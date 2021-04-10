@@ -3,29 +3,71 @@ const config = {
     "k": '' //
 }
 
-
 function getJSON(path) {
     return fetch(path).then(response => response.json());
 }
 
-// shp('assets/data/nuts1-ger-simple.zip').then(function(data){
 getJSON('assets/data/test2.json').then(function(data){
+
+    let subdivision = new DCEL()
+
+    data.features.forEach(feature => {
+        feature.geometry.coordinates.forEach(subplgn => {
+            const face = subdivision.makeFace()
+            let prevHalfEdge = null
+            let initialEdge = null
+            for (let idx = 0; idx <= subplgn.length; idx++) {
+                if (idx == subplgn.length) {
+                    prevHalfEdge.next = initialEdge
+                    initialEdge.prev = prevHalfEdge
+                    prevHalfEdge = initialEdge
+                    initialEdge.twin = subdivision.makeHalfEdge(initialEdge.next.origin, null, null)
+                    continue
+                }
+
+                const point = subplgn[idx]
+                const origin = subdivision.makeVertex(point[0],point[1])
+                const halfEdge = subdivision.makeHalfEdge(origin, prevHalfEdge, null)
+                origin.incidentEdge = halfEdge
+                halfEdge.incidentFace = face
+                halfEdge.twin = subdivision.makeHalfEdge(null, null, null)
+
+                if (idx == 0) {
+                    initialEdge = halfEdge
+                    face.outerComponent = initialEdge
+                } else {
+                    prevHalfEdge.next = halfEdge
+                    prevHalfEdge.twin.origin = halfEdge.origin
+                }
+                prevHalfEdge = halfEdge
+            }
+        })
+    })
+
+        console.log("DCEL:", subdivision);
+
+        subdivision.faces.forEach(face => {
+            let currentEdge = face.outerComponent
+            let initialEdge = currentEdge
+            console.log(currentEdge.origin, currentEdge);
+            do {
+                currentEdge = currentEdge.next
+                console.log(currentEdge.origin, currentEdge)
+            } while (currentEdge.next != initialEdge)
+            console.log("–––––––");
+        })
+        // console.log("n vertices:", Object.keys(subdivision.vertices).length);
+
     class Point {
         constructor(lng, lat) {
             this.lng = lng
             this.lat = lat
         }
 
-        equals(that) {
-            return this.lng === that.lng && this.lat === that.lat
-        }
-
         toString() {
             return `${this.lng}--${this.lat}`
         }
     }
-
-    console.log(data)
 
     // render input in leaflet map
     const sMap = L.map('schematizationMap')
@@ -36,7 +78,6 @@ getJSON('assets/data/test2.json').then(function(data){
     // calculate epsilon
     let sqbb = turf.square(turf.bbox(data))
     const epsilon = Math.abs(sqbb[0] - sqbb[2]) * config.epsilonFactor
-    console.log(epsilon);
 
     const points = data.features.reduce((points, feature) => {
         const coordinates = feature.geometry.coordinates[0].map(point => new Point(point[0], point[1]))
@@ -53,7 +94,6 @@ getJSON('assets/data/test2.json').then(function(data){
         "features": []
     }
     pointsGeoJSON.features = points.map(p => {
-        // console.log([p.lng, p.lat])
         return {
             "type": "Feature",
             "geometry": {
