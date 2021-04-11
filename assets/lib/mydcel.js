@@ -67,6 +67,52 @@ class DCEL {
         this.faces.push(face)
         return face
     }
+
+    buildFromGeoJSON(geoJSON) {
+        let subdivision = new DCEL()
+
+        geoJSON.features.forEach(feature => {
+            feature.geometry.coordinates.forEach(subplgn => {
+                const face = subdivision.makeFace()
+                let prevHalfEdge = null
+                let initialEdge = null
+                for (let idx = 0; idx <= subplgn.length; idx++) {
+                    console.log(idx);
+                    if (idx == subplgn.length) {
+                        prevHalfEdge.next = initialEdge
+                        initialEdge.prev = prevHalfEdge
+                        prevHalfEdge = initialEdge
+                        subdivision.outerFace.halfEdge = initialEdge.twin
+                        initialEdge.twin.origin = initialEdge.next.origin
+                        initialEdge.twin.next = initialEdge.prev.twin
+                        initialEdge.twin.prev = initialEdge.next.twin
+                        continue
+                    }
+
+                    const point = subplgn[idx]
+                    const origin = subdivision.makeVertex(point[0],point[1])
+                    const halfEdge = subdivision.makeHalfEdge(origin, prevHalfEdge, null)
+                    origin.incidentEdge = halfEdge
+                    halfEdge.incidentFace = face
+                    halfEdge.twin = subdivision.makeHalfEdge(null, null, null)
+                    halfEdge.twin.twin = halfEdge
+                    subdivision.outerFace.halfEdge = halfEdge.twin
+
+                    if (idx == 0) {
+                        initialEdge = halfEdge
+                        face.halfEdge = initialEdge
+                    } else {
+                        prevHalfEdge.next = halfEdge
+                        halfEdge.twin.next = prevHalfEdge.twin
+                        prevHalfEdge.twin.origin = halfEdge.origin
+                        prevHalfEdge.twin.prev = halfEdge.twin
+                    }
+                    prevHalfEdge = halfEdge
+                }
+            })
+        })
+        return subdivision
+    }
 }
 
 export default DCEL
