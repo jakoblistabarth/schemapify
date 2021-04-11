@@ -1,0 +1,20 @@
+{
+    "vertices": {
+        "coordinates": [
+            [0,0],
+            [2,0],
+            [4,0],
+            [4,2],
+            [2,2],
+            [0,2]
+        ],
+        "length": 6
+    },
+    "halfedges": {
+        "length": 14
+    },
+    "faces": {
+        "length": 3,
+        "circleLengths": [4,4,8]
+    }
+}

@@ -7,7 +7,7 @@ function getJSON(path) {
     return fetch(path).then(response => response.json());
 }
 
-getJSON('assets/data/test2.json').then(function(data){
+getJSON('assets/data/1plgn.json').then(function(data){
 
     let subdivision = new DCEL()
 
@@ -43,8 +43,8 @@ getJSON('assets/data/test2.json').then(function(data){
                     face.halfEdge = initialEdge
                 } else {
                     prevHalfEdge.next = halfEdge
-                    prevHalfEdge.twin.origin = halfEdge.origin
                     halfEdge.twin.next = prevHalfEdge.twin
+                    prevHalfEdge.twin.origin = halfEdge.origin
                     prevHalfEdge.twin.prev = halfEdge.twin
                 }
                 prevHalfEdge = halfEdge

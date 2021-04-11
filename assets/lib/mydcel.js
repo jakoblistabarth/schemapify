@@ -12,8 +12,8 @@ class DCELHalfEdge {
         this.origin = origin
         this.twin = null
         this.incidentFace = null
-        this.prev = prev // prev half-edge
-        this.next = next // next half-edge
+        this.prev = prev
+        this.next = next
     }
 }
 
@@ -32,7 +32,7 @@ class DCEL {
     }
 
     makeVertex(lng,lat) {
-        const key = `${lng}/${lat}`
+        const key = `${lng}/${lat}` // TODO: is there a better way to ensure that a coordinate pair vertex is added only once to the vertex list?
         if (this.vertices[key]) 
             return this.vertices[key]
 
@@ -42,15 +42,13 @@ class DCEL {
     }
 
     makeHalfEdge(origin, prev, next) {
-        let existingEdge = null
+        let existingHalfEdge = null
         if (origin) {
-            existingEdge = this.halfEdges.find(edge => edge.origin == origin && edge.incidentFace == this.outerFace)
+            existingHalfEdge = this.halfEdges.find(edge => edge.origin == origin && edge.incidentFace == this.outerFace)
         }
-        if (existingEdge) {
-            // console.log("duplicate!");
-            // console.log("origin:", origin);
-            // console.log(existingEdge)
-            return existingEdge
+        if (existingHalfEdge) {
+            console.log("existing halfEdge:", existingHalfEdge.origin)
+            return existingHalfEdge
         }
         const halfEdge = new DCELHalfEdge(origin, prev, next)
         halfEdge.incidentFace = this.outerFace
