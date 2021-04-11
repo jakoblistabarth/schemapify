@@ -17,11 +17,15 @@ getJSON('assets/data/test2.json').then(function(data){
             let prevHalfEdge = null
             let initialEdge = null
             for (let idx = 0; idx <= subplgn.length; idx++) {
+                console.log(idx);
                 if (idx == subplgn.length) {
                     prevHalfEdge.next = initialEdge
                     initialEdge.prev = prevHalfEdge
                     prevHalfEdge = initialEdge
-                    initialEdge.twin = subdivision.makeHalfEdge(initialEdge.next.origin, null, null)
+                    subdivision.outerFace.halfEdge = initialEdge.twin
+                    initialEdge.twin.origin = initialEdge.next.origin
+                    initialEdge.twin.next = initialEdge.prev.twin
+                    initialEdge.twin.prev = initialEdge.next.twin
                     continue
                 }
 
@@ -31,32 +35,36 @@ getJSON('assets/data/test2.json').then(function(data){
                 origin.incidentEdge = halfEdge
                 halfEdge.incidentFace = face
                 halfEdge.twin = subdivision.makeHalfEdge(null, null, null)
+                halfEdge.twin.twin = halfEdge
+                subdivision.outerFace.halfEdge = halfEdge.twin
 
                 if (idx == 0) {
                     initialEdge = halfEdge
-                    face.outerComponent = initialEdge
+                    face.halfEdge = initialEdge
                 } else {
                     prevHalfEdge.next = halfEdge
                     prevHalfEdge.twin.origin = halfEdge.origin
+                    halfEdge.twin.next = prevHalfEdge.twin
+                    prevHalfEdge.twin.prev = halfEdge.twin
                 }
                 prevHalfEdge = halfEdge
             }
         })
     })
 
-        console.log("DCEL:", subdivision);
+    console.log("DCEL:", subdivision);
 
-        subdivision.faces.forEach(face => {
-            let currentEdge = face.outerComponent
-            let initialEdge = currentEdge
-            console.log(currentEdge.origin, currentEdge);
-            do {
-                currentEdge = currentEdge.next
-                console.log(currentEdge.origin, currentEdge)
-            } while (currentEdge.next != initialEdge)
-            console.log("–––––––");
-        })
-        // console.log("n vertices:", Object.keys(subdivision.vertices).length);
+    subdivision.faces.forEach(face => {
+        let currentEdge = face.halfEdge
+        let initialEdge = currentEdge
+        console.log(currentEdge);
+        do {
+            currentEdge = currentEdge.next
+            console.log(currentEdge)
+        } while (currentEdge.next != initialEdge)
+        console.log("–––––––");
+    })
+    // console.log("n vertices:", Object.keys(subdivision.vertices).length);
 
     class Point {
         constructor(lng, lat) {

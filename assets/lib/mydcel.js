@@ -19,8 +19,7 @@ class DCELHalfEdge {
 
 class DCELFace {
     constructor() {
-        this.outerComponent = null
-        this.innerComponent = null
+        this.halfEdge = null
     }
 }
 
@@ -28,11 +27,12 @@ class DCEL {
     constructor() {
         this.vertices = {}            
         this.halfEdges = []            
-        this.faces = []            
+        this.faces = []
+        this.outerFace = this.makeFace()
     }
 
     makeVertex(lng,lat) {
-        const key = `${lng}|${lat}`
+        const key = `${lng}/${lat}`
         if (this.vertices[key]) 
             return this.vertices[key]
 
@@ -42,8 +42,20 @@ class DCEL {
     }
 
     makeHalfEdge(origin, prev, next) {
+        let existingEdge = null
+        if (origin) {
+            existingEdge = this.halfEdges.find(edge => edge.origin == origin && edge.incidentFace == this.outerFace)
+        }
+        if (existingEdge) {
+            // console.log("duplicate!");
+            // console.log("origin:", origin);
+            // console.log(existingEdge)
+            return existingEdge
+        }
         const halfEdge = new DCELHalfEdge(origin, prev, next)
+        halfEdge.incidentFace = this.outerFace
         this.halfEdges.push(halfEdge)
+        console.log("create halfEdge:", origin);
         return halfEdge
     }
 
