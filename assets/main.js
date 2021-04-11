@@ -1,3 +1,5 @@
+import DCEL from './lib/mydcel.js'
+
 const config = {
     "epsilonFactor": 0.5, // splitting of edges
     "k": '' //

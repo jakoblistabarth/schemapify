@@ -1,7 +1,8 @@
 {
   "name": "schematization",
   "version": "1.0.0",
-  "description": "",
+  "description": "Implementation of the area-preserving simplification and schematization of polygonal subdivisions, proposed by Buchin et al. (2016)",
+  "repository": "https://github.com/jakoblistabarth/area-preserving-polygon-schematization",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,6 +12,7 @@
   "dependencies": {
     "leaflet": "^1.7.1",
     "shpjs": "^3.6.3",
-    "turf": "^3.0.14"
+    "turf": "^3.0.14",
+    "uuid": "^8.3.2"
   }
 }
