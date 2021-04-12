@@ -26,6 +26,18 @@ class DCELFace {
         this.uuid = uuidv4()
         this.halfEdge = null
     }
+
+    getHalfEdges() {
+        const halfEdges = []
+        const initialEdge = this.halfEdge
+        let currentEdge = initialEdge
+
+        do {
+           halfEdges.push(currentEdge)
+            currentEdge = currentEdge.next
+        } while (currentEdge != initialEdge)
+        return halfEdges
+    }
 }
 
 class DCEL {
@@ -52,13 +64,13 @@ class DCEL {
             existingHalfEdge = this.halfEdges.find(edge => edge.origin == origin && edge.incidentFace == this.outerFace)
         }
         if (existingHalfEdge) {
-            console.log("existing halfEdge:", existingHalfEdge.origin)
+            // console.log("existing halfEdge:", existingHalfEdge.origin)
             return existingHalfEdge
         }
         const halfEdge = new DCELHalfEdge(origin, prev, next)
         halfEdge.incidentFace = this.outerFace
         this.halfEdges.push(halfEdge)
-        console.log("create halfEdge:", origin);
+        // console.log("create halfEdge:", origin);
         return halfEdge
     }
 
@@ -68,8 +80,12 @@ class DCEL {
         return face
     }
 
-    buildFromGeoJSON(geoJSON) {
-        let subdivision = new DCEL()
+    getFaces() {
+        return this.faces
+    }
+
+    static buildFromGeoJSON(geoJSON) {
+        const subdivision = new DCEL()
 
         geoJSON.features.forEach(feature => {
             feature.geometry.coordinates.forEach(subplgn => {
@@ -77,20 +93,22 @@ class DCEL {
                 let prevHalfEdge = null
                 let initialEdge = null
                 for (let idx = 0; idx <= subplgn.length; idx++) {
-                    console.log(idx);
+
                     if (idx == subplgn.length) {
                         prevHalfEdge.next = initialEdge
                         initialEdge.prev = prevHalfEdge
-                        prevHalfEdge = initialEdge
+
                         subdivision.outerFace.halfEdge = initialEdge.twin
+                        prevHalfEdge.twin.origin = initialEdge.origin
+                        prevHalfEdge.twin.prev = initialEdge.twin
                         initialEdge.twin.origin = initialEdge.next.origin
-                        initialEdge.twin.next = initialEdge.prev.twin
+                        initialEdge.twin.next = prevHalfEdge.twin
                         initialEdge.twin.prev = initialEdge.next.twin
                         continue
                     }
 
-                    const point = subplgn[idx]
-                    const origin = subdivision.makeVertex(point[0],point[1])
+                    const v = subplgn[idx]
+                    const origin = subdivision.makeVertex(v[0],v[1])
                     const halfEdge = subdivision.makeHalfEdge(origin, prevHalfEdge, null)
                     origin.incidentEdge = halfEdge
                     halfEdge.incidentFace = face
@@ -112,6 +130,10 @@ class DCEL {
             })
         })
         return subdivision
+    }
+
+    bisectEdge(halfEdge){
+        return
     }
 }
 

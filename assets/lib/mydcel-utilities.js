@@ -1,66 +1,49 @@
 // import leaflet from '../../node_modules/leaflet/src/leaflet.js'; // TODO: load leaflet as module
 
 export function logDCEL(dcel) {
-    console.log("DCEL:", dcel);
-    dcel.faces.forEach(face => {
-        let currentEdge = face.halfEdge
-        let initialEdge = currentEdge
-        console.log(currentEdge);
-        do {
-            currentEdge = currentEdge.next
-            console.log(currentEdge)
-        } while (currentEdge.next != initialEdge)
-        console.log("–––––––");
+    console.log("--> START DCEL:", dcel);
+
+    dcel.getFaces().forEach(f => {
+        console.log("-> new face", f.uuid);
+        f.getHalfEdges().forEach(e => {
+            console.log(e, e.origin.lng, e.origin.lat);
+        })
     })
-    // console.log("n vertices:", Object.keys(subdivision.vertices).length);
+    console.log("<-- DCEL END");
 }
 
-export function mapFromDCEL(dcel) {
-    console.log("leaflet map in the making :D")
-    class Point {
-        constructor(lng, lat) {
-            this.lng = lng
-            this.lat = lat
-        }
-
-        toString() {
-            return `${this.lng}--${this.lat}`
-        }
-    }
-
-    // render input in leaflet map
-    const sMap = L.map('schematizationMap')
-    let inputD = L.geoJSON(dcel)
-    inputD.addTo(sMap)
-    sMap.fitBounds(inputD.getBounds())
-
-    // calculate epsilon
-    let sqbb = turf.square(turf.bbox(data))
-    const epsilon = Math.abs(sqbb[0] - sqbb[2]) * config.epsilonFactor
-
-    const points = data.features.reduce((points, feature) => {
-        const coordinates = feature.geometry.coordinates[0].map(point => new Point(point[0], point[1]))
-        return [...points, ...coordinates]
-    }, [])
-
-    let totalPoints = points.length
-    let uniquePoints = Array.from(new Set(points.map(p => p.toString()))).length
-    let highDegreePoints = totalPoints - uniquePoints 
-    console.log(`${highDegreePoints} Coordinate-pairs (out of ${totalPoints}) are occupied by more than one Vertex`)
-
-    let pointsGeoJSON = {
+function createGeoJSON(features) {
+    return {
         "type": "FeatureCollection",
-        "features": []
+        "features": features
     }
-    pointsGeoJSON.features = points.map(p => {
+}
+
+export function mapFromDCEL(dcel, name) {
+
+    const grid = document.getElementById('map-grid')
+    let map = document.createElement("div")
+    map.id = name
+    map.className = "map"
+    grid.appendChild(map)
+
+    const DCELMap = L.map(name)
+    DCELMap.attributionControl.addAttribution(name)
+
+    const vertexFeatures = Object.values(dcel.vertices).map(v => {
         return {
             "type": "Feature",
             "geometry": {
                 "type": "Point",
-                "coordinates": [p.lng, p.lat]
+                "coordinates": [v.lng, v.lat]
+            },
+            "properties": {
+                "uuid": v.uuid
             }
         }
     })
+
+    const verticesJSON = createGeoJSON(vertexFeatures)
 
     var geojsonMarkerOptions = {
         radius: 6,
@@ -71,9 +54,44 @@ export function mapFromDCEL(dcel) {
         fillOpacity: 0.2
     }
     
-    L.geoJson(pointsGeoJSON, {
+    let vertices = L.geoJson(verticesJSON, {
         pointToLayer: function (feature, latlng) {
-            return L.circleMarker(latlng, geojsonMarkerOptions)
+            const uuid = feature.properties.uuid
+            const v = feature.geometry.coordinates
+            return L.circleMarker(latlng, geojsonMarkerOptions).bindTooltip(`<strong>${v[0]},${v[1]}</strong><br>${uuid}`)
         }
-    }).addTo(sMap)
+    })
+
+    // const polygonFeatures = dcel.faces.forEach(f => {
+    //     let polygon = []
+    //     let currentEdge = f.halfEdge
+    //     let initialEdge = currentEdge
+    //     while (currentEdge.next != initialEdge) {
+    //         // console.log(currentEdge.origin);
+    //         polygon.push([currentEdge.origin.lng, currentEdge.origin.lat])
+    //         currentEdge = currentEdge.next
+    //         console.log(currentEdge)
+    //     }
+    //     return {
+    //         "type": "Feature",
+    //         "geometry": {
+    //             "type": "Point",
+    //             "coordinates": polygon // TODO: implement holes
+    //         },
+    //         "properties": {
+    //             "uuid": f.uuid
+    //         }
+    //     }
+    // })
+
+    // const PolygonsJSON = createGeoJSON(polygonFeatures)
+    // console.log("PolygonsJSON", PolygonsJSON);
+
+    vertices.addTo(DCELMap)
+    DCELMap.fitBounds(vertices.getBounds())
+
+    // let polygonsL = L.geoJSON(halfEdges)
+    // polygons.addTo(DCELMap)
+
+    return DCELMap
 }
