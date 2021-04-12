@@ -1,9 +1,9 @@
-import uuidv4 from '../../node_modules/uuid/dist/esm-browser/v4.js';
+import { v4 as uuid } from 'uuid';
 
 // TODO: if this class needs particular methods for the schematization algorithm extend this class
 class DCELVertex {
     constructor(lng,lat) {
-        this.uuid = uuidv4()
+        this.uuid = uuid()
         this.lng = lng
         this.lat = lat
         this.incidentEdge = null
@@ -12,7 +12,7 @@ class DCELVertex {
 
 class DCELHalfEdge {
     constructor(origin, prev, next) {
-        this.uuid = uuidv4()
+        this.uuid = uuid()
         this.origin = origin
         this.twin = null
         this.incidentFace = null
@@ -23,11 +23,11 @@ class DCELHalfEdge {
 
 class DCELFace {
     constructor() {
-        this.uuid = uuidv4()
+        this.uuid = uuid()
         this.halfEdge = null
     }
 
-    getHalfEdges() {
+    getEdges() {
         const halfEdges = []
         const initialEdge = this.halfEdge
         let currentEdge = initialEdge

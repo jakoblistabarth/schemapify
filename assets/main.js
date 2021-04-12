@@ -1,5 +1,5 @@
-import DCEL from './lib/mydcel.js'
-import { logDCEL, mapFromDCEL } from './lib/mydcel-utilities.js'
+import DCEL from './lib/dcel.mjs'
+import { logDCEL, mapFromDCEL } from './lib/dcel-utilities.js'
 
 const config = {
     "epsilonFactor": 0.5, // splitting of edges

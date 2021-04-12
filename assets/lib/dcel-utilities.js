@@ -1,11 +1,11 @@
-// import leaflet from '../../node_modules/leaflet/src/leaflet.js'; // TODO: load leaflet as module
+import leaflet from 'leaflet' // TODO: load leaflet as module
 
 export function logDCEL(dcel) {
     console.log("--> START DCEL:", dcel);
 
     dcel.getFaces().forEach(f => {
         console.log("-> new face", f.uuid);
-        f.getHalfEdges().forEach(e => {
+        f.getEdges().forEach(e => {
             console.log(e, e.origin.lng, e.origin.lat);
         })
     })
