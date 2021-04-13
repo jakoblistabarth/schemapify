@@ -32,8 +32,8 @@ describe("getDistance()", function() {
     it("returns the correct distance between 2 points", function() {
         expect(b.getDistance(a)).toEqual(b.getDistance(a))
         expect(a.getDistance(b)).toEqual(4)
-        // expect(a.getDistance(c)).toEqual(14.14) TODO: how to test something like this?
-        // expect(d.getDistance(a)).toEqual(14.14)
+        expect(a.getDistance(c)).toEqual(Math.sqrt(4*4 + 4*4))
+        expect(d.getDistance(a)).toEqual(Math.sqrt(-4*-4 + -4*-4))
     })
 
 })
