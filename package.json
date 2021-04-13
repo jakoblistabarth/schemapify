@@ -7,7 +7,8 @@
   "scripts": {
     "test": "jasmine",
     "build": "esbuild --bundle assets/main.js --outfile=dist/main.bundle.js",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "serve": "browser-sync --config config/bs-config.js"
   },
   "nodemonConfig": {
     "ignore": [
