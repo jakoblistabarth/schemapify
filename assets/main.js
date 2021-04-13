@@ -1,5 +1,5 @@
-import DCEL from './lib/dcel.mjs'
-import { logDCEL, mapFromDCEL } from './lib/dcel-utilities.js'
+import DCEL from './lib/dcel/Dcel.mjs'
+import { logDCEL, mapFromDCEL } from './lib/dcel/Utilities.js'
 
 const config = {
     "epsilonFactor": 0.5, // max edge length of input: 0.05 suggested by buchin et al.
@@ -26,5 +26,6 @@ tests.forEach(async (test) => {
     const subdivision = DCEL.buildFromGeoJSON(data)
     // logDCEL(subdivision)
     mapFromDCEL(subdivision, name)
+    subdivision.halfEdges[0].bisect();
 
 })

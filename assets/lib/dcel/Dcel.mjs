@@ -1,57 +1,8 @@
-import { v4 as uuid } from 'uuid';
+import Vertex from './Vertex.mjs'
+import HalfEdge from './HalfEdge.mjs'
+import Face from './Face.mjs'
 
-// TODO: if this class needs particular methods for the schematization algorithm extend this class
-class DCELVertex {
-    constructor(lng,lat) {
-        this.uuid = uuid()
-        this.lng = lng
-        this.lat = lat
-        this.incidentEdge = null
-    }
-
-    getDistance(p) {
-        const [x1, y1] = [this.lng, this.lat]
-        const [x2, y2] = [p.lng, p.lat]
-
-        const a = x1 - x2
-        const b = y1 - y2
-
-        const c = Math.sqrt( a*a + b*b )
-        return c
-    }
-}
-
-class DCELHalfEdge {
-    constructor(origin, prev, next) {
-        this.uuid = uuid()
-        this.origin = origin
-        this.twin = null
-        this.incidentFace = null
-        this.prev = prev
-        this.next = next
-    }
-}
-
-class DCELFace {
-    constructor() {
-        this.uuid = uuid()
-        this.halfEdge = null
-    }
-
-    getEdges() {
-        const halfEdges = []
-        const initialEdge = this.halfEdge
-        let currentEdge = initialEdge
-
-        do {
-           halfEdges.push(currentEdge)
-            currentEdge = currentEdge.next
-        } while (currentEdge != initialEdge)
-        return halfEdges
-    }
-}
-
-class DCEL {
+class Dcel {
     constructor() {
         this.vertices = {}
         this.halfEdges = []
@@ -64,7 +15,7 @@ class DCEL {
         if (this.vertices[key])
             return this.vertices[key]
 
-        const vertex = new DCELVertex(lng,lat)
+        const vertex = new Vertex(lng,lat)
         this.vertices[key] = vertex
         return vertex
     }
@@ -78,7 +29,7 @@ class DCEL {
             // console.log("existing halfEdge:", existingHalfEdge.origin)
             return existingHalfEdge
         }
-        const halfEdge = new DCELHalfEdge(origin, prev, next)
+        const halfEdge = new HalfEdge(origin, prev, next)
         halfEdge.incidentFace = this.outerFace
         this.halfEdges.push(halfEdge)
         // console.log("create halfEdge:", origin);
@@ -86,7 +37,7 @@ class DCEL {
     }
 
     makeFace(){
-        const face = new DCELFace()
+        const face = new Face()
         this.faces.push(face)
         return face
     }
@@ -141,7 +92,7 @@ class DCEL {
     }
 
     static buildFromGeoJSON(geoJSON) {
-        const subdivision = new DCEL()
+        const subdivision = new Dcel()
 
         geoJSON.features.forEach(feature => {
             feature.geometry.coordinates.forEach(subplgn => {
@@ -196,9 +147,6 @@ class DCEL {
         return this.getDiameter() * factor
     }
 
-    bisectEdge(halfEdge){
-        return
-    }
 }
 
-export default DCEL
+export default Dcel

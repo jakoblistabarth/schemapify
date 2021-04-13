@@ -1,4 +1,4 @@
-import DCEL from '../assets/lib/dcel.mjs'
+import DCEL from '../assets/lib/dcel/Dcel.mjs'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 
