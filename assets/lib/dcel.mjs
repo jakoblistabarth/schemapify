@@ -8,6 +8,17 @@ class DCELVertex {
         this.lat = lat
         this.incidentEdge = null
     }
+
+    getDistance(p) {
+        const [x1, y1] = [this.lng, this.lat]
+        const [x2, y2] = [p.lng, p.lat]
+
+        const a = x1 - x2
+        const b = y1 - y2
+
+        const c = Math.sqrt( a*a + b*b )
+        return c
+    }
 }
 
 class DCELHalfEdge {
@@ -42,15 +53,15 @@ class DCELFace {
 
 class DCEL {
     constructor() {
-        this.vertices = {}            
-        this.halfEdges = []            
+        this.vertices = {}
+        this.halfEdges = []
         this.faces = []
         this.outerFace = this.makeFace()
     }
 
     makeVertex(lng,lat) {
         const key = `${lng}/${lat}` // TODO: is there a better way to ensure that a coordinate pair vertex is added only once to the vertex list?
-        if (this.vertices[key]) 
+        if (this.vertices[key])
             return this.vertices[key]
 
         const vertex = new DCELVertex(lng,lat)
@@ -82,6 +93,51 @@ class DCEL {
 
     getFaces() {
         return this.faces
+    }
+
+    // as seen @ https://github.com/Turfjs/turf/blob/master/packages/turf-bbox/index.ts
+    // takes a dcel
+    // returns its Boundingbox as [minX, minY, maxX, maxY]
+    getBbox() {
+        const points = Object.values(this.vertices).map(p => [p.lng, p.lat])
+        const bbox = [Infinity,Infinity,-Infinity,-Infinity]
+        points.forEach(p =>{
+            if (bbox[0] > p[0]) {
+                bbox[0] = p[0];
+              }
+              if (bbox[1] > p[1]) {
+                bbox[1] = p[1];
+              }
+              if (bbox[2] < p[0]) {
+                bbox[2] = p[0];
+              }
+              if (bbox[3] < p[1]) {
+                bbox[3] = p[1];
+              }
+        })
+        return bbox
+    }
+
+    // takes a dcel
+    // returns its diameter
+    getDiameter() {
+        const bbox = this.getBbox()
+        // TODO: refactor this?
+        const [a, b, c, d] = [
+            this.makeVertex(bbox[0],bbox[1]),
+            this.makeVertex(bbox[2],bbox[1]),
+            this.makeVertex(bbox[2],bbox[3]),
+            this.makeVertex(bbox[0],bbox[3])
+        ]
+
+        const diameter = Math.max(...[ // TODO: refactor this – only two sides necessary?
+            a.getDistance(b),
+            b.getDistance(c),
+            c.getDistance(d),
+            d.getDistance(a)
+        ])
+
+        return diameter;
     }
 
     static buildFromGeoJSON(geoJSON) {
@@ -130,6 +186,14 @@ class DCEL {
             })
         })
         return subdivision
+    }
+
+    // get epsilon
+    // – the threshold for max edge length
+    // takes a dcel
+    // returns the treshold as flaot
+    getEpsilon(factor) {
+        return this.getDiameter() * factor
     }
 
     bisectEdge(halfEdge){

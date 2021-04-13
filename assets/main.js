@@ -2,8 +2,8 @@ import DCEL from './lib/dcel.mjs'
 import { logDCEL, mapFromDCEL } from './lib/dcel-utilities.js'
 
 const config = {
-    "epsilonFactor": 0.5, // splitting of edges
-    "k": '' //
+    "epsilonFactor": 0.5, // max edge length of input: 0.05 suggested by buchin et al.
+    "k": '' // max number of edges, for simplification algorithm
 }
 
 const tests = [
@@ -24,10 +24,7 @@ tests.forEach(async (test) => {
     const name =  test.slice(test.lastIndexOf("/")+1,-5)
 
     const subdivision = DCEL.buildFromGeoJSON(data)
-    logDCEL(subdivision)
+    // logDCEL(subdivision)
     mapFromDCEL(subdivision, name)
-})
 
-// calculate epsilon
-// let sqbb = turf.square(turf.bbox(verticesJSON))
-// const epsilon = Math.abs(sqbb[0] - sqbb[2]) * config.epsilonFactor
+})
