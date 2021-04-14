@@ -45,7 +45,7 @@ export function mapFromDCEL(dcel, name) {
 
     const verticesJSON = createGeoJSON(vertexFeatures)
 
-    var geojsonMarkerOptions = {
+    const geojsonMarkerOptions = {
         radius: 6,
         fillColor: "red",
         color: "red",
@@ -53,8 +53,8 @@ export function mapFromDCEL(dcel, name) {
         opacity: 1,
         fillOpacity: 0.2
     }
-    
-    let vertices = L.geoJson(verticesJSON, {
+
+    const vertices = L.geoJson(verticesJSON, {
         pointToLayer: function (feature, latlng) {
             const uuid = feature.properties.uuid
             const v = feature.geometry.coordinates
@@ -62,36 +62,37 @@ export function mapFromDCEL(dcel, name) {
         }
     })
 
-    // const polygonFeatures = dcel.faces.forEach(f => {
-    //     let polygon = []
-    //     let currentEdge = f.halfEdge
-    //     let initialEdge = currentEdge
-    //     while (currentEdge.next != initialEdge) {
-    //         // console.log(currentEdge.origin);
-    //         polygon.push([currentEdge.origin.lng, currentEdge.origin.lat])
-    //         currentEdge = currentEdge.next
-    //         console.log(currentEdge)
-    //     }
-    //     return {
-    //         "type": "Feature",
-    //         "geometry": {
-    //             "type": "Point",
-    //             "coordinates": polygon // TODO: implement holes
-    //         },
-    //         "properties": {
-    //             "uuid": f.uuid
-    //         }
-    //     }
-    // })
+    const polygonFeatures = dcel.faces.map(f => {
+        const halfEdges = f.getEdges()
+        const coordinates = halfEdges.map(e => e.origin.getXY())
+        coordinates.push(halfEdges[0].origin.getXY())
+        // console.log("halfEdges", halfEdges);
+        // console.log("coordinates", coordinates);
+        return {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [ coordinates ] // TODO: implement holes
+            },
+            "properties": f.properties
+        }
+    })
 
-    // const PolygonsJSON = createGeoJSON(polygonFeatures)
-    // console.log("PolygonsJSON", PolygonsJSON);
+    const polygonsJSON = createGeoJSON(polygonFeatures)
+    console.log("polygonsJSON", polygonsJSON);
 
+    const polygons = L.geoJSON(polygonsJSON, {
+        // style: function (feature) {
+        //     return {color: feature.properties.color}
+        // }
+    }).bindTooltip(function (layer) {
+        return `Face: ${null || layer.feature.properties.Name}`
+        // return "hello world"
+    })
+
+    polygons.addTo(DCELMap)
     vertices.addTo(DCELMap)
     DCELMap.fitBounds(vertices.getBounds())
-
-    // let polygonsL = L.geoJSON(halfEdges)
-    // polygons.addTo(DCELMap)
 
     return DCELMap
 }
