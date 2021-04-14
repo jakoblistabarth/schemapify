@@ -4,6 +4,7 @@ class Face {
     constructor() {
         this.uuid = uuid()
         this.halfEdge = null
+        this.properties = null
     }
 
     getEdges() {

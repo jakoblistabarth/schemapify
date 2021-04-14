@@ -37,8 +37,9 @@ class Dcel {
         return halfEdge
     }
 
-    makeFace(){
+    makeFace(properties){
         const face = new Face()
+        face.properties = properties
         this.faces.push(face)
         return face
     }
@@ -97,7 +98,7 @@ class Dcel {
 
         geoJSON.features.forEach(feature => {
             feature.geometry.coordinates.forEach(subplgn => {
-                const face = subdivision.makeFace()
+                const face = subdivision.makeFace(feature.properties)
                 let prevHalfEdge = null
                 let initialEdge = null
                 for (let idx = 0; idx <= subplgn.length; idx++) {
