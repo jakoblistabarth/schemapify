@@ -1,4 +1,5 @@
 import DCEL from '../assets/lib/dcel/Dcel.mjs'
+import HalfEdge from '../assets/lib/dcel/HalfEdge.mjs'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 
@@ -43,6 +44,51 @@ describe("getDiameter()", function() {
     it("returns the correct diameter", function() {
         expect(DCEL.buildFromGeoJSON(plgn1).getDiameter()).toEqual(2)
         expect(DCEL.buildFromGeoJSON(plgn3).getDiameter()).toEqual(2)
+    })
+
+})
+
+describe("getLength()", function() {
+
+    const edge = DCEL.buildFromGeoJSON(plgn1).getFaces()[0].halfEdge
+
+    it("returns the correct length", function() {
+        expect(edge.getLength()).toEqual(2)
+    })
+
+})
+
+describe("getMidpoint()", function() {
+
+    const subdivision = new DCEL()
+    const [ org, dest ] = [ subdivision.makeVertex(0,0),  subdivision.makeVertex(6,4) ]
+    const edge = new HalfEdge(org)
+    edge.twin = new HalfEdge(dest)
+
+    const [ org2, dest2 ] = [ subdivision.makeVertex(-2,1),  subdivision.makeVertex(2,-1) ]
+    const edge2 = new HalfEdge(org2)
+    edge2.twin = new HalfEdge(dest2)
+
+    it("returns the correct length", function() {
+        expect(edge.getMidpoint()).toEqual([3,2])
+        expect(edge2.getMidpoint()).toEqual([0,0])
+    })
+
+})
+
+describe("bisect()", function() {
+
+    const dcel = DCEL.buildFromGeoJSON(plgn1)
+    dcel.getFaces()[0].halfEdge.bisect()
+
+    it("on one edge of a square results in 5 linked inner halfEdges", function(){
+        expect(dcel.getFaces()[0].getEdges().length).toBe(5)
+        expect(dcel.getFaces()[1].halfEdge.twin.incidentFace.getEdges().length).toBe(5)
+    })
+
+    it("on one edge of a square results in 5 linked outer halfEdges", function(){
+        expect(dcel.getFaces()[1].getEdges().length).toBe(5)
+        expect(dcel.getFaces()[0].halfEdge.twin.incidentFace.getEdges().length).toBe(5)
     })
 
 })

@@ -10,10 +10,6 @@ describe("A DCEL of a single square", function() {
 
     let dcel = DCEL.buildFromGeoJSON(plgn1)
 
-    it("has 4 properties", function(){
-        expect(Object.keys(dcel).length).toBe(4)
-    })
-
     it("has 1 outerface", function(){
         expect(dcel.outerFace).toEqual(jasmine.any(Object))
     })
@@ -30,11 +26,14 @@ describe("A DCEL of a single square", function() {
         expect(dcel.halfEdges.length).toBe(8)
     })
 
-    it("has 4 linked edges", function(){
+    it("has 4 linked inner edges", function(){
         expect(dcel.faces[0].getEdges().length).toBe(4)
+        expect(dcel.faces[1].halfEdge.twin.incidentFace.getEdges().length).toBe(4)
+    })
+
+    it("has 4 linked outer edges", function(){
         expect(dcel.faces[1].getEdges().length).toBe(4)
         expect(dcel.faces[0].halfEdge.twin.incidentFace.getEdges().length).toBe(4)
-        expect(dcel.faces[1].halfEdge.twin.incidentFace.getEdges().length).toBe(4)
     })
 
 })
@@ -42,10 +41,6 @@ describe("A DCEL of a single square", function() {
 describe("A DCEL of 2 adjacent squares", function() {
 
     let dcel = DCEL.buildFromGeoJSON(plgn2)
-
-    it("has 4 properties", function(){
-        expect(Object.keys(dcel).length).toBe(4)
-    })
 
     it("has 1 outerface", function(){
         expect(dcel.outerFace).toEqual(jasmine.any(Object))
@@ -81,10 +76,6 @@ describe("A DCEL of 2 adjacent squares", function() {
 describe("A DCEL of 3 adjacent squares", function() {
 
     let dcel = DCEL.buildFromGeoJSON(plgn3)
-
-    it("has 4 properties", function(){
-        expect(Object.keys(dcel).length).toBe(4)
-    })
 
     it("has 1 outerface", function(){
         expect(dcel.outerFace).toEqual(jasmine.any(Object))

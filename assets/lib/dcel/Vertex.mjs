@@ -1,11 +1,16 @@
 import { v4 as uuid } from 'uuid';
 
 class Vertex {
-    constructor(lng,lat) {
+    constructor(lng,lat, dcel) {
         this.uuid = uuid()
         this.lng = lng
         this.lat = lat
+        this.dcel = dcel
         this.incidentEdge = null
+    }
+
+    getXY() {
+        return [this.lng, this.lat]
     }
 
     getDistance(p) {
