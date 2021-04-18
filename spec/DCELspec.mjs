@@ -2,12 +2,9 @@ import DCEL from '../assets/lib/dcel/Dcel.mjs'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 
-const plgn1 = JSON.parse(readFileSync(resolve('assets/data/1plgn.json'), 'utf8'))
-const plgn2 = JSON.parse(readFileSync(resolve('assets/data/2plgn.json'), 'utf8'))
-const plgn3 = JSON.parse(readFileSync(resolve('assets/data/3plgn.json'), 'utf8'))
-
 describe("A DCEL of a single square", function() {
 
+    const plgn1 = JSON.parse(readFileSync(resolve('assets/data/1plgn.json'), 'utf8'))
     let dcel = DCEL.buildFromGeoJSON(plgn1)
 
     it("has 1 outerface", function(){
@@ -26,20 +23,23 @@ describe("A DCEL of a single square", function() {
         expect(dcel.halfEdges.length).toBe(8)
     })
 
-    it("has 4 linked inner edges", function(){
+    it("has 4 linked outer edges", function(){
         expect(dcel.faces[0].getEdges().length).toBe(4)
         expect(dcel.faces[1].halfEdge.twin.incidentFace.getEdges().length).toBe(4)
     })
 
-    it("has 4 linked outer edges", function(){
+    it("has 4 linked inner edges", function(){
         expect(dcel.faces[1].getEdges().length).toBe(4)
         expect(dcel.faces[0].halfEdge.twin.incidentFace.getEdges().length).toBe(4)
+        expect(dcel.faces[1].getEdges(false).length).toBe(4)
+        expect(dcel.faces[0].halfEdge.twin.incidentFace.getEdges(false).length).toBe(4)
     })
 
 })
 
 describe("A DCEL of 2 adjacent squares", function() {
 
+    const plgn2 = JSON.parse(readFileSync(resolve('assets/data/2plgn.json'), 'utf8'))
     let dcel = DCEL.buildFromGeoJSON(plgn2)
 
     it("has 1 outerface", function(){
@@ -75,6 +75,7 @@ describe("A DCEL of 2 adjacent squares", function() {
 
 describe("A DCEL of 3 adjacent squares", function() {
 
+    const plgn3 = JSON.parse(readFileSync(resolve('assets/data/3plgn.json'), 'utf8'))
     let dcel = DCEL.buildFromGeoJSON(plgn3)
 
     it("has 1 outerface", function(){
