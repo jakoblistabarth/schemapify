@@ -4,17 +4,17 @@ class Face {
     constructor() {
         this.uuid = uuid()
         this.halfEdge = null
-        this.properties = null
+        this.properties = {}
     }
 
-    getEdges() {
+    getEdges(anticlockwise = true) {
         const halfEdges = []
         const initialEdge = this.halfEdge
         let currentEdge = initialEdge
 
         do {
            halfEdges.push(currentEdge)
-            currentEdge = currentEdge.next
+            currentEdge = anticlockwise ? currentEdge.next : currentEdge.prev
         } while (currentEdge != initialEdge)
         return halfEdges
     }

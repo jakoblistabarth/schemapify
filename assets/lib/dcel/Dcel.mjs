@@ -24,22 +24,23 @@ class Dcel {
     makeHalfEdge(origin, prev, next) {
         let existingHalfEdge = null
         if (origin) {
-            existingHalfEdge = this.halfEdges.find(edge => edge.origin == origin && edge.incidentFace == this.outerFace)
+            existingHalfEdge = this.halfEdges.find(edge => origin == edge.origin && origin !== null && edge.incidentFace == this.outerFace)
         }
-        if (existingHalfEdge) {
-            // console.log("existing halfEdge:", existingHalfEdge.origin.getXY(), existingHalfEdge)
+        if (existingHalfEdge && false) {
+            console.log(origin.getXY());
+            console.log("existing halfEdge:", existingHalfEdge.origin.getXY(), existingHalfEdge.uuid)
             return existingHalfEdge
         }
         const halfEdge = new HalfEdge(origin, prev, next, this)
         halfEdge.incidentFace = this.outerFace
+        // console.log("create halfEdge:", halfEdge.uuid);
         this.halfEdges.push(halfEdge)
-        // console.log("create halfEdge:", origin);
         return halfEdge
     }
 
     makeFace(properties){
         const face = new Face()
-        face.properties = properties
+        face.properties = properties ? properties : face.properties
         this.faces.push(face)
         return face
     }
@@ -151,9 +152,6 @@ class Dcel {
     setEpsilon(factor) {
         this.epsilon = this.getDiameter() * factor
     }
-
-    // create subdivision of edge to make orientation restriction work better
-
 
 }
 

@@ -40,19 +40,44 @@ class HalfEdge {
 
     bisect() {
         const [ x, y ] = this.getMidpoint()
+        const a = this
+        const b = this.next
 
         const newVertex = this.dcel.makeVertex(x, y)
-        const halfEdge1 = this.dcel.makeHalfEdge(newVertex, this, this.next)
-        newVertex.incidentEdge = halfEdge1
-        halfEdge1.incidentFace = this.twin.incidentFace // because of prevent duplicate logic
-        halfEdge1.twin = this.twin
-        this.next = halfEdge1
-        this.next.prev = halfEdge1
-        const halfEdge2 = this.dcel.makeHalfEdge(newVertex, this.next.twin, this.prev.twin)
-        halfEdge2.incidentFace = this.incidentFace
-        halfEdge2.twin = this
-        this.twin = halfEdge2
-        halfEdge2.prev.next = halfEdge2
+
+        const a_ = this.dcel.makeHalfEdge(newVertex, a, b)
+        a.next = a_
+        b.prev = a_
+        newVertex.incidentEdge = a_
+
+        a.twin.origin = newVertex
+        const a_t = this.dcel.makeHalfEdge(b.origin, b.twin, a.twin)
+        a.twin.prev = a_t
+        b.twin.next = a_t
+
+        a_t.twin = a_
+        a_.twin = a_t
+
+        a_.incidentFace = b.incidentFace
+        a_.twin.incidentFace = b.twin.incidentFace
+
+        return a_
+    }
+
+    subdivideToThreshold(threshold) {
+        const initialHalfEdge = this
+        let currentHalfEdge = initialHalfEdge
+
+        while (currentHalfEdge != initialHalfEdge.next) {
+            // console.log(currentHalfEdge.origin.getXY(), currentHalfEdge.getLength());
+            if (currentHalfEdge.getLength() < threshold) {
+                currentHalfEdge = currentHalfEdge.next
+            } else {
+                const newHalfEdge = currentHalfEdge.bisect()
+                console.log(newHalfEdge);
+                currentHalfEdge = newHalfEdge.prev
+            }
+        }
     }
 }
 

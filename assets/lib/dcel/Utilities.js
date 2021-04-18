@@ -63,6 +63,7 @@ export function mapFromDCEL(dcel, name) {
     })
 
     const polygonFeatures = dcel.faces.map(f => {
+        f.properties.uuid = f.uuid
         const halfEdges = f.getEdges()
         const coordinates = halfEdges.map(e => e.origin.getXY())
         coordinates.push(halfEdges[0].origin.getXY())
@@ -86,8 +87,10 @@ export function mapFromDCEL(dcel, name) {
         //     return {color: feature.properties.color}
         // }
     }).bindTooltip(function (layer) {
-        return `Face: ${null || layer.feature.properties.Name}`
-        // return "hello world"
+        return `
+            Face: ${layer.feature.properties.Name}
+            uuid : ${layer.feature.properties.uuid}
+            `
     })
 
     polygons.addTo(DCELMap)
