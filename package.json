@@ -8,7 +8,7 @@
     "test": "jasmine",
     "build": "esbuild --bundle assets/main.js --outfile=dist/main.bundle.js",
     "dev": "nodemon",
-    "serve": "browser-sync --config config/bs-config.js"
+    "start": "browser-sync --config config/bs-config.js"
   },
   "nodemonConfig": {
     "ignore": [
@@ -20,6 +20,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "browser-sync": "^2.26.14",
     "esbuild": "^0.11.9",
     "jasmine": "^3.7.0",
     "leaflet": "^1.7.1",
