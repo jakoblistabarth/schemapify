@@ -8,15 +8,7 @@ class Face {
     }
 
     getEdges(counterclockwise = true) {
-        const halfEdges = []
-        const initialEdge = this.edge
-        let currentEdge = initialEdge
-
-        do {
-           halfEdges.push(currentEdge)
-            currentEdge = counterclockwise ? currentEdge.next : currentEdge.prev
-        } while (currentEdge != initialEdge)
-        return halfEdges
+        return this.edge.getCycle(counterclockwise)
     }
 }
 

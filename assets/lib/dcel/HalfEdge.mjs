@@ -23,23 +23,24 @@ class HalfEdge {
         return [ this.getTail(), this.getHead() ]
     }
 
+    getCycle(forwards = true) {
+        let currentEdge = this
+        const initialEdge = currentEdge
+        const halfEdges = []
+
+        do {
+           halfEdges.push(currentEdge)
+            currentEdge = forwards ? currentEdge.next : currentEdge.prev
+        } while (currentEdge != initialEdge)
+
+        return halfEdges
+    }
+
     getAngle() {
         const vector = [this.twin.tail.lng - this.tail.lng, this.twin.tail.lat - this.tail.lat]
         const angle = Math.atan2(vector[1], vector[0])
         return angle < 0 ? angle + 2 * Math.PI : angle
     }
-
-    getRadialHalfEdge() {
-        return this.prev.twin.prev.twin // or twin.next ??
-
-    }
-
-    // getRadialHalfEdge(counterclockwise = true){ //TODO: implement clockwise direction
-    //     const edges = this.getTail().getOutgoingEdges()
-    //     const idx = edges.findIndex(e => e === this) + (counterclockwise ? 1 : -1)
-
-    //     return edges[idx >= edges.length ? 0 : idx < 0 ? edges.length -1 : idx]
-    // }
 
     getLength() {
         return this.getTail().getDistance(this.getHead())
@@ -62,21 +63,25 @@ class HalfEdge {
 
         const newVertex = this.dcel.makeVertex(x, y)
 
-        const a_ = this.dcel.makeHalfEdge(newVertex, a, b)
+        const a_ = this.dcel.makeHalfEdge(newVertex, b.tail)
+        a_.next = b
+        a_.prev = a
         a.next = a_
         b.prev = a_
         newVertex.incidentEdge = a_
 
-        a.twin.origin = newVertex
-        const a_t = this.dcel.makeHalfEdge(b.origin, b.twin, a.twin)
+        a.twin.tail = newVertex
+        const a_t = this.dcel.makeHalfEdge(b.tail, newVertex)
+        a_t.next = a.twin
+        a_t.prev = b.twin
         a.twin.prev = a_t
         b.twin.next = a_t
 
         a_t.twin = a_
         a_.twin = a_t
 
-        a_.incidentFace = b.incidentFace
-        a_.twin.incidentFace = b.twin.incidentFace
+        a_.face = b.face
+        a_.twin.face = b.twin.face
 
         return a_
     }

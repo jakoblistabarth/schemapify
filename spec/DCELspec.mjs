@@ -4,7 +4,7 @@ import DCEL from '../assets/lib/dcel/Dcel.mjs'
 
 describe("A DCEL of 2 adjacent squares", function() {
 
-    const plgn2 = JSON.parse(readFileSync(resolve('assets/data/2plgn.json'), 'utf8'))
+    const plgn2 = JSON.parse(readFileSync(resolve('assets/data/2plgn-adjacent.json'), 'utf8'))
     let dcel = DCEL.buildFromGeoJSON(plgn2)
 
     it("has 1 outerface", function(){
@@ -33,7 +33,7 @@ describe("A DCEL of 2 adjacent squares", function() {
 
     it("has outer Face with 6 linked edges", function(){
         expect(dcel.outerFace.getEdges().length).toBe(6)
-        expect(dcel.outerFace.halfEdge.twin.incidentFace.getEdges().length).toBe(4)
+        expect(dcel.outerFace.edge.twin.face.getEdges().length).toBe(4)
     })
 
 })
@@ -73,7 +73,7 @@ describe("getBbox()", function() {
     it("returns the correct boundingbox of a given dcel", function() {
 
         const plgn1 = JSON.parse(readFileSync(resolve('assets/data/1plgn.json'), 'utf8'))
-        const plgn2 = JSON.parse(readFileSync(resolve('assets/data/2plgn.json'), 'utf8'))
+        const plgn2 = JSON.parse(readFileSync(resolve('assets/data/2plgn-adjacent.json'), 'utf8'))
         const plgn3 = JSON.parse(readFileSync(resolve('assets/data/3plgn.json'), 'utf8'))
 
         let bboxPlgn1 = DCEL.buildFromGeoJSON(plgn1).getBbox()

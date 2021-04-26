@@ -62,25 +62,22 @@ export function mapFromDCEL(dcel, name) {
         }
     })
 
-    const polygonFeatures = dcel.faces.map(f => {
+    const polygonFeatures = dcel.getInnerFaces().map(f => {
         f.properties.uuid = f.uuid
         const halfEdges = f.getEdges()
         const coordinates = halfEdges.map(e => [e.tail.lng, e.tail.lat])
         coordinates.push([halfEdges[0].tail.lng, halfEdges[0].tail.lat])
-        // console.log("halfEdges", halfEdges);
-        // console.log("coordinates", coordinates);
         return {
-            "type": "Feature",
-            "geometry": {
-                "type": "Polygon",
-                "coordinates": [ coordinates ] // TODO: implement holes
+            type: "Feature",
+            geometry: {
+                type: "Polygon",
+                coordinates: [ coordinates ] // TODO: implement holes
             },
-            "properties": f.properties
+            properties: f.properties
         }
     })
 
     const polygonsJSON = createGeoJSON(polygonFeatures)
-    // console.log("polygonsJSON", polygonsJSON);
 
     const polygons = L.geoJSON(polygonsJSON, {
         // style: function (feature) {
@@ -93,8 +90,41 @@ export function mapFromDCEL(dcel, name) {
             `
     })
 
+    const halfEdgeFeatures = Object.values(dcel.halfEdges).map(e => {
+        const a = e.tail
+        const b = e.twin.tail
+
+        return {
+            type: "Feature",
+            geometry: {
+                type: "LineString",
+                coordinates: [
+                    [a.lng, a.lat],
+                    [b.lng, b.lat]
+                ]
+            },
+            properties: {
+                edge: `${e.uuid.substring(0,5)} (${e.tail.lng},${e.tail.lat}) -> (${e.twin.tail.lng},${e.twin.tail.lat}) face: ${e.face?.uuid.substring(0,5)}`, 
+                twin: `${e.twin.uuid.substring(0,5)} (${e.twin.tail.lng},${e.twin.tail.lat}) -> (${e.tail.lng},${e.tail.lat}) face: ${e.twin.face?.uuid.substring(0,5)}` 
+            }
+        }
+    })
+
+    const halfEdgesJSON = createGeoJSON(halfEdgeFeatures)
+    const halfEdges = L.geoJSON(halfEdgesJSON, {
+        // style: function (feature) {
+        //     return {color: feature.properties.color}
+        // }
+    }).bindTooltip(function (layer) {
+        return `
+            uuid: ${layer.feature.properties.edge} <br>
+            twin: ${layer.feature.properties.twin}
+            `
+    })
+
     polygons.addTo(DCELMap)
     vertices.addTo(DCELMap)
+    halfEdges.addTo(DCELMap)
     DCELMap.fitBounds(vertices.getBounds())
 
     return DCELMap

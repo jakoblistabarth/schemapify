@@ -22,13 +22,13 @@ describe("getLength()", function() {
 describe("getMidpoint()", function() {
 
     it("returns the correct length", function() {
-        
+
         const a = new Vertex(0,0)
         const b = new Vertex(2,0)
         const edge = new HalfEdge(a)
         edge.twin = new HalfEdge(b)
         edge.twin.twin = edge
-        
+
         const c = new Vertex(0, 10)
         const edge2 = new HalfEdge(a)
         edge2.twin = new HalfEdge(c)
@@ -74,30 +74,30 @@ describe("getAngle()", function() {
 
 })
 
-xdescribe("bisect()", function() {
+describe("bisect()", function() {
 
     it("on one edge of a square results in 5 linked outer halfEdges", function(){
 
         const plgn1 = JSON.parse(readFileSync(resolve('assets/data/1plgn.json'), 'utf8'))
         const dcel = DCEL.buildFromGeoJSON(plgn1)
-        dcel.getFaces()[0].halfEdge.bisect()
+        dcel.getFaces()[1].edge.bisect()
 
-        expect(dcel.getFaces()[0].getEdges().length).toBe(5)
-        expect(dcel.getFaces()[1].halfEdge.twin.incidentFace.getEdges().length).toBe(5)
-        expect(dcel.getFaces()[0].getEdges(false).length).toBe(5)
-        expect(dcel.getFaces()[1].halfEdge.twin.incidentFace.getEdges(false).length).toBe(5)
+        // expect(dcel.outerFace.getEdges().length).toBe(5)
+        expect(dcel.getFaces()[1].edge.twin.face.getEdges().length).toBe(5)
+        // expect(dcel.outerFace.getEdges(false).length).toBe(5)
+        expect(dcel.getFaces()[1].edge.twin.face.getEdges(false).length).toBe(5)
     })
 
     it("on one edge of a square results in 5 linked inner halfEdges", function(){
 
         const plgn1 = JSON.parse(readFileSync(resolve('assets/data/1plgn.json'), 'utf8'))
         const dcel = DCEL.buildFromGeoJSON(plgn1)
-        dcel.getFaces()[0].halfEdge.bisect()
+        dcel.outerFace.edge.bisect()
 
         expect(dcel.getFaces()[1].getEdges().length).toBe(5)
-        expect(dcel.getFaces()[0].halfEdge.twin.incidentFace.getEdges().length).toBe(5)
+        expect(dcel.outerFace.edge.twin.face.getEdges().length).toBe(5)
         expect(dcel.getFaces()[1].getEdges(false).length).toBe(5)
-        expect(dcel.getFaces()[0].halfEdge.twin.incidentFace.getEdges(false).length).toBe(5)
+        expect(dcel.outerFace.edge.twin.face.getEdges(false).length).toBe(5)
     })
 
 })

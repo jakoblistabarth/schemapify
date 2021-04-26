@@ -43,6 +43,10 @@ class Dcel {
         return this.faces
     }
 
+    getInnerFaces(){
+        return this.faces.filter(f => f.properties.type !== "outerFace")
+    }
+
     // as seen @ https://github.com/Turfjs/turf/blob/master/packages/turf-bbox/index.ts
     // takes a dcel
     // returns its Boundingbox as [minX, minY, maxX, maxY]
@@ -117,37 +121,60 @@ class Dcel {
 
         // TODO: sort edges everytime a new edge is pushed to vertex.edges
         Object.values(subdivision.vertices).forEach(vertex => {
+            
             //  sort the half-edges whose tail vertex is that endpoint in clockwise order.
             vertex.sortEdges()
+            
             // For every pair of half-edges e1, e2 in clockwise order, assign e1->twin->next = e2 and e2->prev = e1->twin.
             vertex.edges.forEach((e1, idx) => {
                 const e2 = vertex.edges[(idx + 1) % vertex.edges.length]
+                if (false && vertex.lng === 2 && vertex.lat === 2) {
+                    console.log(`${e1.twin.uuid.substring(0,5)}.next = ${e2.uuid.substring(0,5)}`)
+                    console.log(`${e2.uuid.substring(0,5)}.prev = ${e1.twin.uuid.substring(0,5)}`)
+                }
+
                 e1.twin.next = e2
                 e2.prev = e1.twin
-                e2.twin.next = e1
-                e1.prev = e2.twin
+            })
+            vertex.edges.reverse().forEach((e2, idx) => {
+                const e1 = vertex.edges[(idx + 1) % vertex.edges.length]
+                if (false && vertex.lng === 2 && vertex.lat === 2) {
+                    console.log(`${e1.twin.uuid.substring(0,5)}.next = ${e2.uuid.substring(0,5)}`)
+                    console.log(`${e2.uuid.substring(0,5)}.prev = ${e1.twin.uuid.substring(0,5)}`)
+                }
+
+                e1.twin.next = e2
+                e2.prev = e1.twin
             })
         })
 
-        // geoJSON.features.forEach(feature => {
-        //     feature.geometry.coordinates.forEach(subplgn => {
-        //         const [ firstPoint, secondPoint ] = subplgn
-        //         const initialEdge = subdivision.halfEdges.find(edge => {
-        //             return edge.tail.lng === firstPoint[0] && edge.tail.lat === firstPoint[1] &&
-        //                 edge.twin.tail.lng === secondPoint[0] && edge.twin.tail.lat === secondPoint[1]
-        //         })
+        geoJSON.features.forEach(feature => {
+            feature.geometry.coordinates.forEach(subplgn => {
+                const [ firstPoint, secondPoint ] = subplgn
+                const initialEdge = subdivision.halfEdges.find(edge => {
+                    return edge.tail.lng === firstPoint[0] && edge.tail.lat === firstPoint[1] &&
+                        edge.twin.tail.lng === secondPoint[0] && edge.twin.tail.lat === secondPoint[1]
+                })
 
-        //         let currentEdge = initialEdge
-        //         const face = subdivision.makeFace(feature.properties)
-        //         face.edge = initialEdge
-        //         do {
-        //             currentEdge.face = face
-        //             currentEdge = currentEdge.next
-        //          } while (currentEdge != initialEdge)
-        //     })
-        // })
+                const face = subdivision.makeFace(feature.properties)
+                let currentEdge = initialEdge // TODO: use getCycle method instead?
+                face.edge = initialEdge
+                do {
+                    currentEdge.face = face
+                    currentEdge = currentEdge.next
+                 } while (currentEdge != initialEdge)
+            })
+        })
 
-        console.log(subdivision);
+        subdivision.outerFace = subdivision.makeFace({type: "outerFace"})
+        let outerEdge = subdivision.halfEdges.find(edge => edge.face === null )
+        subdivision.outerFace.edge = outerEdge
+        while (subdivision.halfEdges.find(edge => edge.face === null )) {
+            outerEdge = subdivision.halfEdges.find(edge => edge.face === null )
+            outerEdge.getCycle().forEach(edge => {
+                edge.face = subdivision.outerFace
+            })
+        }
 
         subdivision.setEpsilon(config.eFactor)
         return subdivision

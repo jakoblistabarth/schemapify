@@ -6,6 +6,8 @@ const tests = [
     'assets/data/1plgn.json',
     // 'assets/data/1plgn-hole.json',
     'assets/data/2plgn.json',
+    // 'assets/data/2plgn-adjacent.json',
+    // 'assets/data/2plgn-islands.json',
     // 'assets/data/3plgn.json'
 ]
 
@@ -19,8 +21,12 @@ tests.forEach(async (test) => {
     const name =  test.slice(test.lastIndexOf("/")+1,-5)
 
     const subdivision = DCEL.buildFromGeoJSON(data)
-    // subdivision.getFaces()[0].halfEdge.bisect();
-    // subdivision.getFaces()[0].halfEdge.subdivideToThreshold(subdivision.epsilon);
+    subdivision.getInnerFaces().forEach(f => {
+        console.log(f);
+        console.log("edge:", f.edge);
+        f.edge.bisect();
+    })
+    // subdivision.getFaces()[0].edge.subdivideToThreshold(subdivision.epsilon);
     mapFromDCEL(subdivision, name)
     // logDCEL(subdivision)
 
