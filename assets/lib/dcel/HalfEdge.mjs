@@ -1,36 +1,53 @@
 import { v4 as uuid } from 'uuid'
-import Vertex from './Vertex.mjs'
 
 class HalfEdge {
-    constructor(origin, prev, next, dcel) {
+    constructor(tail, dcel) {
         this.uuid = uuid()
-        this.origin = origin
+        this.tail = tail
         this.twin = null
-        this.incidentFace = null
-        this.prev = prev
-        this.next = next
+        this.face = null
+        this.prev = null
+        this.next = null
         this.dcel = dcel
     }
 
-    getOrigin() {
-        return this.origin
+    getTail() {
+        return this.tail
     }
 
-    getDestination() {
-        return this.twin.origin
+    getHead() {
+        return this.twin.tail
     }
 
     getEndpoints() {
-        return [ this.getOrigin(), this.getDestination() ]
+        return [ this.getTail(), this.getHead() ]
     }
 
+    getAngle() {
+        const vector = [this.twin.tail.lng - this.tail.lng, this.twin.tail.lat - this.tail.lat]
+        const angle = Math.atan2(vector[1], vector[0])
+        return angle < 0 ? angle + 2 * Math.PI : angle
+    }
+
+    getRadialHalfEdge() {
+        return this.prev.twin.prev.twin // or twin.next ??
+
+    }
+
+    // getRadialHalfEdge(counterclockwise = true){ //TODO: implement clockwise direction
+    //     const edges = this.getTail().getOutgoingEdges()
+    //     const idx = edges.findIndex(e => e === this) + (counterclockwise ? 1 : -1)
+
+    //     return edges[idx >= edges.length ? 0 : idx < 0 ? edges.length -1 : idx]
+    // }
+
     getLength() {
-        return this.getOrigin().getDistance(this.getDestination())
+        return this.getTail().getDistance(this.getHead())
     }
 
     getMidpoint() {
-        const [ x1, y1 ] = [ this.getOrigin().lng, this.getOrigin().lat ]
-        const [ x2, y2 ] = [ this.getDestination().lng, this.getDestination().lat ]
+        const [ x1, y1 ] = [ this.getTail().lng, this.getTail().lat ]
+        const [ x2, y2 ] = [ this.getHead().lng, this.getHead().lat ]
 
         const mx = (x1 + x2) / 2
         const my = (y1 + y2) / 2
@@ -69,7 +86,6 @@ class HalfEdge {
         let currentHalfEdge = initialHalfEdge
 
         while (currentHalfEdge != initialHalfEdge.next) {
-            // console.log(currentHalfEdge.origin.getXY(), currentHalfEdge.getLength());
             if (currentHalfEdge.getLength() < threshold) {
                 currentHalfEdge = currentHalfEdge.next
             } else {

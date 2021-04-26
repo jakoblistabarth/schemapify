@@ -8,11 +8,11 @@ class Dcel {
         this.vertices = {}
         this.halfEdges = []
         this.faces = []
-        this.outerFace = this.makeFace()
+        // this.outerFace = this.makeFace()
     }
 
     makeVertex(lng,lat) {
-        const key = `${lng}/${lat}` // TODO: is there a better way to ensure that a coordinate pair vertex is added only once to the vertex list?
+        const key = Vertex.getKey(lng, lat) // TODO: is there a better way to ensure that a coordinate pair vertex is added only once to the vertex list
         if (this.vertices[key])
             return this.vertices[key]
 
@@ -21,20 +21,14 @@ class Dcel {
         return vertex
     }
 
-    makeHalfEdge(origin, prev, next) {
-        let existingHalfEdge = null
-        if (origin) {
-            existingHalfEdge = this.halfEdges.find(edge => origin == edge.origin && origin !== null && edge.incidentFace == this.outerFace)
-        }
-        if (existingHalfEdge && false) {
-            console.log(origin.getXY());
-            console.log("existing halfEdge:", existingHalfEdge.origin.getXY(), existingHalfEdge.uuid)
+    makeHalfEdge(tail, head) {
+        const existingHalfEdge = this.halfEdges.find(edge => tail == edge.tail && edge.twin.tail == head)
+        if (existingHalfEdge)
             return existingHalfEdge
-        }
-        const halfEdge = new HalfEdge(origin, prev, next, this)
-        halfEdge.incidentFace = this.outerFace
-        // console.log("create halfEdge:", halfEdge.uuid);
+
+        const halfEdge = new HalfEdge(tail, this)
         this.halfEdges.push(halfEdge)
+        tail.edges.push(halfEdge)
         return halfEdge
     }
 
@@ -94,54 +88,68 @@ class Dcel {
         return diameter;
     }
 
+    findVertex(lng, lat) {
+        const key = Vertex.getKey(lng, lat)
+        return this.vertices[key]
+    }
+
     static buildFromGeoJSON(geoJSON) {
         const subdivision = new Dcel()
 
-        geoJSON.features.forEach(feature => {
-            feature.geometry.coordinates.forEach(subplgn => {
-                const face = subdivision.makeFace(feature.properties)
-                let prevHalfEdge = null
-                let initialEdge = null
-                for (let idx = 0; idx <= subplgn.length; idx++) {
+        const polygons = geoJSON.features.reduce((acc, feature)  => {
+            acc.push(...feature.geometry.coordinates.map(subplgn => {
+                return subplgn.map(point => {
+                    return subdivision.findVertex(point[0], point[1]) || subdivision.makeVertex(point[0],point[1])
+                })
+            }))
+            return acc
+        }, [])
 
-                    if (idx == subplgn.length) {
-                        prevHalfEdge.next = initialEdge
-                        initialEdge.prev = prevHalfEdge
-
-                        subdivision.outerFace.halfEdge = initialEdge.twin
-                        prevHalfEdge.twin.origin = initialEdge.origin
-                        prevHalfEdge.twin.prev = initialEdge.twin
-                        initialEdge.twin.origin = initialEdge.next.origin
-                        initialEdge.twin.next = prevHalfEdge.twin
-                        initialEdge.twin.prev = initialEdge.next.twin
-                        continue
-                    }
-
-                    const v = subplgn[idx]
-                    const origin = subdivision.makeVertex(v[0],v[1])
-                    const halfEdge = subdivision.makeHalfEdge(origin, prevHalfEdge, null)
-                    origin.incidentEdge = halfEdge
-                    halfEdge.incidentFace = face
-                    halfEdge.twin = subdivision.makeHalfEdge(null, null, null)
-                    halfEdge.twin.twin = halfEdge
-                    subdivision.outerFace.halfEdge = halfEdge.twin
-
-                    if (idx == 0) {
-                        initialEdge = halfEdge
-                        face.halfEdge = initialEdge
-                    } else {
-                        prevHalfEdge.next = halfEdge
-                        halfEdge.twin.next = prevHalfEdge.twin
-                        prevHalfEdge.twin.origin = halfEdge.origin
-                        prevHalfEdge.twin.prev = halfEdge.twin
-                    }
-                    prevHalfEdge = halfEdge
-                }
+        polygons.forEach(plgn =>{
+            plgn.forEach((tail, idx) => {
+                const head = plgn[(idx + 1) % plgn.length]
+                const halfEdge = subdivision.makeHalfEdge(tail, head)
+                const twinHalfEdge = subdivision.makeHalfEdge(head, tail)
+                halfEdge.twin = twinHalfEdge
+                twinHalfEdge.twin = halfEdge
             })
         })
-        
-        subdivision.setEpsilon(config.eFactor)
 
+        // TODO: sort edges everytime a new edge is pushed to vertex.edges
+        Object.values(subdivision.vertices).forEach(vertex => {
+            //  sort the half-edges whose tail vertex is that endpoint in clockwise order.
+            vertex.sortEdges()
+            // For every pair of half-edges e1, e2 in clockwise order, assign e1->twin->next = e2 and e2->prev = e1->twin.
+            vertex.edges.forEach((e1, idx) => {
+                const e2 = vertex.edges[(idx + 1) % vertex.edges.length]
+                e1.twin.next = e2
+                e2.prev = e1.twin
+                e2.twin.next = e1
+                e1.prev = e2.twin
+            })
+        })
+
+        // geoJSON.features.forEach(feature => {
+        //     feature.geometry.coordinates.forEach(subplgn => {
+        //         const [ firstPoint, secondPoint ] = subplgn
+        //         const initialEdge = subdivision.halfEdges.find(edge => {
+        //             return edge.tail.lng === firstPoint[0] && edge.tail.lat === firstPoint[1] &&
+        //                 edge.twin.tail.lng === secondPoint[0] && edge.twin.tail.lat === secondPoint[1]
+        //         })
+
+        //         let currentEdge = initialEdge
+        //         const face = subdivision.makeFace(feature.properties)
+        //         face.edge = initialEdge
+        //         do {
+        //             currentEdge.face = face
+        //             currentEdge = currentEdge.next
+        //          } while (currentEdge != initialEdge)
+        //     })
+        // })
+
+        console.log(subdivision);
+
+        subdivision.setEpsilon(config.eFactor)
         return subdivision
     }
 

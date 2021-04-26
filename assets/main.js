@@ -19,8 +19,9 @@ tests.forEach(async (test) => {
     const name =  test.slice(test.lastIndexOf("/")+1,-5)
 
     const subdivision = DCEL.buildFromGeoJSON(data)
-    subdivision.getFaces()[0].halfEdge.bisect();
+    // subdivision.getFaces()[0].halfEdge.bisect();
+    // subdivision.getFaces()[0].halfEdge.subdivideToThreshold(subdivision.epsilon);
     mapFromDCEL(subdivision, name)
-    logDCEL(subdivision)
+    // logDCEL(subdivision)
 
 })

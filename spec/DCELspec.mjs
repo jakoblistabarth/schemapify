@@ -1,41 +1,6 @@
-import DCEL from '../assets/lib/dcel/Dcel.mjs'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
-
-describe("A DCEL of a single square", function() {
-
-    const plgn1 = JSON.parse(readFileSync(resolve('assets/data/1plgn.json'), 'utf8'))
-    let dcel = DCEL.buildFromGeoJSON(plgn1)
-
-    it("has 1 outerface", function(){
-        expect(dcel.outerFace).toEqual(jasmine.any(Object))
-    })
-
-    it("has 2 faces", function(){
-        expect(dcel.faces.length).toBe(2)
-    })
-
-    it("has 4 vertices", function(){
-        expect(Object.keys(dcel.vertices).length).toBe(4)
-    })
-
-    it("has 8 edges", function(){
-        expect(dcel.halfEdges.length).toBe(8)
-    })
-
-    it("has 4 linked outer edges", function(){
-        expect(dcel.faces[0].getEdges().length).toBe(4)
-        expect(dcel.faces[1].halfEdge.twin.incidentFace.getEdges().length).toBe(4)
-    })
-
-    it("has 4 linked inner edges", function(){
-        expect(dcel.faces[1].getEdges().length).toBe(4)
-        expect(dcel.faces[0].halfEdge.twin.incidentFace.getEdges().length).toBe(4)
-        expect(dcel.faces[1].getEdges(false).length).toBe(4)
-        expect(dcel.faces[0].halfEdge.twin.incidentFace.getEdges(false).length).toBe(4)
-    })
-
-})
+import DCEL from '../assets/lib/dcel/Dcel.mjs'
 
 describe("A DCEL of 2 adjacent squares", function() {
 
@@ -58,7 +23,7 @@ describe("A DCEL of 2 adjacent squares", function() {
         expect(dcel.halfEdges.length).toBe(14)
     })
 
-    xit("has faces with the right amount of edges", function(){
+    it("has faces with the right amount of edges", function(){
         const edgeCount = dcel.getFaces().reduce((counter, f) => {
             counter.push(f.getEdges().length)
             return counter
@@ -66,7 +31,7 @@ describe("A DCEL of 2 adjacent squares", function() {
         expect(edgeCount.sort()).toEqual([4,4,6].sort())
     })
 
-    xit("has outer Face with 6 linked edges", function(){
+    it("has outer Face with 6 linked edges", function(){
         expect(dcel.outerFace.getEdges().length).toBe(6)
         expect(dcel.outerFace.halfEdge.twin.incidentFace.getEdges().length).toBe(4)
     })
@@ -94,11 +59,43 @@ describe("A DCEL of 3 adjacent squares", function() {
         expect(dcel.halfEdges.length).toBe(20)
     })
 
-    xit("has faces with the right amount of edges", function(){
+    it("has faces with the right amount of edges", function(){
         const edgeCount = dcel.getFaces().reduce((counter, f) => {
             counter.push(f.getEdges().length)
             return counter
         }, [])
         expect(edgeCount.sort()).toEqual([4,4,4,8].sort())
     })
+})
+
+describe("getBbox()", function() {
+
+    it("returns the correct boundingbox of a given dcel", function() {
+
+        const plgn1 = JSON.parse(readFileSync(resolve('assets/data/1plgn.json'), 'utf8'))
+        const plgn2 = JSON.parse(readFileSync(resolve('assets/data/2plgn.json'), 'utf8'))
+        const plgn3 = JSON.parse(readFileSync(resolve('assets/data/3plgn.json'), 'utf8'))
+
+        let bboxPlgn1 = DCEL.buildFromGeoJSON(plgn1).getBbox()
+        let bboxPlgn2 = DCEL.buildFromGeoJSON(plgn2).getBbox()
+        let bboxPlgn3 = DCEL.buildFromGeoJSON(plgn3).getBbox()
+
+        expect(bboxPlgn1).toEqual([0, 0, 2, 2])
+        expect(bboxPlgn2).toEqual([0, 0, 4, 2])
+        expect(bboxPlgn3).toEqual([0, 0, 2, 2])
+    })
+
+})
+
+describe("getDiameter()", function() {
+
+    it("returns the correct diameter", function() {
+
+        const plgn1 = JSON.parse(readFileSync(resolve('assets/data/1plgn.json'), 'utf8'))
+        const plgn3 = JSON.parse(readFileSync(resolve('assets/data/3plgn.json'), 'utf8'))
+
+        expect(DCEL.buildFromGeoJSON(plgn1).getDiameter()).toEqual(2)
+        expect(DCEL.buildFromGeoJSON(plgn3).getDiameter()).toEqual(2)
+    })
+
 })

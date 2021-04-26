@@ -6,7 +6,7 @@ export function logDCEL(dcel) {
     dcel.getFaces().forEach(f => {
         console.log("-> new face", f.uuid);
         f.getEdges().forEach(e => {
-            console.log(e, e.origin.lng, e.origin.lat);
+            console.log(e, e.tail.lng, e.tail.lat);
         })
     })
     console.log("<-- DCEL END");
@@ -65,8 +65,8 @@ export function mapFromDCEL(dcel, name) {
     const polygonFeatures = dcel.faces.map(f => {
         f.properties.uuid = f.uuid
         const halfEdges = f.getEdges()
-        const coordinates = halfEdges.map(e => e.origin.getXY())
-        coordinates.push(halfEdges[0].origin.getXY())
+        const coordinates = halfEdges.map(e => [e.tail.lng, e.tail.lat])
+        coordinates.push([halfEdges[0].tail.lng, halfEdges[0].tail.lat])
         // console.log("halfEdges", halfEdges);
         // console.log("coordinates", coordinates);
         return {
@@ -80,7 +80,7 @@ export function mapFromDCEL(dcel, name) {
     })
 
     const polygonsJSON = createGeoJSON(polygonFeatures)
-    console.log("polygonsJSON", polygonsJSON);
+    // console.log("polygonsJSON", polygonsJSON);
 
     const polygons = L.geoJSON(polygonsJSON, {
         // style: function (feature) {

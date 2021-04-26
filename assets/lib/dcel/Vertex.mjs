@@ -1,17 +1,22 @@
 import { v4 as uuid } from 'uuid';
 
 class Vertex {
-    constructor(lng,lat, dcel) {
+    constructor(lng,lat) {
         this.uuid = uuid()
         this.lng = lng
         this.lat = lat
-        this.dcel = dcel
-        this.incidentEdge = null
+        this.edges = []
     }
 
-    getXY() {
-        return [this.lng, this.lat]
+    static getKey(lng, lat) {
+        return `${lng}/${lat}` // TODO: is there a better way to ensure that a coordinate pair vertex is added only once to the vertex list?
     }
+
+    sortEdges() {
+        this.edges = this.edges.sort((a, b) => {
+          return b.getAngle() - a.getAngle()
+        })
+      }
 
     getDistance(p) {
         const [x1, y1] = [this.lng, this.lat]

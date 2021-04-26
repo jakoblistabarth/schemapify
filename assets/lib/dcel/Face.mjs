@@ -3,18 +3,18 @@ import { v4 as uuid } from 'uuid';
 class Face {
     constructor() {
         this.uuid = uuid()
-        this.halfEdge = null
+        this.edge = null
         this.properties = {}
     }
 
-    getEdges(anticlockwise = true) {
+    getEdges(counterclockwise = true) {
         const halfEdges = []
-        const initialEdge = this.halfEdge
+        const initialEdge = this.edge
         let currentEdge = initialEdge
 
         do {
            halfEdges.push(currentEdge)
-            currentEdge = anticlockwise ? currentEdge.next : currentEdge.prev
+            currentEdge = counterclockwise ? currentEdge.next : currentEdge.prev
         } while (currentEdge != initialEdge)
         return halfEdges
     }
