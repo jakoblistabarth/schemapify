@@ -3,56 +3,56 @@
   "features": [
     {
       "type": "Feature",
+      "properties": {
+        "id": 1
+      },
       "geometry": {
-        "bbox": [],
         "type": "Polygon",
         "coordinates": [
           [
             [0,0],
             [1,0],
             [1,1],
-            [0,1]
+            [0,1],
+            [0,0]
           ]
         ]
-      },
-      "properties": {
-        "Name": "A"
       }
     },
     {
         "type": "Feature",
+        "properties": {
+          "id": 2
+        },
         "geometry": {
-          "bbox": [],
           "type": "Polygon",
           "coordinates": [
             [
               [1,0],
               [2,0],
               [2,1],
-              [1,1]
+              [1,1],
+              [1,0]
             ]
           ]
-        },
-        "properties": {
-          "Name": "B"
         }
       },
       {
         "type": "Feature",
+        "properties": {
+          "id": 1
+        },
         "geometry": {
-          "bbox": [],
           "type": "Polygon",
           "coordinates": [
             [
               [1,1],
               [2,1],
               [2,2],
-              [1,2]
+              [1,2],
+              [1,1]
             ]
           ]
-        },
-        "properties": {
-          "Name": "C"
         }
       }
   ]

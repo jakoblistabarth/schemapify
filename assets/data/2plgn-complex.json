@@ -3,26 +3,28 @@
   "features": [
     {
       "type": "Feature",
+      "properties": {
+        "id": 1
+      },
       "geometry": {
-        "bbox": [],
         "type": "Polygon",
         "coordinates": [
           [
             [0,0],
             [2,0],
             [2,2],
-            [0,2]
+            [0,2],
+            [0,0]
           ]
         ]
-      },
-      "properties": {
-        "Name": "A"
       }
     },
     {
         "type": "Feature",
+        "properties": {
+          "id": 2
+        },
         "geometry": {
-          "bbox": [],
           "type": "Polygon",
           "coordinates": [
             [
@@ -31,14 +33,11 @@
               [3.8,1.2],
               [4.2,1.8],
               [4,2],
-              [2,2]
+              [2,2],
+              [2,0]
             ]
           ]
-        },
-        "properties": {
-          "Name": "B"
         }
       }
-  ],
-  "fileName": "2plgn-complex"
+  ]
 }

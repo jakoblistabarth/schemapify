@@ -85,7 +85,7 @@ export function mapFromDCEL(dcel, name) {
         // }
     }).bindTooltip(function (layer) {
         return `
-            Face: ${layer.feature.properties.Name}
+            Face: ${layer.feature.properties.id}
             uuid : ${layer.feature.properties.uuid}
             `
     })

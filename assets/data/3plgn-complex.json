@@ -3,65 +3,64 @@
   "features": [
     {
       "type": "Feature",
+      "properties": {
+        "id": 1
+      },
       "geometry": {
-        "bbox": [],
         "type": "Polygon",
         "coordinates": [
           [
             [2,3],
             [4,3],
             [4,5],
-            [2,5]
+            [2,5],
+            [2,3]
           ]
         ]
-      },
-      "properties": {
-        "Name": "A"
       }
     },
     {
         "type": "Feature",
+        "properties": {
+          "id": 2
+        },
         "geometry": {
-          "bbox": [],
           "type": "Polygon",
           "coordinates": [
             [
               [4,3],
-              [10,1],
-              [5,0],
-              [1,1],
-              [0,5],
+              [2,3],
               [2,5],
-              [2,3]
-            ]
-          ]
-        },
-        "properties": {
-          "Name": "B"
-        }
-      },
-      {
-        "type": "Feature",
-        "geometry": {
-          "bbox": [],
-          "type": "Polygon",
-          "coordinates": [
-            [
-              [4,5],
-              [6,8],
-              [7,8],
-              [8,9],
-              [9,7],
-              [10,6],
+              [0,5],
+              [1,1],
+              [5,0],
               [10,1],
               [4,3]
             ]
           ]
-        },
+        }
+      },
+      {
+        "type": "Feature",
         "properties": {
-          "Name": "C"
+          "id": 3
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [4,5],
+              [4,3],
+              [10,1],
+              [10,6],
+              [9,7],
+              [8,9],
+              [7,8],
+              [6,8],
+              [4,5]
+            ]
+          ]
         }
       }
-  ],
-  "fileName": "3plgn"
+  ]
 }

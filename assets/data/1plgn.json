@@ -3,22 +3,21 @@
   "features": [
     {
       "type": "Feature",
+      "properties": {
+        "id": 1
+      },
       "geometry": {
-        "bbox": [],
         "type": "Polygon",
         "coordinates": [
           [
             [0,0],
             [2,0],
             [2,2],
-            [0,2]
+            [0,2],
+            [0,0]
           ]
         ]
-      },
-      "properties": {
-        "Name": "A"
       }
     }
-  ],
-  "fileName": "1plgn"
+  ]
 }

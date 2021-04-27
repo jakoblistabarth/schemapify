@@ -3,38 +3,39 @@
   "features": [
     {
       "type": "Feature",
+      "properties": {
+        "id": 1
+      },
       "geometry": {
-        "bbox": [],
         "type": "Polygon",
         "coordinates": [
           [
             [0,0],
             [2,0],
             [2,2],
-            [0,2]
+            [0,2],
+            [0,0]
           ]
         ]
-      },
-      "properties": {
-        "Name": "A"
       }
     },
     {
         "type": "Feature",
+        "properties": {
+          "id": 2
+        },
         "geometry": {
-          "bbox": [],
+
           "type": "Polygon",
           "coordinates": [
             [
               [2,0],
               [4,0],
               [4,2],
-              [2,2]
+              [2,2],
+              [2,0]
             ]
           ]
-        },
-        "properties": {
-          "Name": "B"
         }
       }
   ]

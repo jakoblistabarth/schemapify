@@ -38,24 +38,6 @@
           ]
         ]
       }
-    },
-    {
-        "type": "Feature",
-        "properties": {
-          "id": 2
-        },
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": [
-            [
-              [2,0],
-              [4,0],
-              [4,2],
-              [2,2],
-              [2,0]
-            ]
-          ]
-        }
-      }
+    }
   ]
 }
