@@ -95,7 +95,7 @@ class HalfEdge {
                 currentHalfEdge = currentHalfEdge.next
             } else {
                 const newHalfEdge = currentHalfEdge.bisect()
-                console.log(newHalfEdge);
+                // console.log(newHalfEdge);
                 currentHalfEdge = newHalfEdge.prev
             }
         }

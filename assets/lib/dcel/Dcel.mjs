@@ -101,17 +101,21 @@ class Dcel {
         const subdivision = new Dcel()
 
         const polygons = geoJSON.features.reduce((acc, feature)  => {
-            acc.push(...feature.geometry.coordinates.map(subplgn => {
-                return subplgn.map(point => {
+            const multiPolygons = (feature.geometry.type !== "MultiPolygon") // TODO: check in e.g, parseGeoJSON()? if only polygons in Multipolygons
+                ? [ feature.geometry.coordinates ]
+                : feature.geometry.coordinates
+
+            acc.push(...multiPolygons.map(polygon => polygon.map(ring => {
+                return ring.map(point => {
                     return subdivision.findVertex(point[0], point[1]) || subdivision.makeVertex(point[0],point[1])
                 })
-            }))
+            }).flat()))
             return acc
         }, [])
 
-        polygons.forEach(plgn =>{
-            plgn.forEach((tail, idx) => {
-                const head = plgn[(idx + 1) % plgn.length]
+        polygons.forEach(polygon => {
+            polygon.forEach((tail, idx) => {
+                const head = polygon[(idx + 1) % (polygon.length - 1)] // TODO: make this idx more elegant?
                 const halfEdge = subdivision.makeHalfEdge(tail, head)
                 const twinHalfEdge = subdivision.makeHalfEdge(head, tail)
                 halfEdge.twin = twinHalfEdge
@@ -121,10 +125,10 @@ class Dcel {
 
         // TODO: sort edges everytime a new edge is pushed to vertex.edges
         Object.values(subdivision.vertices).forEach(vertex => {
-            
+
             //  sort the half-edges whose tail vertex is that endpoint in clockwise order.
             vertex.sortEdges()
-            
+
             // For every pair of half-edges e1, e2 in clockwise order, assign e1->twin->next = e2 and e2->prev = e1->twin.
             vertex.edges.forEach((e1, idx) => {
                 const e2 = vertex.edges[(idx + 1) % vertex.edges.length]
@@ -136,6 +140,8 @@ class Dcel {
                 e1.twin.next = e2
                 e2.prev = e1.twin
             })
+
+            // do permutations
             vertex.edges.reverse().forEach((e2, idx) => {
                 const e1 = vertex.edges[(idx + 1) % vertex.edges.length]
                 if (false && vertex.lng === 2 && vertex.lat === 2) {
@@ -148,24 +154,28 @@ class Dcel {
             })
         })
 
+        // For every cycle, allocate and assign a face structure.
         geoJSON.features.forEach(feature => {
-            feature.geometry.coordinates.forEach(subplgn => {
-                const [ firstPoint, secondPoint ] = subplgn
-                const initialEdge = subdivision.halfEdges.find(edge => {
+
+            const multiPolygons = (feature.geometry.type !== "MultiPolygon")
+                ? [ feature.geometry.coordinates ]
+                : feature.geometry.coordinates // TODO: check in e.g, parseGeoJSON()? if only polygons in Multipolygons
+
+            multiPolygons.forEach(polygon => polygon.forEach(ring => {
+                const [ firstPoint, secondPoint ] = ring
+                const edge = subdivision.halfEdges.find(edge => {
                     return edge.tail.lng === firstPoint[0] && edge.tail.lat === firstPoint[1] &&
                         edge.twin.tail.lng === secondPoint[0] && edge.twin.tail.lat === secondPoint[1]
                 })
 
+                // TODO: set face for twin edges of interior rings
                 const face = subdivision.makeFace(feature.properties)
-                let currentEdge = initialEdge // TODO: use getCycle method instead?
-                face.edge = initialEdge
-                do {
-                    currentEdge.face = face
-                    currentEdge = currentEdge.next
-                 } while (currentEdge != initialEdge)
-            })
+                face.edge = edge
+                edge.getCycle().forEach(e => e.face = face)
+            }))
         })
 
+        // create outerface and assign it to edges which do not have a face yet
         subdivision.outerFace = subdivision.makeFace({type: "outerFace"})
         let outerEdge = subdivision.halfEdges.find(edge => edge.face === null )
         subdivision.outerFace.edge = outerEdge
