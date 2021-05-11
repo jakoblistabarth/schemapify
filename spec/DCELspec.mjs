@@ -72,7 +72,7 @@ describe("getBbox()", function() {
 
     it("returns the correct boundingbox of a given dcel", function() {
 
-        const plgn1 = JSON.parse(readFileSync(resolve('assets/data/1plgn.json'), 'utf8'))
+        const plgn1 = JSON.parse(readFileSync(resolve('assets/data/square.json'), 'utf8'))
         const plgn2 = JSON.parse(readFileSync(resolve('assets/data/2plgn-adjacent.json'), 'utf8'))
         const plgn3 = JSON.parse(readFileSync(resolve('assets/data/3plgn.json'), 'utf8'))
 
@@ -91,7 +91,7 @@ describe("getDiameter()", function() {
 
     it("returns the correct diameter", function() {
 
-        const plgn1 = JSON.parse(readFileSync(resolve('assets/data/1plgn.json'), 'utf8'))
+        const plgn1 = JSON.parse(readFileSync(resolve('assets/data/square.json'), 'utf8'))
         const plgn3 = JSON.parse(readFileSync(resolve('assets/data/3plgn.json'), 'utf8'))
 
         expect(DCEL.buildFromGeoJSON(plgn1).getDiameter()).toEqual(2)

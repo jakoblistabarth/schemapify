@@ -1,0 +1,39 @@
+body {
+    margin: 0;
+    font-family: 'DM Mono', monospace;
+}
+#map-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+}
+.map {
+    height: 50vh;
+    width: 50vw;
+}
+.leaflet-container{
+    font-family: 'DM Mono', monospace;
+}
+.leaflet-tooltip {
+    background-color: rgb(10,10,10);
+    color: white;
+    border-color: rgb(10,10,10);
+    opacity: 1;
+}
+.leaflet-tooltip-left:before {
+    border-left-color: rgb(10,10,10);
+}
+.leaflet-tooltip-right:before {
+    border-right-color: rgb(10,10,10);
+}
+.leaflet-tooltip table {
+    border-collapse: collapse;
+}
+.leaflet-tooltip table tr:first-of-type td {
+    padding-bottom: 10px;
+}
+.material-icons { 
+    font-size: 18px; 
+    position: relative;
+    top: 4.5px;
+}

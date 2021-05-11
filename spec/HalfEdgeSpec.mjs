@@ -78,7 +78,7 @@ describe("bisect()", function() {
 
     it("on one edge of a square results in 5 linked outer halfEdges", function(){
 
-        const plgn1 = JSON.parse(readFileSync(resolve('assets/data/1plgn.json'), 'utf8'))
+        const plgn1 = JSON.parse(readFileSync(resolve('assets/data/square.json'), 'utf8'))
         const dcel = DCEL.buildFromGeoJSON(plgn1)
         dcel.getFaces()[1].edge.bisect()
 
@@ -90,7 +90,7 @@ describe("bisect()", function() {
 
     it("on one edge of a square results in 5 linked inner halfEdges", function(){
 
-        const plgn1 = JSON.parse(readFileSync(resolve('assets/data/1plgn.json'), 'utf8'))
+        const plgn1 = JSON.parse(readFileSync(resolve('assets/data/square.json'), 'utf8'))
         const dcel = DCEL.buildFromGeoJSON(plgn1)
         dcel.outerFace.edge.bisect()
 

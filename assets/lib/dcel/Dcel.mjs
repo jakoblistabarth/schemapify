@@ -34,7 +34,7 @@ class Dcel {
 
     makeFace(properties){
         const face = new Face()
-        face.properties = properties ? properties : face.properties
+        face.properties = properties ? properties : {} //TODO: move this into the constructor?
         this.faces.push(face)
         return face
     }
@@ -109,19 +109,22 @@ class Dcel {
                 return ring.map(point => {
                     return subdivision.findVertex(point[0], point[1]) || subdivision.makeVertex(point[0],point[1])
                 })
-            }).flat()))
+            })))
             return acc
         }, [])
 
-        polygons.forEach(polygon => {
-            polygon.forEach((tail, idx) => {
-                const head = polygon[(idx + 1) % (polygon.length - 1)] // TODO: make this idx more elegant?
+
+        polygons.forEach(polygon => polygon.forEach(ring => {
+            const points = ring.slice(0,-1)
+
+            points.forEach((tail, idx) => {
+                const head = points[(idx + 1) % points.length] // TODO: make this idx more elegant?
                 const halfEdge = subdivision.makeHalfEdge(tail, head)
                 const twinHalfEdge = subdivision.makeHalfEdge(head, tail)
                 halfEdge.twin = twinHalfEdge
                 twinHalfEdge.twin = halfEdge
             })
-        })
+        }))
 
         // TODO: sort edges everytime a new edge is pushed to vertex.edges
         Object.values(subdivision.vertices).forEach(vertex => {
@@ -161,7 +164,9 @@ class Dcel {
                 ? [ feature.geometry.coordinates ]
                 : feature.geometry.coordinates // TODO: check in e.g, parseGeoJSON()? if only polygons in Multipolygons
 
-            multiPolygons.forEach(polygon => polygon.forEach(ring => {
+            let leftFace
+            multiPolygons.forEach(polygon => polygon.forEach((ring, idx) => {
+                let exteriorRing = idx == 0 ? true : false
                 const [ firstPoint, secondPoint ] = ring
                 const edge = subdivision.halfEdges.find(edge => {
                     return edge.tail.lng === firstPoint[0] && edge.tail.lat === firstPoint[1] &&
@@ -169,9 +174,16 @@ class Dcel {
                 })
 
                 // TODO: set face for twin edges of interior rings
-                const face = subdivision.makeFace(feature.properties)
-                face.edge = edge
-                edge.getCycle().forEach(e => e.face = face)
+                if (exteriorRing) {
+                    leftFace = subdivision.makeFace(feature.properties)
+                    edge.getCycle().forEach(e => e.face = leftFace)
+                    leftFace.edge = edge
+                } else {
+                    const face = subdivision.makeFace(feature.properties)
+                    edge.getCycle().forEach(e => e.face = face)
+                    face.edge = edge.twin
+                    edge.twin.getCycle().forEach(e => e.face = leftFace)
+                }
             }))
         })
 

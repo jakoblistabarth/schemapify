@@ -4,8 +4,12 @@ import { resolve } from 'path'
 
 describe("A DCEL of a single square", function() {
 
-    const plgn1 = JSON.parse(readFileSync(resolve('assets/data/1plgn.json'), 'utf8'))
-    let dcel = DCEL.buildFromGeoJSON(plgn1)
+    let dcel
+
+    beforeEach(function() {
+        const polygon = JSON.parse(readFileSync(resolve('assets/data/square.json'), 'utf8'))
+        dcel = DCEL.buildFromGeoJSON(polygon)
+    })
 
     it("has 1 outerface", function(){
         expect(dcel.outerFace).toEqual(jasmine.any(Object))

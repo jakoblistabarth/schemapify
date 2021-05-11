@@ -21,13 +21,19 @@ tests.forEach(async (test) => {
     const name =  test.slice(test.lastIndexOf("/")+1,-5)
 
     const subdivision = DCEL.buildFromGeoJSON(data)
-    subdivision.getInnerFaces().forEach(f => {
-        console.log(f);
-        console.log("edge:", f.edge);
-        f.edge.bisect();
-    })
-    // subdivision.getFaces()[0].edge.subdivideToThreshold(subdivision.epsilon);
+
+    // subdivision.getInnerFaces().forEach(f => {
+    //     f.edge.getCycle().forEach(e => {
+    //         e.bisect()
+    //     })
+    // })
+
+    // subdivision.getInnerFaces().forEach(f => {
+    //     console.log(f)
+    //     f.edge.subdivideToThreshold(subdivision.epsilon)
+    // })
+
     mapFromDCEL(subdivision, name)
-    // logDCEL(subdivision)
+    logDCEL(subdivision)
 
 })
