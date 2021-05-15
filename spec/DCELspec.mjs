@@ -14,7 +14,6 @@ describe("buildFromGeoJSON() sets all required properties for all", function () 
     return files;
   });
   const testFiles = filesInDir.filter((f) => f.substr(-5, f.length) === ".json");
-  console.log(testFiles);
 
   testFiles.forEach((file) => {
     const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
