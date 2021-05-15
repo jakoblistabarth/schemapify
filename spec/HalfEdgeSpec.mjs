@@ -65,6 +65,24 @@ describe("getAngle()", function () {
   });
 });
 
+describe("getCycle()", function () {
+  it("returns the correct number of edges for square", function () {
+    const json = JSON.parse(readFileSync(resolve("assets/data/square.json"), "utf8"));
+    const dcel = DCEL.buildFromGeoJSON(json);
+
+    expect(dcel.getInnerFaces()[0].edge.getCycle().length).toBe(4);
+    expect(dcel.outerFace.edge.getCycle().length).toBe(4);
+  });
+
+  it("returns the correct number of edges for a triangle", function () {
+    const json = JSON.parse(readFileSync(resolve("assets/data/triangle.json"), "utf8"));
+    const dcel = DCEL.buildFromGeoJSON(json);
+
+    expect(dcel.getInnerFaces()[0].edge.getCycle().length).toBe(3);
+    expect(dcel.outerFace.edge.getCycle().length).toBe(3);
+  });
+});
+
 describe("bisect()", function () {
   it("on one edge of a square results in 5 linked outer halfEdges", function () {
     const plgn1 = JSON.parse(

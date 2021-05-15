@@ -37,10 +37,7 @@ class HalfEdge {
   }
 
   getAngle() {
-    const vector = [
-      this.twin.tail.lng - this.tail.lng,
-      this.twin.tail.lat - this.tail.lat,
-    ];
+    const vector = [this.twin.tail.lng - this.tail.lng, this.twin.tail.lat - this.tail.lat];
     const angle = Math.atan2(vector[1], vector[0]);
     return angle < 0 ? angle + 2 * Math.PI : angle;
   }

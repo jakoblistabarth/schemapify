@@ -140,36 +140,13 @@ class Dcel {
 
     // TODO: sort edges everytime a new edge is pushed to vertex.edges
     Object.values(subdivision.vertices).forEach((vertex) => {
-      //  sort the half-edges whose tail vertex is that endpoint in clockwise order.
+      // sort the half-edges whose tail vertex is that endpoint in clockwise order.
+      // own words: sort all outgoing edges of current point in clockwise order
       vertex.sortEdges();
 
       // For every pair of half-edges e1, e2 in clockwise order, assign e1->twin->next = e2 and e2->prev = e1->twin.
       vertex.edges.forEach((e1, idx) => {
         const e2 = vertex.edges[(idx + 1) % vertex.edges.length];
-        if (false && vertex.lng === 2 && vertex.lat === 2) {
-          console.log(
-            `${e1.twin.uuid.substring(0, 5)}.next = ${e2.uuid.substring(0, 5)}`
-          );
-          console.log(
-            `${e2.uuid.substring(0, 5)}.prev = ${e1.twin.uuid.substring(0, 5)}`
-          );
-        }
-
-        e1.twin.next = e2;
-        e2.prev = e1.twin;
-      });
-
-      // do permutations
-      vertex.edges.reverse().forEach((e2, idx) => {
-        const e1 = vertex.edges[(idx + 1) % vertex.edges.length];
-        if (false && vertex.lng === 2 && vertex.lat === 2) {
-          console.log(
-            `${e1.twin.uuid.substring(0, 5)}.next = ${e2.uuid.substring(0, 5)}`
-          );
-          console.log(
-            `${e2.uuid.substring(0, 5)}.prev = ${e1.twin.uuid.substring(0, 5)}`
-          );
-        }
 
         e1.twin.next = e2;
         e2.prev = e1.twin;
@@ -186,19 +163,19 @@ class Dcel {
       let leftFace;
       multiPolygons.forEach((polygon) =>
         polygon.forEach((ring, idx) => {
-          let exteriorRing = idx == 0 ? true : false;
           const [firstPoint, secondPoint] = ring;
-          const edge = subdivision.halfEdges.find((edge) => {
+          const edge = subdivision.halfEdges.find((e) => {
             return (
-              edge.tail.lng === firstPoint[0] &&
-              edge.tail.lat === firstPoint[1] &&
-              edge.twin.tail.lng === secondPoint[0] &&
-              edge.twin.tail.lat === secondPoint[1]
+              e.tail.lng === firstPoint[0] &&
+              e.tail.lat === firstPoint[1] &&
+              e.twin.tail.lng === secondPoint[0] &&
+              e.twin.tail.lat === secondPoint[1]
             );
           });
 
           // TODO: set face for twin edges of interior rings
-          if (exteriorRing) {
+          if (idx == 0) {
+            // only for exterior ring
             leftFace = subdivision.makeFace(feature.properties);
             edge.getCycle().forEach((e) => (e.face = leftFace));
             leftFace.edge = edge;
