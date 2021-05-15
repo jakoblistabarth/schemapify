@@ -61,12 +61,9 @@ export function mapFromDCEL(dcel, name) {
       const uuid = feature.properties.uuid;
       const v = feature.geometry.coordinates;
       return L.circleMarker(latlng, geojsonMarkerOptions).bindTooltip(`
-                    <span class="material-icons">radio_button_checked</span> ${uuid.substring(
-                      0,
-                      5
-                    )}<br>
-                    (${v[0]}/${v[1]})
-                `);
+        <span class="material-icons">radio_button_checked</span> ${uuid.substring(0, 5)}
+        (${v[0]}/${v[1]})
+    `);
     },
     onEachFeature: onEachFeature,
   });
@@ -107,10 +104,7 @@ export function mapFromDCEL(dcel, name) {
             <table>
             <tr>
                 <td><span class="material-icons">highlight_alt</span> </td>
-                <td><strong>${layer.feature.properties.uuid.substring(
-                  0,
-                  5
-                )}</strong></td>
+                <td><strong>${layer.feature.properties.uuid.substring(0, 5)}</strong></td>
             </tr>
             ${properties}
             </table>
@@ -169,9 +163,7 @@ export function mapFromDCEL(dcel, name) {
                     )}`,
         twin: `
                     <span class="material-icons">rotate_left</span>
-                    ${e.twin.uuid.substring(0, 5)} (${e.twin.tail.lng}/${
-          e.twin.tail.lat
-        })
+                    ${e.twin.uuid.substring(0, 5)} (${e.twin.tail.lng}/${e.twin.tail.lat})
                     <span class="material-icons">arrow_forward</span>
                     (${e.tail.lng}/${e.tail.lat})
                     <span class="material-icons">highlight_alt</span> ${e.twin.face?.uuid.substring(
