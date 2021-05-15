@@ -52,7 +52,9 @@ describe("sortEdges()", function () {
 
   it("sorts outgoing edges of all vertices of 2 adjacent triangles in clockwise order", function () {
     let dcel;
-    const json = JSON.parse(readFileSync(resolve("assets/data/2triangle-adjacent.json"), "utf8"));
+    const json = JSON.parse(
+      readFileSync(resolve("assets/data/shapes/2triangle-adjacent.json"), "utf8")
+    );
     dcel = DCEL.buildFromGeoJSON(json);
 
     Object.values(dcel.vertices).forEach((vertex) => {
@@ -63,7 +65,9 @@ describe("sortEdges()", function () {
 
   it("sorts outgoing edges of all vertices of 2 adjacent squares in clockwise order", function () {
     let dcel;
-    const json = JSON.parse(readFileSync(resolve("assets/data/2plgn-adjacent.json"), "utf8"));
+    const json = JSON.parse(
+      readFileSync(resolve("assets/data/shapes/2plgn-adjacent.json"), "utf8")
+    );
     dcel = DCEL.buildFromGeoJSON(json);
 
     Object.values(dcel.vertices).forEach((vertex) => {
@@ -74,7 +78,7 @@ describe("sortEdges()", function () {
 
   it("sorts outgoing edges of all vertices of 3 adjacent polygons in clockwise order", function () {
     let dcel;
-    const json = JSON.parse(readFileSync(resolve("assets/data/3plgn-complex.json"), "utf8"));
+    const json = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn-complex.json"), "utf8"));
     dcel = DCEL.buildFromGeoJSON(json);
 
     Object.values(dcel.vertices).forEach((vertex) => {

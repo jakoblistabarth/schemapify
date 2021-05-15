@@ -7,7 +7,7 @@ describe("A DCEL of a single triangle with one triangular hole", function () {
 
   beforeEach(function () {
     const polygon = JSON.parse(
-      readFileSync(resolve("assets/data/triangle-hole.json"), "utf8")
+      readFileSync(resolve("assets/data/shapes/triangle-hole.json"), "utf8")
     );
     dcel = DCEL.buildFromGeoJSON(polygon);
   });

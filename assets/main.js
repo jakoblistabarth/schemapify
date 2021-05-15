@@ -2,20 +2,21 @@ import DCEL from "./lib/dcel/Dcel.mjs";
 import { logDCEL, mapFromDCEL } from "./lib/dcel/Utilities.js";
 
 const tests = [
-  // 'assets/data/ne_110m_africa_admin0.json',
-  // 'assets/data/nuts1-ger-simple.json',
-  "assets/data/AUT_adm1.json",
-  // 'assets/data/central-austria.json',
-  // 'assets/data/square.json',
-  // 'assets/data/square-islands.json',
-  // 'assets/data/square-hole.json',
-  // 'assets/data/triangle-hole.json',
-  // 'assets/data/2triangle-adjacent.json',
-  // 'assets/data/2plgn.json',
-  // 'assets/data/2plgn-adjacent.json',
-  "assets/data/2plgn-islands.json",
-  // 'assets/data/3plgn.json',
-  // 'assets/data/3plgn-complex.json'
+  // 'assets/data/geodata/ne_110m_africa_admin0.json',
+  // 'assets/data/geodata/nuts1-ger-simple.json',
+  // "assets/data/geodata/AUT_adm1.json",
+  // "assets/data/geodata/central-austria.json",
+  "assets/data/shapes/square.json",
+  // 'assets/data/shapes/square-islands.json',
+  // "assets/data/shapes/square-hole.json",
+  "assets/data/shapes/triangle.json",
+  // "assets/data/shapes/triangle-hole.json",
+  // "assets/data/shapes/2triangle-adjacent.json",
+  // "assets/data/shapes/2plgn.json",
+  // "assets/data/shapes/2plgn-adjacent.json",
+  // "assets/data/shapes/2plgn-islands.json",
+  // 'assets/data/shapes/3plgn.json',
+  "assets/data/shapes/3plgn-complex.json",
 ];
 
 async function getJSON(path) {

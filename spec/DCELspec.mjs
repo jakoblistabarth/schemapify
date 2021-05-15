@@ -1,12 +1,51 @@
-import { readFileSync } from "fs";
+import { readFileSync, readdirSync } from "fs";
 import { resolve } from "path";
 import DCEL from "../assets/lib/dcel/Dcel.mjs";
 
+describe("buildFromGeoJSON() sets all required properties for all", function () {
+  const dir = "assets/data/shapes";
+
+  const filesInDir = readdirSync(dir, function (err, files) {
+    //handling error
+    if (err) {
+      return console.log("Unable to scan directory: " + err);
+    }
+    //listing all files using forEach
+    return files;
+  });
+  const testFiles = filesInDir.filter((f) => f.substr(-5, f.length) === ".json");
+  console.log(testFiles);
+
+  testFiles.forEach((file) => {
+    const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
+    let dcel = DCEL.buildFromGeoJSON(json);
+
+    it("vertices", function () {
+      const vertices = Object.values(dcel.vertices)
+        .map((vertex) => Object.values(vertex).every((x) => typeof x !== "undefined"))
+        .every((x) => x === true);
+      expect(vertices).toBe(true);
+    });
+
+    it("halfEdges", function () {
+      const halfEdges = dcel.halfEdges
+        .map((halfEdge) => Object.values(halfEdge).every((x) => typeof x !== "undefined"))
+        .every((x) => x === true);
+      expect(halfEdges).toBe(true);
+    });
+
+    it("faces", function () {
+      const faces = dcel.faces
+        .map((face) => Object.values(face).every((x) => typeof x !== "undefined"))
+        .every((x) => x === true);
+      expect(faces).toBe(true);
+    });
+  });
+});
+
 describe("A DCEL of 2 adjacent squares", function () {
-  const plgn2 = JSON.parse(
-    readFileSync(resolve("assets/data/2plgn-adjacent.json"), "utf8")
-  );
-  let dcel = DCEL.buildFromGeoJSON(plgn2);
+  const json = JSON.parse(readFileSync(resolve("assets/data/shapes/2plgn-adjacent.json"), "utf8"));
+  let dcel = DCEL.buildFromGeoJSON(json);
 
   it("has 1 outerface", function () {
     expect(dcel.outerFace).toEqual(jasmine.any(Object));
@@ -39,10 +78,8 @@ describe("A DCEL of 2 adjacent squares", function () {
 });
 
 describe("A DCEL of 3 adjacent squares", function () {
-  const plgn3 = JSON.parse(
-    readFileSync(resolve("assets/data/3plgn.json"), "utf8")
-  );
-  let dcel = DCEL.buildFromGeoJSON(plgn3);
+  const json = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn.json"), "utf8"));
+  let dcel = DCEL.buildFromGeoJSON(json);
 
   it("has 1 outerface", function () {
     expect(dcel.outerFace).toEqual(jasmine.any(Object));
@@ -71,15 +108,11 @@ describe("A DCEL of 3 adjacent squares", function () {
 
 describe("getBbox()", function () {
   it("returns the correct boundingbox of a given dcel", function () {
-    const plgn1 = JSON.parse(
-      readFileSync(resolve("assets/data/square.json"), "utf8")
-    );
+    const plgn1 = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
     const plgn2 = JSON.parse(
-      readFileSync(resolve("assets/data/2plgn-adjacent.json"), "utf8")
+      readFileSync(resolve("assets/data/shapes/2plgn-adjacent.json"), "utf8")
     );
-    const plgn3 = JSON.parse(
-      readFileSync(resolve("assets/data/3plgn.json"), "utf8")
-    );
+    const plgn3 = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn.json"), "utf8"));
 
     let bboxPlgn1 = DCEL.buildFromGeoJSON(plgn1).getBbox();
     let bboxPlgn2 = DCEL.buildFromGeoJSON(plgn2).getBbox();
@@ -93,12 +126,8 @@ describe("getBbox()", function () {
 
 describe("getDiameter()", function () {
   it("returns the correct diameter", function () {
-    const plgn1 = JSON.parse(
-      readFileSync(resolve("assets/data/square.json"), "utf8")
-    );
-    const plgn3 = JSON.parse(
-      readFileSync(resolve("assets/data/3plgn.json"), "utf8")
-    );
+    const plgn1 = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
+    const plgn3 = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn.json"), "utf8"));
 
     expect(DCEL.buildFromGeoJSON(plgn1).getDiameter()).toEqual(2);
     expect(DCEL.buildFromGeoJSON(plgn3).getDiameter()).toEqual(2);

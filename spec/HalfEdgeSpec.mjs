@@ -67,7 +67,7 @@ describe("getAngle()", function () {
 
 describe("getCycle()", function () {
   it("returns the correct number of edges for square", function () {
-    const json = JSON.parse(readFileSync(resolve("assets/data/square.json"), "utf8"));
+    const json = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(json);
 
     expect(dcel.getInnerFaces()[0].edge.getCycle().length).toBe(4);
@@ -75,7 +75,7 @@ describe("getCycle()", function () {
   });
 
   it("returns the correct number of edges for a triangle", function () {
-    const json = JSON.parse(readFileSync(resolve("assets/data/triangle.json"), "utf8"));
+    const json = JSON.parse(readFileSync(resolve("assets/data/shapes/triangle.json"), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(json);
 
     expect(dcel.getInnerFaces()[0].edge.getCycle().length).toBe(3);
@@ -83,30 +83,79 @@ describe("getCycle()", function () {
   });
 });
 
-describe("bisect()", function () {
+xdescribe("bisect()", function () {
   it("on one edge of a square results in 5 linked outer halfEdges", function () {
-    const plgn1 = JSON.parse(
-      readFileSync(resolve("assets/data/square.json"), "utf8")
-    );
+    const plgn1 = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(plgn1);
-    dcel.getFaces()[1].edge.bisect();
+    dcel.getInnerFaces()[0].edge.bisect();
 
     // expect(dcel.outerFace.getEdges().length).toBe(5)
-    expect(dcel.getFaces()[1].edge.twin.face.getEdges().length).toBe(5);
+    expect(dcel.getInnerFaces()[0].edge.twin.face.getEdges().length).toBe(5);
     // expect(dcel.outerFace.getEdges(false).length).toBe(5)
-    expect(dcel.getFaces()[1].edge.twin.face.getEdges(false).length).toBe(5);
+    expect(dcel.getInnerFaces()[0].edge.twin.face.getEdges(false).length).toBe(5);
   });
 
-  it("on one edge of a square results in 5 linked inner halfEdges", function () {
-    const plgn1 = JSON.parse(
-      readFileSync(resolve("assets/data/square.json"), "utf8")
-    );
+  it("on one outer edge of a square results in 5 linked inner halfEdges", function () {
+    const plgn1 = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(plgn1);
     dcel.outerFace.edge.bisect();
 
-    expect(dcel.getFaces()[1].getEdges().length).toBe(5);
+    expect(dcel.getFaces().length).toBe(2);
+    expect(dcel.halfEdges.length).toBe(10);
+
+    expect(dcel.getInnerFaces()[0].getEdges().length).toBe(5);
     expect(dcel.outerFace.edge.twin.face.getEdges().length).toBe(5);
-    expect(dcel.getFaces()[1].getEdges(false).length).toBe(5);
+    expect(dcel.getInnerFaces()[0].getEdges(false).length).toBe(5);
     expect(dcel.outerFace.edge.twin.face.getEdges(false).length).toBe(5);
+  });
+
+  it("on one inneredge of a square results in 5 linked outer halfEdges", function () {
+    const plgn1 = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
+    const dcel = DCEL.buildFromGeoJSON(plgn1);
+    dcel.getInnerFaces()[0].edge.bisect();
+
+    expect(dcel.getFaces().length).toBe(2);
+    expect(dcel.halfEdges.length).toBe(10);
+
+    expect(dcel.getInnerFaces()[0].edge.twin.face.getEdges().length).toBe(5);
+    expect(dcel.outerFace.edge.face.getEdges().length).toBe(5);
+    expect(dcel.getInnerFaces()[0].edge.twin.face.getEdges(false).length).toBe(5);
+    expect(dcel.outerFace.edge.face.getEdges(false).length).toBe(5);
+  });
+
+  it("on the 1st outer edge of the first of 2 adjacent triangles results in 4 and 3 linked inner and 5 linked outer halfEdges", function () {
+    const adjTriangles = JSON.parse(
+      readFileSync(resolve("assets/data/shapes/2triangle-adjacent.json"), "utf8")
+    );
+    const dcel = DCEL.buildFromGeoJSON(adjTriangles);
+    dcel.getInnerFaces()[0].getEdges()[1].bisect();
+
+    expect(dcel.getFaces().length).toBe(3);
+    expect(dcel.halfEdges.length).toBe(12);
+
+    expect(dcel.getInnerFaces()[0].getEdges().length).toBe(4);
+    expect(dcel.getInnerFaces()[0].getEdges(false).length).toBe(4);
+    expect(dcel.getInnerFaces()[1].getEdges().length).toBe(3);
+    expect(dcel.getInnerFaces()[1].getEdges(false).length).toBe(3);
+    expect(dcel.outerFace.edge.face.getEdges().length).toBe(5);
+    expect(dcel.outerFace.edge.face.getEdges(false).length).toBe(5);
+  });
+
+  it("on the 2nd outer edge of the first of 2 adjacent triangles results in 4 and 3 linked inner and 5 linked outer halfEdges", function () {
+    const adjTriangles = JSON.parse(
+      readFileSync(resolve("assets/data/shapes/2triangle-adjacent.json"), "utf8")
+    );
+    const dcel = DCEL.buildFromGeoJSON(adjTriangles);
+    dcel.getInnerFaces()[0].getEdges()[2].bisect();
+
+    expect(dcel.getFaces().length).toBe(3);
+    expect(dcel.halfEdges.length).toBe(12);
+
+    expect(dcel.getInnerFaces()[0].getEdges().length).toBe(4);
+    expect(dcel.getInnerFaces()[0].getEdges(false).length).toBe(4);
+    expect(dcel.getInnerFaces()[1].getEdges().length).toBe(3);
+    expect(dcel.getInnerFaces()[1].getEdges(false).length).toBe(3);
+    expect(dcel.outerFace.edge.face.getEdges().length).toBe(5);
+    expect(dcel.outerFace.edge.face.getEdges(false).length).toBe(5);
   });
 });
