@@ -21,9 +21,11 @@ class Dcel {
   }
 
   makeHalfEdge(tail, head) {
-    const existingHalfEdge = this.halfEdges.find(
-      (edge) => tail == edge.tail && edge.twin.tail == head
-    );
+    const existingHalfEdge = this.halfEdges.find((edge) => {
+      // console.log(edge.tail, edge.twin.tail);
+      // console.log(edge.tail);
+      return tail == edge.tail && edge.twin.tail == head;
+    });
     if (existingHalfEdge) return existingHalfEdge;
 
     const halfEdge = new HalfEdge(tail, this);
@@ -82,7 +84,7 @@ class Dcel {
       new Vertex(bbox[0], bbox[3]),
     ];
 
-    const diameter = Math.max(
+    return Math.max(
       ...[
         // TODO: refactor this – only two sides necessary?
         a.getDistance(b),
@@ -91,13 +93,19 @@ class Dcel {
         d.getDistance(a),
       ]
     );
-
-    return diameter;
   }
 
   findVertex(lng, lat) {
     const key = Vertex.getKey(lng, lat);
     return this.vertices[key];
+  }
+
+  removeHalfEdge(edge) {
+    const idx = this.halfEdges.indexOf(edge);
+    if (idx > -1) {
+      this.halfEdges.splice(idx, 1);
+    }
+    return this.halfEdges;
   }
 
   static buildFromGeoJSON(geoJSON) {

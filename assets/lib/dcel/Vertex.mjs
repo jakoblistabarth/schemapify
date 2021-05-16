@@ -28,6 +28,14 @@ class Vertex {
     const c = Math.sqrt(a * a + b * b);
     return c;
   }
+
+  removeIncidentEdge(edge) {
+    const idx = this.edges.indexOf(edge);
+    if (idx > -1) {
+      this.edges.splice(idx, 1);
+    }
+    return this.edges;
+  }
 }
 
 export default Vertex;

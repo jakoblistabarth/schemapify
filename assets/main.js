@@ -6,7 +6,7 @@ const tests = [
   // 'assets/data/geodata/nuts1-ger-simple.json',
   // "assets/data/geodata/AUT_adm1.json",
   // "assets/data/geodata/central-austria.json",
-  "assets/data/shapes/square.json",
+  // "assets/data/shapes/square.json",
   // 'assets/data/shapes/square-islands.json',
   // "assets/data/shapes/square-hole.json",
   "assets/data/shapes/triangle.json",
@@ -15,8 +15,8 @@ const tests = [
   // "assets/data/shapes/2plgn.json",
   // "assets/data/shapes/2plgn-adjacent.json",
   // "assets/data/shapes/2plgn-islands.json",
-  // 'assets/data/shapes/3plgn.json',
-  "assets/data/shapes/3plgn-complex.json",
+  // "assets/data/shapes/3plgn.json",
+  // "assets/data/shapes/3plgn-complex.json",
 ];
 
 async function getJSON(path) {
@@ -29,18 +29,22 @@ tests.forEach(async (test) => {
   const name = test.slice(test.lastIndexOf("/") + 1, -5);
 
   const subdivision = DCEL.buildFromGeoJSON(data);
+  console.log(name, "-----");
+  const e = subdivision.getInnerFaces()[0].edge.getCycle()[2];
+  console.log("bisected edge:", e.uuid);
+  e.bisect();
 
-  // subdivision.getInnerFaces().forEach(f => {
-  //     f.edge.getCycle().forEach(e => {
-  //         e.bisect()
-  //     })
-  // })
+  // subdivision.getInnerFaces().forEach((f) => {
+  //   f.edge.getCycle().forEach((e) => {
+  //     e.bisect();
+  //   });
+  // });
 
-  // subdivision.getInnerFaces().forEach(f => {
-  //     console.log(f)
-  //     f.edge.subdivideToThreshold(subdivision.epsilon)
-  // })
+  // subdivision.getInnerFaces().forEach((f) => {
+  //   console.log(f);
+  //   f.edge.subdivideToThreshold(subdivision.epsilon);
+  // });
 
-  mapFromDCEL(subdivision, name);
   logDCEL(subdivision);
+  mapFromDCEL(subdivision, name);
 });

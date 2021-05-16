@@ -56,34 +56,64 @@ class HalfEdge {
     return [mx, my];
   }
 
+  remove() {
+    this.tail.removeIncidentEdge(this);
+    this.dcel.removeHalfEdge(this);
+  }
+
   bisect() {
-    const [x, y] = this.getMidpoint();
-    const a = this;
-    const b = this.next;
+    const e = this;
+    const et = e.twin;
+    const f1 = e.face;
+    const f2 = et.face;
 
-    const newVertex = this.dcel.makeVertex(x, y);
+    const a = e.next;
+    const b = e.prev;
+    const c = et.next;
+    const d = et.prev;
 
-    const a_ = this.dcel.makeHalfEdge(newVertex, b.tail);
-    a_.next = b;
-    a_.prev = a;
-    a.next = a_;
-    b.prev = a_;
-    newVertex.incidentEdge = a_;
+    const [x, y] = e.getMidpoint();
+    const N = this.dcel.makeVertex(x, y);
 
-    a.twin.tail = newVertex;
-    const a_t = this.dcel.makeHalfEdge(b.tail, newVertex);
-    a_t.next = a.twin;
-    a_t.prev = b.twin;
-    a.twin.prev = a_t;
-    b.twin.next = a_t;
+    const et_ = this.dcel.makeHalfEdge(N, e.tail);
+    const et__ = this.dcel.makeHalfEdge(et.tail, N);
+    N.edges.push(et_);
+    N.edges.sort();
+    et_.next = c;
+    et_.prev = et__;
+    et_.face = f2;
 
-    a_t.twin = a_;
-    a_.twin = a_t;
+    et__.next = et_;
+    et__.prev = d;
+    et__.face = f2;
 
-    a_.face = b.face;
-    a_.twin.face = b.twin.face;
+    et.prev.next = et__;
+    et.next.prev = et_;
+    et.remove();
 
-    return a_;
+    const e_ = this.dcel.makeHalfEdge(e.tail, N);
+    const e__ = this.dcel.makeHalfEdge(N, et.tail);
+    N.edges.push(e__);
+    N.edges.sort();
+    e_.next = e__;
+    e_.prev = b;
+    e_.face = f1;
+
+    e__.next = a;
+    e__.prev = e_;
+    e__.face = f1;
+
+    b.next = e_;
+    a.prev = e__;
+
+    et_.twin = e_;
+    e_.twin = et_;
+    et__.twin = e__;
+    e__.twin = et__;
+
+    e.remove();
+
+    return e_;
   }
 
   subdivideToThreshold(threshold) {

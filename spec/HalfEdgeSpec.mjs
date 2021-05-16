@@ -83,7 +83,7 @@ describe("getCycle()", function () {
   });
 });
 
-xdescribe("bisect()", function () {
+describe("bisect()", function () {
   it("on one edge of a square results in 5 linked outer halfEdges", function () {
     const plgn1 = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(plgn1);
