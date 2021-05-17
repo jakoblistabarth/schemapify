@@ -9,7 +9,7 @@ describe("buildFromGeoJSON() for simple shapes sets all required properties for 
 
   testFiles.forEach((file) => {
     const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-    let dcel = DCEL.buildFromGeoJSON(json);
+    const dcel = DCEL.buildFromGeoJSON(json);
 
     checkIfEntitiesComplete(dcel);
   });
@@ -23,7 +23,7 @@ describe("buildFromGeoJSON() for geoData sets all required properties for all", 
 
   testFiles.forEach((file) => {
     const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-    let dcel = DCEL.buildFromGeoJSON(json);
+    const dcel = DCEL.buildFromGeoJSON(json);
 
     checkIfEntitiesComplete(dcel);
   });
@@ -31,26 +31,27 @@ describe("buildFromGeoJSON() for geoData sets all required properties for all", 
 
 describe("buildFromGeoJSON() creates only complete cycles", function () {
   const dir = "assets/data/shapes";
-  let testFiles = getTestFiles(dir);
+  const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
     const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-    let dcel = DCEL.buildFromGeoJSON(json);
+    const dcel = DCEL.buildFromGeoJSON(json);
 
+    const cycles = [];
     dcel.getFaces().forEach((f) => {
-      it("for all faces in counter clockwise direction", function () {
-        expect(f.getEdges()).nothing();
-      });
-      it("for all faces in clockwise direction", function () {
-        expect(f.getEdges(false)).nothing();
-      });
+      cycles.push(f.getEdges());
+      cycles.push(f.getEdges(false));
+    });
+
+    it("with complete cycles for all faces in counter-clockwise and clockwise direction", function () {
+      expect(cycles).nothing();
     });
   });
 });
 
 describe("A DCEL of 2 adjacent squares", function () {
   const json = JSON.parse(readFileSync(resolve("assets/data/shapes/2plgn-adjacent.json"), "utf8"));
-  let dcel = DCEL.buildFromGeoJSON(json);
+  const dcel = DCEL.buildFromGeoJSON(json);
 
   it("has 1 outerface", function () {
     expect(dcel.outerFace).toEqual(jasmine.any(Object));
@@ -84,7 +85,7 @@ describe("A DCEL of 2 adjacent squares", function () {
 
 describe("A DCEL of 3 adjacent squares", function () {
   const json = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn.json"), "utf8"));
-  let dcel = DCEL.buildFromGeoJSON(json);
+  const dcel = DCEL.buildFromGeoJSON(json);
 
   it("has 1 outerface", function () {
     expect(dcel.outerFace).toEqual(jasmine.any(Object));

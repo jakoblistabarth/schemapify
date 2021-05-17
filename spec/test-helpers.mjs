@@ -32,4 +32,9 @@ export function checkIfEntitiesComplete(dcel) {
     );
     expect(faces).not.toContain(false);
   });
+
+  it("outerface", function () {
+    const outerFace = Object.values(dcel.outerFace).every((x) => typeof x !== "undefined");
+    expect(outerFace).not.toContain(false);
+  });
 }

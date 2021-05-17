@@ -29,6 +29,7 @@ class Dcel {
     const halfEdge = new HalfEdge(tail, this);
     this.halfEdges.push(halfEdge);
     tail.edges.push(halfEdge);
+    tail.edges.sort();
     return halfEdge;
   }
 
