@@ -29,6 +29,8 @@ describe("A DCEL of a single square", function () {
   it("has 4 linked outer edges", function () {
     expect(dcel.outerFace.getEdges().length).toBe(4);
     expect(dcel.faces[1].edge.twin.face.getEdges().length).toBe(4);
+    expect(dcel.outerFace.getEdges(false).length).toBe(4);
+    expect(dcel.faces[1].edge.twin.face.getEdges(false).length).toBe(4);
   });
 
   it("has 4 linked inner edges", function () {

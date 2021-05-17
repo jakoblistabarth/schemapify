@@ -22,9 +22,7 @@ class Dcel {
 
   makeHalfEdge(tail, head) {
     const existingHalfEdge = this.halfEdges.find((edge) => {
-      // console.log(edge.tail, edge.twin.tail);
-      // console.log(edge.tail);
-      return tail == edge.tail && edge.twin.tail == head;
+      return tail == edge.tail && edge.twin?.tail == head; // TODO: check why .twin is only not defined in bisect()
     });
     if (existingHalfEdge) return existingHalfEdge;
 

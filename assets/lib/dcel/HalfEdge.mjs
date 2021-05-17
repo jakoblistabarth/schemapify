@@ -92,7 +92,7 @@ class HalfEdge {
     et.remove();
 
     const e_ = this.dcel.makeHalfEdge(e.tail, N);
-    const e__ = this.dcel.makeHalfEdge(N, et.tail);
+    const e__ = this.dcel.makeHalfEdge(N, a.tail);
     N.edges.push(e__);
     N.edges.sort();
     e_.next = e__;
