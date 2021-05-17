@@ -92,9 +92,35 @@ describe("bisect() on one edge of a triangle results in a complete DCEL", functi
   checkIfEntitiesComplete(dcel);
 });
 
-describe("bisect() results in a DCEL", function () {
+describe("bisect() on geodata results in a DCEL", function () {
+  const dir = "assets/data/geodata";
+  const testFiles = getTestFiles(dir);
+
+  testFiles.forEach((file) => {
+    const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
+    const dcel = DCEL.buildFromGeoJSON(json);
+    dcel
+      .getInnerFaces()[0]
+      .getEdges()
+      .forEach((e) => e.bisect());
+
+    checkIfEntitiesComplete(dcel);
+
+    const cycles = [];
+    dcel.getFaces().forEach((f) => {
+      cycles.push(f.getEdges());
+      cycles.push(f.getEdges(false));
+    });
+
+    it("with complete cycles for all faces in counter-clockwise and clockwise direction", function () {
+      expect(cycles).nothing();
+    });
+  });
+});
+
+describe("bisect() on simple shapes results in a DCEL", function () {
   const dir = "assets/data/shapes";
-  let testFiles = getTestFiles(dir);
+  const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
     const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));

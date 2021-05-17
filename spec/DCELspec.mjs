@@ -19,8 +19,6 @@ describe("buildFromGeoJSON() for geoData sets all required properties for all", 
   const dir = "assets/data/geodata";
   let testFiles = getTestFiles(dir);
 
-  testFiles = testFiles.filter((f) => f !== "nuts1-ger.json"); // TODO: check why not working for nuts1-ger??
-
   testFiles.forEach((file) => {
     const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(json);
