@@ -56,7 +56,7 @@ export function mapFromDCEL(dcel, name) {
     fillOpacity: 1,
   };
 
-  const vertices = L.geoJson(verticesJSON, {
+  const vertexLayer = L.geoJson(verticesJSON, {
     pointToLayer: function (feature, latlng) {
       const uuid = feature.properties.uuid;
       const v = feature.geometry.coordinates;
@@ -85,7 +85,7 @@ export function mapFromDCEL(dcel, name) {
 
   const polygonsJSON = createGeoJSON(polygonFeatures);
 
-  const polygons = L.geoJSON(polygonsJSON, {
+  const polygonLayer = L.geoJSON(polygonsJSON, {
     style: function (feature) {
       return {
         color: "black",
@@ -135,10 +135,16 @@ export function mapFromDCEL(dcel, name) {
   }
 
   function resetHighlight(e) {
-    halfEdges.resetStyle(e.target);
+    edgeLayer.resetStyle(e.target);
   }
 
-  const halfEdgeFeatures = Object.values(dcel.halfEdges).map((e) => {
+  const edges = [];
+  dcel.halfEdges.forEach((halfEdge) => {
+    const idx = edges.indexOf(halfEdge.twin);
+    if (idx < 0) edges.push(halfEdge);
+  });
+
+  const edgeFeatures = edges.map((e) => {
     const a = e.tail;
     const b = e.twin.tail;
 
@@ -153,29 +159,23 @@ export function mapFromDCEL(dcel, name) {
       },
       properties: {
         edge: `
-                    <span class="material-icons">rotate_right</span>
-                    ${e.uuid.substring(0, 5)} (${e.tail.lng}/${e.tail.lat})
-                    <span class="material-icons">arrow_forward</span>
-                    (${e.twin.tail.lng}/${e.twin.tail.lat})
-                    <span class="material-icons">highlight_alt</span> ${e.face?.uuid.substring(
-                      0,
-                      5
-                    )}`,
+          <span class="material-icons">rotate_right</span>
+          ${e.uuid.substring(0, 5)} (${e.tail.lng}/${e.tail.lat})
+          <span class="material-icons">arrow_forward</span>
+          (${e.twin.tail.lng}/${e.twin.tail.lat})
+          <span class="material-icons">highlight_alt</span> ${e.face?.uuid.substring(0, 5)}`,
         twin: `
-                    <span class="material-icons">rotate_left</span>
-                    ${e.twin.uuid.substring(0, 5)} (${e.twin.tail.lng}/${e.twin.tail.lat})
-                    <span class="material-icons">arrow_forward</span>
-                    (${e.tail.lng}/${e.tail.lat})
-                    <span class="material-icons">highlight_alt</span> ${e.twin.face?.uuid.substring(
-                      0,
-                      5
-                    )}`,
+          <span class="material-icons">rotate_left</span>
+          ${e.twin.uuid.substring(0, 5)} (${e.twin.tail.lng}/${e.twin.tail.lat})
+          <span class="material-icons">arrow_forward</span>
+          (${e.tail.lng}/${e.tail.lat})
+          <span class="material-icons">highlight_alt</span> ${e.twin.face?.uuid.substring(0, 5)}`,
       },
     };
   });
 
-  const halfEdgesJSON = createGeoJSON(halfEdgeFeatures);
-  const halfEdges = L.geoJSON(halfEdgesJSON, {
+  const edgesJSON = createGeoJSON(edgeFeatures);
+  const edgeLayer = L.geoJSON(edgesJSON, {
     style: edgeStyle,
     onEachFeature: onEachFeature,
   }).bindTooltip(function (layer) {
@@ -185,10 +185,10 @@ export function mapFromDCEL(dcel, name) {
             `;
   });
 
-  polygons.addTo(DCELMap);
-  halfEdges.addTo(DCELMap);
-  vertices.addTo(DCELMap);
-  DCELMap.fitBounds(vertices.getBounds());
+  polygonLayer.addTo(DCELMap);
+  edgeLayer.addTo(DCELMap);
+  vertexLayer.addTo(DCELMap);
+  DCELMap.fitBounds(polygonLayer.getBounds());
 
   return DCELMap;
 }
