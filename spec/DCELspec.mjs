@@ -17,7 +17,7 @@ describe("buildFromGeoJSON() for simple shapes sets all required properties for 
 
 describe("buildFromGeoJSON() for geoData sets all required properties for all", function () {
   const dir = "assets/data/geodata";
-  let testFiles = getTestFiles(dir);
+  const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
     const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
@@ -27,7 +27,27 @@ describe("buildFromGeoJSON() for geoData sets all required properties for all", 
   });
 });
 
-describe("buildFromGeoJSON() creates only complete cycles", function () {
+describe("buildFromGeoJSON() on geodata creates only complete cycles", function () {
+  const dir = "assets/data/geodata";
+  const testFiles = getTestFiles(dir);
+
+  testFiles.forEach((file) => {
+    const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
+    const dcel = DCEL.buildFromGeoJSON(json);
+
+    const cycles = [];
+    dcel.getFaces().forEach((f) => {
+      cycles.push(f.getEdges());
+      cycles.push(f.getEdges(false));
+    });
+
+    it("with complete cycles for all faces in counter-clockwise and clockwise direction", function () {
+      expect(cycles).nothing();
+    });
+  });
+});
+
+describe("buildFromGeoJSON() on simple shapes creates only complete cycles", function () {
   const dir = "assets/data/shapes";
   const testFiles = getTestFiles(dir);
 

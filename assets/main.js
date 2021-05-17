@@ -30,22 +30,31 @@ tests.forEach(async (test) => {
   const name = test.slice(test.lastIndexOf("/") + 1, -5);
 
   const subdivision = DCEL.buildFromGeoJSON(data);
-  console.log(name, "-----");
-  const e = subdivision.getInnerFaces()[0].edge.getCycle()[2];
-  console.log("bisected edge:", e.uuid);
-  e.bisect();
+  mapFromDCEL(subdivision, name);
+  logDCEL(subdivision);
+
+  subdivision
+    .getInnerFaces()
+    .slice(1, 2)
+    .forEach((f, idx) => {
+      f.edge
+        .getCycle()
+        .slice(0, 1)
+        .forEach((e) => {
+          e.bisect();
+        });
+    });
+
+  subdivision.getInnerFaces().forEach((f) => {
+    f.getEdges().forEach((e) => {
+      console.log(e.tail, e.face.uuid);
+    });
+  });
 
   // subdivision.getInnerFaces().forEach((f) => {
-  //   f.edge.getCycle().forEach((e) => {
-  //     e.bisect();
-  //   });
-  // });
-
-  // subdivision.getInnerFaces().forEach((f) => {
-  //   console.log(f);
-  //   f.edge.subdivideToThreshold(subdivision.epsilon);
+  //   f.getEdges().forEach((e) => e.subdivideToThreshold(subdivision.epsilon));
   // });
 
   logDCEL(subdivision);
-  mapFromDCEL(subdivision, name);
+  mapFromDCEL(subdivision, name + "_bisect");
 });
