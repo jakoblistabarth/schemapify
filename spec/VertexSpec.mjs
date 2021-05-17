@@ -3,6 +3,7 @@ import { resolve } from "path";
 import Vertex from "../assets/lib/dcel/Vertex.mjs";
 import HalfEdge from "../assets/lib/dcel/Halfedge.mjs";
 import DCEL from "../assets/lib/dcel/Dcel.mjs";
+import { getTestFiles } from "./test-helpers.mjs";
 
 describe("getDistance()", function () {
   it("returns the correct distance between 2 points", function () {
@@ -50,40 +51,18 @@ describe("sortEdges()", function () {
     expect(center.edges).toEqual([edgeBottom, edgeLeft, edgeTop, edgeRight]);
   });
 
-  it("sorts outgoing edges of all vertices of 2 adjacent triangles in clockwise order", function () {
-    let dcel;
-    const json = JSON.parse(
-      readFileSync(resolve("assets/data/shapes/2triangle-adjacent.json"), "utf8")
-    );
-    dcel = DCEL.buildFromGeoJSON(json);
+  it("sorts outgoing edges of all vertices in clockwise order", function () {
+    const dir = "assets/data/shapes";
+    const testFiles = getTestFiles(dir);
 
-    Object.values(dcel.vertices).forEach((vertex) => {
-      const angles = vertex.edges.map((e) => e.getAngle());
-      expect(angles.every((v, i, a) => !i || a[i - 1] >= v)).toEqual(true);
-    });
-  });
+    testFiles.forEach((file) => {
+      const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
+      let dcel = DCEL.buildFromGeoJSON(json);
 
-  it("sorts outgoing edges of all vertices of 2 adjacent squares in clockwise order", function () {
-    let dcel;
-    const json = JSON.parse(
-      readFileSync(resolve("assets/data/shapes/2plgn-adjacent.json"), "utf8")
-    );
-    dcel = DCEL.buildFromGeoJSON(json);
-
-    Object.values(dcel.vertices).forEach((vertex) => {
-      const angles = vertex.edges.map((e) => e.getAngle());
-      expect(angles.every((v, i, a) => !i || a[i - 1] >= v)).toEqual(true);
-    });
-  });
-
-  it("sorts outgoing edges of all vertices of 3 adjacent polygons in clockwise order", function () {
-    let dcel;
-    const json = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn-complex.json"), "utf8"));
-    dcel = DCEL.buildFromGeoJSON(json);
-
-    Object.values(dcel.vertices).forEach((vertex) => {
-      const angles = vertex.edges.map((e) => e.getAngle());
-      expect(angles.every((v, i, a) => !i || a[i - 1] >= v)).toEqual(true);
+      Object.values(dcel.vertices).forEach((vertex) => {
+        const angles = vertex.edges.map((e) => e.getAngle());
+        expect(angles.every((v, i, a) => !i || a[i - 1] >= v)).toEqual(true);
+      });
     });
   });
 });

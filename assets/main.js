@@ -5,6 +5,7 @@ const tests = [
   // 'assets/data/geodata/ne_110m_africa_admin0.json',
   // 'assets/data/geodata/nuts1-ger-simple.json',
   // "assets/data/geodata/AUT_adm1.json",
+  // "assets/data/geodata/nuts1-ger.json",
   // "assets/data/geodata/central-austria.json",
   // "assets/data/shapes/square.json",
   // 'assets/data/shapes/square-islands.json',

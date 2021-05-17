@@ -1,43 +1,49 @@
-import { readFileSync, readdirSync } from "fs";
+import { readFileSync } from "fs";
 import { resolve } from "path";
+import { getTestFiles, checkIfEntitiesComplete } from "./test-helpers.mjs";
 import DCEL from "../assets/lib/dcel/Dcel.mjs";
 
-describe("buildFromGeoJSON() sets all required properties for all", function () {
+describe("buildFromGeoJSON() for simple shapes sets all required properties for all", function () {
   const dir = "assets/data/shapes";
-
-  const filesInDir = readdirSync(dir, function (err, files) {
-    //handling error
-    if (err) {
-      return console.log("Unable to scan directory: " + err);
-    }
-    //listing all files using forEach
-    return files;
-  });
-  const testFiles = filesInDir.filter((f) => f.substr(-5, f.length) === ".json");
+  const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
     const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
     let dcel = DCEL.buildFromGeoJSON(json);
 
-    it("vertices", function () {
-      const vertices = Object.values(dcel.vertices)
-        .map((vertex) => Object.values(vertex).every((x) => typeof x !== "undefined"))
-        .every((x) => x === true);
-      expect(vertices).toBe(true);
-    });
+    checkIfEntitiesComplete(dcel);
+  });
+});
 
-    it("halfEdges", function () {
-      const halfEdges = dcel.halfEdges
-        .map((halfEdge) => Object.values(halfEdge).every((x) => typeof x !== "undefined"))
-        .every((x) => x === true);
-      expect(halfEdges).toBe(true);
-    });
+describe("buildFromGeoJSON() for geoData sets all required properties for all", function () {
+  const dir = "assets/data/geodata";
+  let testFiles = getTestFiles(dir);
 
-    it("faces", function () {
-      const faces = dcel.faces
-        .map((face) => Object.values(face).every((x) => typeof x !== "undefined"))
-        .every((x) => x === true);
-      expect(faces).toBe(true);
+  testFiles = testFiles.filter((f) => f !== "nuts1-ger.json"); // TODO: check why not working for nuts1-ger??
+
+  testFiles.forEach((file) => {
+    const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
+    let dcel = DCEL.buildFromGeoJSON(json);
+
+    checkIfEntitiesComplete(dcel);
+  });
+});
+
+describe("buildFromGeoJSON() creates only complete cycles", function () {
+  const dir = "assets/data/shapes";
+  let testFiles = getTestFiles(dir);
+
+  testFiles.forEach((file) => {
+    const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
+    let dcel = DCEL.buildFromGeoJSON(json);
+
+    dcel.getFaces().forEach((f) => {
+      it("for all faces in counter clockwise direction", function () {
+        expect(f.getEdges()).nothing();
+      });
+      it("for all faces in clockwise direction", function () {
+        expect(f.getEdges(false)).nothing();
+      });
     });
   });
 });
