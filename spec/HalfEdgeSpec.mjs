@@ -225,3 +225,31 @@ describe("bisect()", function () {
     expect(dcel.outerFace.edge.face.getEdges(false).length).toBe(5);
   });
 });
+
+describe("subdivideToThreshold()", function () {
+  it("turns an edge of length 2 into 8 edges (threshold factor 0.25)", function () {
+    const json = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
+    const dcel = DCEL.buildFromGeoJSON(json);
+    const edge = dcel.getInnerFaces()[0].edge;
+    dcel.setEpsilon(0.25);
+
+    const halfEdgesBefore = dcel.halfEdges.length;
+    edge.subdivideToThreshold(dcel.epsilon);
+    const halfEdgesAfter = dcel.halfEdges.length;
+    console.log(halfEdgesBefore, halfEdgesAfter);
+
+    expect(halfEdgesAfter).toBe(halfEdgesBefore - 2 + 8 * 2);
+  });
+
+  it("turns an square with sides of length 2 into a dcel with 64 edges (threshold factor 0.25)", function () {
+    const json = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
+    const dcel = DCEL.buildFromGeoJSON(json);
+    dcel.setEpsilon(0.25);
+    dcel
+      .getInnerFaces()[0]
+      .getEdges()
+      .forEach((edge) => edge.subdivideToThreshold(dcel.epsilon));
+
+    expect(dcel.halfEdges.length).toBe(64);
+  });
+});
