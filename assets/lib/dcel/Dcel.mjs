@@ -161,7 +161,8 @@ class Dcel {
     });
 
     // For every cycle, allocate and assign a face structure.
-    geoJSON.features.forEach((feature) => {
+    geoJSON.features.forEach((feature, idx) => {
+      const FID = idx;
       const multiPolygons =
         feature.geometry.type !== "MultiPolygon"
           ? [feature.geometry.coordinates]
@@ -184,10 +185,14 @@ class Dcel {
           if (idx == 0) {
             // only for exterior ring
             leftFace = subdivision.makeFace(feature.properties);
+            leftFace.FID = FID;
+            leftFace.ringType = "exterior";
             edge.getCycle().forEach((e) => (e.face = leftFace));
             leftFace.edge = edge;
           } else {
             const face = subdivision.makeFace(feature.properties);
+            face.FID = FID;
+            face.ringType = "interior";
             edge.getCycle().forEach((e) => (e.face = face));
             face.edge = edge.twin;
             edge.twin.getCycle().forEach((e) => (e.face = leftFace));

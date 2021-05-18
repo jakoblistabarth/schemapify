@@ -1,5 +1,6 @@
 import DCEL from "./lib/dcel/Dcel.mjs";
-import { logDCEL, mapFromDCEL } from "./lib/dcel/Utilities.js";
+import { logDCEL, mapFromDCEL } from "./lib/dcel/Utilities.mjs";
+import { DCELtoGeoJSON } from "./lib/dcel/DCELtoGeoJSON.mjs";
 
 const tests = [
   // 'assets/data/geodata/ne_110m_africa_admin0.json',

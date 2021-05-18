@@ -15,9 +15,10 @@ export function logDCEL(dcel, verbose = false) {
   }
 }
 
-function createGeoJSON(features) {
+export function createGeoJSON(features, name) {
   return {
     type: "FeatureCollection",
+    name: name,
     features: features,
   };
 }
@@ -45,7 +46,7 @@ export function mapFromDCEL(dcel, name) {
     };
   });
 
-  const verticesJSON = createGeoJSON(vertexFeatures);
+  const verticesJSON = createGeoJSON(vertexFeatures, name + "_vertices");
 
   const geojsonMarkerOptions = {
     radius: 2,
@@ -79,11 +80,11 @@ export function mapFromDCEL(dcel, name) {
         type: "Polygon",
         coordinates: [coordinates], // TODO: implement holes
       },
-      properties: { ...featureProperties, uuid: f.uuid },
+      properties: { ...featureProperties, uuid: f.uuid, ringType: f.ringType },
     };
   });
 
-  const polygonsJSON = createGeoJSON(polygonFeatures);
+  const polygonsJSON = createGeoJSON(polygonFeatures, name + "_polygons");
 
   const polygonLayer = L.geoJSON(polygonsJSON, {
     style: function (feature) {
@@ -174,7 +175,7 @@ export function mapFromDCEL(dcel, name) {
     };
   });
 
-  const edgesJSON = createGeoJSON(edgeFeatures);
+  const edgesJSON = createGeoJSON(edgeFeatures, name + "_edges");
   const edgeLayer = L.geoJSON(edgesJSON, {
     style: edgeStyle,
     onEachFeature: onEachFeature,

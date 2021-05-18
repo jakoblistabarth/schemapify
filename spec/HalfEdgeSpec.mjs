@@ -236,7 +236,6 @@ describe("subdivideToThreshold()", function () {
     const halfEdgesBefore = dcel.halfEdges.length;
     edge.subdivideToThreshold(dcel.epsilon);
     const halfEdgesAfter = dcel.halfEdges.length;
-    console.log(halfEdgesBefore, halfEdgesAfter);
 
     expect(halfEdgesAfter).toBe(halfEdgesBefore - 2 + 8 * 2);
   });
