@@ -1,4 +1,5 @@
 import leaflet from "leaflet"; // TODO: load leaflet as module
+import { DCELtoGeoJSON } from "./DCELtoGeoJSON.mjs";
 
 export function logDCEL(dcel, verbose = false) {
   if (!verbose) console.log("DCEL", dcel);
@@ -25,12 +26,14 @@ export function createGeoJSON(features, name) {
 
 export function mapFromDCEL(dcel, name) {
   const grid = document.getElementById("map-grid");
-  let map = document.createElement("div");
+  const map = document.createElement("div");
   map.id = name;
   map.className = "map";
   grid.appendChild(map);
 
-  const DCELMap = L.map(name);
+  const DCELMap = L.map(name, {
+    zoomControl: false,
+  });
   DCELMap.attributionControl.addAttribution(name);
 
   const vertexFeatures = Object.values(dcel.vertices).map((v) => {
@@ -66,10 +69,10 @@ export function mapFromDCEL(dcel, name) {
         (${v[0]}/${v[1]})
     `);
     },
-    onEachFeature: onEachFeature,
+    onEachFeature: onEachEdge,
   });
 
-  const polygonFeatures = dcel.getInnerFaces().map((f) => {
+  const faceFeatures = dcel.getInnerFaces().map((f) => {
     const halfEdges = f.getEdges();
     const featureProperties = f.properties;
     const coordinates = halfEdges.map((e) => [e.tail.lng, e.tail.lat]);
@@ -84,16 +87,16 @@ export function mapFromDCEL(dcel, name) {
     };
   });
 
-  const polygonsJSON = createGeoJSON(polygonFeatures, name + "_polygons");
+  const facesJSON = createGeoJSON(faceFeatures, name + "_polygons");
 
-  const polygonLayer = L.geoJSON(polygonsJSON, {
+  const faceLayer = L.geoJSON(facesJSON, {
     style: function (feature) {
       return {
         color: "black",
         weight: 1,
       };
     },
-    onEachFeature: onEachFeature,
+    onEachFeature: onEachEdge,
   }).bindTooltip(function (layer) {
     const properties = Object.entries(layer.feature.properties)
       .map((elem) => {
@@ -119,10 +122,17 @@ export function mapFromDCEL(dcel, name) {
     };
   }
 
-  function onEachFeature(feature, layer) {
+  function onEachEdge(feature, layer) {
     layer.on({
       mouseover: highlightFeature,
-      mouseout: resetHighlight,
+      mouseout: resetHighlightEdge,
+    });
+  }
+
+  function onEachPolygon(feature, layer) {
+    layer.on({
+      mouseover: highlightFeature,
+      mouseout: resetHighlightPolygon,
     });
   }
 
@@ -135,8 +145,12 @@ export function mapFromDCEL(dcel, name) {
     });
   }
 
-  function resetHighlight(e) {
+  function resetHighlightEdge(e) {
     edgeLayer.resetStyle(e.target);
+  }
+
+  function resetHighlightPolygon(e) {
+    polygonLayer.resetStyle(e.target);
   }
 
   const edges = [];
@@ -178,7 +192,7 @@ export function mapFromDCEL(dcel, name) {
   const edgesJSON = createGeoJSON(edgeFeatures, name + "_edges");
   const edgeLayer = L.geoJSON(edgesJSON, {
     style: edgeStyle,
-    onEachFeature: onEachFeature,
+    onEachFeature: onEachEdge,
   }).bindTooltip(function (layer) {
     return `
             ${layer.feature.properties.twin}<br>
@@ -186,10 +200,60 @@ export function mapFromDCEL(dcel, name) {
             `;
   });
 
-  polygonLayer.addTo(DCELMap);
+  const polygonsJSON = DCELtoGeoJSON(dcel);
+  const polygonLayer = L.geoJSON(polygonsJSON, {
+    style: function (feature) {
+      return {
+        color: "red",
+        weight: 1,
+      };
+    },
+    onEachFeature: onEachPolygon,
+  }).bindTooltip(function (layer) {
+    const properties = Object.entries(layer.feature.properties)
+      .map((elem) => {
+        return `<tr><td>${elem[0]}</td> <td><strong>${elem[1]}</strong></td></tr>`;
+      })
+      .join("");
+
+    return `
+            <table>
+            <tr>
+                <td><span class="material-icons">highlight_alt</span> </td>
+            </tr>
+            ${properties}
+            </table>
+            `;
+  });
+
+  faceLayer.addTo(DCELMap);
   edgeLayer.addTo(DCELMap);
   vertexLayer.addTo(DCELMap);
-  DCELMap.fitBounds(polygonLayer.getBounds());
+  DCELMap.fitBounds(vertexLayer.getBounds());
 
+  function toggleLayer() {
+    if (showPolygons) {
+      polygonLayer.addTo(DCELMap);
+      polygonLayer.bringToBack();
+      faceLayer.remove();
+      facesLabel.classList.remove("active");
+      polygonsLabel.classList.add("active");
+    } else {
+      faceLayer.addTo(DCELMap);
+      faceLayer.bringToBack();
+      polygonLayer.remove();
+      facesLabel.classList.add("active");
+      polygonsLabel.classList.remove("active");
+    }
+  }
+  const toggleBtn = document.querySelector("#layer-toggle");
+  const polygonsLabel = document.querySelector("#polygons-label");
+  const facesLabel = document.querySelector("#faces-label");
+  let showPolygons = toggleBtn.checked ? true : false;
+  toggleLayer();
+  toggleBtn.addEventListener("click", function () {
+    showPolygons = !showPolygons;
+    toggleLayer();
+  });
   return DCELMap;
 }
