@@ -1,12 +1,6 @@
 {
   "type": "FeatureCollection",
   "name": "2triangle-adjacent",
-  "crs": {
-    "type": "name",
-    "properties": {
-      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
-    }
-  },
   "features": [
     {
       "type": "Feature",
@@ -18,10 +12,10 @@
         "coordinates": [
           [
             [
-              [10,0],
-              [10,20],
-              [0,10],
-              [10,0]
+              [10, 0],
+              [10, 20],
+              [0, 10],
+              [10, 0]
             ]
           ]
         ]
@@ -37,10 +31,10 @@
         "coordinates": [
           [
             [
-              [10,20],
-              [10,0],
-              [20,10],
-              [10,20]
+              [10, 20],
+              [10, 0],
+              [20, 10],
+              [10, 20]
             ]
           ]
         ]
