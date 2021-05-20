@@ -132,7 +132,8 @@ class Dcel {
     }, []);
 
     polygons.forEach((polygon) =>
-      polygon.forEach((ring) => {
+      polygon.forEach((ring, idx) => {
+        ring = idx > 0 ? ring.reverse() : ring; // sort clockwise ordered vertices of inner rings (geojson spec) counterclockwise
         const points = ring.slice(0, -1);
 
         points.forEach((tail, idx) => {
@@ -168,9 +169,10 @@ class Dcel {
           ? [feature.geometry.coordinates]
           : feature.geometry.coordinates; // TODO: check in e.g, parseGeoJSON()? if only polygons in Multipolygons
 
-      let leftFace;
+      let outerRingFace;
       multiPolygons.forEach((polygon) =>
         polygon.forEach((ring, idx) => {
+          ring = idx > 0 ? ring.reverse() : ring;
           const [firstPoint, secondPoint] = ring;
           const edge = subdivision.halfEdges.find((e) => {
             return (
@@ -181,21 +183,24 @@ class Dcel {
             );
           });
 
-          // TODO: set face for twin edges of interior rings
-          if (idx == 0) {
-            // only for exterior ring
-            leftFace = subdivision.makeFace(feature.properties);
-            leftFace.FID = FID;
-            leftFace.ringType = "exterior";
-            edge.getCycle().forEach((e) => (e.face = leftFace));
-            leftFace.edge = edge;
+          // TODO: implement holes!
+          if (idx === 0) {
+            // only for outer ring
+            outerRingFace = subdivision.makeFace(feature.properties);
+            // console.log("outerRingFace", outerRingFace);
+            outerRingFace.FID = FID;
+            outerRingFace.ringType = "outer";
+            edge.getCycle().forEach((e) => (e.face = outerRingFace));
+            outerRingFace.edge = edge;
           } else {
-            const face = subdivision.makeFace(feature.properties);
-            face.FID = FID;
-            face.ringType = "interior";
-            edge.getCycle().forEach((e) => (e.face = face));
-            face.edge = edge.twin;
-            edge.twin.getCycle().forEach((e) => (e.face = leftFace));
+            const innerRingFace = subdivision.makeFace(feature.properties);
+            innerRingFace.FID = FID;
+            // console.log("innerRingFace", innerRingFace);
+            innerRingFace.ringType = "inner";
+            // console.log("cc edge", edge);
+            edge.getCycle().forEach((e) => (e.face = innerRingFace));
+            innerRingFace.edge = edge;
+            edge.twin.getCycle().forEach((e) => (e.face = outerRingFace));
           }
         })
       );

@@ -3,20 +3,19 @@ import { logDCEL, mapFromDCEL } from "./lib/dcel/Utilities.mjs";
 import { DCELtoGeoJSON } from "./lib/dcel/DCELtoGeoJSON.mjs";
 
 const tests = [
-  // 'assets/data/geodata/ne_110m_africa_admin0.json',
-  // 'assets/data/geodata/nuts1-ger-simple.json',
+  // "assets/data/geodata/ne_110m_africa_admin0.json",
   // "assets/data/geodata/AUT_adm1.json",
-  // "assets/data/geodata/nuts1-ger.json",
   // "assets/data/geodata/central-austria.json",
-  // "assets/data/shapes/square.json",
-  // 'assets/data/shapes/square-islands.json',
-  // "assets/data/shapes/square-hole.json",
-  "assets/data/shapes/triangle.json",
+  // "assets/data/shapes/triangle.json",
   // "assets/data/shapes/triangle-hole.json",
   // "assets/data/shapes/2triangle-adjacent.json",
+  "assets/data/shapes/square.json",
+  // "assets/data/shapes/square-islands.json",
+  "assets/data/shapes/square-hole.json",
   // "assets/data/shapes/2plgn.json",
   // "assets/data/shapes/2plgn-adjacent.json",
   // "assets/data/shapes/2plgn-islands.json",
+  // "assets/data/shapes/2plgn-islands-hole.json",
   // "assets/data/shapes/3plgn.json",
   // "assets/data/shapes/3plgn-complex.json",
 ];
@@ -31,31 +30,32 @@ tests.forEach(async (test) => {
   const name = test.slice(test.lastIndexOf("/") + 1, -5);
 
   const subdivision = DCEL.buildFromGeoJSON(data);
+
+  const e = subdivision.getInnerFaces()[subdivision.getInnerFaces().length - 1].edge.getCycle()[0];
+
+  console.log("outerFace", subdivision.outerFace);
+  console.log("e", e);
+  console.log("e.face", e.face);
+  console.log("e.twin.face", e.twin.face);
+
   mapFromDCEL(subdivision, name);
   logDCEL(subdivision);
+  // DCELtoGeoJSON(subdivision, name);
 
-  subdivision
-    .getInnerFaces()
-    .slice(1, 2)
-    .forEach((f, idx) => {
-      f.edge
-        .getCycle()
-        .slice(0, 1)
-        .forEach((e) => {
-          e.bisect();
-        });
-    });
-
-  subdivision.getInnerFaces().forEach((f) => {
-    f.getEdges().forEach((e) => {
-      console.log(e.tail, e.face.uuid);
-    });
-  });
+  e.bisect();
 
   // subdivision.getInnerFaces().forEach((f) => {
-  //   f.getEdges().forEach((e) => e.subdivideToThreshold(subdivision.epsilon));
+  //   f.getEdges().forEach((e) => {
+  //     console.log(e.tail, e.face.uuid);
+  //   });
   // });
 
-  logDCEL(subdivision);
+  // subdivision.getInnerFaces().forEach((f) => {
+  //   f.getEdges()
+  //     .slice(0, 1)
+  //     .forEach((e) => e.subdivideToThreshold(subdivision.epsilon));
+  // });
+
+  // logDCEL(subdivision);
   mapFromDCEL(subdivision, name + "_bisect");
 });

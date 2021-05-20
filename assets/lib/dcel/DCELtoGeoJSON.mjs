@@ -23,10 +23,10 @@ export function DCELtoGeoJSON(dcel, name) {
     let idx = 0;
     feature.forEach((ring) => {
       featureProperties = ring.properties;
-      const halfEdges = ring.ringType === "interior" ? ring.getEdges(false) : ring.getEdges();
+      const halfEdges = ring.ringType === "inner" ? ring.getEdges(false) : ring.getEdges();
       const coordinates = halfEdges.map((e) => [e.tail.lng, e.tail.lat]);
       coordinates.push([halfEdges[0].tail.lng, halfEdges[0].tail.lat]);
-      if (ring.ringType === "interior") {
+      if (ring.ringType === "inner") {
         featureCoordinates[idx - 1].push(coordinates);
       } else {
         featureCoordinates.push([coordinates]);

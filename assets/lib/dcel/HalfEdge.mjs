@@ -90,7 +90,6 @@ class HalfEdge {
     et.next.prev = et_;
 
     f2.edge = et_;
-    // if (f2.edge === et) f2.edge = et_;
     et.remove();
 
     const e_ = this.dcel.makeHalfEdge(e.tail, N);
@@ -113,7 +112,6 @@ class HalfEdge {
     e__.twin = et__;
 
     f1.edge = e_;
-    // if (f1.edge === e) f1.edge = e_;
     e.remove();
 
     return e_;

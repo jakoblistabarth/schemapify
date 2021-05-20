@@ -174,15 +174,15 @@ export function mapFromDCEL(dcel, name) {
       },
       properties: {
         edge: `
-          <span class="material-icons">rotate_right</span>
+          <span class="material-icons">rotate_left</span>
           ${e.uuid.substring(0, 5)} (${e.tail.lng}/${e.tail.lat})
           <span class="material-icons">arrow_forward</span>
           (${e.twin.tail.lng}/${e.twin.tail.lat})
           <span class="material-icons">highlight_alt</span> ${e.face?.uuid.substring(0, 5)}`,
         twin: `
-          <span class="material-icons">rotate_left</span>
+          <span class="material-icons">rotate_right</span>
           ${e.twin.uuid.substring(0, 5)} (${e.twin.tail.lng}/${e.twin.tail.lat})
-          <span class="material-icons">arrow_forward</span>
+          <span class="material-icons">arrow_back</span>
           (${e.tail.lng}/${e.tail.lat})
           <span class="material-icons">highlight_alt</span> ${e.twin.face?.uuid.substring(0, 5)}`,
       },
@@ -195,8 +195,8 @@ export function mapFromDCEL(dcel, name) {
     onEachFeature: onEachEdge,
   }).bindTooltip(function (layer) {
     return `
-            ${layer.feature.properties.twin}<br>
-            ${layer.feature.properties.edge}
+            ${layer.feature.properties.edge}<br>
+            ${layer.feature.properties.twin}
             `;
   });
 
