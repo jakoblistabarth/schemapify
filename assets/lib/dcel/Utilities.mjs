@@ -82,7 +82,10 @@ export function mapFromDCEL(dcel, name) {
         type: "Polygon",
         coordinates: [coordinates], // TODO: implement holes
       },
-      properties: { uuid: f.uuid, ringType: f.ringType },
+      properties: {
+        uuid: f.uuid,
+        ringType: f.outerRing != null ? "inner" : "outer",
+      },
     };
   });
 
@@ -157,11 +160,10 @@ export function mapFromDCEL(dcel, name) {
   }
 
   function highlightFeature(e) {
-    var layer = e.target;
-
-    layer.setStyle({
+    var feature = e.target;
+    feature.setStyle({
       weight: 3,
-      fillOpacity: 0.3,
+      fillOpacity: 0.5,
     });
   }
 
@@ -174,6 +176,7 @@ export function mapFromDCEL(dcel, name) {
   }
 
   function resetHighlightPolygon(e) {
+    e.target.bringToBack();
     polygonLayer.resetStyle(e.target);
   }
 

@@ -13,8 +13,8 @@ describe("A DCEL of a single triangle with one triangular hole", function () {
     dcel = DCEL.buildFromGeoJSON(polygon);
   });
 
-  it("has 1 outerface", function () {
-    expect(dcel.outerFace).toEqual(jasmine.any(Object));
+  it("has 1 unbounded face", function () {
+    expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
   });
 
   it("has 3 faces (1 outer, 2 inner) in total", function () {
@@ -29,19 +29,19 @@ describe("A DCEL of a single triangle with one triangular hole", function () {
     expect(dcel.halfEdges.length).toBe(12);
   });
 
-  it("an counterclockwise halfedge of the hole has edges with property ringType 'inner'", function () {
+  it("a counterclockwise halfedge of the hole has edges with a pointer to an outer Ring", function () {
     const innerFaces = dcel.getInnerFaces();
-    const innerRing = innerFaces.find((f) => f.ringType == "inner");
+    const innerRing = innerFaces.find((f) => f.outerRing);
     innerRing.getEdges().forEach((e) => {
-      expect(e.face.ringType).toBe("inner");
+      expect(e.face.outerRing).toBeDefined();
     });
   });
 
-  it("an counterclockwise halfedge of the outer ring has edges face with property ringType 'outer'", function () {
+  it("a counterclockwise halfedge of the outer ring has edges face with no pointer to an outer Ring", function () {
     const innerFaces = dcel.getInnerFaces();
-    const outerRing = innerFaces.find((f) => f.ringType == "outer");
-    outerRing.getEdges().forEach((e) => {
-      expect(e.face.ringType).toBe("outer");
+    const outerRing = innerFaces.find((f) => !f.outerRing);
+    outerRing.edge.getCycle().forEach((e) => {
+      expect(e.face.outerRing).toBe(null);
     });
   });
 });

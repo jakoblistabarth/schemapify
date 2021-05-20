@@ -12,8 +12,8 @@ describe("A DCEL of a single square with one square hole", function () {
     dcel = DCEL.buildFromGeoJSON(polygon);
   });
 
-  it("has 1 outerface", function () {
-    expect(dcel.outerFace).toEqual(jasmine.any(Object));
+  it("has 1 unbounded face", function () {
+    expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
   });
 
   it("has 3 faces (1 outer, 2 inner) in total", function () {

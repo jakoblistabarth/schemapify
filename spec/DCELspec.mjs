@@ -36,7 +36,7 @@ describe("buildFromGeoJSON() on geodata creates only complete cycles", function 
     const dcel = DCEL.buildFromGeoJSON(json);
 
     const cycles = [];
-    dcel.getFaces().forEach((f) => {
+    dcel.getInnerFaces().forEach((f) => {
       cycles.push(f.getEdges());
       cycles.push(f.getEdges(false));
     });
@@ -56,7 +56,7 @@ describe("buildFromGeoJSON() on simple shapes creates only complete cycles", fun
     const dcel = DCEL.buildFromGeoJSON(json);
 
     const cycles = [];
-    dcel.getFaces().forEach((f) => {
+    dcel.getInnerFaces().forEach((f) => {
       cycles.push(f.getEdges());
       cycles.push(f.getEdges(false));
     });
@@ -71,8 +71,8 @@ describe("A DCEL of 2 adjacent squares", function () {
   const json = JSON.parse(readFileSync(resolve("assets/data/shapes/2plgn-adjacent.json"), "utf8"));
   const dcel = DCEL.buildFromGeoJSON(json);
 
-  it("has 1 outerface", function () {
-    expect(dcel.outerFace).toEqual(jasmine.any(Object));
+  it("has 1 unbounded face", function () {
+    expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
   });
 
   it("has 3 faces", function () {
@@ -87,17 +87,12 @@ describe("A DCEL of 2 adjacent squares", function () {
     expect(dcel.halfEdges.length).toBe(14);
   });
 
-  it("has faces with the right amount of edges", function () {
-    const edgeCount = dcel.getFaces().reduce((counter, f) => {
+  it("has inner faces with the right amount of edges", function () {
+    const edgeCount = dcel.getInnerFaces().reduce((counter, f) => {
       counter.push(f.getEdges().length);
       return counter;
     }, []);
-    expect(edgeCount.sort()).toEqual([4, 4, 6].sort());
-  });
-
-  it("has outer Face with 6 linked edges", function () {
-    expect(dcel.outerFace.getEdges().length).toBe(6);
-    expect(dcel.outerFace.edge.twin.face.getEdges().length).toBe(4);
+    expect(edgeCount.sort()).toEqual([4, 4].sort());
   });
 });
 
@@ -105,8 +100,8 @@ describe("A DCEL of 3 adjacent squares", function () {
   const json = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn.json"), "utf8"));
   const dcel = DCEL.buildFromGeoJSON(json);
 
-  it("has 1 outerface", function () {
-    expect(dcel.outerFace).toEqual(jasmine.any(Object));
+  it("has 1 unbounded face", function () {
+    expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
   });
 
   it("has 4 faces", function () {
@@ -121,12 +116,12 @@ describe("A DCEL of 3 adjacent squares", function () {
     expect(dcel.halfEdges.length).toBe(20);
   });
 
-  it("has faces with the right amount of edges", function () {
-    const edgeCount = dcel.getFaces().reduce((counter, f) => {
+  it("has inner faces with the right amount of edges", function () {
+    const edgeCount = dcel.getInnerFaces().reduce((counter, f) => {
       counter.push(f.getEdges().length);
       return counter;
     }, []);
-    expect(edgeCount.sort()).toEqual([4, 4, 4, 8].sort());
+    expect(edgeCount.sort()).toEqual([4, 4, 4].sort());
   });
 });
 

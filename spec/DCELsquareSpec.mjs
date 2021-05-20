@@ -10,8 +10,8 @@ describe("A DCEL of a single square", function () {
     dcel = DCEL.buildFromGeoJSON(polygon);
   });
 
-  it("has 1 outerface", function () {
-    expect(dcel.outerFace).toEqual(jasmine.any(Object));
+  it("has 1 unbounded face", function () {
+    expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
   });
 
   it("has 2 faces", function () {
@@ -26,17 +26,10 @@ describe("A DCEL of a single square", function () {
     expect(dcel.halfEdges.length).toBe(8);
   });
 
-  it("has 4 linked outer edges", function () {
-    expect(dcel.outerFace.getEdges().length).toBe(4);
-    expect(dcel.faces[1].edge.twin.face.getEdges().length).toBe(4);
-    expect(dcel.outerFace.getEdges(false).length).toBe(4);
-    expect(dcel.faces[1].edge.twin.face.getEdges(false).length).toBe(4);
-  });
-
   it("has 4 linked inner edges", function () {
-    expect(dcel.faces[1].getEdges().length).toBe(4);
-    expect(dcel.outerFace.edge.twin.face.getEdges().length).toBe(4);
-    expect(dcel.faces[1].getEdges(false).length).toBe(4);
-    expect(dcel.outerFace.edge.twin.face.getEdges(false).length).toBe(4);
+    expect(dcel.getInnerFaces()[0].getEdges().length).toBe(4);
+    expect(dcel.getInnerFaces()[0].edge.twin.getCycle().length).toBe(4);
+    expect(dcel.getInnerFaces()[0].getEdges(false).length).toBe(4);
+    expect(dcel.getInnerFaces()[0].edge.twin.getCycle(false).length).toBe(4);
   });
 });

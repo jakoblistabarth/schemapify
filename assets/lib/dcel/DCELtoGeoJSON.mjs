@@ -15,23 +15,30 @@ const groupBy = (key) => (array) =>
   }, {});
 
 export function DCELtoGeoJSON(dcel, name) {
+  const outerRings = dcel.getInnerFaces().filter((f) => f.outerRing === null);
   const groupByFID = groupBy("FID");
-  const facesGrouped = groupByFID(dcel.getInnerFaces());
-  const features = Object.values(facesGrouped).map((feature) => {
+  const facesGrouped = groupByFID(outerRings);
+
+  const features = Object.entries(facesGrouped).map(([fid, feature]) => {
+    const featureProperties = dcel.featureProperties[fid];
     let featureCoordinates = [];
-    let featureProperties;
     let idx = 0;
     feature.forEach((ring) => {
-      featureProperties = ring.properties;
-      const halfEdges = ring.ringType === "inner" ? ring.getEdges(false) : ring.getEdges();
+      const halfEdges = ring.getEdges();
       const coordinates = halfEdges.map((e) => [e.tail.lng, e.tail.lat]);
       coordinates.push([halfEdges[0].tail.lng, halfEdges[0].tail.lat]);
-      if (ring.ringType === "inner") {
-        featureCoordinates[idx - 1].push(coordinates);
-      } else {
-        featureCoordinates.push([coordinates]);
-        idx++;
+      featureCoordinates.push([coordinates]);
+      if (ring.innerEdges) {
+        const ringCoordinates = [];
+        ring.innerEdges.forEach((innerEdge) => {
+          const halfEdges = innerEdge.getCycle(false); // go backwards to go counterclockwise also for holes
+          const coordinates = halfEdges.map((e) => [e.tail.lng, e.tail.lat]);
+          coordinates.push([halfEdges[0].tail.lng, halfEdges[0].tail.lat]);
+          ringCoordinates.push(coordinates);
+        });
+        featureCoordinates[idx].push(...ringCoordinates);
       }
+      idx++;
     });
     return {
       type: "Feature",

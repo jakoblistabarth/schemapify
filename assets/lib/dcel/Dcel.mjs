@@ -8,7 +8,7 @@ class Dcel {
     this.vertices = {};
     this.halfEdges = [];
     this.faces = [];
-    // this.outerFace = this.makeFace()
+    this.featureProperties = null;
   }
 
   makeVertex(lng, lat) {
@@ -33,9 +33,8 @@ class Dcel {
     return halfEdge;
   }
 
-  makeFace(properties) {
+  makeFace() {
     const face = new Face();
-    face.properties = properties ? properties : {}; //TODO: move this into the constructor?
     this.faces.push(face);
     return face;
   }
@@ -45,7 +44,11 @@ class Dcel {
   }
 
   getInnerFaces() {
-    return this.faces.filter((f) => f.properties.type !== "outerFace");
+    return this.faces.filter((f) => f.edge !== null);
+  }
+
+  getUnboundedFace() {
+    return this.faces.find((f) => f.edge == null);
   }
 
   // as seen @ https://github.com/Turfjs/turf/blob/master/packages/turf-bbox/index.ts
@@ -109,6 +112,8 @@ class Dcel {
 
   static buildFromGeoJSON(geoJSON) {
     const subdivision = new Dcel();
+
+    subdivision.featureProperties = geoJSON.features.map((feature) => feature.properties);
 
     const polygons = geoJSON.features.reduce((acc, feature) => {
       const multiPolygons =
@@ -186,34 +191,30 @@ class Dcel {
           // TODO: implement holes!
           if (idx === 0) {
             // only for outer ring
-            outerRingFace = subdivision.makeFace(feature.properties);
-            // console.log("outerRingFace", outerRingFace);
+            outerRingFace = subdivision.makeFace();
             outerRingFace.FID = FID;
-            outerRingFace.ringType = "outer";
             edge.getCycle().forEach((e) => (e.face = outerRingFace));
             outerRingFace.edge = edge;
           } else {
-            const innerRingFace = subdivision.makeFace(feature.properties);
+            const innerRingFace = subdivision.makeFace();
             innerRingFace.FID = FID;
-            // console.log("innerRingFace", innerRingFace);
-            innerRingFace.ringType = "inner";
-            // console.log("cc edge", edge);
+            innerRingFace.outerRing = outerRingFace;
             edge.getCycle().forEach((e) => (e.face = innerRingFace));
             innerRingFace.edge = edge;
+            if (outerRingFace.innerEdges === null) outerRingFace.innerEdges = [];
+            outerRingFace.innerEdges.push(edge);
             edge.twin.getCycle().forEach((e) => (e.face = outerRingFace));
           }
         })
       );
     });
 
-    // create outerface and assign it to edges which do not have a face yet
-    subdivision.outerFace = subdivision.makeFace({ type: "outerFace" });
-    let outerEdge = subdivision.halfEdges.find((edge) => edge.face === null);
-    subdivision.outerFace.edge = outerEdge;
+    // create unbounded Face (infinite outerFace) and assign it to edges which do not have a face yet
+    const unboundedFace = subdivision.makeFace();
     while (subdivision.halfEdges.find((edge) => edge.face === null)) {
-      outerEdge = subdivision.halfEdges.find((edge) => edge.face === null);
+      const outerEdge = subdivision.halfEdges.find((edge) => edge.face === null);
       outerEdge.getCycle().forEach((edge) => {
-        edge.face = subdivision.outerFace;
+        edge.face = unboundedFace;
       });
     }
 
