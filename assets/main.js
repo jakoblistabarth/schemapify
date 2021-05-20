@@ -31,31 +31,32 @@ tests.forEach(async (test) => {
 
   const subdivision = DCEL.buildFromGeoJSON(data);
 
-  const e = subdivision.getInnerFaces()[subdivision.getInnerFaces().length - 1].edge.getCycle()[0];
+  const e = subdivision
+    .getBoundedFaces()
+    [subdivision.getBoundedFaces().length - 1].edge.getCycle()[0];
 
-  console.log("outerFace", subdivision.outerFace);
-  console.log("e", e);
-  console.log("e.face", e.face);
-  console.log("e.twin.face", e.twin.face);
+  // console.log("unboundedFace", subdivision.getUnboundedFace());
+  // console.log("e", e);
+  // console.log("e.face", e.face);
+  // console.log("e.twin.face", e.twin.face);
 
   mapFromDCEL(subdivision, name);
   logDCEL(subdivision);
-  // DCELtoGeoJSON(subdivision, name);
 
-  e.bisect();
+  // e.bisect();
 
-  // subdivision.getInnerFaces().forEach((f) => {
+  // subdivision.getBoundedFaces().forEach((f) => {
   //   f.getEdges().forEach((e) => {
   //     console.log(e.tail, e.face.uuid);
   //   });
   // });
 
-  // subdivision.getInnerFaces().forEach((f) => {
+  // subdivision.getBoundedFaces().forEach((f) => {
   //   f.getEdges()
   //     .slice(0, 1)
   //     .forEach((e) => e.subdivideToThreshold(subdivision.epsilon));
   // });
 
   // logDCEL(subdivision);
-  mapFromDCEL(subdivision, name + "_bisect");
+  // mapFromDCEL(subdivision, name + "_bisect");
 });

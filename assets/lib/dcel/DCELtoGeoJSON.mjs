@@ -15,7 +15,7 @@ const groupBy = (key) => (array) =>
   }, {});
 
 export function DCELtoGeoJSON(dcel, name) {
-  const outerRings = dcel.getInnerFaces().filter((f) => f.outerRing === null);
+  const outerRings = dcel.getBoundedFaces().filter((f) => f.outerRing === null);
   const groupByFID = groupBy("FID");
   const facesGrouped = groupByFID(outerRings);
 

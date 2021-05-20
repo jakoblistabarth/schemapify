@@ -30,7 +30,7 @@ describe("A DCEL of a single triangle with one triangular hole", function () {
   });
 
   it("a counterclockwise halfedge of the hole has edges with a pointer to an outer Ring", function () {
-    const innerFaces = dcel.getInnerFaces();
+    const innerFaces = dcel.getBoundedFaces();
     const innerRing = innerFaces.find((f) => f.outerRing);
     innerRing.getEdges().forEach((e) => {
       expect(e.face.outerRing).toBeDefined();
@@ -38,7 +38,7 @@ describe("A DCEL of a single triangle with one triangular hole", function () {
   });
 
   it("a counterclockwise halfedge of the outer ring has edges face with no pointer to an outer Ring", function () {
-    const innerFaces = dcel.getInnerFaces();
+    const innerFaces = dcel.getBoundedFaces();
     const outerRing = innerFaces.find((f) => !f.outerRing);
     outerRing.edge.getCycle().forEach((e) => {
       expect(e.face.outerRing).toBe(null);

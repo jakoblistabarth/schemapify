@@ -71,23 +71,23 @@ describe("getCycle()", function () {
     const json = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(json);
 
-    expect(dcel.getInnerFaces()[0].edge.getCycle().length).toBe(4);
-    expect(dcel.getInnerFaces()[0].edge.twin.getCycle().length).toBe(4);
+    expect(dcel.getBoundedFaces()[0].edge.getCycle().length).toBe(4);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(4);
   });
 
   it("returns the correct number of edges for a triangle", function () {
     const json = JSON.parse(readFileSync(resolve("assets/data/shapes/triangle.json"), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(json);
 
-    expect(dcel.getInnerFaces()[0].edge.getCycle().length).toBe(3);
-    expect(dcel.getInnerFaces()[0].edge.twin.getCycle().length).toBe(3);
+    expect(dcel.getBoundedFaces()[0].edge.getCycle().length).toBe(3);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(3);
   });
 });
 
 describe("bisect() on one edge of a triangle results in a complete DCEL", function () {
   const json = JSON.parse(readFileSync(resolve("assets/data/shapes/triangle.json"), "utf8"));
   const dcel = DCEL.buildFromGeoJSON(json);
-  dcel.getInnerFaces()[0].getEdges()[0].bisect();
+  dcel.getBoundedFaces()[0].getEdges()[0].bisect();
 
   checkIfEntitiesComplete(dcel);
 });
@@ -99,13 +99,13 @@ xdescribe("bisect() on geodata results in a DCEL", function () {
   testFiles.forEach((file) => {
     const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(json);
-    // dcel.getInnerFaces().forEach((f) => f.getEdges().forEach((e) => e.bisect()));
+    // dcel.getBoundedFaces().forEach((f) => f.getEdges().forEach((e) => e.bisect()));
 
     checkIfEntitiesComplete(dcel);
 
     xit("with complete cycles for all faces in counter-clockwise and clockwise direction", function () {
       const cycles = [];
-      dcel.getInnerFaces().forEach((f) => {
+      dcel.getBoundedFaces().forEach((f) => {
         cycles.push(f.getEdges());
         cycles.push(f.getEdges(false));
       });
@@ -122,13 +122,13 @@ describe("bisect() on simple shapes results in a DCEL", function () {
   testFiles.forEach((file) => {
     const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(json);
-    dcel.getInnerFaces().forEach((f) => f.getEdges().forEach((e) => e.bisect()));
+    dcel.getBoundedFaces().forEach((f) => f.getEdges().forEach((e) => e.bisect()));
 
     checkIfEntitiesComplete(dcel);
 
     it("with complete cycles for all faces in counter-clockwise and clockwise direction", function () {
       const cycles = [];
-      dcel.getInnerFaces().forEach((f) => {
+      dcel.getBoundedFaces().forEach((f) => {
         cycles.push(f.getEdges());
         cycles.push(f.getEdges(false));
       });
@@ -142,49 +142,49 @@ describe("bisect()", function () {
   it("on one edge of a triangle results in 4 linked halfEdges", function () {
     const json = JSON.parse(readFileSync(resolve("assets/data/shapes/triangle.json"), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(json);
-    dcel.getInnerFaces()[0].getEdges()[0].bisect();
+    dcel.getBoundedFaces()[0].getEdges()[0].bisect();
 
-    expect(dcel.getInnerFaces()[0].getEdges().length).toBe(4);
-    expect(dcel.getInnerFaces()[0].getEdges(false).length).toBe(4);
-    expect(dcel.getInnerFaces()[0].edge.twin.face.getEdges().length).toBe(4);
-    expect(dcel.getInnerFaces()[0].edge.twin.face.getEdges(false).length).toBe(4);
+    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
+    expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(4);
+    expect(dcel.getBoundedFaces()[0].edge.twin.face.getEdges().length).toBe(4);
+    expect(dcel.getBoundedFaces()[0].edge.twin.face.getEdges(false).length).toBe(4);
   });
 
   it("on one edge of a square results in 5 linked outer halfEdges", function () {
     const json = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(json);
-    dcel.getInnerFaces()[0].getEdges()[0].bisect();
+    dcel.getBoundedFaces()[0].getEdges()[0].bisect();
 
-    expect(dcel.getInnerFaces()[0].edge.twin.face.getEdges().length).toBe(5);
-    expect(dcel.getInnerFaces()[0].edge.twin.face.getEdges(false).length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin.face.getEdges().length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin.face.getEdges(false).length).toBe(5);
   });
 
   it("on one outer edge of a square results in 5 linked inner halfEdges", function () {
     const json = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(json);
-    dcel.getInnerFaces()[0].edge.twin.bisect();
+    dcel.getBoundedFaces()[0].edge.twin.bisect();
 
     expect(dcel.getFaces().length).toBe(2);
     expect(dcel.halfEdges.length).toBe(10);
 
-    expect(dcel.getInnerFaces()[0].getEdges().length).toBe(5);
-    expect(dcel.getInnerFaces()[0].edge.twin.getCycle().length).toBe(5);
-    expect(dcel.getInnerFaces()[0].getEdges(false).length).toBe(5);
-    expect(dcel.getInnerFaces()[0].edge.twin.getCycle(false).length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle(false).length).toBe(5);
   });
 
   it("on one inneredge of a square results in 5 linked outer halfEdges", function () {
     const json = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(json);
-    dcel.getInnerFaces()[0].edge.bisect();
+    dcel.getBoundedFaces()[0].edge.bisect();
 
     expect(dcel.getFaces().length).toBe(2);
     expect(dcel.halfEdges.length).toBe(10);
 
-    expect(dcel.getInnerFaces()[0].edge.twin.face.getEdges().length).toBe(5);
-    expect(dcel.getInnerFaces()[0].edge.twin.getCycle().length).toBe(5);
-    expect(dcel.getInnerFaces()[0].edge.twin.face.getEdges(false).length).toBe(5);
-    expect(dcel.getInnerFaces()[0].edge.twin.getCycle(false).length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin.face.getEdges().length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin.face.getEdges(false).length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle(false).length).toBe(5);
   });
 
   it("on the 1st outer edge of the first of 2 adjacent triangles results in 4 and 3 linked inner and 5 linked outer halfEdges", function () {
@@ -192,17 +192,17 @@ describe("bisect()", function () {
       readFileSync(resolve("assets/data/shapes/2triangle-adjacent.json"), "utf8")
     );
     const dcel = DCEL.buildFromGeoJSON(json);
-    dcel.getInnerFaces()[0].getEdges()[1].bisect();
+    dcel.getBoundedFaces()[0].getEdges()[1].bisect();
 
     expect(dcel.getFaces().length).toBe(3);
     expect(dcel.halfEdges.length).toBe(12);
 
-    expect(dcel.getInnerFaces()[0].getEdges().length).toBe(4);
-    expect(dcel.getInnerFaces()[0].getEdges(false).length).toBe(4);
-    expect(dcel.getInnerFaces()[1].getEdges().length).toBe(3);
-    expect(dcel.getInnerFaces()[1].getEdges(false).length).toBe(3);
-    expect(dcel.getInnerFaces()[0].edge.twin.getCycle().length).toBe(5);
-    expect(dcel.getInnerFaces()[0].edge.twin.getCycle(false).length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
+    expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(4);
+    expect(dcel.getBoundedFaces()[1].getEdges().length).toBe(3);
+    expect(dcel.getBoundedFaces()[1].getEdges(false).length).toBe(3);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle(false).length).toBe(5);
   });
 
   it("on the 2nd outer edge of the first of 2 adjacent triangles results in 4 and 3 linked inner and 5 linked outer halfEdges", function () {
@@ -210,17 +210,17 @@ describe("bisect()", function () {
       readFileSync(resolve("assets/data/shapes/2triangle-adjacent.json"), "utf8")
     );
     const dcel = DCEL.buildFromGeoJSON(json);
-    dcel.getInnerFaces()[0].getEdges()[2].bisect();
+    dcel.getBoundedFaces()[0].getEdges()[2].bisect();
 
     expect(dcel.getFaces().length).toBe(3);
     expect(dcel.halfEdges.length).toBe(12);
 
-    expect(dcel.getInnerFaces()[0].getEdges().length).toBe(4);
-    expect(dcel.getInnerFaces()[0].getEdges(false).length).toBe(4);
-    expect(dcel.getInnerFaces()[1].getEdges().length).toBe(3);
-    expect(dcel.getInnerFaces()[1].getEdges(false).length).toBe(3);
-    expect(dcel.getInnerFaces()[0].edge.twin.getCycle().length).toBe(5);
-    expect(dcel.getInnerFaces()[0].edge.twin.getCycle(false).length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
+    expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(4);
+    expect(dcel.getBoundedFaces()[1].getEdges().length).toBe(3);
+    expect(dcel.getBoundedFaces()[1].getEdges(false).length).toBe(3);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle(false).length).toBe(5);
   });
 });
 
@@ -228,7 +228,7 @@ describe("subdivideToThreshold()", function () {
   it("turns an edge of length 2 into 8 edges (threshold factor 0.25)", function () {
     const json = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
     const dcel = DCEL.buildFromGeoJSON(json);
-    const edge = dcel.getInnerFaces()[0].edge;
+    const edge = dcel.getBoundedFaces()[0].edge;
     dcel.setEpsilon(0.25);
 
     const halfEdgesBefore = dcel.halfEdges.length;
@@ -243,7 +243,7 @@ describe("subdivideToThreshold()", function () {
     const dcel = DCEL.buildFromGeoJSON(json);
     dcel.setEpsilon(0.25);
     dcel
-      .getInnerFaces()[0]
+      .getBoundedFaces()[0]
       .getEdges()
       .forEach((edge) => edge.subdivideToThreshold(dcel.epsilon));
 

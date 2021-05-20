@@ -36,7 +36,7 @@ describe("buildFromGeoJSON() on geodata creates only complete cycles", function 
     const dcel = DCEL.buildFromGeoJSON(json);
 
     const cycles = [];
-    dcel.getInnerFaces().forEach((f) => {
+    dcel.getBoundedFaces().forEach((f) => {
       cycles.push(f.getEdges());
       cycles.push(f.getEdges(false));
     });
@@ -56,7 +56,7 @@ describe("buildFromGeoJSON() on simple shapes creates only complete cycles", fun
     const dcel = DCEL.buildFromGeoJSON(json);
 
     const cycles = [];
-    dcel.getInnerFaces().forEach((f) => {
+    dcel.getBoundedFaces().forEach((f) => {
       cycles.push(f.getEdges());
       cycles.push(f.getEdges(false));
     });
@@ -88,7 +88,7 @@ describe("A DCEL of 2 adjacent squares", function () {
   });
 
   it("has inner faces with the right amount of edges", function () {
-    const edgeCount = dcel.getInnerFaces().reduce((counter, f) => {
+    const edgeCount = dcel.getBoundedFaces().reduce((counter, f) => {
       counter.push(f.getEdges().length);
       return counter;
     }, []);
@@ -117,7 +117,7 @@ describe("A DCEL of 3 adjacent squares", function () {
   });
 
   it("has inner faces with the right amount of edges", function () {
-    const edgeCount = dcel.getInnerFaces().reduce((counter, f) => {
+    const edgeCount = dcel.getBoundedFaces().reduce((counter, f) => {
       counter.push(f.getEdges().length);
       return counter;
     }, []);

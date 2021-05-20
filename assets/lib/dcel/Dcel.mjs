@@ -43,7 +43,7 @@ class Dcel {
     return this.faces;
   }
 
-  getInnerFaces() {
+  getBoundedFaces() {
     return this.faces.filter((f) => f.edge !== null);
   }
 

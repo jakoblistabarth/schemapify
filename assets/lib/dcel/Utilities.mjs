@@ -72,7 +72,7 @@ export function mapFromDCEL(dcel, name) {
     onEachFeature: onEachVertex,
   });
 
-  const faceFeatures = dcel.getInnerFaces().map((f) => {
+  const faceFeatures = dcel.getBoundedFaces().map((f) => {
     const halfEdges = f.getEdges();
     const coordinates = halfEdges.map((e) => [e.tail.lng, e.tail.lat]);
     coordinates.push([halfEdges[0].tail.lng, halfEdges[0].tail.lat]);
