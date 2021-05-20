@@ -51,11 +51,11 @@ export function mapFromDCEL(dcel, name) {
 
   const verticesJSON = createGeoJSON(vertexFeatures, name + "_vertices");
 
-  const geojsonMarkerOptions = {
+  const vertexStyleOptions = {
     radius: 2,
     fillColor: "white",
     color: "black",
-    weight: 1.5,
+    weight: 2,
     opacity: 1,
     fillOpacity: 1,
   };
@@ -64,17 +64,16 @@ export function mapFromDCEL(dcel, name) {
     pointToLayer: function (feature, latlng) {
       const uuid = feature.properties.uuid;
       const v = feature.geometry.coordinates;
-      return L.circleMarker(latlng, geojsonMarkerOptions).bindTooltip(`
+      return L.circleMarker(latlng, vertexStyleOptions).bindTooltip(`
         <span class="material-icons">radio_button_checked</span> ${uuid.substring(0, 5)}
         (${v[0]}/${v[1]})
     `);
     },
-    onEachFeature: onEachEdge,
+    onEachFeature: onEachVertex,
   });
 
   const faceFeatures = dcel.getInnerFaces().map((f) => {
     const halfEdges = f.getEdges();
-    const featureProperties = f.properties;
     const coordinates = halfEdges.map((e) => [e.tail.lng, e.tail.lat]);
     coordinates.push([halfEdges[0].tail.lng, halfEdges[0].tail.lat]);
     return {
@@ -83,20 +82,15 @@ export function mapFromDCEL(dcel, name) {
         type: "Polygon",
         coordinates: [coordinates], // TODO: implement holes
       },
-      properties: { ...featureProperties, uuid: f.uuid, ringType: f.ringType },
+      properties: { uuid: f.uuid, ringType: f.ringType },
     };
   });
 
   const facesJSON = createGeoJSON(faceFeatures, name + "_polygons");
 
   const faceLayer = L.geoJSON(facesJSON, {
-    style: function (feature) {
-      return {
-        color: "black",
-        weight: 1,
-      };
-    },
-    onEachFeature: onEachEdge,
+    style: faceStyle,
+    onEachFeature: onEachFace,
   }).bindTooltip(function (layer) {
     const properties = Object.entries(layer.feature.properties)
       .map((elem) => {
@@ -111,9 +105,21 @@ export function mapFromDCEL(dcel, name) {
                 <td><strong>${layer.feature.properties.uuid.substring(0, 5)}</strong></td>
             </tr>
             ${properties}
-            </table>
             `;
   });
+
+  function faceStyle(feature) {
+    return {
+      color: "black",
+      fillColor: feature.properties.ringType === "inner" ? "transparent" : "black",
+      weight: 1,
+      dashArray: feature.properties.ringType === "inner" ? "3,3" : "0",
+    };
+  }
+
+  function vertexStyle(feature) {
+    return vertexStyleOptions;
+  }
 
   function edgeStyle(feature) {
     return {
@@ -122,10 +128,24 @@ export function mapFromDCEL(dcel, name) {
     };
   }
 
+  function onEachVertex(feature, layer) {
+    layer.on({
+      mouseover: highlightFeature,
+      mouseout: resetHighlightVertex,
+    });
+  }
+
   function onEachEdge(feature, layer) {
     layer.on({
       mouseover: highlightFeature,
       mouseout: resetHighlightEdge,
+    });
+  }
+
+  function onEachFace(feature, layer) {
+    layer.on({
+      mouseover: highlightFeature,
+      mouseout: resetHighlightFace,
     });
   }
 
@@ -145,12 +165,21 @@ export function mapFromDCEL(dcel, name) {
     });
   }
 
+  function resetHighlightVertex(e) {
+    vertexLayer.resetStyle(e.target);
+  }
+
   function resetHighlightEdge(e) {
     edgeLayer.resetStyle(e.target);
   }
 
   function resetHighlightPolygon(e) {
     polygonLayer.resetStyle(e.target);
+  }
+
+  function resetHighlightFace(e) {
+    e.target.bringToBack();
+    faceLayer.resetStyle(e.target);
   }
 
   const edges = [];
@@ -211,6 +240,7 @@ export function mapFromDCEL(dcel, name) {
     onEachFeature: onEachPolygon,
   }).bindTooltip(function (layer) {
     const properties = Object.entries(layer.feature.properties)
+      .slice(0, 5)
       .map((elem) => {
         return `<tr><td>${elem[0]}</td> <td><strong>${elem[1]}</strong></td></tr>`;
       })
@@ -218,9 +248,6 @@ export function mapFromDCEL(dcel, name) {
 
     return `
             <table>
-            <tr>
-                <td><span class="material-icons">highlight_alt</span> </td>
-            </tr>
             ${properties}
             </table>
             `;

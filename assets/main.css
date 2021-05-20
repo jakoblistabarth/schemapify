@@ -29,9 +29,7 @@ body {
 .leaflet-tooltip table {
   border-collapse: collapse;
 }
-.leaflet-tooltip table tr:first-of-type td {
-  padding-bottom: 10px;
-}
+
 .material-icons {
   font-size: 18px;
   position: relative;
@@ -44,7 +42,7 @@ nav {
   position: absolute;
   display: flex;
   justify-content: center;
-  z-index: 1;
+  z-index: 500;
 }
 
 #toolbar {
