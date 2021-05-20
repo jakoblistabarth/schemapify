@@ -25,15 +25,15 @@ export function DCELtoGeoJSON(dcel, name) {
     let idx = 0;
     feature.forEach((ring) => {
       const halfEdges = ring.getEdges();
-      const coordinates = halfEdges.map((e) => [e.tail.lng, e.tail.lat]);
-      coordinates.push([halfEdges[0].tail.lng, halfEdges[0].tail.lat]);
+      const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
+      coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
       featureCoordinates.push([coordinates]);
       if (ring.innerEdges) {
         const ringCoordinates = [];
         ring.innerEdges.forEach((innerEdge) => {
           const halfEdges = innerEdge.getCycle(false); // go backwards to go counterclockwise also for holes
-          const coordinates = halfEdges.map((e) => [e.tail.lng, e.tail.lat]);
-          coordinates.push([halfEdges[0].tail.lng, halfEdges[0].tail.lat]);
+          const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
+          coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
           ringCoordinates.push(coordinates);
         });
         featureCoordinates[idx].push(...ringCoordinates);

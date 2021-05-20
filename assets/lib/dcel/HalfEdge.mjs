@@ -37,7 +37,7 @@ class HalfEdge {
   }
 
   getAngle() {
-    const vector = [this.twin.tail.lng - this.tail.lng, this.twin.tail.lat - this.tail.lat];
+    const vector = [this.twin.tail.x - this.tail.x, this.twin.tail.y - this.tail.y];
     const angle = Math.atan2(vector[1], vector[0]);
     return angle < 0 ? angle + 2 * Math.PI : angle;
   }
@@ -47,8 +47,8 @@ class HalfEdge {
   }
 
   getMidpoint() {
-    const [x1, y1] = [this.getTail().lng, this.getTail().lat];
-    const [x2, y2] = [this.getHead().lng, this.getHead().lat];
+    const [x1, y1] = [this.getTail().x, this.getTail().y];
+    const [x2, y2] = [this.getHead().x, this.getHead().y];
 
     const mx = (x1 + x2) / 2;
     const my = (y1 + y2) / 2;

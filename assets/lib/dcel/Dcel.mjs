@@ -55,7 +55,7 @@ class Dcel {
   // takes a dcel
   // returns its Boundingbox as [minX, minY, maxX, maxY]
   getBbox() {
-    const points = Object.values(this.vertices).map((p) => [p.lng, p.lat]);
+    const points = Object.values(this.vertices).map((p) => [p.x, p.y]);
     const bbox = [Infinity, Infinity, -Infinity, -Infinity];
     points.forEach((p) => {
       if (bbox[0] > p[0]) {
@@ -181,10 +181,10 @@ class Dcel {
           const [firstPoint, secondPoint] = ring;
           const edge = subdivision.halfEdges.find((e) => {
             return (
-              e.tail.lng === firstPoint[0] &&
-              e.tail.lat === firstPoint[1] &&
-              e.twin.tail.lng === secondPoint[0] &&
-              e.twin.tail.lat === secondPoint[1]
+              e.tail.x === firstPoint[0] &&
+              e.tail.y === firstPoint[1] &&
+              e.twin.tail.x === secondPoint[0] &&
+              e.twin.tail.y === secondPoint[1]
             );
           });
 

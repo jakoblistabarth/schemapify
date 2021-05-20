@@ -3,8 +3,8 @@ import { v4 as uuid } from "uuid";
 class Vertex {
   constructor(lng, lat) {
     this.uuid = uuid();
-    this.lng = lng;
-    this.lat = lat;
+    this.x = lng;
+    this.y = lat;
     this.edges = [];
   }
 
@@ -19,8 +19,8 @@ class Vertex {
   }
 
   getDistance(p) {
-    const [x1, y1] = [this.lng, this.lat];
-    const [x2, y2] = [p.lng, p.lat];
+    const [x1, y1] = [this.x, this.y];
+    const [x2, y2] = [p.x, p.y];
 
     const a = x1 - x2;
     const b = y1 - y2;

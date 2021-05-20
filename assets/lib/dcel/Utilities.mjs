@@ -9,7 +9,7 @@ export function logDCEL(dcel, verbose = false) {
     dcel.getFaces().forEach((f) => {
       console.log("→ new face", f.uuid);
       f.getEdges().forEach((e) => {
-        console.log(e, `(${e.tail.lng},${e.tail.lat})`);
+        console.log(e, `(${e.tail.x},${e.tail.y})`);
       });
     });
     console.log("🡐 DCEL END");
@@ -41,7 +41,7 @@ export function mapFromDCEL(dcel, name) {
       type: "Feature",
       geometry: {
         type: "Point",
-        coordinates: [v.lng, v.lat],
+        coordinates: [v.x, v.y],
       },
       properties: {
         uuid: v.uuid,
@@ -74,8 +74,8 @@ export function mapFromDCEL(dcel, name) {
 
   const faceFeatures = dcel.getBoundedFaces().map((f) => {
     const halfEdges = f.getEdges();
-    const coordinates = halfEdges.map((e) => [e.tail.lng, e.tail.lat]);
-    coordinates.push([halfEdges[0].tail.lng, halfEdges[0].tail.lat]);
+    const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
+    coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
     return {
       type: "Feature",
       geometry: {
@@ -200,22 +200,22 @@ export function mapFromDCEL(dcel, name) {
       geometry: {
         type: "LineString",
         coordinates: [
-          [a.lng, a.lat],
-          [b.lng, b.lat],
+          [a.x, a.y],
+          [b.x, b.y],
         ],
       },
       properties: {
         edge: `
           <span class="material-icons">rotate_left</span>
-          ${e.uuid.substring(0, 5)} (${e.tail.lng}/${e.tail.lat})
+          ${e.uuid.substring(0, 5)} (${e.tail.x}/${e.tail.y})
           <span class="material-icons">arrow_forward</span>
-          (${e.twin.tail.lng}/${e.twin.tail.lat})
+          (${e.twin.tail.x}/${e.twin.tail.y})
           <span class="material-icons">highlight_alt</span> ${e.face?.uuid.substring(0, 5)}`,
         twin: `
           <span class="material-icons">rotate_right</span>
-          ${e.twin.uuid.substring(0, 5)} (${e.twin.tail.lng}/${e.twin.tail.lat})
+          ${e.twin.uuid.substring(0, 5)} (${e.twin.tail.x}/${e.twin.tail.y})
           <span class="material-icons">arrow_back</span>
-          (${e.tail.lng}/${e.tail.lat})
+          (${e.tail.x}/${e.tail.y})
           <span class="material-icons">highlight_alt</span> ${e.twin.face?.uuid.substring(0, 5)}`,
       },
     };
