@@ -12,6 +12,14 @@ class Face {
   getEdges(counterclockwise = true) {
     return this.edge.getCycle(counterclockwise);
   }
+
+  removeInnerEdge(edge) {
+    const idx = this.innerEdges.indexOf(edge);
+    if (idx > -1) {
+      this.innerEdges.splice(idx, 1);
+    }
+    return this.innerEdges;
+  }
 }
 
 export default Face;

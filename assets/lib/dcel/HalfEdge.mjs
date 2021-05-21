@@ -59,6 +59,7 @@ class HalfEdge {
   remove() {
     this.tail.removeIncidentEdge(this);
     this.dcel.removeHalfEdge(this);
+    if (this.face.outerRing) this.face.outerRing.removeInnerEdge(this);
   }
 
   bisect() {
@@ -89,7 +90,18 @@ class HalfEdge {
     et.prev.next = et__;
     et.next.prev = et_;
 
-    f2.edge = et_;
+    console.log("f1", f1);
+    console.log("f2", f2);
+
+    if (f1.outerRing) {
+      console.log("is a hole");
+      //if f1 is a hole
+      f2.innerEdges.push(et_);
+    } else if (f2.edge != null) {
+      // if f2 is not the unbounded face and f1 does not have holes
+      console.log("here!");
+      f2.edge = et_;
+    }
     et.remove();
 
     const e_ = this.dcel.makeHalfEdge(e.tail, N);
@@ -112,6 +124,9 @@ class HalfEdge {
     e__.twin = et__;
 
     f1.edge = e_;
+    // if (f1.outerRing) {
+    //
+    // }
     e.remove();
 
     return e_;
