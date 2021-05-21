@@ -1,15 +1,15 @@
 import { v4 as uuid } from "uuid";
 
 class Vertex {
-  constructor(lng, lat) {
+  constructor(x, y) {
     this.uuid = uuid();
-    this.x = lng;
-    this.y = lat;
+    this.x = x;
+    this.y = y;
     this.edges = [];
   }
 
-  static getKey(lng, lat) {
-    return `${lng}/${lat}`; // TODO: is there a better way to ensure that a coordinate pair vertex is added only once to the vertex list?
+  static getKey(x, y) {
+    return `${x}/${y}`; // TODO: is there a better way to ensure that a coordinate pair vertex is added only once to the vertex list?
   }
 
   sortEdges() {

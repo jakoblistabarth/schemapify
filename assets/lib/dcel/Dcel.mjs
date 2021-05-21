@@ -11,11 +11,11 @@ class Dcel {
     this.featureProperties = null;
   }
 
-  makeVertex(lng, lat) {
-    const key = Vertex.getKey(lng, lat); // TODO: is there a better way to ensure that a coordinate pair vertex is added only once to the vertex list
+  makeVertex(x, y) {
+    const key = Vertex.getKey(x, y); // TODO: is there a better way to ensure that a coordinate pair vertex is added only once to the vertex list
     if (this.vertices[key]) return this.vertices[key];
 
-    const vertex = new Vertex(lng, lat, this);
+    const vertex = new Vertex(x, y, this);
     this.vertices[key] = vertex;
     return vertex;
   }
@@ -84,8 +84,8 @@ class Dcel {
     return diagonal;
   }
 
-  findVertex(lng, lat) {
-    const key = Vertex.getKey(lng, lat);
+  findVertex(x, y) {
+    const key = Vertex.getKey(x, y);
     return this.vertices[key];
   }
 
