@@ -84,6 +84,7 @@ export function mapFromDCEL(dcel, name) {
       },
       properties: {
         uuid: f.uuid,
+        FID: f.FID,
         ringType: f.outerRing != null ? "inner" : "outer",
       },
     };
@@ -120,10 +121,6 @@ export function mapFromDCEL(dcel, name) {
     };
   }
 
-  function vertexStyle(feature) {
-    return vertexStyleOptions;
-  }
-
   function edgeStyle(feature) {
     return {
       color: "black",
@@ -133,36 +130,46 @@ export function mapFromDCEL(dcel, name) {
 
   function onEachVertex(feature, layer) {
     layer.on({
-      mouseover: highlightFeature,
+      mouseover: highlightDCELFeature,
       mouseout: resetHighlightVertex,
     });
   }
 
   function onEachEdge(feature, layer) {
     layer.on({
-      mouseover: highlightFeature,
+      mouseover: highlightDCELFeature,
       mouseout: resetHighlightEdge,
+      click: clickEdge,
     });
   }
 
   function onEachFace(feature, layer) {
     layer.on({
-      mouseover: highlightFeature,
+      mouseover: highlightDCELFeature,
       mouseout: resetHighlightFace,
     });
   }
 
   function onEachPolygon(feature, layer) {
     layer.on({
-      mouseover: highlightFeature,
+      mouseover: highlightPolygonFeature,
       mouseout: resetHighlightPolygon,
     });
   }
 
-  function highlightFeature(e) {
+  function highlightDCELFeature(e) {
     var feature = e.target;
     feature.setStyle({
       weight: 3,
+      fillColor: "black",
+      fillOpacity: feature.feature.properties.ringType === "inner" ? 0.25 : 0.5,
+    });
+  }
+
+  function highlightPolygonFeature(e) {
+    var feature = e.target;
+    feature.setStyle({
+      weight: 5,
       fillOpacity: 0.5,
     });
   }
@@ -185,6 +192,10 @@ export function mapFromDCEL(dcel, name) {
     faceLayer.resetStyle(e.target);
   }
 
+  function clickEdge(e) {
+    console.log("length", e.target.feature.properties.length);
+  }
+
   const edges = [];
   dcel.halfEdges.forEach((halfEdge) => {
     const idx = edges.indexOf(halfEdge.twin);
@@ -205,6 +216,7 @@ export function mapFromDCEL(dcel, name) {
         ],
       },
       properties: {
+        length: e.getLength(),
         edge: `
           <span class="material-icons">rotate_left</span>
           ${e.uuid.substring(0, 5)} (${e.tail.x}/${e.tail.y})
