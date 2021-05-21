@@ -1,0 +1,39 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [0, 0],
+              [10, 0],
+              [10, 10],
+              [0, 10],
+              [0, 0]
+            ],
+            [
+              [1, 1],
+              [1, 9],
+              [9, 9],
+              [9, 1],
+              [1, 1]
+            ],
+            [
+              [2, 2],
+              [2, 8],
+              [8, 8],
+              [8, 2],
+              [2, 2]
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
