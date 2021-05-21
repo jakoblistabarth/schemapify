@@ -222,7 +222,7 @@ class Dcel {
       });
     }
 
-    subdivision.setEpsilon(config.eFactor);
+    subdivision.setEpsilon(config.lambda);
     return subdivision;
   }
 
@@ -232,6 +232,16 @@ class Dcel {
   // returns the treshold as float
   setEpsilon(factor) {
     this.epsilon = this.getDiameter() * factor;
+    return this.epsilon;
+  }
+
+  splitEdges() {
+    this.getBoundedFaces().forEach((f) => {
+      f.getEdges().forEach((e) => {
+        e.subdivideToThreshold(this.epsilon);
+      });
+    });
+    return this;
   }
 }
 

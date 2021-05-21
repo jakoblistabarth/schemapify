@@ -2,7 +2,7 @@ import DCEL from "./lib/dcel/Dcel.mjs";
 import { logDCEL, mapFromDCEL } from "./lib/dcel/Utilities.mjs";
 
 const tests = [
-  // "assets/data/geodata/ne_110m_africa_admin0.json",
+  "assets/data/geodata/ne_110m_africa_admin0.json",
   // "assets/data/geodata/AUT_adm1.json",
   // "assets/data/geodata/central-austria.json",
   // "assets/data/shapes/triangle.json",
@@ -11,10 +11,10 @@ const tests = [
   // "assets/data/shapes/triangle-hole.json",
   // "assets/data/shapes/2triangle-adjacent.json",
   // "assets/data/shapes/square.json",
-  // "assets/data/shapes/square-islands.json",
+  "assets/data/shapes/square-islands.json",
   // "assets/data/shapes/square-hole.json",
   // "assets/data/shapes/square-hole-island.json",
-  "assets/data/shapes/square-hole-island-hole.json",
+  // "assets/data/shapes/square-hole-island-hole.json",
   // "assets/data/shapes/2plgn.json",
   // "assets/data/shapes/2plgn-adjacent.json",
   // "assets/data/shapes/2plgn-islands.json",
@@ -38,11 +38,7 @@ tests.forEach(async (test) => {
   // logDCEL(subdivision, name);
   // mapFromDCEL(subdivision, name);
 
-  subdivision.getBoundedFaces().forEach((f) => {
-    f.getEdges().forEach((e) => {
-      e.subdivideToThreshold(subdivision.epsilon);
-    });
-  });
+  subdivision.splitEdges();
 
   logDCEL(subdivision, name);
   mapFromDCEL(subdivision, name + "_bisect");
