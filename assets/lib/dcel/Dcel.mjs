@@ -78,23 +78,10 @@ class Dcel {
   // returns its diameter
   getDiameter() {
     const bbox = this.getBbox();
-    // TODO: refactor this?
-    const [a, b, c, d] = [
-      new Vertex(bbox[0], bbox[1]),
-      new Vertex(bbox[2], bbox[1]),
-      new Vertex(bbox[2], bbox[3]),
-      new Vertex(bbox[0], bbox[3]),
-    ];
+    const [a, c] = [new Vertex(bbox[0], bbox[1]), new Vertex(bbox[2], bbox[3])];
 
-    return Math.max(
-      ...[
-        // TODO: refactor this – only two sides necessary?
-        a.getDistance(b),
-        b.getDistance(c),
-        c.getDistance(d),
-        d.getDistance(a),
-      ]
-    );
+    const diagonal = a.getDistance(c);
+    return diagonal;
   }
 
   findVertex(lng, lat) {
@@ -235,10 +222,10 @@ class Dcel {
     return this.epsilon;
   }
 
-  splitEdges() {
+  splitEdges(threshold = this.epsilon) {
     this.getBoundedFaces().forEach((f) => {
       f.getEdges().forEach((e) => {
-        e.subdivideToThreshold(this.epsilon);
+        e.subdivideToThreshold(threshold);
       });
     });
     return this;
