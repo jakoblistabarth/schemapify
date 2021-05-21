@@ -1,5 +1,5 @@
 function createGeoJSON(features, name) {
-  //TODO: cannot import this from utilities.mjs because leaflet import in utilities.mjs throws error in jasmine
+  //FIXME: cannot import this from utilities.mjs because leaflet import in utilities.mjs throws error in jasmine
   return {
     type: "FeatureCollection",
     name: name,
@@ -55,7 +55,7 @@ export function DCELtoGeoJSON(dcel, name) {
       type: "Feature",
       geometry: {
         type: "MultiPolygon",
-        coordinates: featureCoordinates, // TODO: implement holes
+        coordinates: featureCoordinates,
       },
       properties: featureProperties,
     };

@@ -1,4 +1,4 @@
-import leaflet from "leaflet"; // TODO: load leaflet as module
+import leaflet from "leaflet"; // FIXME: load leaflet as module
 import { DCELtoGeoJSON } from "./DCELtoGeoJSON.mjs";
 
 export function logDCEL(dcel, name, verbose = false) {
@@ -80,7 +80,7 @@ export function mapFromDCEL(dcel, name) {
       type: "Feature",
       geometry: {
         type: "Polygon",
-        coordinates: [coordinates], // TODO: implement holes
+        coordinates: [coordinates],
       },
       properties: {
         uuid: f.uuid,
