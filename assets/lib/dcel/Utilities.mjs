@@ -1,8 +1,8 @@
 import leaflet from "leaflet"; // TODO: load leaflet as module
 import { DCELtoGeoJSON } from "./DCELtoGeoJSON.mjs";
 
-export function logDCEL(dcel, verbose = false) {
-  if (!verbose) console.log("DCEL", dcel);
+export function logDCEL(dcel, name, verbose = false) {
+  if (!verbose) console.log("DCEL " + name, dcel);
   else {
     console.log("🡒 START DCEL:", dcel);
 

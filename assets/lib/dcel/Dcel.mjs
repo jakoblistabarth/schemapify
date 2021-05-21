@@ -188,22 +188,26 @@ class Dcel {
             );
           });
 
-          // TODO: implement holes!
-          if (idx === 0) {
-            // only for outer ring
-            outerRingFace = subdivision.makeFace();
-            outerRingFace.FID = FID;
-            edge.getCycle().forEach((e) => (e.face = outerRingFace));
-            outerRingFace.edge = edge;
+          const existingFace = subdivision.faces.find((f) => f.edge === edge);
+          if (existingFace) {
+            existingFace.FID.push(FID);
           } else {
-            const innerRingFace = subdivision.makeFace();
-            innerRingFace.FID = FID;
-            innerRingFace.outerRing = outerRingFace;
-            edge.getCycle().forEach((e) => (e.face = innerRingFace));
-            innerRingFace.edge = edge;
-            if (outerRingFace.innerEdges === null) outerRingFace.innerEdges = [];
-            outerRingFace.innerEdges.push(edge);
-            edge.twin.getCycle().forEach((e) => (e.face = outerRingFace));
+            if (idx === 0) {
+              // only for outer ring
+              outerRingFace = subdivision.makeFace();
+              outerRingFace.FID = [FID];
+              edge.getCycle().forEach((e) => (e.face = outerRingFace));
+              outerRingFace.edge = edge;
+            } else {
+              const innerRingFace = subdivision.makeFace();
+              innerRingFace.FID = [FID];
+              innerRingFace.outerRing = outerRingFace;
+              edge.getCycle().forEach((e) => (e.face = innerRingFace));
+              innerRingFace.edge = edge;
+              if (outerRingFace.innerEdges === null) outerRingFace.innerEdges = [];
+              outerRingFace.innerEdges.push(edge);
+              edge.twin.getCycle().forEach((e) => (e.face = outerRingFace));
+            }
           }
         })
       );

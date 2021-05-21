@@ -15,11 +15,22 @@ const groupBy = (key) => (array) =>
   }, {});
 
 export function DCELtoGeoJSON(dcel, name) {
-  const outerRings = dcel.getBoundedFaces().filter((f) => f.outerRing === null);
-  const groupByFID = groupBy("FID");
-  const facesGrouped = groupByFID(outerRings);
+  // copy faces, so that every face has only one FID
+  const flattenedFaces = dcel.getBoundedFaces().reduce((acc, f) => {
+    f.FID.forEach((id, idx) => {
+      let newFace = Object.assign(Object.create(Object.getPrototypeOf(f)), f); // clone the object
+      newFace.FID = id;
+      if (idx > 0) newFace.outerRing = null;
+      acc.push(newFace);
+    });
+    return acc;
+  }, []);
 
-  const features = Object.entries(facesGrouped).map(([fid, feature]) => {
+  const outerRings = flattenedFaces.filter((f) => f.outerRing === null);
+  const groupByFID = groupBy("FID");
+  const outerRingsByFID = groupByFID(outerRings);
+
+  const features = Object.entries(outerRingsByFID).map(([fid, feature]) => {
     const featureProperties = dcel.featureProperties[fid];
     let featureCoordinates = [];
     let idx = 0;

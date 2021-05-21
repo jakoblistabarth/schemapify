@@ -6,16 +6,20 @@ const tests = [
   // "assets/data/geodata/AUT_adm1.json",
   // "assets/data/geodata/central-austria.json",
   // "assets/data/shapes/triangle.json",
+  "assets/data/shapes/enclave.json",
+  // "assets/data/shapes/enclave2.json",
   // "assets/data/shapes/triangle-hole.json",
   // "assets/data/shapes/2triangle-adjacent.json",
   // "assets/data/shapes/square.json",
   // "assets/data/shapes/square-islands.json",
-  "assets/data/shapes/square-hole.json",
+  // "assets/data/shapes/square-hole.json",
+  // "assets/data/shapes/square-hole-island.json",
+  "assets/data/shapes/square-hole-island-hole.json",
   // "assets/data/shapes/2plgn.json",
   // "assets/data/shapes/2plgn-adjacent.json",
   // "assets/data/shapes/2plgn-islands.json",
   // "assets/data/shapes/2plgn-islands-hole.json",
-  // "assets/data/shapes/2plgn-islands-holes.json",
+  "assets/data/shapes/2plgn-islands-holes.json",
   // "assets/data/shapes/3plgn.json",
   // "assets/data/shapes/3plgn-complex.json",
 ];
@@ -31,26 +35,15 @@ tests.forEach(async (test) => {
 
   const subdivision = DCEL.buildFromGeoJSON(data);
 
-  // console.log("unboundedFace", subdivision.getUnboundedFace());
-  // console.log("e", e);
-  // console.log("e.face", e.face);
-  // console.log("e.twin.face", e.twin.face);
-
+  // logDCEL(subdivision, name);
   // mapFromDCEL(subdivision, name);
-  // logDCEL(subdivision);
 
-  subdivision
-    .getBoundedFaces()
-    .slice(0, 1)
-    .forEach((f) => {
-      f.getEdges()
-        .slice(0, 1)
-        .forEach((e) => {
-          e.bisect();
-          // e.subdivideToThreshold(subdivision.epsilon);
-        });
+  subdivision.getBoundedFaces().forEach((f) => {
+    f.getEdges().forEach((e) => {
+      e.subdivideToThreshold(subdivision.epsilon);
     });
+  });
 
-  logDCEL(subdivision);
+  logDCEL(subdivision, name);
   mapFromDCEL(subdivision, name + "_bisect");
 });

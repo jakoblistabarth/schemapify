@@ -90,17 +90,14 @@ class HalfEdge {
     et.prev.next = et__;
     et.next.prev = et_;
 
-    console.log("f1", f1);
-    console.log("f2", f2);
-
-    if (f1.outerRing) {
-      console.log("is a hole");
-      //if f1 is a hole
-      f2.innerEdges.push(et_);
-    } else if (f2.edge != null) {
-      // if f2 is not the unbounded face and f1 does not have holes
-      console.log("here!");
+    if (f2.edge != null && !f1.outerRing) {
+      // if f2 is not the unbounded face and f1 is not a hole
       f2.edge = et_;
+    }
+    if (f2.innerEdges) {
+      f2.innerEdges.forEach((e) => {
+        e.face.replaceOuterRingEdge(et, et_);
+      });
     }
     et.remove();
 
@@ -124,9 +121,16 @@ class HalfEdge {
     e__.twin = et__;
 
     f1.edge = e_;
-    // if (f1.outerRing) {
-    //
-    // }
+
+    if (f1.outerRing) {
+      //if f1 is a hole
+      f2.replaceInnerEdge(e, e_);
+    }
+    if (f1.innerEdges) {
+      f1.innerEdges.forEach((e) => {
+        e.face.replaceOuterRingEdge(e, e_);
+      });
+    }
     e.remove();
 
     return e_;

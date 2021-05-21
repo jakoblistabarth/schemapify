@@ -20,6 +20,25 @@ class Face {
     }
     return this.innerEdges;
   }
+
+  replaceInnerEdge(old, edge) {
+    const idx = this.innerEdges.indexOf(old);
+    if (idx === -1) {
+      return;
+    } else {
+      this.innerEdges[idx] = edge;
+    }
+    return this.innerEdges;
+  }
+
+  replaceOuterRingEdge(old, edge) {
+    if (this.outerRing.edge != old) {
+      return;
+    } else {
+      this.outerRing.edge = edge;
+      return this.outerRing.edge;
+    }
+  }
 }
 
 export default Face;
