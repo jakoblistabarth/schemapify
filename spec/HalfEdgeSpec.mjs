@@ -169,8 +169,8 @@ describe("bisect()", function () {
 
     expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
     expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(4);
-    expect(dcel.getBoundedFaces()[0].edge.twin.face.getEdges().length).toBe(4);
-    expect(dcel.getBoundedFaces()[0].edge.twin.face.getEdges(false).length).toBe(4);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(4);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle(false).length).toBe(4);
   });
 
   it("on one edge of a square results in 5 linked outer halfEdges", function () {
@@ -178,8 +178,8 @@ describe("bisect()", function () {
     const dcel = DCEL.buildFromGeoJSON(json);
     dcel.getBoundedFaces()[0].getEdges()[0].bisect();
 
-    expect(dcel.getBoundedFaces()[0].edge.twin.face.getEdges().length).toBe(5);
-    expect(dcel.getBoundedFaces()[0].edge.twin.face.getEdges(false).length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle(false).length).toBe(5);
   });
 
   it("on one outer edge of a square results in 5 linked inner halfEdges", function () {
@@ -191,9 +191,7 @@ describe("bisect()", function () {
     expect(dcel.halfEdges.length).toBe(10);
 
     expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(5);
-    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(5);
     expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(5);
-    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle(false).length).toBe(5);
   });
 
   it("on one inneredge of a square results in 5 linked outer halfEdges", function () {
@@ -204,9 +202,7 @@ describe("bisect()", function () {
     expect(dcel.getFaces().length).toBe(2);
     expect(dcel.halfEdges.length).toBe(10);
 
-    expect(dcel.getBoundedFaces()[0].edge.twin.face.getEdges().length).toBe(5);
     expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(5);
-    expect(dcel.getBoundedFaces()[0].edge.twin.face.getEdges(false).length).toBe(5);
     expect(dcel.getBoundedFaces()[0].edge.twin.getCycle(false).length).toBe(5);
   });
 

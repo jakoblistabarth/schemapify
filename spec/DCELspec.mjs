@@ -121,7 +121,7 @@ describe("A DCEL of 3 adjacent squares", function () {
       counter.push(f.getEdges().length);
       return counter;
     }, []);
-    expect(edgeCount.sort()).toEqual([4, 4, 4].sort());
+    expect(edgeCount.sort()).toEqual([4, 4, 4]);
   });
 });
 
@@ -148,7 +148,7 @@ describe("getDiameter()", function () {
     const plgn1 = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
     const plgn3 = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn.json"), "utf8"));
 
-    expect(DCEL.buildFromGeoJSON(plgn1).getDiameter()).toEqual(2);
-    expect(DCEL.buildFromGeoJSON(plgn3).getDiameter()).toEqual(2);
+    expect(DCEL.buildFromGeoJSON(plgn1).getDiameter()).toBe(2);
+    expect(DCEL.buildFromGeoJSON(plgn3).getDiameter()).toBe(2);
   });
 });
