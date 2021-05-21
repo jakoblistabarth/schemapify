@@ -6,7 +6,7 @@ import { resolve } from "path";
 import { getTestFiles, checkIfEntitiesComplete } from "./test-helpers.mjs";
 
 describe("getLength()", function () {
-  it("returns the correct length", function () {
+  it("returns the correct length for a single halfEdge", function () {
     const a = new Vertex(0, 0);
     const b = new Vertex(2, 0);
     const edge = new HalfEdge(a);
@@ -14,6 +14,29 @@ describe("getLength()", function () {
     edge.twin.twin = edge;
 
     expect(edge.getLength()).toEqual(2);
+  });
+
+  it("returns the correct length for all sides of a square", function () {
+    const json = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
+    const dcel = DCEL.buildFromGeoJSON(json);
+
+    dcel
+      .getBoundedFaces()[0]
+      .edge.getCycle()
+      .forEach((e) => {
+        expect(e.getLength()).toBe(2);
+      });
+  });
+
+  it("returns the correct length for the sides of a triangle", function () {
+    const json = JSON.parse(readFileSync(resolve("assets/data/shapes/triangle.json"), "utf8"));
+    const dcel = DCEL.buildFromGeoJSON(json);
+
+    const lengths = dcel
+      .getBoundedFaces()[0]
+      .edge.getCycle()
+      .map((e) => e.getLength());
+    expect(lengths.sort()).toEqual([14.142135623730951, 14.142135623730951, 20]);
   });
 });
 
