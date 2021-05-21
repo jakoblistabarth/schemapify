@@ -10,26 +10,3 @@ export function getTestFiles(dir) {
 
   return filesInDir.filter((f) => f.substr(-5, f.length) === ".json");
 }
-
-export function checkIfEntitiesComplete(dcel) {
-  it("with a set of complete vertices", function () {
-    const vertices = Object.values(dcel.vertices).map((vertex) =>
-      Object.values(vertex).every((x) => typeof x !== "undefined")
-    );
-    expect(vertices).not.toContain(false);
-  });
-
-  it("with a set of complete halfEdges", function () {
-    const halfEdges = dcel.halfEdges.map((halfEdge) =>
-      Object.values(halfEdge).every((x) => typeof x !== "undefined")
-    );
-    expect(halfEdges).not.toContain(false);
-  });
-
-  it("with a set of complete faces", function () {
-    const faces = dcel.faces.map((face) =>
-      Object.values(face).every((x) => typeof x !== "undefined")
-    );
-    expect(faces).not.toContain(false);
-  });
-}

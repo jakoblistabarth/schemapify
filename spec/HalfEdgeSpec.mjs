@@ -3,7 +3,7 @@ import HalfEdge from "../assets/lib/dcel/HalfEdge.mjs";
 import Vertex from "../assets/lib/dcel/Vertex.mjs";
 import { readFileSync } from "fs";
 import { resolve } from "path";
-import { getTestFiles, checkIfEntitiesComplete } from "./test-helpers.mjs";
+import { getTestFiles } from "./test-helpers.mjs";
 
 describe("getLength()", function () {
   it("returns the correct length for a single halfEdge", function () {
@@ -107,34 +107,28 @@ describe("getCycle()", function () {
   });
 });
 
-describe("bisect() on one edge of a triangle results in a complete DCEL", function () {
-  const json = JSON.parse(readFileSync(resolve("assets/data/shapes/triangle.json"), "utf8"));
-  const dcel = DCEL.buildFromGeoJSON(json);
-  dcel.getBoundedFaces()[0].getEdges()[0].bisect();
-
-  checkIfEntitiesComplete(dcel);
-});
-
-xdescribe("bisect() on geodata results in a DCEL", function () {
+describe("bisect() on geodata results in a DCEL", function () {
   const dir = "assets/data/geodata";
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
-    const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-    const dcel = DCEL.buildFromGeoJSON(json);
-    // dcel.getBoundedFaces().forEach((f) => f.getEdges().forEach((e) => e.bisect()));
+    it(
+      "with complete cycles for all faces in counter-clockwise and clockwise direction of file " +
+        file,
+      function () {
+        const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
+        const dcel = DCEL.buildFromGeoJSON(json);
+        dcel.getBoundedFaces().forEach((f) => f.getEdges().forEach((e) => e.bisect()));
 
-    checkIfEntitiesComplete(dcel);
+        const cycles = [];
+        dcel.getBoundedFaces().forEach((f) => {
+          cycles.push(f.getEdges());
+          cycles.push(f.getEdges(false));
+        });
 
-    xit("with complete cycles for all faces in counter-clockwise and clockwise direction", function () {
-      const cycles = [];
-      dcel.getBoundedFaces().forEach((f) => {
-        cycles.push(f.getEdges());
-        cycles.push(f.getEdges(false));
-      });
-
-      expect(cycles).nothing();
-    });
+        expect(cycles).nothing();
+      }
+    );
   });
 });
 
@@ -143,21 +137,23 @@ describe("bisect() on simple shapes results in a DCEL", function () {
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
-    const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-    const dcel = DCEL.buildFromGeoJSON(json);
-    dcel.getBoundedFaces().forEach((f) => f.getEdges().forEach((e) => e.bisect()));
+    it(
+      "with complete cycles for all faces in counter-clockwise and clockwise direction of file " +
+        file,
+      function () {
+        const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
+        const dcel = DCEL.buildFromGeoJSON(json);
+        dcel.getBoundedFaces().forEach((f) => f.getEdges().forEach((e) => e.bisect()));
 
-    checkIfEntitiesComplete(dcel);
+        const cycles = [];
+        dcel.getBoundedFaces().forEach((f) => {
+          cycles.push(f.getEdges());
+          cycles.push(f.getEdges(false));
+        });
 
-    it("with complete cycles for all faces in counter-clockwise and clockwise direction", function () {
-      const cycles = [];
-      dcel.getBoundedFaces().forEach((f) => {
-        cycles.push(f.getEdges());
-        cycles.push(f.getEdges(false));
-      });
-
-      expect(cycles).nothing();
-    });
+        expect(cycles).nothing();
+      }
+    );
   });
 });
 

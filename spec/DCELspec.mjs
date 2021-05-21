@@ -1,31 +1,7 @@
 import { readFileSync } from "fs";
 import { resolve } from "path";
-import { getTestFiles, checkIfEntitiesComplete } from "./test-helpers.mjs";
+import { getTestFiles } from "./test-helpers.mjs";
 import DCEL from "../assets/lib/dcel/Dcel.mjs";
-
-describe("buildFromGeoJSON() for simple shapes sets all required properties for all", function () {
-  const dir = "assets/data/shapes";
-  const testFiles = getTestFiles(dir);
-
-  testFiles.forEach((file) => {
-    const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-    const dcel = DCEL.buildFromGeoJSON(json);
-
-    checkIfEntitiesComplete(dcel);
-  });
-});
-
-describe("buildFromGeoJSON() for geoData sets all required properties for all", function () {
-  const dir = "assets/data/geodata";
-  const testFiles = getTestFiles(dir);
-
-  testFiles.forEach((file) => {
-    const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-    const dcel = DCEL.buildFromGeoJSON(json);
-
-    checkIfEntitiesComplete(dcel);
-  });
-});
 
 describe("buildFromGeoJSON() on geodata creates only complete cycles", function () {
   const dir = "assets/data/geodata";
