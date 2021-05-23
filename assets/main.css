@@ -3,13 +3,14 @@ body {
   font-family: "DM Mono", monospace;
 }
 #map-grid {
+  height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1px;
 }
 .map {
-  height: 50vh;
-  width: 50vw;
+  height: 100%;
+  width: 100%;
 }
 .leaflet-container {
   font-family: "DM Mono", monospace;

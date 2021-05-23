@@ -1,6 +1,11 @@
 import DCEL from "./lib/dcel/Dcel.mjs";
 import { logDCEL, mapFromDCEL } from "./lib/dcel/Utilities.mjs";
 
+async function getJSON(path) {
+  const response = await fetch(path);
+  return response.json();
+}
+
 const tests = [
   // "assets/data/geodata/ne_110m_africa_admin0.json",
   // "assets/data/geodata/AUT_adm1.json",
@@ -25,17 +30,35 @@ const tests = [
   "assets/data/shapes/edge-cases.json",
 ];
 
-async function getJSON(path) {
-  const response = await fetch(path);
-  return response.json();
+function calculateMapGrid(mapGridID) {
+  const grid = document.getElementById(mapGridID);
+  let templateColumns;
+  if (tests.length === 1) {
+    templateColumns = "1fr";
+  } else if (tests.length > 1 && tests.length <= 5 && tests.length != 3) {
+    templateColumns = "1fr 1fr";
+  } else {
+    templateColumns = "1fr 1fr 1fr";
+  }
+  grid.style.gridTemplateColumns = templateColumns;
+
+  tests.forEach((test) => {
+    const map = document.createElement("div");
+    const name = test.slice(test.lastIndexOf("/") + 1, -5);
+    map.id = name;
+    map.className = "map";
+    grid.appendChild(map);
+  });
 }
 
+calculateMapGrid("map-grid");
+
 tests.forEach(async (test) => {
-  const data = await getJSON(test);
   const name = test.slice(test.lastIndexOf("/") + 1, -5);
+  const data = await getJSON(test);
   const subdivision = DCEL.buildFromGeoJSON(data);
   subdivision.splitEdges();
 
   logDCEL(subdivision, name);
-  mapFromDCEL(subdivision, name + "_bisect");
+  mapFromDCEL(subdivision, name);
 });

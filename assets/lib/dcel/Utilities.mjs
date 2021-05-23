@@ -25,12 +25,6 @@ export function createGeoJSON(features, name) {
 }
 
 export function mapFromDCEL(dcel, name) {
-  const grid = document.getElementById("map-grid");
-  const map = document.createElement("div");
-  map.id = name;
-  map.className = "map";
-  grid.appendChild(map);
-
   const DCELMap = L.map(name, {
     zoomControl: false,
   });
@@ -114,10 +108,9 @@ export function mapFromDCEL(dcel, name) {
 
   function faceStyle(feature) {
     return {
-      color: "black",
+      color: "transparent",
       fillColor: feature.properties.ringType === "inner" ? "transparent" : "black",
       weight: 1,
-      dashArray: feature.properties.ringType === "inner" ? "3,3" : "0",
     };
   }
 
@@ -125,6 +118,7 @@ export function mapFromDCEL(dcel, name) {
     return {
       color: "black",
       weight: 1,
+      dashArray: feature.properties.incidentFaceType === "inner" ? "3,3" : "0",
     };
   }
 
@@ -169,7 +163,7 @@ export function mapFromDCEL(dcel, name) {
   function highlightPolygonFeature(e) {
     var feature = e.target;
     feature.setStyle({
-      weight: 5,
+      weight: 3,
       fillOpacity: 0.5,
     });
   }
@@ -197,9 +191,11 @@ export function mapFromDCEL(dcel, name) {
   }
 
   const edges = [];
-  dcel.halfEdges.forEach((halfEdge) => {
-    const idx = edges.indexOf(halfEdge.twin);
-    if (idx < 0) edges.push(halfEdge);
+  dcel.getBoundedFaces().forEach((f) => {
+    f.getEdges().forEach((halfEdge) => {
+      const idx = edges.indexOf(halfEdge.twin);
+      if (idx < 0) edges.push(halfEdge);
+    });
   });
 
   const edgeFeatures = edges.map((e) => {
@@ -216,6 +212,7 @@ export function mapFromDCEL(dcel, name) {
         ],
       },
       properties: {
+        incidentFaceType: e.face.outerRing ? "inner" : "outer",
         length: e.getLength(),
         edge: `
           <span class="material-icons">rotate_left</span>
@@ -276,13 +273,17 @@ export function mapFromDCEL(dcel, name) {
   function toggleLayer() {
     if (showPolygons) {
       polygonLayer.addTo(DCELMap);
-      polygonLayer.bringToBack();
+      // polygonLayer.bringToBack();
       faceLayer.remove();
+      vertexLayer.remove();
+      edgeLayer.remove();
       facesLabel.classList.remove("active");
       polygonsLabel.classList.add("active");
     } else {
       faceLayer.addTo(DCELMap);
-      faceLayer.bringToBack();
+      vertexLayer.addTo(DCELMap);
+      edgeLayer.addTo(DCELMap);
+      // faceLayer.bringToBack();
       polygonLayer.remove();
       facesLabel.classList.add("active");
       polygonsLabel.classList.remove("active");
