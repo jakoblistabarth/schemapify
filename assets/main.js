@@ -57,7 +57,8 @@ tests.forEach(async (test) => {
   const name = test.slice(test.lastIndexOf("/") + 1, -5);
   const data = await getJSON(test);
   const subdivision = DCEL.buildFromGeoJSON(data);
-  subdivision.splitEdges();
+  // subdivision.splitEdges();
+  subdivision.constrainAngles();
 
   logDCEL(subdivision, name);
   mapFromDCEL(subdivision, name);

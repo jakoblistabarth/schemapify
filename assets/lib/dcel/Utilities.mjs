@@ -39,28 +39,28 @@ export function mapFromDCEL(dcel, name) {
       },
       properties: {
         uuid: v.uuid,
+        isSignificant: v.schematizationProperties.isSignificant,
       },
     };
   });
 
   const verticesJSON = createGeoJSON(vertexFeatures, name + "_vertices");
 
-  const vertexStyleOptions = {
-    radius: 2,
-    fillColor: "white",
-    color: "black",
-    weight: 2,
-    opacity: 1,
-    fillOpacity: 1,
-  };
-
   const vertexLayer = L.geoJson(verticesJSON, {
     pointToLayer: function (feature, latlng) {
       const uuid = feature.properties.uuid;
       const v = feature.geometry.coordinates;
-      return L.circleMarker(latlng, vertexStyleOptions).bindTooltip(`
+      return L.circleMarker(latlng, {
+        radius: feature.properties.isSignificant ? 4 : 2,
+        fillColor: "white",
+        color: "black",
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 1,
+      }).bindTooltip(`
         <span class="material-icons">radio_button_checked</span> ${uuid.substring(0, 5)}
-        (${v[0]}/${v[1]})
+        (${v[0]}/${v[1]})<br>
+        significant: ${feature.properties.isSignificant}
     `);
     },
     onEachFeature: onEachVertex,
@@ -187,18 +187,14 @@ export function mapFromDCEL(dcel, name) {
   }
 
   function clickEdge(e) {
-    console.log("length", e.target.feature.properties.length);
+    const edge = e.target.feature;
+    console.log(
+      `edge => length: ${edge.properties.length} sector: ${edge.properties.sector}`,
+      edge.properties.schematizationProperties
+    );
   }
 
-  const edges = [];
-  dcel.getBoundedFaces().forEach((f) => {
-    f.getEdges().forEach((halfEdge) => {
-      const idx = edges.indexOf(halfEdge.twin);
-      if (idx < 0) edges.push(halfEdge);
-    });
-  });
-
-  const edgeFeatures = edges.map((e) => {
+  const edgeFeatures = dcel.getSimpleEdges().map((e) => {
     const a = e.tail;
     const b = e.twin.tail;
 
@@ -214,6 +210,8 @@ export function mapFromDCEL(dcel, name) {
       properties: {
         incidentFaceType: e.face.outerRing ? "inner" : "outer",
         length: e.getLength(),
+        sector: e.getAssociatedSector(),
+        schematizationProperties: e.schematizationProperties,
         edge: `
           <span class="material-icons">rotate_left</span>
           ${e.uuid.substring(0, 5)} (${e.tail.x}/${e.tail.y})
@@ -273,18 +271,16 @@ export function mapFromDCEL(dcel, name) {
   function toggleLayer() {
     if (showPolygons) {
       polygonLayer.addTo(DCELMap);
-      // polygonLayer.bringToBack();
       faceLayer.remove();
       vertexLayer.remove();
       edgeLayer.remove();
       facesLabel.classList.remove("active");
       polygonsLabel.classList.add("active");
     } else {
-      faceLayer.addTo(DCELMap);
-      vertexLayer.addTo(DCELMap);
-      edgeLayer.addTo(DCELMap);
-      // faceLayer.bringToBack();
       polygonLayer.remove();
+      faceLayer.addTo(DCELMap);
+      edgeLayer.addTo(DCELMap);
+      vertexLayer.addTo(DCELMap);
       facesLabel.classList.add("active");
       polygonsLabel.classList.remove("active");
     }

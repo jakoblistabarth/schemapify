@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import config from "../../schematization.config.mjs";
 
 class HalfEdge {
   constructor(tail, dcel) {
@@ -9,6 +10,7 @@ class HalfEdge {
     this.prev = null;
     this.next = null;
     this.dcel = dcel;
+    this.schematizationProperties = {};
   }
 
   getTail() {
@@ -148,6 +150,55 @@ class HalfEdge {
         currentHalfEdge = newHalfEdge;
       }
     }
+  }
+
+  getAssociatedDirections(sectors = config.C.getSectors()) {
+    const angle = this.getAngle();
+    let directions;
+    sectors.some(function (sector) {
+      if (angle === sector.lower) directions = [sector.lower];
+      else if (angle === sector.upper) directions = [sector.upper];
+      else if (angle > sector.lower && angle < sector.upper)
+        directions = [sector.lower, sector.upper];
+    });
+    return directions;
+  }
+
+  getAssociatedSector(sectors = config.C.getSectors()) {
+    const direction = this.getAssociatedDirections();
+    return sectors.reduce((acc, sector) => {
+      if (
+        (direction[0] === sector.lower && direction[1] === sector.upper) ||
+        +direction === sector.lower ||
+        +direction === sector.upper ||
+        +direction === sector.upper - Math.PI * 2
+      ) {
+        acc.push(sector);
+      }
+      return acc;
+    }, []);
+  }
+
+  isInSector(sector) {
+    const [lowerBound, upperBound] = sector.getBounds();
+    return (this.getAngle() > lowerBound && this.getAngle() < upperBound) ||
+      this.getAngle() === lowerBound ||
+      this.getAngle() === upperBound
+      ? true
+      : false;
+  }
+
+  isAligned(sectors = config.C.getSectors()) {
+    const isAligned = this.getAssociatedDirections(sectors).length === 1 ? true : false;
+    this.schematizationProperties.isAligned = isAligned;
+    return isAligned;
+  }
+
+  classify(sectors = config.C.getSectors()) {
+    let classification;
+    if (this.isAligned() && this.tail.allEdgesAligned()) classification = "alignedBasic";
+    this.schematizationProperties.classification = classification;
+    return classification;
   }
 }
 

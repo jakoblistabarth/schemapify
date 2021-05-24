@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import config from "../../schematization.config.mjs";
 
 class Vertex {
   constructor(x, y) {
@@ -6,6 +7,7 @@ class Vertex {
     this.x = x;
     this.y = y;
     this.edges = [];
+    this.schematizationProperties = {};
   }
 
   static getKey(x, y) {
@@ -35,6 +37,52 @@ class Vertex {
       this.edges.splice(idx, 1);
     }
     return this.edges;
+  }
+
+  allEdgesAligned() {
+    return this.edges.every((edge) => edge.isAligned());
+  }
+
+  isSignificant(c = config.C) {
+    // QUESTION: are vertices with aligned edges always not signficant?
+    // TODO: move to another class? to not mix dcel and schematization?
+
+    // classify as not significant if all edges are already aligned
+    if (this.allEdgesAligned()) {
+      this.schematizationProperties.isSignificant = false;
+      return false;
+    }
+
+    // classify as significant if one sector occurs multiple times
+    const occupiedSectorIdcs = this.edges
+      .map((edge) => edge.getAssociatedSector().map((sector) => sector.idx))
+      .flat()
+      .sort();
+
+    const uniqueSectorIdcs = Array.from(new Set(occupiedSectorIdcs));
+    if (occupiedSectorIdcs.length !== uniqueSectorIdcs.length) {
+      this.schematizationProperties.isSignificant = true;
+      return true;
+    }
+
+    // classify as not significant if none of the sectors are neighbors
+    const isSignificant = uniqueSectorIdcs.every((idx) => {
+      const sector = c.getSector(idx);
+      const [prevSector, nextSector] = sector.getNeighbors();
+      if (
+        this.getEdgesInSector(prevSector).length > 0 ||
+        this.getEdgesInSector(nextSector).length > 0
+      )
+        return true;
+    });
+    this.schematizationProperties.isSignificant = isSignificant;
+    return isSignificant;
+  }
+
+  getEdgesInSector(sector) {
+    return this.edges.filter((edge) => {
+      return edge.isInSector(sector);
+    });
   }
 }
 
