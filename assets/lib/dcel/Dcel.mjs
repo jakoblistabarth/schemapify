@@ -51,6 +51,18 @@ class Dcel {
     return this.faces.find((f) => f.edge == null);
   }
 
+  getSimpleEdges() {
+    // FIXME: confusing for map output: sometimes clockwise/counterclockwise assignment in map output wrong
+    let simpleEdges = [];
+    this.getBoundedFaces().forEach((f) => {
+      f.getEdges().forEach((halfEdge) => {
+        const idx = simpleEdges.indexOf(halfEdge.twin);
+        if (idx < 0) simpleEdges.push(halfEdge);
+      });
+    });
+    return simpleEdges;
+  }
+
   // as seen @ https://github.com/Turfjs/turf/blob/master/packages/turf-bbox/index.ts
   // takes a dcel
   // returns its Boundingbox as [minX, minY, maxX, maxY]
@@ -85,7 +97,7 @@ class Dcel {
   }
 
   findVertex(x, y) {
-    const key = Vertex.getKey(x, y);
+    const key = Vertex.getKey(x, y); // TODO: why do we need this string key again, wyh not only compare coordinates??
     return this.vertices[key];
   }
 
@@ -210,6 +222,8 @@ class Dcel {
     }
 
     subdivision.setEpsilon(config.lambda);
+    console.log(config.C);
+    console.log(config.C.getSectors());
     return subdivision;
   }
 
@@ -229,6 +243,25 @@ class Dcel {
       });
     });
     return this;
+  }
+
+  classifyVerticesEdges() {
+    Object.values(this.vertices).forEach((v) => {
+      v.isSignificant();
+    });
+    const edgesWith2SignificantEndPoints = this.getSimpleEdges().filter((edge) => {
+      const [head, tail] = edge.getEndpoints();
+      return head.isSignificant() && tail.isSignificant();
+    });
+    edgesWith2SignificantEndPoints.forEach((edge) => edge.bisect());
+
+    this.getSimpleEdges().forEach((edge) => {
+      edge.classify();
+    });
+  }
+
+  constrainAngles() {
+    this.classifyVerticesEdges();
   }
 }
 

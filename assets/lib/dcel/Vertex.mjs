@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import config from "../../schematization.config.mjs";
 
 class Vertex {
   constructor(x, y) {
@@ -6,6 +7,7 @@ class Vertex {
     this.x = x;
     this.y = y;
     this.edges = [];
+    this.schematizationProperties = {};
   }
 
   static getKey(x, y) {
@@ -35,6 +37,61 @@ class Vertex {
       this.edges.splice(idx, 1);
     }
     return this.edges;
+  }
+
+  allEdgesAligned() {
+    return this.edges.every((edge) => edge.isAligned());
+  }
+
+  isSignificant(sectors = config.C.getSectors()) {
+    // QUESTION: are vertices with aligned edges always not signficant?
+    // TODO: move to another class? to not mix dcel and schematization?
+
+    // classify as not significant if all edges are already aligned
+    if (this.allEdgesAligned()) {
+      this.schematizationProperties.isSignificant = false;
+      return false;
+    }
+
+    // classify as significant if one sector occurs multiple times
+    const occupiedSectors = this.edges
+      .map((edge) => edge.getSectorIndex(sectors))
+      .flat()
+      .sort();
+
+    const uniqueSectors = Array.from(new Set(occupiedSectors));
+    if (occupiedSectors.length !== uniqueSectors.length) {
+      this.schematizationProperties.isSignificant = true;
+      return true;
+    }
+
+    // classify as not significant if none of the sectors are neighbors
+    const isSignificant = uniqueSectors.every((sector) => {
+      const sectorIdx = sector;
+      const nextSectorIdx = (sectorIdx + 1) % sectors.length;
+      const prevSectorIdx = sectorIdx == 0 ? sectors.length - 1 : sectorIdx - 1;
+      console.log(`
+        examined sector: ${sectorIdx} => edges: ${this.getEdgesInSector(sectors[sectorIdx]).length} 
+        edges in prev (${prevSectorIdx}): ${this.getEdgesInSector(sectors[prevSectorIdx]).length}
+        edges in next prev(${nextSectorIdx}), ${
+        this.getEdgesInSector(sectors[nextSectorIdx]).length
+      }
+      }
+        `);
+      if (
+        this.getEdgesInSector(sectors[prevSectorIdx]).length > 0 ||
+        this.getEdgesInSector(sectors[nextSectorIdx]).length > 0
+      )
+        return true;
+    });
+    this.schematizationProperties.isSignificant = isSignificant;
+    return isSignificant;
+  }
+
+  getEdgesInSector(sector) {
+    return this.edges.filter((edge) => {
+      return edge.isInSector(sector);
+    });
   }
 }
 

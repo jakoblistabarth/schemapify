@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import config from "../../schematization.config.mjs";
 
 class HalfEdge {
   constructor(tail, dcel) {
@@ -9,6 +10,7 @@ class HalfEdge {
     this.prev = null;
     this.next = null;
     this.dcel = dcel;
+    this.schematizationProperties = {};
   }
 
   getTail() {
@@ -148,6 +150,58 @@ class HalfEdge {
         currentHalfEdge = newHalfEdge;
       }
     }
+  }
+
+  getAssociatedDirections(sectors = config.C.getSectors()) {
+    const angle = this.getAngle();
+    let directions;
+    sectors.some(function (sector) {
+      if (angle === sector[0]) directions = [sector[0]];
+      else if (angle === sector[1]) directions = [sector[1]];
+      else if (angle > sector[0] && angle < sector[1]) directions = sector;
+      return;
+    });
+    return directions;
+  }
+
+  getSectorIndex(sectors = config.C.getSectors()) {
+    const direction = this.getAssociatedDirections();
+    const idx = sectors.reduce((acc, sector, idx) => {
+      if (
+        (direction[0] === sector[0] && direction[1] === sector[1]) ||
+        +direction === sector[0] ||
+        +direction === sector[1] ||
+        +direction === sector[1] - Math.PI * 2
+      ) {
+        acc.push(idx);
+      }
+      return acc;
+    }, []);
+    return idx;
+  }
+
+  isInSector(sector) {
+    return (this.getAngle() > sector[0] && this.getAngle() < sector[1]) ||
+      this.getAngle() === sector[0] ||
+      this.getAngle() === sector[1]
+      ? true
+      : false;
+  }
+
+  isAligned(sectors = config.C.getSectors()) {
+    const isAligned = this.getAssociatedDirections(sectors).length === 1 ? true : false;
+    this.schematizationProperties.isAligned = isAligned;
+    return isAligned;
+  }
+
+  classify(sectors = config.C.getSectors()) {
+    let classification;
+    const sectorIdx = this.getSectorIndex();
+    const prevSector = sectors[(sectorIdx - 1) % sectors.length];
+    const nextSector = sectors[(sectorIdx + 1) % sectors.length];
+    if (this.isAligned() && this.tail.allEdgesAligned()) classification = "alignedBasic";
+    this.schematizationProperties.classification = classification;
+    return classification;
   }
 }
 
