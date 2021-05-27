@@ -54,20 +54,23 @@ class Vertex {
     }
 
     // classify as significant if one sector occurs multiple times
-    const occupiedSectorIdcs = this.edges
-      .map((edge) => edge.getAssociatedSector().map((sector) => sector.idx))
+    const occupiedSectors = this.edges
+      .map((edge) => edge.getAssociatedSector())
       .flat()
       .sort();
 
-    const uniqueSectorIdcs = Array.from(new Set(occupiedSectorIdcs));
-    if (occupiedSectorIdcs.length !== uniqueSectorIdcs.length) {
+    const uniqueSectors = occupiedSectors.reduce((acc, sector) => {
+      if (!acc.find((accSector) => accSector.idx == sector.idx)) acc.push(sector);
+      return acc;
+    }, []);
+
+    if (occupiedSectors.length !== uniqueSectors.length) {
       this.schematizationProperties.isSignificant = true;
       return true;
     }
 
     // classify as not significant if none of the sectors are neighbors
-    const isSignificant = uniqueSectorIdcs.every((idx) => {
-      const sector = c.getSector(idx);
+    const isSignificant = uniqueSectors.every((sector) => {
       const [prevSector, nextSector] = sector.getNeighbors();
       if (
         this.getEdgesInSector(prevSector).length > 0 ||
