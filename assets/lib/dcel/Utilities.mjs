@@ -30,6 +30,15 @@ export function mapFromDCEL(dcel, name) {
   });
   DCELMap.attributionControl.addAttribution(name);
 
+  function highlightDCELFeature(e) {
+    var feature = e.target;
+    feature.setStyle({
+      weight: 3,
+      fillColor: "black",
+      fillOpacity: feature.feature.properties.ringType === "inner" ? 0.25 : 0.5,
+    });
+  }
+
   const vertexFeatures = Object.values(dcel.vertices).map((v) => {
     return {
       type: "Feature",
@@ -45,7 +54,6 @@ export function mapFromDCEL(dcel, name) {
   });
 
   const verticesJSON = createGeoJSON(vertexFeatures, name + "_vertices");
-
   const vertexLayer = L.geoJson(verticesJSON, {
     pointToLayer: function (feature, latlng) {
       const uuid = feature.properties.uuid;
@@ -66,6 +74,17 @@ export function mapFromDCEL(dcel, name) {
     onEachFeature: onEachVertex,
   });
 
+  function resetHighlightVertex(e) {
+    vertexLayer.resetStyle(e.target);
+  }
+
+  function onEachVertex(feature, layer) {
+    layer.on({
+      mouseover: highlightDCELFeature,
+      mouseout: resetHighlightVertex,
+    });
+  }
+
   const faceFeatures = dcel.getBoundedFaces().map((f) => {
     const halfEdges = f.getEdges();
     const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
@@ -85,7 +104,6 @@ export function mapFromDCEL(dcel, name) {
   });
 
   const facesJSON = createGeoJSON(faceFeatures, name + "_polygons");
-
   const faceLayer = L.geoJSON(facesJSON, {
     style: faceStyle,
     onEachFeature: onEachFace,
@@ -114,27 +132,9 @@ export function mapFromDCEL(dcel, name) {
     };
   }
 
-  function edgeStyle(feature) {
-    return {
-      color: "black",
-      weight: 1,
-      dashArray: feature.properties.incidentFaceType === "inner" ? "3,3" : "0",
-    };
-  }
-
-  function onEachVertex(feature, layer) {
-    layer.on({
-      mouseover: highlightDCELFeature,
-      mouseout: resetHighlightVertex,
-    });
-  }
-
-  function onEachEdge(feature, layer) {
-    layer.on({
-      mouseover: highlightDCELFeature,
-      mouseout: resetHighlightEdge,
-      click: clickEdge,
-    });
+  function resetHighlightFace(e) {
+    e.target.bringToBack();
+    faceLayer.resetStyle(e.target);
   }
 
   function onEachFace(feature, layer) {
@@ -142,56 +142,6 @@ export function mapFromDCEL(dcel, name) {
       mouseover: highlightDCELFeature,
       mouseout: resetHighlightFace,
     });
-  }
-
-  function onEachPolygon(feature, layer) {
-    layer.on({
-      mouseover: highlightPolygonFeature,
-      mouseout: resetHighlightPolygon,
-    });
-  }
-
-  function highlightDCELFeature(e) {
-    var feature = e.target;
-    feature.setStyle({
-      weight: 3,
-      fillColor: "black",
-      fillOpacity: feature.feature.properties.ringType === "inner" ? 0.25 : 0.5,
-    });
-  }
-
-  function highlightPolygonFeature(e) {
-    var feature = e.target;
-    feature.setStyle({
-      weight: 3,
-      fillOpacity: 0.5,
-    });
-  }
-
-  function resetHighlightVertex(e) {
-    vertexLayer.resetStyle(e.target);
-  }
-
-  function resetHighlightEdge(e) {
-    edgeLayer.resetStyle(e.target);
-  }
-
-  function resetHighlightPolygon(e) {
-    e.target.bringToBack();
-    polygonLayer.resetStyle(e.target);
-  }
-
-  function resetHighlightFace(e) {
-    e.target.bringToBack();
-    faceLayer.resetStyle(e.target);
-  }
-
-  function clickEdge(e) {
-    const edge = e.target.feature;
-    console.log(
-      `edge => length: ${edge.properties.length} sector: ${edge.properties.sector}`,
-      edge.properties.schematizationProperties
-    );
   }
 
   const edgeFeatures = dcel.getSimpleEdges().map((e) => {
@@ -239,12 +189,40 @@ export function mapFromDCEL(dcel, name) {
             `;
   });
 
+  function edgeStyle(feature) {
+    return {
+      color: "black",
+      weight: 1,
+      dashArray: feature.properties.incidentFaceType === "inner" ? "3,3" : "0",
+    };
+  }
+
+  function resetHighlightEdge(e) {
+    edgeLayer.resetStyle(e.target);
+  }
+
+  function onEachEdge(feature, layer) {
+    layer.on({
+      mouseover: highlightDCELFeature,
+      mouseout: resetHighlightEdge,
+      click: clickEdge,
+    });
+  }
+
+  function clickEdge(e) {
+    const edge = e.target.feature;
+    console.log(
+      `edge => length: ${edge.properties.length} sector: ${edge.properties.sector}`,
+      edge.properties.schematizationProperties
+    );
+  }
+
   const polygonsJSON = DCELtoGeoJSON(dcel);
   const polygonLayer = L.geoJSON(polygonsJSON, {
     style: function (feature) {
       return {
         color: "red",
-        weight: 1,
+        weight: 2,
       };
     },
     onEachFeature: onEachPolygon,
@@ -262,6 +240,26 @@ export function mapFromDCEL(dcel, name) {
             </table>
             `;
   });
+
+  function highlightPolygonFeature(e) {
+    var feature = e.target;
+    feature.setStyle({
+      weight: 4,
+      fillOpacity: 0.5,
+    });
+  }
+
+  function resetHighlightPolygon(e) {
+    e.target.bringToBack();
+    polygonLayer.resetStyle(e.target);
+  }
+
+  function onEachPolygon(feature, layer) {
+    layer.on({
+      mouseover: highlightPolygonFeature,
+      mouseout: resetHighlightPolygon,
+    });
+  }
 
   faceLayer.addTo(DCELMap);
   edgeLayer.addTo(DCELMap);
