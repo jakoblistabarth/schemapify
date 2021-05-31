@@ -30,6 +30,16 @@ body {
 .leaflet-tooltip table {
   border-collapse: collapse;
 }
+.leaflet-tooltip table .material-icons {
+  font-size: 1em;
+  top: 0.2em;
+}
+.leaflet-tooltip td {
+  padding: 0 0.5em;
+}
+.leaflet-tooltip tr td:first-child {
+  padding-left: 0;
+}
 
 .material-icons {
   font-size: 18px;

@@ -17,9 +17,9 @@ class Sector {
 
   getNeighbors(sectors = config.C.getSectors()) {
     const idx = this.getIdx();
-    const next = (idx + 1) % sectors.length;
     const prev = idx == 0 ? sectors.length - 1 : idx - 1;
-    return [sectors[next], sectors[prev]];
+    const next = (idx + 1) % sectors.length;
+    return [sectors[prev], sectors[next]];
   }
 }
 

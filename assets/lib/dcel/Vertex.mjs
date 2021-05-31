@@ -27,8 +27,7 @@ class Vertex {
     const a = x1 - x2;
     const b = y1 - y2;
 
-    const c = Math.sqrt(a * a + b * b);
-    return c;
+    return Math.sqrt(a * a + b * b);
   }
 
   removeIncidentEdge(edge) {
@@ -44,7 +43,7 @@ class Vertex {
   }
 
   isSignificant(c = config.C) {
-    // QUESTION: are vertices with aligned edges always not signficant?
+    // QUESTION: are vertices with only aligned edges never significant?
     // TODO: move to another class? to not mix dcel and schematization?
 
     // classify as not significant if all edges are already aligned
@@ -86,6 +85,37 @@ class Vertex {
     return this.edges.filter((edge) => {
       return edge.isInSector(sector);
     });
+  }
+
+  assignDirections(c = config.C) {
+    let edgeIdx = 0;
+    let directions = [];
+    while (
+      directions.length !== this.edges.length &&
+      directions.length === Array.from(new Set(directions)).length
+    ) {
+      const edge = this.edges[edgeIdx];
+      // const currentSector = edge.getAssociatedSector();
+      // const edgesInCurrentSector = this.getEdgesInSector(currentSector);
+      let direction;
+      if (edge.isAligned(c.getSectors())) {
+        direction = edge.getAssociatedDirections(c.getSectors())[0];
+      } else {
+        const angle = edge.getAngle();
+        const [lower, upper] = edge.getAssociatedDirections(c.getSectors());
+        direction = angle - lower <= upper - angle ? lower : upper;
+      }
+      direction = direction == Math.PI * 2 ? 0 : direction;
+      console.log(direction, c.getAngles());
+      let directionIdx = c.getAngles().indexOf(direction);
+      if (directionIdx === directions[(edgeIdx - 1) % this.edges.length])
+        directionIdx = (directionIdx + 1) % c.getSectors().length;
+      directions[edgeIdx] = directionIdx;
+      console.log(edgeIdx, directions);
+      edgeIdx = (edgeIdx + 1) % this.edges.length;
+    }
+    this.edges.forEach((edge, idx) => (edge.schematizationProperties.direction = directions[idx]));
+    return this.edges;
   }
 }
 

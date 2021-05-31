@@ -253,7 +253,7 @@ class Dcel {
     });
     edgesWith2SignificantEndPoints.forEach((edge) => edge.bisect());
 
-    this.getSimpleEdges().forEach((edge) => {
+    this.halfEdges.forEach((edge) => {
       edge.classify();
     });
   }

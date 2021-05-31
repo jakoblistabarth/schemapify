@@ -1,5 +1,41 @@
 import { createEdgeVertexSetup } from "./test-helpers.mjs";
 
+describe("isAligned() works properly", function () {
+  let s;
+  beforeEach(function () {
+    s = createEdgeVertexSetup();
+  });
+
+  it("for an aligned edge in a rectilinear schematization.", function () {
+    expect(s.od0.isAligned(s.c2.getSectors())).toBe(true);
+    expect(s.od90.isAligned(s.c2.getSectors())).toBe(true);
+    expect(s.od180.isAligned(s.c2.getSectors())).toBe(true);
+    expect(s.od270.isAligned(s.c2.getSectors())).toBe(true);
+  });
+
+  it("for an aligned edge in an octilinear schematization.", function () {
+    expect(s.od0.isAligned(s.c4.getSectors())).toBe(true);
+    expect(s.od90.isAligned(s.c4.getSectors())).toBe(true);
+    expect(s.od180.isAligned(s.c4.getSectors())).toBe(true);
+    expect(s.od270.isAligned(s.c4.getSectors())).toBe(true);
+  });
+
+  it("for an unaligned edge in a rectilinear schematization.", function () {
+    expect(s.od37.isAligned(s.c2.getSectors())).toBe(false);
+    expect(s.od53.isAligned(s.c2.getSectors())).toBe(false);
+    expect(s.od76.isAligned(s.c2.getSectors())).toBe(false);
+    expect(s.od143.isAligned(s.c2.getSectors())).toBe(false);
+    expect(s.od217.isAligned(s.c2.getSectors())).toBe(false);
+  });
+
+  it("for an unaligned edge in an octilinear schematization.", function () {
+    expect(s.od37.isAligned(s.c4.getSectors())).toBe(false);
+    expect(s.od53.isAligned(s.c4.getSectors())).toBe(false);
+    expect(s.od76.isAligned(s.c4.getSectors())).toBe(false);
+    expect(s.od143.isAligned(s.c4.getSectors())).toBe(false);
+  });
+});
+
 describe("getNeighbors() returns the neighboring sectors of the sector", function () {
   let s;
   beforeEach(function () {
@@ -11,7 +47,7 @@ describe("getNeighbors() returns the neighboring sectors of the sector", functio
       .getSector(0)
       .getNeighbors()
       .map((neighbor) => neighbor.idx);
-    expect(neighbors).toEqual([1, 3]);
+    expect(neighbors).toEqual([3, 1]);
   });
 });
 
@@ -22,7 +58,7 @@ describe("isInSector()", function () {
   });
 
   it("returns true for edges in specified sector", function () {
-    expect(s.od14.isInSector(s.c2.getSector(0))).toBe(true);
+    expect(s.od37.isInSector(s.c2.getSector(0))).toBe(true);
   });
 
   it("returns true for aligned edge associated to specified sector", function () {
@@ -40,6 +76,11 @@ describe("getEdgesInSector()", function () {
     s.o.edges.push(s.od0, s.od90);
     expect(s.o.getEdgesInSector(s.c2.getSector(0)).length).toBe(2);
   });
+
+  it("get correct edges in specified sector", function () {
+    s.o.edges.push(s.od0, s.od90);
+    expect(s.o.getEdgesInSector(s.c4.getSector(0)).length).toBe(1);
+  });
 });
 
 describe("isSignficant()", function () {
@@ -54,7 +95,7 @@ describe("isSignficant()", function () {
   });
 
   it("classifies a vertex correctly", function () {
-    s.o.edges.push(s.od14, s.od284);
+    s.o.edges.push(s.od37, s.od284);
     expect(s.o.isSignificant(s.c2)).toBe(true);
   });
 
@@ -64,17 +105,17 @@ describe("isSignficant()", function () {
   });
 
   it("classifies a vertex correctly", function () {
-    s.o.edges.push(s.od0, s.od14);
+    s.o.edges.push(s.od0, s.od37);
     expect(s.o.isSignificant()).toBe(true);
   });
 
   it("classifies a vertex correctly", function () {
-    s.o.edges.push(s.od104, s.od14);
+    s.o.edges.push(s.od104, s.od37);
     expect(s.o.isSignificant()).toBe(true);
   });
 
   it("classifies a vertex with edges in disjoint sectors as not significant.", function () {
-    s.o.edges.push(s.od225, s.od14);
+    s.o.edges.push(s.od217, s.od37);
     expect(s.o.isSignificant()).toBe(false);
   });
 });
@@ -128,7 +169,7 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
     expect(s.od90.getAssociatedDirections(s.c2.getSectors())).toEqual([Math.PI * 0.5]);
     expect(s.od180.getAssociatedDirections(s.c2.getSectors())).toEqual([Math.PI]);
     expect(s.od270.getAssociatedDirections(s.c2.getSectors())).toEqual([Math.PI * 1.5]);
-    expect(s.od14.getAssociatedDirections(s.c2.getSectors())).toEqual([0, Math.PI * 0.5]);
+    expect(s.od37.getAssociatedDirections(s.c2.getSectors())).toEqual([0, Math.PI * 0.5]);
     expect(s.od284.getAssociatedDirections(s.c2.getSectors())).toEqual([
       Math.PI * 1.5,
       Math.PI * 2,
@@ -140,7 +181,7 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
     expect(s.od90.getAssociatedDirections(s.c4.getSectors())).toEqual([Math.PI * 0.5]);
     expect(s.od180.getAssociatedDirections(s.c4.getSectors())).toEqual([Math.PI]);
     expect(s.od270.getAssociatedDirections(s.c4.getSectors())).toEqual([Math.PI * 1.5]);
-    expect(s.od14.getAssociatedDirections(s.c4.getSectors())).toEqual([0, Math.PI * 0.25]);
+    expect(s.od37.getAssociatedDirections(s.c4.getSectors())).toEqual([0, Math.PI * 0.25]);
     expect(s.od284.getAssociatedDirections(s.c4.getSectors())).toEqual([
       Math.PI * 1.5,
       Math.PI * 1.75,

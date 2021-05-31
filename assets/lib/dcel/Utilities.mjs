@@ -1,4 +1,4 @@
-import leaflet from "leaflet"; // FIXME: load leaflet as module
+// import leaflet from "leaflet"; // FIXME: load leaflet as module
 import { DCELtoGeoJSON } from "./DCELtoGeoJSON.mjs";
 
 export function logDCEL(dcel, name, verbose = false) {
@@ -49,6 +49,7 @@ export function mapFromDCEL(dcel, name) {
       properties: {
         uuid: v.uuid,
         isSignificant: v.schematizationProperties.isSignificant,
+        edges: v.edges,
       },
     };
   });
@@ -56,8 +57,29 @@ export function mapFromDCEL(dcel, name) {
   const verticesJSON = createGeoJSON(vertexFeatures, name + "_vertices");
   const vertexLayer = L.geoJson(verticesJSON, {
     pointToLayer: function (feature, latlng) {
-      const uuid = feature.properties.uuid;
+      const props = feature.properties;
       const v = feature.geometry.coordinates;
+      const edges = props.edges
+        .map((edge) => {
+          const head = edge.getHead();
+          const tail = edge.getTail();
+          return `
+            <tr>
+              <td>${edge.uuid.substring(0, 5)}</td>
+              <td>
+                (${tail.x}/${tail.y})
+                <span class="material-icons">arrow_forward</span>
+                (${head.x}/${head.y})
+              </td>
+              <td>Sectors: ${edge
+                .getAssociatedSector()
+                .map((s) => s.idx)
+                .join(",")}</td>
+              <td>${edge.schematizationProperties.classification}</td>
+            </tr>
+          `;
+        })
+        .join("");
       return L.circleMarker(latlng, {
         radius: feature.properties.isSignificant ? 4 : 2,
         fillColor: "white",
@@ -66,9 +88,12 @@ export function mapFromDCEL(dcel, name) {
         opacity: 1,
         fillOpacity: 1,
       }).bindTooltip(`
-        <span class="material-icons">radio_button_checked</span> ${uuid.substring(0, 5)}
+        <span class="material-icons">radio_button_checked</span> ${props.uuid.substring(0, 5)}
         (${v[0]}/${v[1]})<br>
-        significant: ${feature.properties.isSignificant}
+        significant: ${props.isSignificant}<br>
+        <table>
+          ${edges}
+        </table>
     `);
     },
     onEachFeature: onEachVertex,

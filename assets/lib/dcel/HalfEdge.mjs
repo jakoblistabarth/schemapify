@@ -154,18 +154,24 @@ class HalfEdge {
 
   getAssociatedDirections(sectors = config.C.getSectors()) {
     const angle = this.getAngle();
-    let directions;
+    let directions = [];
     sectors.some(function (sector) {
-      if (angle === sector.lower) directions = [sector.lower];
-      else if (angle === sector.upper) directions = [sector.upper];
-      else if (angle > sector.lower && angle < sector.upper)
-        directions = [sector.lower, sector.upper];
+      if (angle === sector.lower) {
+        directions.push(sector.lower);
+        return angle === sector.lower;
+      } else if (angle === sector.upper) {
+        directions.push(sector.upper);
+        return angle === sector.upper;
+      } else if (angle > sector.lower && angle < sector.upper) {
+        directions.push(sector.lower, sector.upper);
+        return angle > sector.lower && angle < sector.upper;
+      }
     });
     return directions;
   }
 
   getAssociatedSector(sectors = config.C.getSectors()) {
-    const direction = this.getAssociatedDirections();
+    const direction = this.getAssociatedDirections(sectors);
     return sectors.reduce((acc, sector) => {
       if (
         (direction[0] === sector.lower && direction[1] === sector.upper) ||
@@ -196,7 +202,26 @@ class HalfEdge {
 
   classify(sectors = config.C.getSectors()) {
     let classification;
-    if (this.isAligned() && this.tail.allEdgesAligned()) classification = "alignedBasic";
+    const assignedDirection = this.schematizationProperties.assignedDirection;
+    const associatedSectors = this.getAssociatedSector(sectors);
+    const associatedSector = this.isAligned() ? null : associatedSectors[0];
+    const [prevSector, nextSector] = this.isAligned()
+      ? [associatedSectors[0], associatedSectors[1]]
+      : associatedSector.getNeighbors();
+
+    if (this.isAligned() && assignedDirection == this.getAssociatedDirections[0])
+      classification = "alignedBasic";
+    else if (
+      !this.isAligned() &&
+      this.tail.getEdgesInSector(associatedSector).length == 1 &&
+      this.tail.getEdgesInSector(prevSector).length < 1 &&
+      this.tail.getEdgesInSector(nextSector).length < 1
+    )
+      classification = "unalignedBasic";
+    else if (!this.isAligned() && this.tail.getEdgesInSector(associatedSector)) {
+      classification = "evading";
+    }
+
     this.schematizationProperties.classification = classification;
     return classification;
   }
