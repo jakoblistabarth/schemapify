@@ -16,6 +16,10 @@ export function logDCEL(dcel, name, verbose = false) {
   }
 }
 
+export function crawlArray(array, index, n) {
+  return (((index + n) % array.length) + array.length) % array.length;
+}
+
 export function createGeoJSON(features, name) {
   return {
     type: "FeatureCollection",

@@ -1,4 +1,5 @@
 import { createEdgeVertexSetup } from "./test-helpers.mjs";
+import { crawlArray } from "../assets/lib/dcel/Utilities.mjs";
 
 describe("isAligned() works properly", function () {
   let s;
@@ -186,5 +187,28 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
       Math.PI * 1.5,
       Math.PI * 1.75,
     ]);
+  });
+});
+
+describe("crawlArray()", function () {
+  let arr;
+  beforeEach(function () {
+    arr = ["first", "second", 2, 3, 4, 5, "secondlast", "last"];
+  });
+
+  it("crawls forward +2", function () {
+    expect(arr[crawlArray(arr, 6, +2)]).toBe("first");
+  });
+
+  it("crawls forward +1", function () {
+    expect(arr[crawlArray(arr, 7, +1)]).toBe("first");
+  });
+
+  it("crawls backward -1", function () {
+    expect(arr[crawlArray(arr, 0, -1)]).toBe("last");
+  });
+
+  it("crawls backward -2", function () {
+    expect(arr[crawlArray(arr, 0, -2)]).toBe("secondlast");
   });
 });

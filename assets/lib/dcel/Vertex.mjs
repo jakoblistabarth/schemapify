@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
 import config from "../../schematization.config.mjs";
+import { crawlArray } from "../dcel/Utilities.mjs";
 
 class Vertex {
   constructor(x, y) {
@@ -89,29 +90,70 @@ class Vertex {
 
   assignDirections(c = config.C) {
     let edgeIdx = 0;
+    let lastEdgeIdx = null;
     let directions = [];
     while (
       directions.length !== this.edges.length &&
       directions.length === Array.from(new Set(directions)).length
     ) {
-      const edge = this.edges[edgeIdx];
-      // const currentSector = edge.getAssociatedSector();
-      // const edgesInCurrentSector = this.getEdgesInSector(currentSector);
       let direction;
-      if (edge.isAligned(c.getSectors())) {
-        direction = edge.getAssociatedDirections(c.getSectors())[0];
+      const edge = this.edges[edgeIdx];
+      const currentSector = edge.getAssociatedSector(c.getSectors())[0];
+      const [prevSector, nextSector] = currentSector.getNeighbors(c.getSectors());
+      const edgesInCurrentSector = this.getEdgesInSector(currentSector);
+      console.log("currentSector: ", currentSector);
+      console.log("angle: ", edge.getAngle());
+      if (edgesInCurrentSector.length === 4) {
+        directions = [
+          crawlArray(c.getAngles(), c.getAngles().indexOf(currentSector.lower), -1),
+          c.getAngles().indexOf(currentSector.lower),
+          c.getAngles().indexOf(currentSector.upper),
+          crawlArray(c.getAngles(), c.getAngles().indexOf(currentSector.upper), +1),
+        ];
+        edgeIdx = 3;
+      } else if (edgesInCurrentSector.length === 3) {
+        directions = [
+          c.getAngles().indexOf(currentSector.lower),
+          c.getAngles().indexOf(currentSector.upper),
+          crawlArray(c.getAngles(), c.getAngles().indexOf(currentSector.upper), +1),
+        ];
+        edgeIdx = (edgeIdx + edgesInCurrentSector.length) % this.edges.length;
       } else {
-        const angle = edge.getAngle();
-        const [lower, upper] = edge.getAssociatedDirections(c.getSectors());
-        direction = angle - lower <= upper - angle ? lower : upper;
+        console.log("edges in sector", edgesInCurrentSector.length);
+        console.log("edges in prev", this.getEdgesInSector(prevSector).length);
+        console.log("edges in next", this.getEdgesInSector(nextSector).length);
+        if (this.getEdgesInSector(nextSector).length > 1) {
+          if (edgesInCurrentSector.length === 2) {
+            if (edgeIdx % 2 == 0) {
+              direction =
+                c.getAngles()[
+                  crawlArray(c.getAngles(), c.getAngles().indexOf(currentSector.lower), -1)
+                ];
+            } else direction = edge.getAssociatedSector(c.getSectors())[0].lower;
+          } else direction = edge.getAssociatedSector(c.getSectors())[0].lower;
+        } else if (edge.isAligned(c.getSectors())) {
+          direction = edge.getAssociatedDirections(c.getSectors())[0];
+        } else {
+          console.log("here =======> " + edgeIdx);
+          const angle = edge.getAngle();
+          const [lower, upper] = edge.getAssociatedDirections(c.getSectors());
+          direction = angle - lower <= upper - angle ? lower : upper;
+        }
+        console.log("dir", direction);
+        direction = direction == Math.PI * 2 ? 0 : direction;
+        let directionIdx = c.getAngles().indexOf(direction);
+        console.log(
+          directions,
+          directionIdx,
+          "<>",
+          directions[crawlArray(directions, edgeIdx, -1)]
+        );
+        if (directionIdx === directions[lastEdgeIdx])
+          directionIdx = (directionIdx + 1) % c.getSectors().length;
+        directions[edgeIdx] = directionIdx;
       }
-      direction = direction == Math.PI * 2 ? 0 : direction;
-      console.log(direction, c.getAngles());
-      let directionIdx = c.getAngles().indexOf(direction);
-      if (directionIdx === directions[(edgeIdx - 1) % this.edges.length])
-        directionIdx = (directionIdx + 1) % c.getSectors().length;
-      directions[edgeIdx] = directionIdx;
       console.log(edgeIdx, directions);
+      lastEdgeIdx = edgeIdx;
       edgeIdx = (edgeIdx + 1) % this.edges.length;
     }
     this.edges.forEach((edge, idx) => (edge.schematizationProperties.direction = directions[idx]));
