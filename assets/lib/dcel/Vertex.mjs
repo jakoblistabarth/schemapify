@@ -95,35 +95,35 @@ class Vertex {
     let assignedDirections = [];
     const closestBounds = edges.map((edge) => {
       let direction;
-      if (edge.isAligned(c.getSectors())) {
-        direction = edge.getAssociatedDirections(c.getSectors())[0];
-      } else {
-        const [lower, upper] = edge.getAssociatedSector(c.getSectors())[0].getBounds();
-        direction = edge.getAngle() - lower <= upper - edge.getAngle() ? lower : upper;
-        direction = direction == Math.PI * 2 ? 0 : direction;
-      }
+
+      const [lower, upper] = edge.getAssociatedSector(c.getSectors())[0].getBounds();
+      direction = edge.getAngle() - lower <= upper - edge.getAngle() ? lower : upper;
+      direction = direction == Math.PI * 2 ? 0 : direction;
+
       return c.getAngles().indexOf(direction);
     });
+
     assignedDirections = closestBounds;
-    if (closestBounds.length !== Array.from(new Set(closestBounds)).length) {
-      closestBounds.forEach((direction, idx) => {
-        if (getOccurrence(assignedDirections, direction) == 1) assignedDirections[idx] = direction;
-        else {
-          const nextDirection = crawlArray(c.getAngles(), direction, +1);
-          const prevDirection = crawlArray(c.getAngles(), direction, -1);
-          const prevPrevDirection = crawlArray(c.getAngles(), direction, -2);
-          if (getOccurrence(assignedDirections, nextDirection) > 0) {
-            direction = prevDirection;
-            if (getOccurrence(assignedDirections, prevDirection) > 0)
-              assignedDirections[crawlArray(closestBounds, idx, -1)] = prevPrevDirection;
-          } else assignedDirections[(idx + 1) % closestBounds.length] = nextDirection;
-          assignedDirections[idx] = direction;
-        }
-      });
-    }
+
+    closestBounds.forEach((direction, idx) => {
+      if (getOccurrence(assignedDirections, direction) == 1) {
+        assignedDirections[idx] = direction;
+        return;
+      }
+
+      const nextDirection = crawlArray(c.getAngles(), direction, +1);
+      const prevDirection = crawlArray(c.getAngles(), direction, -1);
+      if (getOccurrence(assignedDirections, nextDirection) > 0) {
+        assignedDirections[idx] = prevDirection;
+      } else {
+        assignedDirections[(idx + 1) % closestBounds.length] = nextDirection
+      };
+    });
+
     edges.forEach(
       (edge, idx) => (edge.schematizationProperties.direction = assignedDirections[idx])
     );
+
     return this.edges;
   }
 }
