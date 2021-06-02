@@ -221,7 +221,6 @@ class Dcel {
       });
     }
 
-    subdivision.setEpsilon(config.lambda);
     return subdivision;
   }
 

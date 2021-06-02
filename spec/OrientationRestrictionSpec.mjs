@@ -107,17 +107,17 @@ describe("isSignficant()", function () {
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od0, s.od37);
-    expect(s.o.isSignificant()).toBe(true);
+    expect(s.o.isSignificant(s.c2)).toBe(true);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od104, s.od37);
-    expect(s.o.isSignificant()).toBe(true);
+    expect(s.o.isSignificant(s.c2)).toBe(true);
   });
 
   it("classifies a vertex with edges in disjoint sectors as not significant.", function () {
     s.o.edges.push(s.od217, s.od37);
-    expect(s.o.isSignificant()).toBe(false);
+    expect(s.o.isSignificant(s.c2)).toBe(false);
   });
 });
 

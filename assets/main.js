@@ -21,7 +21,7 @@ const tests = [
   // "assets/data/shapes/square-hole-island.json",
   // "assets/data/shapes/square-hole-island-hole.json",
   // "assets/data/shapes/2plgn.json",
-  // "assets/data/shapes/2plgn-adjacent.json",
+  "assets/data/shapes/2plgn-adjacent.json",
   // "assets/data/shapes/2plgn-islands.json",
   // "assets/data/shapes/2plgn-islands-hole.json",
   // "assets/data/shapes/2plgn-islands-holes.json",
