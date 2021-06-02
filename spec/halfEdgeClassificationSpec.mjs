@@ -52,7 +52,7 @@ describe("Given the examples in the paper of buchin et al., directions are assig
     s.o.edges.push(s.od315, s.od333, s.od53, s.od76);
     expect(
       s.o.assignDirections(s.c2).map((edge) => edge.schematizationProperties.direction)
-    ).toEqual([3, 0, 1, 2]);
+    ).toEqual([1, 2, 3, 0]);
   });
 
   it("h", function () {
@@ -101,7 +101,7 @@ describe("Given the examples in the paper of buchin et al., directions are assig
     s.o.edges.push(s.od315, s.od333, s.od53, s.od76);
     expect(
       s.o.assignDirections(s.c4).map((edge) => edge.schematizationProperties.direction)
-    ).toEqual([7, 0, 1, 2]);
+    ).toEqual([1, 2, 7, 0]);
   });
 });
 
