@@ -41,8 +41,8 @@ class Vertex {
     return this.edges;
   }
 
-  allEdgesAligned() {
-    return this.edges.every((edge) => edge.isAligned());
+  allEdgesAligned(sectors = config.C.getSectors()) {
+    return this.edges.every((edge) => edge.isAligned(sectors));
   }
 
   isSignificant(c = config.C) {
@@ -57,7 +57,7 @@ class Vertex {
 
     // classify as significant if one sector occurs multiple times
     const occupiedSectors = this.edges
-      .map((edge) => edge.getAssociatedSector())
+      .map((edge) => edge.getAssociatedSector(c.getSectors()))
       .flat()
       .sort();
 

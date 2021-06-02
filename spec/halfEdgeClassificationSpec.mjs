@@ -1,4 +1,75 @@
+import Vertex from "../assets/lib/dcel/Vertex.mjs";
 import { createEdgeVertexSetup } from "./test-helpers.mjs";
+
+describe("isDeviating()", function () {
+  let s;
+  beforeEach(function () {
+    s = createEdgeVertexSetup();
+  });
+
+  it("returns true for an deviating edge", function () {
+    s.od53.schematizationProperties.direction = 2;
+    expect(s.od53.isDeviating(s.c2.getSectors())).toBe(true);
+  });
+
+  it("returns true for an deviating edge", function () {
+    s.od53.schematizationProperties.direction = 3;
+    expect(s.od53.isDeviating(s.c2.getSectors())).toBe(true);
+    expect(s.od53.isDeviating(s.c4.getSectors())).toBe(true);
+  });
+
+  it("returns false for a basic edge", function () {
+    s.od53.schematizationProperties.direction = 1;
+    expect(s.od53.isDeviating(s.c2.getSectors())).toBe(false);
+    expect(s.od53.isDeviating(s.c4.getSectors())).toBe(false);
+  });
+
+  it("returns false for a basic edge", function () {
+    s.od333.schematizationProperties.direction = 0;
+    expect(s.od333.isDeviating(s.c2.getSectors())).toBe(false);
+    expect(s.od333.isDeviating(s.c4.getSectors())).toBe(false);
+  });
+
+  it("returns false for a basic edge", function () {
+    s.od53.schematizationProperties.direction = 0;
+    expect(s.od53.isDeviating(s.c2.getSectors())).toBe(false);
+  });
+
+  it("returns false for a for a basic aligned edge", function () {
+    s.od90.schematizationProperties.direction = 1;
+    expect(s.od90.isDeviating(s.c2.getSectors())).toBe(false);
+  });
+
+  it("returns true for a for a deviating aligned edge", function () {
+    s.od90.schematizationProperties.direction = 2;
+    expect(s.od90.isDeviating(s.c2.getSectors())).toBe(true);
+  });
+
+  it("returns false for a for a basic aligned edge", function () {
+    s.od90.schematizationProperties.direction = 2;
+    expect(s.od90.isDeviating(s.c4.getSectors())).toBe(false);
+  });
+
+  it("returns false for a for a basic aligned edge", function () {
+    s.od315.schematizationProperties.direction = 7;
+    expect(s.od315.isDeviating(s.c4.getSectors())).toBe(false);
+  });
+});
+
+describe("getSignificantEndpoint()", function () {
+  let s;
+  beforeEach(function () {
+    s = createEdgeVertexSetup();
+  });
+
+  it("returns an significant endpoint if one is specified", function () {
+    expect(s.od53.getSignificantEndpoint()).toEqual(s.o);
+  });
+  it("returns randomly one of its endpoints if neither of them are significant", function () {
+    s.o.schematizationProperties.isSignificant = false;
+    expect(s.od53.getSignificantEndpoint()).toBeInstanceOf(Vertex);
+  });
+});
 
 describe("Given the examples in the paper of buchin et al., directions are assigned, correctly on example", function () {
   let s;
@@ -105,7 +176,7 @@ describe("Given the examples in the paper of buchin et al., directions are assig
   });
 });
 
-xdescribe("Given the examples in the paper of buchin et al., classify() works as expected on example", function () {
+describe("Given the examples in the paper of buchin et al., classify() works as expected on example", function () {
   let s;
   beforeEach(function () {
     s = createEdgeVertexSetup();
@@ -126,7 +197,7 @@ xdescribe("Given the examples in the paper of buchin et al., classify() works as
 
   it("c", function () {
     s.o.edges.push(s.od37, s.od90, s.od104);
-    expect(s.od53.classify(s.c2)).toBe("unalignedBasic");
+    expect(s.od37.classify(s.c2)).toBe("unalignedBasic");
     expect(s.od90.classify(s.c2)).toBe("alignedBasic");
     expect(s.od104.classify(s.c2)).toBe("unalignedBasic");
   });
@@ -141,15 +212,15 @@ xdescribe("Given the examples in the paper of buchin et al., classify() works as
     s.o.edges.push(s.od37, s.od53, s.od76);
     expect(s.od37.classify(s.c2)).toBe("evading");
     expect(s.od53.classify(s.c2)).toBe("evading");
-    expect(s.od76.classify(s.c2)).toBe("deviating");
+    expect(s.od76.classify(s.c2)).toBe("unalignedDeviating");
   });
 
   it("f", function () {
     s.o.edges.push(s.od0, s.od37, s.od53, s.od76);
-    expect(s.od0.classify(s.c2)).toBe("deviating");
+    expect(s.od0.classify(s.c2)).toBe("alignedDeviating");
     expect(s.od37.classify(s.c2)).toBe("evading");
     expect(s.od53.classify(s.c2)).toBe("evading");
-    expect(s.od76.classify(s.c2)).toBe("deviating");
+    expect(s.od76.classify(s.c2)).toBe("unalignedDeviating");
   });
 
   it("g", function () {
@@ -157,7 +228,7 @@ xdescribe("Given the examples in the paper of buchin et al., classify() works as
     expect(s.od315.classify(s.c2)).toBe("evading");
     expect(s.od333.classify(s.c2)).toBe("evading");
     expect(s.od53.classify(s.c2)).toBe("unalignedBasic");
-    expect(s.od76.classify(s.c2)).toBe("deviating");
+    expect(s.od76.classify(s.c2)).toBe("unalignedDeviating");
   });
 
   it("h", function () {
@@ -195,13 +266,13 @@ xdescribe("Given the examples in the paper of buchin et al., classify() works as
 
   it("m", function () {
     s.o.edges.push(s.od0, s.od37, s.od53, s.od76);
-    expect(s.od0.classify(s.c4)).toBe("deviating");
+    expect(s.od0.classify(s.c4)).toBe("alignedDeviating");
     expect(s.od37.classify(s.c4)).toBe("unalignedBasic");
     expect(s.od53.classify(s.c4)).toBe("evading");
     expect(s.od76.classify(s.c4)).toBe("evading");
   });
 
-  it("g", function () {
+  it("n", function () {
     s.o.edges.push(s.od315, s.od333, s.od53, s.od76);
     expect(s.od315.classify(s.c4)).toBe("alignedBasic");
     expect(s.od333.classify(s.c4)).toBe("unalignedBasic");

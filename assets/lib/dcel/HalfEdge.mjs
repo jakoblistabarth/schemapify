@@ -1,5 +1,14 @@
 import { v4 as uuid } from "uuid";
 import config from "../../schematization.config.mjs";
+import { getOccurrence } from "../dcel/Utilities.mjs";
+
+const EDGE_CLASSES = {
+  AB: "alignedBasic",
+  UB: "unalignedBasic",
+  E: "evading",
+  AD: "alignedDeviating",
+  UD: "unalignedDeviating",
+};
 
 class HalfEdge {
   constructor(tail, dcel) {
@@ -185,6 +194,14 @@ class HalfEdge {
     }, []);
   }
 
+  getSignificantEndpoint() {
+    const endpoints = this.getEndpoints();
+    return (
+      endpoints.find((vertex) => vertex.schematizationProperties.isSignificant === true) ||
+      endpoints[Math.round(Math.random())]
+    );
+  }
+
   isInSector(sector) {
     const [lowerBound, upperBound] = sector.getBounds();
     return (this.getAngle() > lowerBound && this.getAngle() < upperBound) ||
@@ -194,32 +211,57 @@ class HalfEdge {
       : false;
   }
 
+  isDeviating(sectors = config.C.getSectors()) {
+    //TODO: refactor isDeviating(), find better solution for last sector (idx=0) should be 8???
+    let assignedDirection =
+      (this.schematizationProperties.direction * Math.PI * 2) / sectors.length;
+    if (this.isAligned(sectors)) {
+      return this.getAssociatedDirections(sectors)[0] === assignedDirection ? false : true;
+    } else {
+      const sector = this.getAssociatedSector(sectors)[0];
+      if (sector.idx === sectors.length - 1) {
+        assignedDirection = assignedDirection === 0 ? Math.PI * 2 : assignedDirection;
+      }
+      const [lowerBound, upperBound] = sector.getBounds();
+      return (assignedDirection > lowerBound && assignedDirection < upperBound) ||
+        assignedDirection === lowerBound ||
+        assignedDirection === upperBound
+        ? false
+        : true;
+    }
+  }
+
   isAligned(sectors = config.C.getSectors()) {
     const isAligned = this.getAssociatedDirections(sectors).length === 1 ? true : false;
     this.schematizationProperties.isAligned = isAligned;
     return isAligned;
   }
 
-  classify(sectors = config.C.getSectors()) {
+  classify(c = config.C) {
     let classification;
-    const assignedDirection = this.schematizationProperties.assignedDirection;
-    const associatedSectors = this.getAssociatedSector(sectors);
-    const associatedSector = this.isAligned() ? null : associatedSectors[0];
-    const [prevSector, nextSector] = this.isAligned()
-      ? [associatedSectors[0], associatedSectors[1]]
-      : associatedSector.getNeighbors();
 
-    if (this.isAligned() && assignedDirection == this.getAssociatedDirections[0])
-      classification = "alignedBasic";
-    else if (
-      !this.isAligned() &&
-      this.tail.getEdgesInSector(associatedSector).length == 1 &&
-      this.tail.getEdgesInSector(prevSector).length < 1 &&
-      this.tail.getEdgesInSector(nextSector).length < 1
-    )
-      classification = "unalignedBasic";
-    else if (!this.isAligned() && this.tail.getEdgesInSector(associatedSector)) {
-      classification = "evading";
+    let significantEndpoint = this.getSignificantEndpoint();
+    significantEndpoint.assignDirections(c);
+
+    if (this.isAligned(c.getSectors())) {
+      if (!this.isDeviating(c.getSectors())) classification = EDGE_CLASSES.AB;
+      else {
+        classification = EDGE_CLASSES.AD;
+      }
+    } else {
+      if (this.isDeviating(c.getSectors())) classification = EDGE_CLASSES.UD;
+      else {
+        const sector = this.getAssociatedSector(c.getSectors())[0];
+        const edges = significantEndpoint.getEdgesInSector(sector);
+        if (
+          !this.isDeviating(c.getSectors()) &&
+          edges.filter(
+            (edge) => !edge.isAligned(c.getSectors()) && !edge.isDeviating(c.getSectors())
+          ).length == 2
+        )
+          classification = EDGE_CLASSES.E;
+        else if (!this.isDeviating(c.getSectors())) classification = EDGE_CLASSES.UB;
+      }
     }
 
     this.schematizationProperties.classification = classification;

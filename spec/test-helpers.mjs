@@ -16,7 +16,10 @@ export function getTestFiles(dir) {
 
 export function createEdgeVertexSetup() {
   const setup = {};
+
   setup.o = new Vertex(0, 0);
+  setup.o.schematizationProperties.isSignificant = true;
+
   const d0 = new Vertex(4, 0);
   const d37 = new Vertex(4, 3);
   const d53 = new Vertex(3, 4);
