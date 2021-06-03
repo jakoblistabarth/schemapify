@@ -12,7 +12,7 @@ class Vertex {
   }
 
   static getKey(x, y) {
-    return `${x}/${y}`; // TODO: is there a better way to ensure that a coordinate pair vertex is added only once to the vertex list?
+    return `${x}/${y}`;
   }
 
   sortEdges(clockwise = true) {

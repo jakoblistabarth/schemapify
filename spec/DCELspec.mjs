@@ -56,7 +56,7 @@ describe("A DCEL of 2 adjacent squares", function () {
   });
 
   it("has 6 vertices", function () {
-    expect(Object.keys(dcel.vertices).length).toBe(6);
+    expect(dcel.vertices.size).toBe(6);
   });
 
   it("has 14 edges", function () {
@@ -85,7 +85,7 @@ describe("A DCEL of 3 adjacent squares", function () {
   });
 
   it("has 8 vertices", function () {
-    expect(Object.keys(dcel.vertices).length).toBe(8);
+    expect(dcel.vertices.size).toBe(8);
   });
 
   it("has 20 edges", function () {

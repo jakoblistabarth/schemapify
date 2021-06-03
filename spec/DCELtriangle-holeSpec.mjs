@@ -22,7 +22,7 @@ describe("A DCEL of a single triangle with one triangular hole", function () {
   });
 
   it("has 6 vertices", function () {
-    expect(Object.values(dcel.vertices).length).toBe(6);
+    expect(dcel.vertices.size).toBe(6);
   });
 
   it("has 12 halfedges", function () {

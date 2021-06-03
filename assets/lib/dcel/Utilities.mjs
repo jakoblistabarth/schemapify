@@ -47,7 +47,7 @@ export function mapFromDCEL(dcel, name) {
     });
   }
 
-  const vertexFeatures = Object.values(dcel.vertices).map((v) => {
+  const vertexFeatures = [...dcel.vertices].map(([k, v]) => {
     return {
       type: "Feature",
       geometry: {
