@@ -195,10 +195,15 @@ class HalfEdge {
 
   getSignificantEndpoint() {
     const endpoints = this.getEndpoints();
-    return (
-      endpoints.find((vertex) => vertex.schematizationProperties.isSignificant === true) ||
-      endpoints[Math.round(Math.random())]
-    );
+    const significantEndpoint =
+      endpoints.find(
+        (vertex) =>
+          vertex.schematizationProperties.isSignificant === true ||
+          vertex.schematizationProperties.isSignificant === "treatedAsSignificant"
+      ) || endpoints[Math.round(Math.random())];
+    if (significantEndpoint.schematizationProperties.isSignificant === false)
+      significantEndpoint.schematizationProperties.isSignificant = "treatedAsSignificant";
+    return significantEndpoint;
   }
 
   isInSector(sector) {
@@ -239,7 +244,13 @@ class HalfEdge {
   classify(c = config.C) {
     let classification;
 
-    let significantEndpoint = this.getSignificantEndpoint();
+    if (this.twin.schematizationProperties.classification) {
+      classification = this.twin.schematizationProperties.classification;
+      this.schematizationProperties.classification = classification;
+      return classification;
+    }
+
+    const significantEndpoint = this.getSignificantEndpoint();
     significantEndpoint.assignDirections(c);
 
     if (this.isAligned(c.getSectors())) {
@@ -264,6 +275,7 @@ class HalfEdge {
     }
 
     this.schematizationProperties.classification = classification;
+    this.twin.schematizationProperties.classification = classification;
     return classification;
   }
 }

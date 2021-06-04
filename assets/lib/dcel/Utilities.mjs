@@ -90,7 +90,7 @@ export function mapFromDCEL(dcel, name) {
         .join("");
       return L.circleMarker(latlng, {
         radius: feature.properties.isSignificant ? 4 : 2,
-        fillColor: "white",
+        fillColor: feature.properties.isSignificant === "treatedAsSignificant" ? "grey" : "white",
         color: "black",
         weight: 2,
         opacity: 1,
@@ -200,13 +200,15 @@ export function mapFromDCEL(dcel, name) {
           ${e.uuid.substring(0, 5)} (${e.tail.x}/${e.tail.y})
           <span class="material-icons">arrow_forward</span>
           (${e.twin.tail.x}/${e.twin.tail.y})
-          <span class="material-icons">highlight_alt</span> ${e.face?.uuid.substring(0, 5)}`,
+          <span class="material-icons">highlight_alt</span> ${e.face?.uuid.substring(0, 5)}
+          ${e.schematizationProperties.classification}`,
         twin: `
           <span class="material-icons">rotate_right</span>
           ${e.twin.uuid.substring(0, 5)} (${e.twin.tail.x}/${e.twin.tail.y})
           <span class="material-icons">arrow_back</span>
           (${e.tail.x}/${e.tail.y})
-          <span class="material-icons">highlight_alt</span> ${e.twin.face?.uuid.substring(0, 5)}`,
+          <span class="material-icons">highlight_alt</span> ${e.twin.face?.uuid.substring(0, 5)}
+          ${e.twin.schematizationProperties.classification}`,
       },
     };
   });

@@ -247,23 +247,28 @@ class Dcel {
     this.splitEdges(this.epsilon);
   }
 
-  classifyVerticesEdges() {
+  classifyVertices() {
     Object.values(this.vertices).forEach((v) => {
       v.isSignificant();
     });
-    const edgesWith2SignificantEndPoints = this.getSimpleEdges().filter((edge) => {
+    const edgesWith2SignificantEndpoints = this.halfEdges.filter((edge) => {
       const [head, tail] = edge.getEndpoints();
       return head.isSignificant() && tail.isSignificant();
     });
-    edgesWith2SignificantEndPoints.forEach((edge) => edge.bisect());
-
-    // TODO: check significance for all vertices right after creating them
-    // instead of loop again over every point in the subdivision (the vast majority has already been classified)
-    Object.values(this.vertices).forEach((v) => {
-      v.isSignificant();
+    edgesWith2SignificantEndpoints.forEach((edge) => {
+      const newPoint = edge.bisect().getHead();
+      newPoint.schematizationProperties.isSignificant = false;
     });
+  }
 
-    this.halfEdges.forEach((edge) => edge.classify());
+  classifyVerticesEdges() {
+    this.classifyVertices();
+
+    this.halfEdges.forEach((edge) => {
+      edge.getSignificantEndpoint().edges.forEach((edge) => {
+        edge.classify();
+      });
+    });
   }
 
   constrainAngles() {
