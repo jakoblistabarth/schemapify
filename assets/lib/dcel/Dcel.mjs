@@ -226,10 +226,10 @@ class Dcel {
 
   // get epsilon
   // – the threshold for max edge length
-  // takes a dcel
+  // takes the factor lambda
   // returns the treshold as float
-  setEpsilon(factor) {
-    this.epsilon = this.getDiameter() * factor;
+  setEpsilon(lambda) {
+    this.epsilon = this.getDiameter() * lambda;
     return this.epsilon;
   }
 
@@ -242,6 +242,11 @@ class Dcel {
     return this;
   }
 
+  preProcess() {
+    this.setEpsilon(config.lambda);
+    this.splitEdges(this.epsilon);
+  }
+
   classifyVerticesEdges() {
     Object.values(this.vertices).forEach((v) => {
       v.isSignificant();
@@ -252,9 +257,13 @@ class Dcel {
     });
     edgesWith2SignificantEndPoints.forEach((edge) => edge.bisect());
 
-    this.halfEdges.forEach((edge) => {
-      edge.classify();
+    // TODO: check significance for all vertices right after creating them
+    // instead of loop again over every point in the subdivision (the vast majority has already been classified)
+    Object.values(this.vertices).forEach((v) => {
+      v.isSignificant();
     });
+
+    this.halfEdges.forEach((edge) => edge.classify());
   }
 
   constrainAngles() {

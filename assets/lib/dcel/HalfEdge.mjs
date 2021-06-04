@@ -1,6 +1,5 @@
 import { v4 as uuid } from "uuid";
 import config from "../../schematization.config.mjs";
-import { getOccurrence } from "../dcel/Utilities.mjs";
 
 const EDGE_CLASSES = {
   AB: "alignedBasic",
