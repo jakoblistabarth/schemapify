@@ -3,8 +3,8 @@ import Sector from "./Sector.mjs";
 class C {
   constructor(orientations, beta = 0) {
     this.beta = beta; // horizontal line by default
-    this.orientations = Array.isArray(orientations) ? orientations.length : orientations; // n umber of orientations, //TODO: at least 2
-    this.angles = Array.isArray(orientations) ? orientations : this.getAngles();
+    this.orientations = orientations; // n umber of orientations, //TODO: at least 2
+    this.angles = this.getAngles();
   }
 
   getAngles() {
