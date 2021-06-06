@@ -49,7 +49,7 @@ class Vertex {
     // QUESTION: are vertices with only aligned edges never significant?
     // TODO: move to another class? to not mix dcel and schematization?
 
-    // classify as not significant if all edges are already aligned
+    // classify as insignificant if all edges are already aligned
     if (this.allEdgesAligned()) {
       return this.schematizationProperties.isSignificant = false;
     }
@@ -57,8 +57,7 @@ class Vertex {
     // classify as significant if one sector occurs multiple times
     const occupiedSectors = this.edges
       .map((edge) => edge.getAssociatedSector(c.getSectors()))
-      .flat()
-      .sort();
+      .flat();
 
     const uniqueSectors = occupiedSectors.reduce((acc, sector) => {
       if (!acc.find((accSector) => accSector.idx == sector.idx)) acc.push(sector);
@@ -69,7 +68,7 @@ class Vertex {
       return this.schematizationProperties.isSignificant = true;
     }
 
-    // classify as not significant if none of the sectors are neighbors
+    // classify as significant if neighbor sectors are not empty
     const isSignificant = uniqueSectors.every((sector) => {
       const [prevSector, nextSector] = sector.getNeighbors();
       return this.getEdgesInSector(prevSector).length > 0 ||
