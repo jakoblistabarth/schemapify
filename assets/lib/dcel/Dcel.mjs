@@ -263,7 +263,7 @@ class Dcel {
   classifyVerticesEdges() {
     this.classifyVertices();
 
-    this.halfEdges.forEach((edge) => {
+    this.getSimpleEdges().forEach((edge) => {
       edge.getSignificantEndpoint().edges.forEach((edge) => {
         edge.classify();
       });

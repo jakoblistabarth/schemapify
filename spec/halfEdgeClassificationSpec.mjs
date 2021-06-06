@@ -1,5 +1,8 @@
 import Vertex from "../assets/lib/dcel/Vertex.mjs";
+import DCEL from "../assets/lib/dcel/Dcel.mjs";
 import { createEdgeVertexSetup } from "./test-helpers.mjs";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 
 describe("isDeviating()", function () {
   let s;
@@ -278,5 +281,41 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
     expect(s.od333.classify(s.c4)).toBe("unalignedBasic");
     expect(s.od53.classify(s.c4)).toBe("evading");
     expect(s.od76.classify(s.c4)).toBe("evading");
+  });
+});
+
+describe("classifyEdges() in a classification where all edges are classified and a halfedge and its twin share the same class", function () {
+  it("on simple test data", function () {
+    const json = JSON.parse(readFileSync(resolve("assets/data/shapes/edge-cases.json"), "utf8"));
+    const dcel = DCEL.buildFromGeoJSON(json);
+    const edgesWithoutClassification = dcel.halfEdges.filter(
+      (edge) => typeof edge.schematizationProperties.classification === undefined
+    );
+    const edgesWithDivergingClasses = dcel.halfEdges.filter(
+      (edge) =>
+        edge.schematizationProperties.classification !==
+        edge.twin.schematizationProperties.classification
+    );
+
+    expect(edgesWithDivergingClasses.length).toBe(0);
+    expect(edgesWithoutClassification.length).toBe(0);
+  });
+
+  it("on geo data", function () {
+    const json = JSON.parse(
+      readFileSync(resolve("assets/data/geodata/ne_110m_admin_0_countries.json"), "utf8")
+    );
+    const dcel = DCEL.buildFromGeoJSON(json);
+    const edgesWithoutClassification = dcel.halfEdges.filter(
+      (edge) => typeof edge.schematizationProperties.classification === undefined
+    );
+    const edgesWithDivergingClasses = dcel.halfEdges.filter(
+      (edge) =>
+        edge.schematizationProperties.classification !==
+        edge.twin.schematizationProperties.classification
+    );
+
+    expect(edgesWithDivergingClasses.length).toBe(0);
+    expect(edgesWithoutClassification.length).toBe(0);
   });
 });
