@@ -165,16 +165,14 @@ class HalfEdge {
     let directions = [];
     sectors.some(function (sector) {
       if (angle === sector.lower) {
-        directions.push(sector.lower);
-        return angle === sector.lower;
+        return directions.push(sector.lower);
       } else if (angle === sector.upper) {
-        directions.push(sector.upper);
-        return angle === sector.upper;
+        return directions.push(sector.upper);
       } else if (angle > sector.lower && angle < sector.upper) {
-        directions.push(sector.lower, sector.upper);
-        return angle > sector.lower && angle < sector.upper;
+        return directions.push(sector.lower, sector.upper);
       }
     });
+
     return directions;
   }
 
@@ -198,10 +196,10 @@ class HalfEdge {
     const significantEndpoint =
       endpoints.find(
         (vertex) =>
-          vertex.schematizationProperties.isSignificant === true ||
+          vertex.schematizationProperties.isSignificant ||
           vertex.schematizationProperties.isSignificant === "treatedAsSignificant"
       ) || endpoints[Math.round(Math.random())];
-    if (significantEndpoint.schematizationProperties.isSignificant === false)
+    if (!significantEndpoint.schematizationProperties.isSignificant)
       significantEndpoint.schematizationProperties.isSignificant = "treatedAsSignificant";
     return significantEndpoint;
   }
@@ -210,8 +208,9 @@ class HalfEdge {
     //TODO: refactor isDeviating(), find better solution for last sector (idx=0) should be 8???
     let assignedDirection =
       (this.schematizationProperties.direction * Math.PI * 2) / sectors.length;
+
     if (this.isAligned(sectors)) {
-      return this.getAssociatedDirections(sectors)[0] === assignedDirection ? false : true;
+      return !(this.getAssociatedDirections(sectors)[0] === assignedDirection)
     } else {
       const sector = this.getAssociatedSector(sectors)[0];
       if (sector.idx === sectors.length - 1) {
@@ -222,7 +221,7 @@ class HalfEdge {
   }
 
   isAligned(sectors = config.C.getSectors()) {
-    const isAligned = this.getAssociatedDirections(sectors).length === 1 ? true : false;
+    const isAligned = this.getAssociatedDirections(sectors).length === 1;
     this.schematizationProperties.isAligned = isAligned;
     return isAligned;
   }
@@ -232,8 +231,7 @@ class HalfEdge {
 
     if (this.twin.schematizationProperties.classification) {
       classification = this.twin.schematizationProperties.classification;
-      this.schematizationProperties.classification = classification;
-      return classification;
+      return this.schematizationProperties.classification = classification;
     }
 
     const significantEndpoint = this.getSignificantEndpoint();
@@ -261,8 +259,7 @@ class HalfEdge {
     }
 
     this.schematizationProperties.classification = classification;
-    this.twin.schematizationProperties.classification = classification;
-    return classification;
+    return this.twin.schematizationProperties.classification = classification;
   }
 }
 

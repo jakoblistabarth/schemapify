@@ -51,8 +51,7 @@ class Vertex {
 
     // classify as not significant if all edges are already aligned
     if (this.allEdgesAligned()) {
-      this.schematizationProperties.isSignificant = false;
-      return false;
+      return this.schematizationProperties.isSignificant = false;
     }
 
     // classify as significant if one sector occurs multiple times
@@ -67,21 +66,17 @@ class Vertex {
     }, []);
 
     if (occupiedSectors.length !== uniqueSectors.length) {
-      this.schematizationProperties.isSignificant = true;
-      return true;
+      return this.schematizationProperties.isSignificant = true;
     }
 
     // classify as not significant if none of the sectors are neighbors
     const isSignificant = uniqueSectors.every((sector) => {
       const [prevSector, nextSector] = sector.getNeighbors();
-      if (
-        this.getEdgesInSector(prevSector).length > 0 ||
+      return this.getEdgesInSector(prevSector).length > 0 ||
         this.getEdgesInSector(nextSector).length > 0
-      )
-        return true;
     });
-    this.schematizationProperties.isSignificant = isSignificant;
-    return isSignificant;
+
+    return this.schematizationProperties.isSignificant = isSignificant;
   }
 
   getEdgesInSector(sector) {
