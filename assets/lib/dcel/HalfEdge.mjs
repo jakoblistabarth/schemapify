@@ -206,15 +206,6 @@ class HalfEdge {
     return significantEndpoint;
   }
 
-  isInSector(sector) {
-    const [lowerBound, upperBound] = sector.getBounds();
-    return (this.getAngle() > lowerBound && this.getAngle() < upperBound) ||
-      this.getAngle() === lowerBound ||
-      this.getAngle() === upperBound
-      ? true
-      : false;
-  }
-
   isDeviating(sectors = config.C.getSectors()) {
     //TODO: refactor isDeviating(), find better solution for last sector (idx=0) should be 8???
     let assignedDirection =
@@ -226,12 +217,7 @@ class HalfEdge {
       if (sector.idx === sectors.length - 1) {
         assignedDirection = assignedDirection === 0 ? Math.PI * 2 : assignedDirection;
       }
-      const [lowerBound, upperBound] = sector.getBounds();
-      return (assignedDirection > lowerBound && assignedDirection < upperBound) ||
-        assignedDirection === lowerBound ||
-        assignedDirection === upperBound
-        ? false
-        : true;
+      return !sector.encloses(assignedDirection)
     }
   }
 

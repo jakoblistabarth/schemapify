@@ -85,9 +85,7 @@ class Vertex {
   }
 
   getEdgesInSector(sector) {
-    return this.edges.filter((edge) => {
-      return edge.isInSector(sector);
-    });
+    return this.edges.filter((edge) => sector.encloses(edge.getAngle()));
   }
 
   assignDirections(c = config.C) {
