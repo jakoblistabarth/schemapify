@@ -1,0 +1,12 @@
+{
+    "cSpell.allowCompoundWords": true,
+    "cSpell.words": [
+        "dcel"
+    ],
+    "cSpell.ignoreWords": [
+        "bbox",
+        "plgn"
+    ],
+    "editor.formatOnSave": true,
+    "prettier.printWidth": 100
+}
