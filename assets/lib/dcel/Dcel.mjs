@@ -5,18 +5,18 @@ import Face from "./Face.mjs";
 
 class Dcel {
   constructor() {
-    this.vertices = {};
+    this.vertices = new Map();
     this.halfEdges = [];
     this.faces = [];
     this.featureProperties = null;
   }
 
   makeVertex(x, y) {
-    const key = Vertex.getKey(x, y); // TODO: is there a better way to ensure that a coordinate pair vertex is added only once to the vertex list
-    if (this.vertices[key]) return this.vertices[key];
+    const key = Vertex.getKey(x, y);
+    if (this.vertices.has(key)) return this.vertices.get(key);
 
     const vertex = new Vertex(x, y, this);
-    this.vertices[key] = vertex;
+    this.vertices.set(key, vertex);
     return vertex;
   }
 
@@ -67,7 +67,7 @@ class Dcel {
   // takes a dcel
   // returns its Boundingbox as [minX, minY, maxX, maxY]
   getBbox() {
-    const points = Object.values(this.vertices).map((p) => [p.x, p.y]);
+    const points = [...this.vertices].map(([k, p]) => [p.x, p.y]);
     const bbox = [Infinity, Infinity, -Infinity, -Infinity];
     points.forEach((p) => {
       if (bbox[0] > p[0]) {
@@ -97,8 +97,7 @@ class Dcel {
   }
 
   findVertex(x, y) {
-    const key = Vertex.getKey(x, y); // TODO: why do we need this string key again, wyh not only compare coordinates??
-    return this.vertices[key];
+    return this.vertices.get(Vertex.getKey(x, y));
   }
 
   removeHalfEdge(edge) {
@@ -151,7 +150,7 @@ class Dcel {
     );
 
     // TODO: sort edges everytime a new edge is pushed to vertex.edges
-    Object.values(subdivision.vertices).forEach((vertex) => {
+    subdivision.vertices.forEach((vertex) => {
       // sort the half-edges whose tail vertex is that endpoint in clockwise order.
       // own words: sort all outgoing edges of current point in clockwise order
       vertex.sortEdges();
@@ -248,7 +247,7 @@ class Dcel {
   }
 
   classifyVertices() {
-    Object.values(this.vertices).forEach((v) => {
+    this.vertices.forEach((v) => {
       v.isSignificant();
     });
     const edgesWith2SignificantEndpoints = this.halfEdges.filter((edge) => {

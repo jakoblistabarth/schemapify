@@ -165,16 +165,14 @@ class HalfEdge {
     let directions = [];
     sectors.some(function (sector) {
       if (angle === sector.lower) {
-        directions.push(sector.lower);
-        return angle === sector.lower;
+        return directions.push(sector.lower);
       } else if (angle === sector.upper) {
-        directions.push(sector.upper);
-        return angle === sector.upper;
+        return directions.push(sector.upper);
       } else if (angle > sector.lower && angle < sector.upper) {
-        directions.push(sector.lower, sector.upper);
-        return angle > sector.lower && angle < sector.upper;
+        return directions.push(sector.lower, sector.upper);
       }
     });
+
     return directions;
   }
 
@@ -198,45 +196,32 @@ class HalfEdge {
     const significantEndpoint =
       endpoints.find(
         (vertex) =>
-          vertex.schematizationProperties.isSignificant === true ||
+          vertex.schematizationProperties.isSignificant ||
           vertex.schematizationProperties.isSignificant === "treatedAsSignificant"
       ) || endpoints[Math.round(Math.random())];
-    if (significantEndpoint.schematizationProperties.isSignificant === false)
+    if (!significantEndpoint.schematizationProperties.isSignificant)
       significantEndpoint.schematizationProperties.isSignificant = "treatedAsSignificant";
     return significantEndpoint;
-  }
-
-  isInSector(sector) {
-    const [lowerBound, upperBound] = sector.getBounds();
-    return (this.getAngle() > lowerBound && this.getAngle() < upperBound) ||
-      this.getAngle() === lowerBound ||
-      this.getAngle() === upperBound
-      ? true
-      : false;
   }
 
   isDeviating(sectors = config.C.getSectors()) {
     //TODO: refactor isDeviating(), find better solution for last sector (idx=0) should be 8???
     let assignedDirection =
       (this.schematizationProperties.direction * Math.PI * 2) / sectors.length;
+
     if (this.isAligned(sectors)) {
-      return this.getAssociatedDirections(sectors)[0] === assignedDirection ? false : true;
+      return !(this.getAssociatedDirections(sectors)[0] === assignedDirection)
     } else {
       const sector = this.getAssociatedSector(sectors)[0];
       if (sector.idx === sectors.length - 1) {
         assignedDirection = assignedDirection === 0 ? Math.PI * 2 : assignedDirection;
       }
-      const [lowerBound, upperBound] = sector.getBounds();
-      return (assignedDirection > lowerBound && assignedDirection < upperBound) ||
-        assignedDirection === lowerBound ||
-        assignedDirection === upperBound
-        ? false
-        : true;
+      return !sector.encloses(assignedDirection)
     }
   }
 
   isAligned(sectors = config.C.getSectors()) {
-    const isAligned = this.getAssociatedDirections(sectors).length === 1 ? true : false;
+    const isAligned = this.getAssociatedDirections(sectors).length === 1;
     this.schematizationProperties.isAligned = isAligned;
     return isAligned;
   }
@@ -246,37 +231,31 @@ class HalfEdge {
 
     if (this.twin.schematizationProperties.classification) {
       classification = this.twin.schematizationProperties.classification;
-      this.schematizationProperties.classification = classification;
-      return classification;
+      return this.schematizationProperties.classification = classification;
     }
 
     const significantEndpoint = this.getSignificantEndpoint();
     significantEndpoint.assignDirections(c);
 
+    const sector = this.getAssociatedSector(c.getSectors())[0];
+    const edges = significantEndpoint.getEdgesInSector(sector).filter(
+      (edge) => !edge.isAligned(c.getSectors()) && !edge.isDeviating(c.getSectors())
+    );
+
     if (this.isAligned(c.getSectors())) {
-      if (!this.isDeviating(c.getSectors())) classification = EDGE_CLASSES.AB;
-      else {
-        classification = EDGE_CLASSES.AD;
-      }
+      classification = this.isDeviating(c.getSectors())
+        ? EDGE_CLASSES.AD
+        : EDGE_CLASSES.AB;
+    } else if (this.isDeviating(c.getSectors())) {
+      classification = EDGE_CLASSES.UD;
+    } else if (edges.length == 2) {
+      classification = EDGE_CLASSES.E;
     } else {
-      if (this.isDeviating(c.getSectors())) classification = EDGE_CLASSES.UD;
-      else {
-        const sector = this.getAssociatedSector(c.getSectors())[0];
-        const edges = significantEndpoint.getEdgesInSector(sector);
-        if (
-          !this.isDeviating(c.getSectors()) &&
-          edges.filter(
-            (edge) => !edge.isAligned(c.getSectors()) && !edge.isDeviating(c.getSectors())
-          ).length == 2
-        )
-          classification = EDGE_CLASSES.E;
-        else if (!this.isDeviating(c.getSectors())) classification = EDGE_CLASSES.UB;
-      }
+      classification = EDGE_CLASSES.UB;
     }
 
     this.schematizationProperties.classification = classification;
-    this.twin.schematizationProperties.classification = classification;
-    return classification;
+    return this.twin.schematizationProperties.classification = classification;
   }
 }
 

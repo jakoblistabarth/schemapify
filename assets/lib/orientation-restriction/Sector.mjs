@@ -21,6 +21,11 @@ class Sector {
     const next = (idx + 1) % sectors.length;
     return [sectors[prev], sectors[next]];
   }
+
+  encloses(angle) {
+    const [lowerBound, upperBound] = this.getBounds();
+    return angle >= lowerBound && angle <= upperBound
+  }
 }
 
 export default Sector;

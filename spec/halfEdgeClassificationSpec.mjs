@@ -162,7 +162,7 @@ describe("Given the examples in the paper of buchin et al., directions are assig
   });
 
   it("m", function () {
-    s.o.edges.push(s.od0, s.od37, s.od53, s.od76);
+    s.o.edges.push(s.od0, s.od14, s.od53, s.od76);
     expect(
       s.o.assignDirections(s.c4).map((edge) => edge.schematizationProperties.direction)
     ).toEqual([7, 0, 1, 2]);
@@ -265,9 +265,9 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
   });
 
   it("m", function () {
-    s.o.edges.push(s.od0, s.od37, s.od53, s.od76);
+    s.o.edges.push(s.od0, s.od14, s.od53, s.od76);
     expect(s.od0.classify(s.c4)).toBe("alignedDeviating");
-    expect(s.od37.classify(s.c4)).toBe("unalignedBasic");
+    expect(s.od14.classify(s.c4)).toBe("unalignedBasic");
     expect(s.od53.classify(s.c4)).toBe("evading");
     expect(s.od76.classify(s.c4)).toBe("evading");
   });

@@ -19,7 +19,7 @@ describe("A DCEL of a single square", function () {
   });
 
   it("has 4 vertices", function () {
-    expect(Object.keys(dcel.vertices).length).toBe(4);
+    expect(dcel.vertices.size).toBe(4);
   });
 
   it("has 8 edges", function () {

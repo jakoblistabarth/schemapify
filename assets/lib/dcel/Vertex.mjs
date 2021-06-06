@@ -12,7 +12,7 @@ class Vertex {
   }
 
   static getKey(x, y) {
-    return `${x}/${y}`; // TODO: is there a better way to ensure that a coordinate pair vertex is added only once to the vertex list?
+    return `${x}/${y}`;
   }
 
   sortEdges(clockwise = true) {
@@ -49,17 +49,15 @@ class Vertex {
     // QUESTION: are vertices with only aligned edges never significant?
     // TODO: move to another class? to not mix dcel and schematization?
 
-    // classify as not significant if all edges are already aligned
+    // classify as insignificant if all edges are already aligned
     if (this.allEdgesAligned()) {
-      this.schematizationProperties.isSignificant = false;
-      return false;
+      return this.schematizationProperties.isSignificant = false;
     }
 
     // classify as significant if one sector occurs multiple times
     const occupiedSectors = this.edges
       .map((edge) => edge.getAssociatedSector(c.getSectors()))
-      .flat()
-      .sort();
+      .flat();
 
     const uniqueSectors = occupiedSectors.reduce((acc, sector) => {
       if (!acc.find((accSector) => accSector.idx == sector.idx)) acc.push(sector);
@@ -67,27 +65,21 @@ class Vertex {
     }, []);
 
     if (occupiedSectors.length !== uniqueSectors.length) {
-      this.schematizationProperties.isSignificant = true;
-      return true;
+      return this.schematizationProperties.isSignificant = true;
     }
 
-    // classify as not significant if none of the sectors are neighbors
+    // classify as significant if neighbor sectors are not empty
     const isSignificant = uniqueSectors.every((sector) => {
       const [prevSector, nextSector] = sector.getNeighbors();
-      if (
-        this.getEdgesInSector(prevSector).length > 0 ||
+      return this.getEdgesInSector(prevSector).length > 0 ||
         this.getEdgesInSector(nextSector).length > 0
-      )
-        return true;
     });
-    this.schematizationProperties.isSignificant = isSignificant;
-    return isSignificant;
+
+    return this.schematizationProperties.isSignificant = isSignificant;
   }
 
   getEdgesInSector(sector) {
-    return this.edges.filter((edge) => {
-      return edge.isInSector(sector);
-    });
+    return this.edges.filter((edge) => sector.encloses(edge.getAngle()));
   }
 
   assignDirections(c = config.C) {
@@ -95,35 +87,35 @@ class Vertex {
     let assignedDirections = [];
     const closestBounds = edges.map((edge) => {
       let direction;
-      if (edge.isAligned(c.getSectors())) {
-        direction = edge.getAssociatedDirections(c.getSectors())[0];
-      } else {
-        const [lower, upper] = edge.getAssociatedSector(c.getSectors())[0].getBounds();
-        direction = edge.getAngle() - lower <= upper - edge.getAngle() ? lower : upper;
-        direction = direction == Math.PI * 2 ? 0 : direction;
-      }
+
+      const [lower, upper] = edge.getAssociatedSector(c.getSectors())[0].getBounds();
+      direction = edge.getAngle() - lower <= upper - edge.getAngle() ? lower : upper;
+      direction = direction == Math.PI * 2 ? 0 : direction;
+
       return c.getAngles().indexOf(direction);
     });
+
     assignedDirections = closestBounds;
-    if (closestBounds.length !== Array.from(new Set(closestBounds)).length) {
-      closestBounds.forEach((direction, idx) => {
-        if (getOccurrence(assignedDirections, direction) == 1) assignedDirections[idx] = direction;
-        else {
-          const nextDirection = crawlArray(c.getAngles(), direction, +1);
-          const prevDirection = crawlArray(c.getAngles(), direction, -1);
-          const prevPrevDirection = crawlArray(c.getAngles(), direction, -2);
-          if (getOccurrence(assignedDirections, nextDirection) > 0) {
-            direction = prevDirection;
-            if (getOccurrence(assignedDirections, prevDirection) > 0)
-              assignedDirections[crawlArray(closestBounds, idx, -1)] = prevPrevDirection;
-          } else assignedDirections[(idx + 1) % closestBounds.length] = nextDirection;
-          assignedDirections[idx] = direction;
-        }
-      });
-    }
+
+    closestBounds.forEach((direction, idx) => {
+      if (getOccurrence(assignedDirections, direction) == 1) {
+        assignedDirections[idx] = direction;
+        return;
+      }
+
+      const nextDirection = crawlArray(c.getAngles(), direction, +1);
+      const prevDirection = crawlArray(c.getAngles(), direction, -1);
+      if (getOccurrence(assignedDirections, nextDirection) > 0) {
+        assignedDirections[idx] = prevDirection;
+      } else {
+        assignedDirections[(idx + 1) % closestBounds.length] = nextDirection
+      };
+    });
+
     edges.forEach(
       (edge, idx) => (edge.schematizationProperties.direction = assignedDirections[idx])
     );
+
     return this.edges;
   }
 }

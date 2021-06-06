@@ -21,6 +21,7 @@ export function createEdgeVertexSetup() {
   setup.o.schematizationProperties.isSignificant = true;
 
   const d0 = new Vertex(4, 0);
+  const d14 = new Vertex(4, 1);
   const d37 = new Vertex(4, 3);
   const d53 = new Vertex(3, 4);
   const d76 = new Vertex(1, 4);
@@ -38,6 +39,11 @@ export function createEdgeVertexSetup() {
   od0.twin = new HalfEdge(d0);
   od0.twin.twin = od0;
   setup.od0 = od0;
+
+  const od14 = new HalfEdge(setup.o);
+  od14.twin = new HalfEdge(d14);
+  od14.twin.twin = od14;
+  setup.od14 = od14;
 
   const od37 = new HalfEdge(setup.o);
   od37.twin = new HalfEdge(d37);

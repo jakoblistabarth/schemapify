@@ -1,5 +1,6 @@
-import { createEdgeVertexSetup } from "./test-helpers.mjs";
 import { crawlArray } from "../assets/lib/dcel/Utilities.mjs";
+import Sector from '../assets/lib/orientation-restriction/Sector.mjs';
+import { createEdgeVertexSetup } from "./test-helpers.mjs";
 
 describe("isAligned() works properly", function () {
   let s;
@@ -52,18 +53,23 @@ describe("getNeighbors() returns the neighboring sectors of the sector", functio
   });
 });
 
-describe("isInSector()", function () {
-  let s;
+describe("encloses()", function () {
+  let sector;
   beforeEach(function () {
-    s = createEdgeVertexSetup();
+    sector = new Sector(0, 0, Math.PI / 2);
   });
 
-  it("returns true for edges in specified sector", function () {
-    expect(s.od37.isInSector(s.c2.getSector(0))).toBe(true);
+  it("returns true sector bounds", function () {
+    expect(sector.encloses(0)).toBe(true);
+    expect(sector.encloses(Math.PI / 2)).toBe(true);
   });
 
-  it("returns true for aligned edge associated to specified sector", function () {
-    expect(s.od0.isInSector(s.c2.getSector(0))).toBe(true);
+  it("returns true enclosed values", function () {
+    expect(sector.encloses(Math.PI / 4)).toBe(true);
+  });
+
+  it("returns false for values outside of sector", function () {
+    expect(sector.encloses(Math.PI / 2 + 0.01)).toBe(false);
   });
 });
 

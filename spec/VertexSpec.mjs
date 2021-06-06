@@ -59,7 +59,7 @@ describe("sortEdges()", function () {
       const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
       let dcel = DCEL.buildFromGeoJSON(json);
 
-      Object.values(dcel.vertices).forEach((vertex) => {
+      dcel.vertices.forEach((vertex) => {
         const angles = vertex.edges.map((e) => e.getAngle());
         expect(angles.every((v, i, a) => !i || a[i - 1] >= v)).toEqual(true);
       });

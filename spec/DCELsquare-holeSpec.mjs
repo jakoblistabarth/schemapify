@@ -21,7 +21,7 @@ describe("A DCEL of a single square with one square hole", function () {
   });
 
   it("has 8 vertices", function () {
-    expect(Object.values(dcel.vertices).length).toBe(8);
+    expect(dcel.vertices.size).toBe(8);
   });
 
   it("has 16 halfedges", function () {
