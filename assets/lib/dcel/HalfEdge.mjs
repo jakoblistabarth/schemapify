@@ -237,25 +237,21 @@ class HalfEdge {
     const significantEndpoint = this.getSignificantEndpoint();
     significantEndpoint.assignDirections(c);
 
+    const sector = this.getAssociatedSector(c.getSectors())[0];
+    const edges = significantEndpoint.getEdgesInSector(sector).filter(
+      (edge) => !edge.isAligned(c.getSectors()) && !edge.isDeviating(c.getSectors())
+    );
+
     if (this.isAligned(c.getSectors())) {
-      if (!this.isDeviating(c.getSectors())) classification = EDGE_CLASSES.AB;
-      else {
-        classification = EDGE_CLASSES.AD;
-      }
+      classification = this.isDeviating(c.getSectors())
+        ? EDGE_CLASSES.AD
+        : EDGE_CLASSES.AB;
+    } else if (this.isDeviating(c.getSectors())) {
+      classification = EDGE_CLASSES.UD;
+    } else if (edges.length == 2) {
+      classification = EDGE_CLASSES.E;
     } else {
-      if (this.isDeviating(c.getSectors())) classification = EDGE_CLASSES.UD;
-      else {
-        const sector = this.getAssociatedSector(c.getSectors())[0];
-        const edges = significantEndpoint.getEdgesInSector(sector);
-        if (
-          !this.isDeviating(c.getSectors()) &&
-          edges.filter(
-            (edge) => !edge.isAligned(c.getSectors()) && !edge.isDeviating(c.getSectors())
-          ).length == 2
-        )
-          classification = EDGE_CLASSES.E;
-        else if (!this.isDeviating(c.getSectors())) classification = EDGE_CLASSES.UB;
-      }
+      classification = EDGE_CLASSES.UB;
     }
 
     this.schematizationProperties.classification = classification;
