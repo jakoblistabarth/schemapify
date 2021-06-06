@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 import config from "../../schematization.config.mjs";
-import { crawlArray, getOccurrence } from "../dcel/Utilities.mjs";
+import { crawlArray, getOccurrence } from "../utilities.mjs";
 
 class Vertex {
   constructor(x, y) {
@@ -51,7 +51,7 @@ class Vertex {
 
     // classify as insignificant if all edges are already aligned
     if (this.allEdgesAligned()) {
-      return this.schematizationProperties.isSignificant = false;
+      return (this.schematizationProperties.isSignificant = false);
     }
 
     // classify as significant if one sector occurs multiple times
@@ -65,17 +65,18 @@ class Vertex {
     }, []);
 
     if (occupiedSectors.length !== uniqueSectors.length) {
-      return this.schematizationProperties.isSignificant = true;
+      return (this.schematizationProperties.isSignificant = true);
     }
 
     // classify as significant if neighbor sectors are not empty
     const isSignificant = uniqueSectors.every((sector) => {
       const [prevSector, nextSector] = sector.getNeighbors();
-      return this.getEdgesInSector(prevSector).length > 0 ||
-        this.getEdgesInSector(nextSector).length > 0
+      return (
+        this.getEdgesInSector(prevSector).length > 0 || this.getEdgesInSector(nextSector).length > 0
+      );
     });
 
-    return this.schematizationProperties.isSignificant = isSignificant;
+    return (this.schematizationProperties.isSignificant = isSignificant);
   }
 
   getEdgesInSector(sector) {
@@ -108,8 +109,8 @@ class Vertex {
       if (getOccurrence(assignedDirections, nextDirection) > 0) {
         assignedDirections[idx] = prevDirection;
       } else {
-        assignedDirections[(idx + 1) % closestBounds.length] = nextDirection
-      };
+        assignedDirections[(idx + 1) % closestBounds.length] = nextDirection;
+      }
     });
 
     edges.forEach(

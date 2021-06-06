@@ -57,7 +57,7 @@ describe("sortEdges()", function () {
 
     testFiles.forEach((file) => {
       const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-      let dcel = DCEL.buildFromGeoJSON(json);
+      let dcel = DCEL.fromGeoJSON(json);
 
       dcel.vertices.forEach((vertex) => {
         const angles = vertex.edges.map((e) => e.getAngle());

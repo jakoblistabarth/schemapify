@@ -1,5 +1,5 @@
-import { crawlArray } from "../assets/lib/dcel/Utilities.mjs";
-import Sector from '../assets/lib/orientation-restriction/Sector.mjs';
+import { crawlArray } from "../assets/lib/utilities.mjs";
+import Sector from "../assets/lib/orientation-restriction/Sector.mjs";
 import { createEdgeVertexSetup } from "./test-helpers.mjs";
 
 describe("isAligned() works properly", function () {

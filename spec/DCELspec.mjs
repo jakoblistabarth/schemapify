@@ -3,13 +3,13 @@ import { resolve } from "path";
 import { getTestFiles } from "./test-helpers.mjs";
 import DCEL from "../assets/lib/dcel/Dcel.mjs";
 
-describe("buildFromGeoJSON() on geodata creates only complete cycles", function () {
+describe("fromGeoJSON() on geodata creates only complete cycles", function () {
   const dir = "assets/data/geodata";
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
     const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-    const dcel = DCEL.buildFromGeoJSON(json);
+    const dcel = DCEL.fromGeoJSON(json);
 
     const cycles = [];
     dcel.getBoundedFaces().forEach((f) => {
@@ -23,13 +23,13 @@ describe("buildFromGeoJSON() on geodata creates only complete cycles", function 
   });
 });
 
-describe("buildFromGeoJSON() on simple shapes creates only complete cycles", function () {
+describe("fromGeoJSON() on simple shapes creates only complete cycles", function () {
   const dir = "assets/data/shapes";
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
     const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-    const dcel = DCEL.buildFromGeoJSON(json);
+    const dcel = DCEL.fromGeoJSON(json);
 
     const cycles = [];
     dcel.getBoundedFaces().forEach((f) => {
@@ -45,7 +45,7 @@ describe("buildFromGeoJSON() on simple shapes creates only complete cycles", fun
 
 describe("A DCEL of 2 adjacent squares", function () {
   const json = JSON.parse(readFileSync(resolve("assets/data/shapes/2plgn-adjacent.json"), "utf8"));
-  const dcel = DCEL.buildFromGeoJSON(json);
+  const dcel = DCEL.fromGeoJSON(json);
 
   it("has 1 unbounded face", function () {
     expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
@@ -74,7 +74,7 @@ describe("A DCEL of 2 adjacent squares", function () {
 
 describe("A DCEL of 3 adjacent squares", function () {
   const json = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn.json"), "utf8"));
-  const dcel = DCEL.buildFromGeoJSON(json);
+  const dcel = DCEL.fromGeoJSON(json);
 
   it("has 1 unbounded face", function () {
     expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
@@ -109,9 +109,9 @@ describe("getBbox()", function () {
     );
     const plgn3 = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn.json"), "utf8"));
 
-    let bboxPlgn1 = DCEL.buildFromGeoJSON(plgn1).getBbox();
-    let bboxPlgn2 = DCEL.buildFromGeoJSON(plgn2).getBbox();
-    let bboxPlgn3 = DCEL.buildFromGeoJSON(plgn3).getBbox();
+    let bboxPlgn1 = DCEL.fromGeoJSON(plgn1).getBbox();
+    let bboxPlgn2 = DCEL.fromGeoJSON(plgn2).getBbox();
+    let bboxPlgn3 = DCEL.fromGeoJSON(plgn3).getBbox();
 
     expect(bboxPlgn1).toEqual([0, 0, 2, 2]);
     expect(bboxPlgn2).toEqual([0, 0, 4, 2]);
@@ -124,11 +124,7 @@ describe("getDiameter()", function () {
     const plgn1 = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
     const plgn3 = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn.json"), "utf8"));
 
-    expect(DCEL.buildFromGeoJSON(plgn1).getDiameter()).toBe(
-      Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2))
-    );
-    expect(DCEL.buildFromGeoJSON(plgn3).getDiameter()).toBe(
-      Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2))
-    );
+    expect(DCEL.fromGeoJSON(plgn1).getDiameter()).toBe(Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)));
+    expect(DCEL.fromGeoJSON(plgn3).getDiameter()).toBe(Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)));
   });
 });

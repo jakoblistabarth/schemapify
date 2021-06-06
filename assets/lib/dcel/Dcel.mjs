@@ -108,7 +108,7 @@ class Dcel {
     return this.halfEdges;
   }
 
-  static buildFromGeoJSON(geoJSON) {
+  static fromGeoJSON(geoJSON) {
     const subdivision = new Dcel();
 
     subdivision.featureProperties = geoJSON.features.map((feature) => feature.properties);

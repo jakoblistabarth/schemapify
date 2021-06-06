@@ -9,7 +9,7 @@ describe("A DCEL of a single square with one square hole", function () {
     const polygon = JSON.parse(
       readFileSync(resolve("assets/data/shapes/square-hole.json"), "utf8")
     );
-    dcel = DCEL.buildFromGeoJSON(polygon);
+    dcel = DCEL.fromGeoJSON(polygon);
   });
 
   it("has 1 unbounded face", function () {

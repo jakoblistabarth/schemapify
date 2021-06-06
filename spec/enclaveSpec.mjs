@@ -1,5 +1,5 @@
 import DCEL from "../assets/lib/dcel/Dcel.mjs";
-import { DCELtoGeoJSON } from "../assets/lib/dcel/DCELtoGeoJSON.mjs";
+import DcelConverter from "../assets/lib/dcel/DcelConverter.mjs";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 
@@ -8,7 +8,7 @@ describe("A DCEL of an simplified enclave model", function () {
 
   beforeEach(function () {
     const polygon = JSON.parse(readFileSync(resolve("assets/data/shapes/enclave.json"), "utf8"));
-    dcel = DCEL.buildFromGeoJSON(polygon);
+    dcel = DCEL.fromGeoJSON(polygon);
   });
 
   it("has 1 unbounded face", function () {
@@ -20,7 +20,8 @@ describe("A DCEL of an simplified enclave model", function () {
   });
 
   it("returns a geojson with 2 polygons", function () {
-    const json = DCELtoGeoJSON(dcel);
+    const dcelC = new DcelConverter(dcel);
+    const json = dcelC.toGeoJSON("enclave");
     expect(json.features.length).toBe(2);
   });
 });
@@ -30,7 +31,7 @@ describe("A DCEL of an simplified enclave model (reversed order)", function () {
 
   beforeEach(function () {
     const polygon = JSON.parse(readFileSync(resolve("assets/data/shapes/enclave2.json"), "utf8"));
-    dcel = DCEL.buildFromGeoJSON(polygon);
+    dcel = DCEL.fromGeoJSON(polygon);
   });
 
   it("has 1 unbounded face", function () {
@@ -42,7 +43,8 @@ describe("A DCEL of an simplified enclave model (reversed order)", function () {
   });
 
   it("returns a geojson with 2 polygons", function () {
-    const json = DCELtoGeoJSON(dcel);
+    const dcelC = new DcelConverter(dcel);
+    const json = dcelC.toGeoJSON("enclave2");
     expect(json.features.length).toBe(2);
   });
 });

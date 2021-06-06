@@ -7,7 +7,7 @@ describe("A DCEL of a single square", function () {
 
   beforeEach(function () {
     const polygon = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
-    dcel = DCEL.buildFromGeoJSON(polygon);
+    dcel = DCEL.fromGeoJSON(polygon);
   });
 
   it("has 1 unbounded face", function () {

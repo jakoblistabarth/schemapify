@@ -1,5 +1,5 @@
-import DCEL from "./lib/dcel/Dcel.mjs";
-import { logDCEL, mapFromDCEL } from "./lib/dcel/Utilities.mjs";
+import Dcel from "./lib/dcel/Dcel.mjs";
+import DcelConverter from "./lib/dcel/DcelConverter.mjs";
 
 async function getJSON(path) {
   const response = await fetch(path);
@@ -57,10 +57,11 @@ tests.forEach(async (test) => {
   const name = test.slice(test.lastIndexOf("/") + 1, -5);
   const data = await getJSON(test);
   // TODO: validate() data (within getJSON??) check if of type polygon or multipolygon, check crs and save it for later?
-  const subdivision = DCEL.buildFromGeoJSON(data);
+  const subdivision = Dcel.fromGeoJSON(data);
   subdivision.preProcess();
   subdivision.constrainAngles();
 
-  logDCEL(subdivision, name);
-  mapFromDCEL(subdivision, name);
+  const dcel = new DcelConverter(subdivision);
+  dcel.log(name);
+  dcel.toMap(name);
 });

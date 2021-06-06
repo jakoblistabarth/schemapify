@@ -8,7 +8,7 @@ describe("replaceOuterRingEdge()", function () {
     const polygon = JSON.parse(
       readFileSync(resolve("assets/data/shapes/square-hole.json"), "utf8")
     );
-    const dcel = DCEL.buildFromGeoJSON(polygon);
+    const dcel = DCEL.fromGeoJSON(polygon);
     innerRing = dcel.getBoundedFaces()[1];
   });
 
