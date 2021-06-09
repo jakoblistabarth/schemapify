@@ -2,6 +2,7 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 import { getTestFiles } from "./test-helpers.mjs";
 import DCEL from "../assets/lib/dcel/Dcel.mjs";
+import { hint } from "@mapbox/geojsonhint";
 
 describe("fromGeoJSON() on geodata creates only complete cycles", function () {
   const dir = "assets/data/geodata";
@@ -126,5 +127,43 @@ describe("getDiameter()", function () {
 
     expect(DCEL.fromGeoJSON(plgn1).getDiameter()).toBe(Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)));
     expect(DCEL.fromGeoJSON(plgn3).getDiameter()).toBe(Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)));
+  });
+});
+
+describe("schematize() returns a result which can be turned into a valid geojson", function () {
+  const dir = "assets/data/geodata";
+  const testFiles = getTestFiles(dir);
+
+  testFiles.forEach((file) => {
+    it("for the geodata input " + file, function () {
+      const inputJson = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
+      const dcel = DCEL.fromGeoJSON(inputJson);
+      dcel.schematize();
+      const outputJson = dcel.toGeoJSON(file);
+      const outputJsonPretty = JSON.stringify(outputJson, null, 4);
+      const errors = hint(outputJsonPretty);
+      if (errors.length > 0) console.log(errors);
+      expect(errors.length).toBe(0);
+      expect(inputJson.features.length).toBe(outputJson.features.length);
+    });
+  });
+});
+
+describe("schematize() returns a result which can be turned into a valid geojson", function () {
+  const dir = "assets/data/shapes";
+  const testFiles = getTestFiles(dir);
+
+  testFiles.forEach((file) => {
+    it("for the simple input " + file, function () {
+      const inputJson = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
+      const dcel = DCEL.fromGeoJSON(inputJson);
+      dcel.schematize();
+      const outputJson = dcel.toGeoJSON(file);
+      const outputJsonPretty = JSON.stringify(outputJson, null, 4);
+      const errors = hint(outputJsonPretty);
+      if (errors.length > 0) console.log(errors);
+      expect(errors.length).toBe(0);
+      expect(inputJson.features.length).toBe(outputJson.features.length);
+    });
   });
 });

@@ -13,7 +13,7 @@ class Staircase {
 
   getRegion() {
     const edge = this.halfEdge;
-    const edgeClass = edge.schematizationProperties.classification;
+    const edgeClass = edge.class;
     if (edgeClass === EDGE_CLASSES.AB) {
       return [
         [edge.getTail().x, edge.getTail().y],
@@ -41,7 +41,7 @@ class Staircase {
   }
 
   getEdgeDistance() {
-    if (this.schematizationProperties.classification === EDGE_CLASSES.AB) {
+    if (this.class === EDGE_CLASSES.AB) {
       return;
     }
     // TODO: implement other cases
@@ -56,10 +56,10 @@ class Staircase {
 
   buildStaircase() {
     const edge = this.halfEdge;
-    const edgeClass = edge.schematizationProperties.classification;
+    const edgeClass = edge.class;
     if (edgeClass === EDGE_CLASSES.AD) {
       const epsilon = 0.1;
-      d1 = edge.schematizationProperties.direction;
+      d1 = edge.class;
       d2 = edge.getAngle();
     }
 

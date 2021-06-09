@@ -12,7 +12,7 @@ describe("getPointOnLine", function () {
     const twin = dcel.makeHalfEdge(d, o);
     edge.twin = twin;
     twin.twin = edge;
-    edge.schematizationProperties.classification = EDGE_CLASSES.UB;
+    edge.class = EDGE_CLASSES.UB;
 
     const staircase = new Staircase(edge);
     expect(staircase.region).toEqual([
@@ -31,7 +31,7 @@ describe("getPointOnLine", function () {
     const twin = dcel.makeHalfEdge(d, o);
     edge.twin = twin;
     twin.twin = edge;
-    edge.schematizationProperties.classification = EDGE_CLASSES.UB;
+    edge.class = EDGE_CLASSES.UB;
 
     const staircase = new Staircase(edge);
     expect(staircase.region).toEqual([
@@ -50,7 +50,7 @@ describe("getPointOnLine", function () {
     const twin = dcel.makeHalfEdge(d, o);
     edge.twin = twin;
     twin.twin = edge;
-    edge.schematizationProperties.classification = EDGE_CLASSES.UB;
+    edge.class = EDGE_CLASSES.UB;
 
     const staircase = new Staircase(edge);
     expect(staircase.region).toEqual([

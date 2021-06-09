@@ -2,13 +2,19 @@ import { v4 as uuid } from "uuid";
 import config from "../../schematization.config.mjs";
 import { crawlArray, getOccurrence } from "../utilities.mjs";
 
+export const SIGNIFICANCE = {
+  S: "significant",
+  I: "insignificant",
+  T: "treatedAsSignificant",
+};
+
 class Vertex {
   constructor(x, y) {
     this.uuid = uuid();
     this.x = x;
     this.y = y;
     this.edges = [];
-    this.schematizationProperties = {};
+    this.significance = null;
   }
 
   static getKey(x, y) {
@@ -51,7 +57,7 @@ class Vertex {
 
     // classify as insignificant if all edges are already aligned
     if (this.allEdgesAligned()) {
-      return (this.schematizationProperties.isSignificant = false);
+      return (this.significance = SIGNIFICANCE.I);
     }
 
     // classify as significant if one sector occurs multiple times
@@ -65,7 +71,7 @@ class Vertex {
     }, []);
 
     if (occupiedSectors.length !== uniqueSectors.length) {
-      return (this.schematizationProperties.isSignificant = true);
+      return (this.significance = SIGNIFICANCE.S);
     }
 
     // classify as significant if neighbor sectors are not empty
@@ -75,17 +81,16 @@ class Vertex {
         this.getEdgesInSector(prevSector).length > 0 || this.getEdgesInSector(nextSector).length > 0
       );
     });
-
-    return (this.schematizationProperties.isSignificant = isSignificant);
+    return (this.significance = isSignificant ? SIGNIFICANCE.S : SIGNIFICANCE.I);
   }
 
   getEdgesInSector(sector) {
     return this.edges.filter((edge) => sector.encloses(edge.getAngle()));
   }
 
-  assignDirections(c = config.C) {
+  assignAngles(c = config.C) {
     const edges = this.sortEdges(false);
-    let assignedDirections = [];
+    let anglesToAssign = [];
     const closestBounds = edges.map((edge) => {
       let direction;
 
@@ -96,26 +101,24 @@ class Vertex {
       return c.getAngles().indexOf(direction);
     });
 
-    assignedDirections = closestBounds;
+    anglesToAssign = closestBounds;
 
     closestBounds.forEach((direction, idx) => {
-      if (getOccurrence(assignedDirections, direction) == 1) {
-        assignedDirections[idx] = direction;
+      if (getOccurrence(anglesToAssign, direction) == 1) {
+        anglesToAssign[idx] = direction;
         return;
       }
 
       const nextDirection = crawlArray(c.getAngles(), direction, +1);
       const prevDirection = crawlArray(c.getAngles(), direction, -1);
-      if (getOccurrence(assignedDirections, nextDirection) > 0) {
-        assignedDirections[idx] = prevDirection;
+      if (getOccurrence(anglesToAssign, nextDirection) > 0) {
+        anglesToAssign[idx] = prevDirection;
       } else {
-        assignedDirections[(idx + 1) % closestBounds.length] = nextDirection;
+        anglesToAssign[(idx + 1) % closestBounds.length] = nextDirection;
       }
     });
 
-    edges.forEach(
-      (edge, idx) => (edge.schematizationProperties.direction = assignedDirections[idx])
-    );
+    edges.forEach((edge, idx) => (edge.assignedAngle = anglesToAssign[idx]));
 
     return this.edges;
   }
