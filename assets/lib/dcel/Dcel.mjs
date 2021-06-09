@@ -358,21 +358,7 @@ class Dcel {
     return createGeoJSON(features, name);
   }
 
-  toMap(name) {
-    const DCELMap = L.map(name, {
-      zoomControl: false,
-    });
-    DCELMap.attributionControl.addAttribution(name);
-
-    function highlightDCELFeature(e) {
-      var feature = e.target;
-      feature.setStyle({
-        weight: 3,
-        fillColor: "black",
-        fillOpacity: feature.feature.properties.ringType === "inner" ? 0.25 : 0.5,
-      });
-    }
-
+  verticesToGeoJSON(name) {
     const vertexFeatures = [...this.vertices].map(([k, v]) => {
       return {
         type: "Feature",
@@ -388,8 +374,87 @@ class Dcel {
       };
     });
 
-    const verticesJSON = createGeoJSON(vertexFeatures, name + "_vertices");
-    const vertexLayer = L.geoJson(verticesJSON, {
+    return createGeoJSON(vertexFeatures, name + "_vertices");
+  }
+
+  facesToGeoJSON(name) {
+    const faceFeatures = this.getBoundedFaces().map((f) => {
+      const halfEdges = f.getEdges();
+      const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
+      coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
+      return {
+        type: "Feature",
+        geometry: {
+          type: "Polygon",
+          coordinates: [coordinates],
+        },
+        properties: {
+          uuid: f.uuid,
+          FID: f.FID,
+          ringType: f.outerRing != null ? "inner" : "outer",
+        },
+      };
+    });
+
+    return createGeoJSON(faceFeatures, name + "_polygons");
+  }
+
+  EdgesToGeoJSON(name) {
+    const edgeFeatures = this.getSimpleEdges().map((e) => {
+      const a = e.tail;
+      const b = e.twin.tail;
+
+      return {
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [a.x, a.y],
+            [b.x, b.y],
+          ],
+        },
+        properties: {
+          incidentFaceType: e.face.outerRing ? "inner" : "outer",
+          length: e.getLength(),
+          sector: e.getAssociatedSector(),
+          schematizationProperties: e.schematizationProperties,
+          edge: `
+              <span class="material-icons">rotate_left</span>
+              ${e.uuid.substring(0, 5)} (${e.tail.x}/${e.tail.y})
+              <span class="material-icons">arrow_forward</span>
+              (${e.twin.tail.x}/${e.twin.tail.y})
+              <span class="material-icons">highlight_alt</span> ${e.face?.uuid.substring(0, 5)}
+              ${e.class}`,
+          twin: `
+              <span class="material-icons">rotate_right</span>
+              ${e.twin.uuid.substring(0, 5)} (${e.twin.tail.x}/${e.twin.tail.y})
+              <span class="material-icons">arrow_back</span>
+              (${e.tail.x}/${e.tail.y})
+              <span class="material-icons">highlight_alt</span> ${e.twin.face?.uuid.substring(0, 5)}
+              ${e.twin.class}`,
+        },
+      };
+    });
+
+    return createGeoJSON(edgeFeatures, name + "_edges");
+  }
+
+  toMap(name) {
+    const DCELMap = L.map(name, {
+      zoomControl: false,
+    });
+    DCELMap.attributionControl.addAttribution(name);
+
+    function highlightDCELFeature(e) {
+      var feature = e.target;
+      feature.setStyle({
+        weight: 3,
+        fillColor: "black",
+        fillOpacity: feature.feature.properties.ringType === "inner" ? 0.25 : 0.5,
+      });
+    }
+
+    const vertexLayer = L.geoJson(this.verticesToGeoJSON(name), {
       pointToLayer: function (feature, latlng) {
         const props = feature.properties;
         const v = feature.geometry.coordinates;
@@ -441,26 +506,7 @@ class Dcel {
       },
     });
 
-    const faceFeatures = this.getBoundedFaces().map((f) => {
-      const halfEdges = f.getEdges();
-      const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
-      coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
-      return {
-        type: "Feature",
-        geometry: {
-          type: "Polygon",
-          coordinates: [coordinates],
-        },
-        properties: {
-          uuid: f.uuid,
-          FID: f.FID,
-          ringType: f.outerRing != null ? "inner" : "outer",
-        },
-      };
-    });
-
-    const facesJSON = createGeoJSON(faceFeatures, name + "_polygons");
-    const faceLayer = L.geoJSON(facesJSON, {
+    const faceLayer = L.geoJSON(this.facesToGeoJSON(), {
       style: function (feature) {
         return {
           color: "transparent",
@@ -494,44 +540,7 @@ class Dcel {
                 `;
     });
 
-    const edgeFeatures = this.getSimpleEdges().map((e) => {
-      const a = e.tail;
-      const b = e.twin.tail;
-
-      return {
-        type: "Feature",
-        geometry: {
-          type: "LineString",
-          coordinates: [
-            [a.x, a.y],
-            [b.x, b.y],
-          ],
-        },
-        properties: {
-          incidentFaceType: e.face.outerRing ? "inner" : "outer",
-          length: e.getLength(),
-          sector: e.getAssociatedSector(),
-          schematizationProperties: e.schematizationProperties,
-          edge: `
-              <span class="material-icons">rotate_left</span>
-              ${e.uuid.substring(0, 5)} (${e.tail.x}/${e.tail.y})
-              <span class="material-icons">arrow_forward</span>
-              (${e.twin.tail.x}/${e.twin.tail.y})
-              <span class="material-icons">highlight_alt</span> ${e.face?.uuid.substring(0, 5)}
-              ${e.class}`,
-          twin: `
-              <span class="material-icons">rotate_right</span>
-              ${e.twin.uuid.substring(0, 5)} (${e.twin.tail.x}/${e.twin.tail.y})
-              <span class="material-icons">arrow_back</span>
-              (${e.tail.x}/${e.tail.y})
-              <span class="material-icons">highlight_alt</span> ${e.twin.face?.uuid.substring(0, 5)}
-              ${e.twin.class}`,
-        },
-      };
-    });
-
-    const edgesJSON = createGeoJSON(edgeFeatures, name + "_edges");
-    const edgeLayer = L.geoJSON(edgesJSON, {
+    const edgeLayer = L.geoJSON(this.EdgesToGeoJSON(), {
       style: function (feature) {
         return {
           color: "black",
@@ -561,11 +570,10 @@ class Dcel {
                 `;
     });
 
-    const polygonsJSON = this.toGeoJSON(this.dcel);
-    const polygonLayer = L.geoJSON(polygonsJSON, {
+    const polygonLayer = L.geoJSON(this.toGeoJSON(this.dcel), {
       style: function (feature) {
         return {
-          color: "red",
+          color: "grey",
           weight: 2,
         };
       },
