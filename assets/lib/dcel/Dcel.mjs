@@ -1,5 +1,6 @@
 import config from "../../schematization.config.mjs";
 import Vertex from "./Vertex.mjs";
+import { SIGNIFICANCE } from "./Vertex.mjs";
 import HalfEdge from "./HalfEdge.mjs";
 import Face from "./Face.mjs";
 import { createGeoJSON, groupBy } from "../utilities.mjs";
@@ -253,9 +254,9 @@ class Dcel {
     });
     this.getSimpleEdges().forEach((edge) => {
       const [head, tail] = edge.getEndpoints();
-      if (head.isSignificant() && tail.isSignificant()) {
+      if (head.isSignificant() === SIGNIFICANCE.S && tail.isSignificant() === SIGNIFICANCE.S) {
         const newPoint = edge.bisect().getHead();
-        newPoint.schematizationProperties.isSignificant = false;
+        newPoint.significance = SIGNIFICANCE.I;
       }
     });
   }
@@ -381,7 +382,7 @@ class Dcel {
         },
         properties: {
           uuid: v.uuid,
-          isSignificant: v.schematizationProperties.isSignificant,
+          significance: v.significance,
           edges: v.edges,
         },
       };
@@ -408,14 +409,15 @@ class Dcel {
                     .getAssociatedSector()
                     .map((s) => s.idx)
                     .join(",")}</td>
-                  <td>${edge.schematizationProperties.classification}</td>
+                  <td>${edge.class}</td>
                 </tr>
               `;
           })
           .join("");
         return L.circleMarker(latlng, {
-          radius: feature.properties.isSignificant ? 4 : 2,
-          fillColor: feature.properties.isSignificant === "treatedAsSignificant" ? "grey" : "white",
+          radius:
+            props.significance === SIGNIFICANCE.S || props.significance === SIGNIFICANCE.T ? 4 : 2,
+          fillColor: props.significance === SIGNIFICANCE.T ? "grey" : "white",
           color: "black",
           weight: 2,
           opacity: 1,
@@ -423,7 +425,7 @@ class Dcel {
         }).bindTooltip(`
             <span class="material-icons">radio_button_checked</span> ${props.uuid.substring(0, 5)}
             (${v[0]}/${v[1]})<br>
-            significant: ${props.isSignificant}<br>
+            significance: ${props.significance}<br>
             <table>
               ${edges}
             </table>
@@ -516,14 +518,14 @@ class Dcel {
               <span class="material-icons">arrow_forward</span>
               (${e.twin.tail.x}/${e.twin.tail.y})
               <span class="material-icons">highlight_alt</span> ${e.face?.uuid.substring(0, 5)}
-              ${e.schematizationProperties.classification}`,
+              ${e.class}`,
           twin: `
               <span class="material-icons">rotate_right</span>
               ${e.twin.uuid.substring(0, 5)} (${e.twin.tail.x}/${e.twin.tail.y})
               <span class="material-icons">arrow_back</span>
               (${e.tail.x}/${e.tail.y})
               <span class="material-icons">highlight_alt</span> ${e.twin.face?.uuid.substring(0, 5)}
-              ${e.twin.schematizationProperties.classification}`,
+              ${e.twin.class}`,
         },
       };
     });

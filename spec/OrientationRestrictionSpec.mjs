@@ -1,6 +1,7 @@
 import { crawlArray } from "../assets/lib/utilities.mjs";
 import Sector from "../assets/lib/orientation-restriction/Sector.mjs";
 import { createEdgeVertexSetup } from "./test-helpers.mjs";
+import { SIGNIFICANCE } from "../assets/lib/dcel/Vertex.mjs";
 
 describe("isAligned() works properly", function () {
   let s;
@@ -98,32 +99,32 @@ describe("isSignficant()", function () {
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od0, s.od90);
-    expect(s.o.isSignificant(s.c2)).toBe(false);
+    expect(s.o.isSignificant(s.c2)).toBe(SIGNIFICANCE.I);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od37, s.od284);
-    expect(s.o.isSignificant(s.c2)).toBe(true);
+    expect(s.o.isSignificant(s.c2)).toBe(SIGNIFICANCE.S);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od0, s.od180);
-    expect(s.o.isSignificant(s.c2)).toBe(false);
+    expect(s.o.isSignificant(s.c2)).toBe(SIGNIFICANCE.I);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od0, s.od37);
-    expect(s.o.isSignificant(s.c2)).toBe(true);
+    expect(s.o.isSignificant(s.c2)).toBe(SIGNIFICANCE.S);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od104, s.od37);
-    expect(s.o.isSignificant(s.c2)).toBe(true);
+    expect(s.o.isSignificant(s.c2)).toBe(SIGNIFICANCE.S);
   });
 
   it("classifies a vertex with edges in disjoint sectors as not significant.", function () {
     s.o.edges.push(s.od217, s.od37);
-    expect(s.o.isSignificant(s.c2)).toBe(false);
+    expect(s.o.isSignificant(s.c2)).toBe(SIGNIFICANCE.I);
   });
 });
 

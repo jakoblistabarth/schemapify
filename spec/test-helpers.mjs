@@ -1,6 +1,7 @@
 import { readdirSync } from "fs";
 import HalfEdge from "../assets/lib/dcel/HalfEdge.mjs";
 import Vertex from "../assets/lib/dcel/Vertex.mjs";
+import { SIGNIFICANCE } from "../assets/lib/dcel/Vertex.mjs";
 import C from "../assets/lib/orientation-restriction/C.mjs";
 
 export function getTestFiles(dir) {
@@ -18,7 +19,7 @@ export function createEdgeVertexSetup() {
   const setup = {};
 
   setup.o = new Vertex(0, 0);
-  setup.o.schematizationProperties.isSignificant = true;
+  setup.o.significance = SIGNIFICANCE.S;
 
   const d0 = new Vertex(4, 0);
   const d14 = new Vertex(4, 1);

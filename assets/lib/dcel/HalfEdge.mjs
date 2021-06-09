@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
 import config from "../../schematization.config.mjs";
+import { SIGNIFICANCE } from "./Vertex.mjs";
 
 const EDGE_CLASSES = {
   AB: "alignedBasic",
@@ -18,7 +19,8 @@ class HalfEdge {
     this.prev = null;
     this.next = null;
     this.dcel = dcel;
-    this.schematizationProperties = {};
+    this.assignedAngle = null;
+    this.isAligning = null;
   }
 
   getTail() {
@@ -195,47 +197,43 @@ class HalfEdge {
     const endpoints = this.getEndpoints();
     const significantEndpoint =
       endpoints.find(
-        (vertex) =>
-          vertex.schematizationProperties.isSignificant ||
-          vertex.schematizationProperties.isSignificant === "treatedAsSignificant"
+        (vertex) => vertex.significance === SIGNIFICANCE.S || vertex.significance === SIGNIFICANCE.T
       ) || endpoints[Math.round(Math.random())];
-    if (!significantEndpoint.schematizationProperties.isSignificant)
-      significantEndpoint.schematizationProperties.isSignificant = "treatedAsSignificant";
+    if (significantEndpoint.significance === SIGNIFICANCE.I)
+      significantEndpoint.significance = SIGNIFICANCE.T;
     return significantEndpoint;
   }
 
   isDeviating(sectors = config.C.getSectors()) {
     //TODO: refactor isDeviating(), find better solution for last sector (idx=0) should be 8???
-    let assignedDirection =
-      (this.schematizationProperties.direction * Math.PI * 2) / sectors.length;
+    let assignedAngle = (this.assignedAngle * Math.PI * 2) / sectors.length;
 
     if (this.isAligned(sectors)) {
-      return !(this.getAssociatedDirections(sectors)[0] === assignedDirection);
+      return !(this.getAssociatedDirections(sectors)[0] === assignedAngle);
     } else {
       const sector = this.getAssociatedSector(sectors)[0];
       if (sector.idx === sectors.length - 1) {
-        assignedDirection = assignedDirection === 0 ? Math.PI * 2 : assignedDirection;
+        assignedAngle = assignedAngle === 0 ? Math.PI * 2 : assignedAngle;
       }
-      return !sector.encloses(assignedDirection);
+      return !sector.encloses(assignedAngle);
     }
   }
 
   isAligned(sectors = config.C.getSectors()) {
     const isAligned = this.getAssociatedDirections(sectors).length === 1;
-    this.schematizationProperties.isAligned = isAligned;
-    return isAligned;
+    return (this.isAligning = isAligned);
   }
 
   classify(c = config.C) {
     let classification;
 
-    if (this.twin.schematizationProperties.classification) {
-      classification = this.twin.schematizationProperties.classification;
-      return (this.schematizationProperties.classification = classification);
+    if (this.twin.class) {
+      classification = this.twin.class;
+      return (this.class = classification);
     }
 
     const significantEndpoint = this.getSignificantEndpoint();
-    significantEndpoint.assignDirections(c);
+    significantEndpoint.assignAngles(c);
 
     const sector = this.getAssociatedSector(c.getSectors())[0];
     const edges = significantEndpoint
@@ -252,8 +250,8 @@ class HalfEdge {
       classification = EDGE_CLASSES.UB;
     }
 
-    this.schematizationProperties.classification = classification;
-    return (this.twin.schematizationProperties.classification = classification);
+    this.class = classification;
+    return (this.twin.class = classification);
   }
 }
 
