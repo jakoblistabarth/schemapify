@@ -100,7 +100,7 @@ class HalfEdge {
     et.prev.next = et__;
     et.next.prev = et_;
 
-    if (f2.edge != null && !f1.outerRing) {
+    if (f2.edge !== null && !f1.outerRing) {
       // if f2 is not the unbounded face and f1 is not a hole
       f2.edge = et_;
     }
@@ -210,13 +210,13 @@ class HalfEdge {
       (this.schematizationProperties.direction * Math.PI * 2) / sectors.length;
 
     if (this.isAligned(sectors)) {
-      return !(this.getAssociatedDirections(sectors)[0] === assignedDirection)
+      return !(this.getAssociatedDirections(sectors)[0] === assignedDirection);
     } else {
       const sector = this.getAssociatedSector(sectors)[0];
       if (sector.idx === sectors.length - 1) {
         assignedDirection = assignedDirection === 0 ? Math.PI * 2 : assignedDirection;
       }
-      return !sector.encloses(assignedDirection)
+      return !sector.encloses(assignedDirection);
     }
   }
 
@@ -231,21 +231,19 @@ class HalfEdge {
 
     if (this.twin.schematizationProperties.classification) {
       classification = this.twin.schematizationProperties.classification;
-      return this.schematizationProperties.classification = classification;
+      return (this.schematizationProperties.classification = classification);
     }
 
     const significantEndpoint = this.getSignificantEndpoint();
     significantEndpoint.assignDirections(c);
 
     const sector = this.getAssociatedSector(c.getSectors())[0];
-    const edges = significantEndpoint.getEdgesInSector(sector).filter(
-      (edge) => !edge.isAligned(c.getSectors()) && !edge.isDeviating(c.getSectors())
-    );
+    const edges = significantEndpoint
+      .getEdgesInSector(sector)
+      .filter((edge) => !edge.isAligned(c.getSectors()) && !edge.isDeviating(c.getSectors()));
 
     if (this.isAligned(c.getSectors())) {
-      classification = this.isDeviating(c.getSectors())
-        ? EDGE_CLASSES.AD
-        : EDGE_CLASSES.AB;
+      classification = this.isDeviating(c.getSectors()) ? EDGE_CLASSES.AD : EDGE_CLASSES.AB;
     } else if (this.isDeviating(c.getSectors())) {
       classification = EDGE_CLASSES.UD;
     } else if (edges.length == 2) {
@@ -255,7 +253,7 @@ class HalfEdge {
     }
 
     this.schematizationProperties.classification = classification;
-    return this.twin.schematizationProperties.classification = classification;
+    return (this.twin.schematizationProperties.classification = classification);
   }
 }
 

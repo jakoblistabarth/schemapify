@@ -1,5 +1,4 @@
 import DCEL from "../assets/lib/dcel/Dcel.mjs";
-import DcelConverter from "../assets/lib/dcel/DcelConverter.mjs";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 
@@ -20,8 +19,7 @@ describe("A DCEL of an simplified enclave model", function () {
   });
 
   it("returns a geojson with 2 polygons", function () {
-    const dcelC = new DcelConverter(dcel);
-    const json = dcelC.toGeoJSON("enclave");
+    const json = dcel.toGeoJSON("enclave");
     expect(json.features.length).toBe(2);
   });
 });
@@ -43,8 +41,7 @@ describe("A DCEL of an simplified enclave model (reversed order)", function () {
   });
 
   it("returns a geojson with 2 polygons", function () {
-    const dcelC = new DcelConverter(dcel);
-    const json = dcelC.toGeoJSON("enclave2");
+    const json = dcel.toGeoJSON("enclave2");
     expect(json.features.length).toBe(2);
   });
 });
