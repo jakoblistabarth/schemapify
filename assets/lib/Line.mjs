@@ -1,23 +1,20 @@
+import Point from "./Point.mjs";
+
 class Line {
-  constructor(x, y, angle) {
-    this.x = x;
-    this.y = y;
+  constructor(point, angle) {
+    this.point = point;
     this.angle = angle;
   }
 
   getPointOnLine(distance = 1) {
-    // QUESTION: do i really need this conditions for dx, and dy because js' sin/cos implementation is inaccurate??
-    const dx =
-      this.angle === Math.PI * 0.5 || this.angle === Math.PI * 1.5 ? 0 : Math.cos(this.angle);
-    const dy = this.angle === Math.PI * 1 || this.angle === Math.PI * 2 ? 0 : Math.sin(this.angle);
-    return [this.x + distance * dx, this.y + distance * dy];
+    return this.point.getNewPoint(distance, this.angle);
   }
 
   getABC() {
-    const [x2, y2] = this.getPointOnLine();
-    const A = y2 - this.y;
-    const B = this.x - x2;
-    const C = A * this.x + B * this.y;
+    const [x2, y2] = this.getPointOnLine().xy();
+    const A = y2 - this.point.y;
+    const B = this.point.x - x2;
+    const C = A * this.point.x + B * this.point.y;
     return [A, B, C];
   }
 
@@ -34,7 +31,7 @@ class Line {
       let y = (A1 * C2 - A2 * C1) / det;
       x = Object.is(x, -0) ? 0 : x;
       y = Object.is(y, -0) ? 0 : y;
-      return [x, y];
+      return new Point(x, y);
     }
   }
 }
