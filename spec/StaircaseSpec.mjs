@@ -8,8 +8,10 @@ import Staircase from "../assets/lib/Staircase.mjs";
 describe("The Staircase class", function () {
   it("returns a Staircase region for an unaligned basic halfEdge", function () {
     const dcel = new Dcel();
-    const o = new Vertex(0, 0);
-    const d = new Vertex(2, 2);
+    dcel.config = { C: new C(2) };
+
+    const o = new Vertex(0, 0, dcel);
+    const d = new Vertex(2, 2, dcel);
     const edge = dcel.makeHalfEdge(o, d);
     const twin = dcel.makeHalfEdge(d, o);
     edge.twin = twin;
@@ -27,8 +29,10 @@ describe("The Staircase class", function () {
 
   it("returns a Staircase region for an unaligned basic halfEdge", function () {
     const dcel = new Dcel();
-    const o = new Vertex(0, 0);
-    const d = new Vertex(-2, -2);
+    dcel.config = { C: new C(2) };
+
+    const o = new Vertex(0, 0, dcel);
+    const d = new Vertex(-2, -2, dcel);
     const edge = dcel.makeHalfEdge(o, d);
     const twin = dcel.makeHalfEdge(d, o);
     edge.twin = twin;
@@ -46,8 +50,10 @@ describe("The Staircase class", function () {
 
   it("returns a Staircase region for an unaligned basic halfEdge", function () {
     const dcel = new Dcel();
-    const o = new Vertex(0, 0);
-    const d = new Vertex(-10, 2);
+    dcel.config = { C: new C(2) };
+
+    const o = new Vertex(0, 0, dcel);
+    const d = new Vertex(-10, 2, dcel);
     const edge = dcel.makeHalfEdge(o, d);
     const twin = dcel.makeHalfEdge(d, o);
     edge.twin = twin;
@@ -69,8 +75,8 @@ describe("buildStaircaseAD", function () {
     const dcel = new Dcel();
     dcel.config = { C: new C(4) };
 
-    const o = new Vertex(0, 0);
-    const d = new Vertex(10, 10);
+    const o = new Vertex(0, 0, dcel);
+    const d = new Vertex(10, 10, dcel);
     const edge = dcel.makeHalfEdge(o, d);
     const twin = dcel.makeHalfEdge(d, o);
     edge.twin = twin;

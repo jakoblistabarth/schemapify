@@ -10,7 +10,8 @@ class Dcel {
     this.vertices = new Map();
     this.halfEdges = [];
     this.faces = [];
-    this.featureProperties = null;
+    this.featureProperties;
+    this.config;
   }
 
   makeVertex(x, y) {
@@ -219,7 +220,7 @@ class Dcel {
   // returns its diameter
   getDiameter() {
     const bbox = this.getBbox();
-    const [a, c] = [new Vertex(bbox[0], bbox[1]), new Vertex(bbox[2], bbox[3])];
+    const [a, c] = [new Vertex(bbox[0], bbox[1]), new Vertex(bbox[2], bbox[3])]; // TODO: use point instead of Vertex
 
     const diagonal = a.distanceToVertex(c);
     return diagonal;
@@ -230,11 +231,10 @@ class Dcel {
   // takes the factor lambda
   // returns the treshold as float
   setEpsilon(lambda) {
-    this.epsilon = this.getDiameter() * lambda;
-    return this.epsilon;
+    return (this.config.epsilon = this.getDiameter() * lambda);
   }
 
-  splitEdges(threshold = this.epsilon) {
+  splitEdges(threshold = this.config.epsilon) {
     this.getBoundedFaces().forEach((f) => {
       f.getEdges().forEach((e) => {
         e.subdivideToThreshold(threshold);
@@ -244,7 +244,8 @@ class Dcel {
   }
 
   preProcess() {
-    this.setEpsilon(config.lambda);
+    this.config = config;
+    this.setEpsilon(this.config.lambda);
     this.splitEdges(this.epsilon);
   }
 

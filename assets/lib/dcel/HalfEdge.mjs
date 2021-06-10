@@ -1,5 +1,4 @@
 import { v4 as uuid } from "uuid";
-import config from "../../schematization.config.mjs";
 import { SIGNIFICANCE } from "./Vertex.mjs";
 
 export const EDGE_CLASSES = {
@@ -13,12 +12,12 @@ export const EDGE_CLASSES = {
 class HalfEdge {
   constructor(tail, dcel) {
     this.uuid = uuid();
+    this.dcel = dcel;
     this.tail = tail;
     this.twin = null;
     this.face = null;
     this.prev = null;
     this.next = null;
-    this.dcel = dcel;
     this.assignedAngle = null;
     this.isAligning = null;
   }
@@ -162,7 +161,8 @@ class HalfEdge {
     }
   }
 
-  getAssociatedDirections(sectors = config.C.getSectors()) {
+  getAssociatedDirections() {
+    const sectors = this.dcel.config.C.getSectors();
     const angle = this.getAngle();
     let directions = [];
     sectors.some(function (sector) {
@@ -178,8 +178,9 @@ class HalfEdge {
     return directions;
   }
 
-  getAssociatedSector(sectors = config.C.getSectors()) {
-    const direction = this.getAssociatedDirections(sectors);
+  getAssociatedSector() {
+    const sectors = this.dcel.config.C.getSectors();
+    const direction = this.getAssociatedDirections();
     return sectors.reduce((acc, sector) => {
       if (
         (direction[0] === sector.lower && direction[1] === sector.upper) ||
@@ -204,14 +205,15 @@ class HalfEdge {
     return significantEndpoint;
   }
 
-  isDeviating(sectors = config.C.getSectors()) {
+  isDeviating() {
+    const sectors = this.dcel.config.C.getSectors();
     //TODO: refactor isDeviating(), find better solution for last sector (idx=0) should be 8???
     let assignedAngle = (this.assignedAngle * Math.PI * 2) / sectors.length;
 
-    if (this.isAligned(sectors)) {
-      return !(this.getAssociatedDirections(sectors)[0] === assignedAngle);
+    if (this.isAligned()) {
+      return this.getAssociatedDirections()[0] !== assignedAngle;
     } else {
-      const sector = this.getAssociatedSector(sectors)[0];
+      const sector = this.getAssociatedSector()[0];
       if (sector.idx === sectors.length - 1) {
         assignedAngle = assignedAngle === 0 ? Math.PI * 2 : assignedAngle;
       }
@@ -219,8 +221,8 @@ class HalfEdge {
     }
   }
 
-  isAligned(sectors = config.C.getSectors()) {
-    const isAligned = this.getAssociatedDirections(sectors).length === 1;
+  isAligned() {
+    const isAligned = this.getAssociatedDirections().length === 1;
     return (this.isAligning = isAligned);
   }
 
@@ -232,7 +234,7 @@ class HalfEdge {
     return Math.min(...distances);
   }
 
-  classify(c = config.C) {
+  classify() {
     let classification;
 
     if (this.twin.class) {
@@ -241,16 +243,16 @@ class HalfEdge {
     }
 
     const significantEndpoint = this.getSignificantEndpoint();
-    significantEndpoint.assignAngles(c);
+    significantEndpoint.assignAngles();
 
-    const sector = this.getAssociatedSector(c.getSectors())[0];
+    const sector = this.getAssociatedSector()[0];
     const edges = significantEndpoint
       .getEdgesInSector(sector)
-      .filter((edge) => !edge.isAligned(c.getSectors()) && !edge.isDeviating(c.getSectors()));
+      .filter((edge) => !edge.isAligned() && !edge.isDeviating());
 
-    if (this.isAligned(c.getSectors())) {
-      classification = this.isDeviating(c.getSectors()) ? EDGE_CLASSES.AD : EDGE_CLASSES.AB;
-    } else if (this.isDeviating(c.getSectors())) {
+    if (this.isAligned()) {
+      classification = this.isDeviating() ? EDGE_CLASSES.AD : EDGE_CLASSES.AB;
+    } else if (this.isDeviating()) {
       classification = EDGE_CLASSES.UD;
     } else if (edges.length == 2) {
       classification = EDGE_CLASSES.E;

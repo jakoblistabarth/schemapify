@@ -7,7 +7,7 @@ class Cirregular {
 
   getSectors() {
     return this.angles.map((angle, idx) => {
-      return new Sector(idx, angle, this.angles[idx + (1 % this.angles.length)]);
+      return new Sector(this, idx, angle, this.angles[idx + (1 % this.angles.length)]);
     });
   }
 

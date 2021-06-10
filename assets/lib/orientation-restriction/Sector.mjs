@@ -1,7 +1,6 @@
-import config from "../../schematization.config.mjs";
-
 class Sector {
-  constructor(idx, lower, upper) {
+  constructor(C, idx, lower, upper) {
+    this.C = C;
     this.idx = idx; // horizontal line by default
     this.lower = lower;
     this.upper = upper;
@@ -15,7 +14,8 @@ class Sector {
     return this.idx;
   }
 
-  getNeighbors(sectors = config.C.getSectors()) {
+  getNeighbors() {
+    const sectors = this.C.getSectors();
     const idx = this.getIdx();
     const prev = idx == 0 ? sectors.length - 1 : idx - 1;
     const next = (idx + 1) % sectors.length;
@@ -24,7 +24,7 @@ class Sector {
 
   encloses(angle) {
     const [lowerBound, upperBound] = this.getBounds();
-    return angle >= lowerBound && angle <= upperBound
+    return angle >= lowerBound && angle <= upperBound;
   }
 }
 

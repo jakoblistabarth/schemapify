@@ -1,5 +1,4 @@
 import { v4 as uuid } from "uuid";
-import config from "../../schematization.config.mjs";
 import Point from "../Point.mjs";
 import { crawlArray, getOccurrence } from "../utilities.mjs";
 
@@ -10,8 +9,9 @@ export const SIGNIFICANCE = {
 };
 
 class Vertex extends Point {
-  constructor(x, y) {
+  constructor(x, y, dcel) {
     super(x, y);
+    this.dcel = dcel;
     this.uuid = uuid();
     this.edges = [];
     this.significance = null;
@@ -61,11 +61,11 @@ class Vertex extends Point {
     return this.edges;
   }
 
-  allEdgesAligned(sectors = config.C.getSectors()) {
-    return this.edges.every((edge) => edge.isAligned(sectors));
+  allEdgesAligned() {
+    return this.edges.every((edge) => edge.isAligned());
   }
 
-  isSignificant(c = config.C) {
+  isSignificant() {
     // QUESTION: are vertices with only aligned edges never significant?
     // TODO: move to another class? to not mix dcel and schematization?
 
@@ -75,9 +75,7 @@ class Vertex extends Point {
     }
 
     // classify as significant if one sector occurs multiple times
-    const occupiedSectors = this.edges
-      .map((edge) => edge.getAssociatedSector(c.getSectors()))
-      .flat();
+    const occupiedSectors = this.edges.map((edge) => edge.getAssociatedSector()).flat();
 
     const uniqueSectors = occupiedSectors.reduce((acc, sector) => {
       if (!acc.find((accSector) => accSector.idx == sector.idx)) acc.push(sector);
@@ -102,17 +100,17 @@ class Vertex extends Point {
     return this.edges.filter((edge) => sector.encloses(edge.getAngle()));
   }
 
-  assignAngles(c = config.C) {
+  assignAngles() {
     const edges = this.sortEdges(false);
     let anglesToAssign = [];
     const closestBounds = edges.map((edge) => {
       let direction;
 
-      const [lower, upper] = edge.getAssociatedSector(c.getSectors())[0].getBounds();
+      const [lower, upper] = edge.getAssociatedSector()[0].getBounds();
       direction = edge.getAngle() - lower <= upper - edge.getAngle() ? lower : upper;
       direction = direction == Math.PI * 2 ? 0 : direction;
 
-      return c.getAngles().indexOf(direction);
+      return this.dcel.config.C.getAngles().indexOf(direction);
     });
 
     anglesToAssign = closestBounds;
@@ -123,8 +121,8 @@ class Vertex extends Point {
         return;
       }
 
-      const nextDirection = crawlArray(c.getAngles(), direction, +1);
-      const prevDirection = crawlArray(c.getAngles(), direction, -1);
+      const nextDirection = crawlArray(this.dcel.config.C.getAngles(), direction, +1);
+      const prevDirection = crawlArray(this.dcel.config.C.getAngles(), direction, -1);
       if (getOccurrence(anglesToAssign, nextDirection) > 0) {
         anglesToAssign[idx] = prevDirection;
       } else {

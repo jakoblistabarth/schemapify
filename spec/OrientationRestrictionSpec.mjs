@@ -1,5 +1,6 @@
 import { crawlArray } from "../assets/lib/utilities.mjs";
 import Sector from "../assets/lib/orientation-restriction/Sector.mjs";
+import C from "../assets/lib/orientation-restriction/C.mjs";
 import { createEdgeVertexSetup } from "./test-helpers.mjs";
 import { SIGNIFICANCE } from "../assets/lib/dcel/Vertex.mjs";
 
@@ -10,43 +11,42 @@ describe("isAligned() works properly", function () {
   });
 
   it("for an aligned edge in a rectilinear schematization.", function () {
-    expect(s.od0.isAligned(s.c2.getSectors())).toBe(true);
-    expect(s.od90.isAligned(s.c2.getSectors())).toBe(true);
-    expect(s.od180.isAligned(s.c2.getSectors())).toBe(true);
-    expect(s.od270.isAligned(s.c2.getSectors())).toBe(true);
+    s.dcel.config = { C: new C(2) };
+    expect(s.od0.isAligned()).toBe(true);
+    expect(s.od90.isAligned()).toBe(true);
+    expect(s.od180.isAligned()).toBe(true);
+    expect(s.od270.isAligned()).toBe(true);
   });
 
   it("for an aligned edge in an octilinear schematization.", function () {
-    expect(s.od0.isAligned(s.c4.getSectors())).toBe(true);
-    expect(s.od90.isAligned(s.c4.getSectors())).toBe(true);
-    expect(s.od180.isAligned(s.c4.getSectors())).toBe(true);
-    expect(s.od270.isAligned(s.c4.getSectors())).toBe(true);
+    s.dcel.config = { C: new C(4) };
+    expect(s.od0.isAligned()).toBe(true);
+    expect(s.od90.isAligned()).toBe(true);
+    expect(s.od180.isAligned()).toBe(true);
+    expect(s.od270.isAligned()).toBe(true);
   });
 
   it("for an unaligned edge in a rectilinear schematization.", function () {
-    expect(s.od37.isAligned(s.c2.getSectors())).toBe(false);
-    expect(s.od53.isAligned(s.c2.getSectors())).toBe(false);
-    expect(s.od76.isAligned(s.c2.getSectors())).toBe(false);
-    expect(s.od143.isAligned(s.c2.getSectors())).toBe(false);
-    expect(s.od217.isAligned(s.c2.getSectors())).toBe(false);
+    s.dcel.config = { C: new C(2) };
+    expect(s.od37.isAligned()).toBe(false);
+    expect(s.od53.isAligned()).toBe(false);
+    expect(s.od76.isAligned()).toBe(false);
+    expect(s.od143.isAligned()).toBe(false);
+    expect(s.od217.isAligned()).toBe(false);
   });
 
   it("for an unaligned edge in an octilinear schematization.", function () {
-    expect(s.od37.isAligned(s.c4.getSectors())).toBe(false);
-    expect(s.od53.isAligned(s.c4.getSectors())).toBe(false);
-    expect(s.od76.isAligned(s.c4.getSectors())).toBe(false);
-    expect(s.od143.isAligned(s.c4.getSectors())).toBe(false);
+    s.dcel.config = { C: new C(4) };
+    expect(s.od37.isAligned()).toBe(false);
+    expect(s.od53.isAligned()).toBe(false);
+    expect(s.od76.isAligned()).toBe(false);
+    expect(s.od143.isAligned()).toBe(false);
   });
 });
 
 describe("getNeighbors() returns the neighboring sectors of the sector", function () {
-  let s;
-  beforeEach(function () {
-    s = createEdgeVertexSetup();
-  });
-
-  it("for all sectors.", function () {
-    const neighbors = s.c2
+  it("for the 'last' sector.", function () {
+    const neighbors = new C(2)
       .getSector(0)
       .getNeighbors()
       .map((neighbor) => neighbor.idx);
@@ -57,7 +57,7 @@ describe("getNeighbors() returns the neighboring sectors of the sector", functio
 describe("encloses()", function () {
   let sector;
   beforeEach(function () {
-    sector = new Sector(0, 0, Math.PI / 2);
+    sector = new Sector(new C(2), 0, 0, Math.PI / 2);
   });
 
   it("returns true sector bounds", function () {
@@ -82,12 +82,12 @@ describe("getEdgesInSector()", function () {
 
   it("get correct edges in specified sector", function () {
     s.o.edges.push(s.od0, s.od90);
-    expect(s.o.getEdgesInSector(s.c2.getSector(0)).length).toBe(2);
+    expect(s.o.getEdgesInSector(new C(2).getSector(0)).length).toBe(2);
   });
 
   it("get correct edges in specified sector", function () {
     s.o.edges.push(s.od0, s.od90);
-    expect(s.o.getEdgesInSector(s.c4.getSector(0)).length).toBe(1);
+    expect(s.o.getEdgesInSector(new C(4).getSector(0)).length).toBe(1);
   });
 });
 
@@ -99,32 +99,38 @@ describe("isSignficant()", function () {
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od0, s.od90);
-    expect(s.o.isSignificant(s.c2)).toBe(SIGNIFICANCE.I);
+    s.dcel.config = { C: new C(2) };
+    expect(s.o.isSignificant()).toBe(SIGNIFICANCE.I);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od37, s.od284);
-    expect(s.o.isSignificant(s.c2)).toBe(SIGNIFICANCE.S);
+    s.dcel.config = { C: new C(2) };
+    expect(s.o.isSignificant()).toBe(SIGNIFICANCE.S);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od0, s.od180);
-    expect(s.o.isSignificant(s.c2)).toBe(SIGNIFICANCE.I);
+    s.dcel.config = { C: new C(2) };
+    expect(s.o.isSignificant()).toBe(SIGNIFICANCE.I);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od0, s.od37);
-    expect(s.o.isSignificant(s.c2)).toBe(SIGNIFICANCE.S);
+    s.dcel.config = { C: new C(2) };
+    expect(s.o.isSignificant()).toBe(SIGNIFICANCE.S);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od104, s.od37);
-    expect(s.o.isSignificant(s.c2)).toBe(SIGNIFICANCE.S);
+    s.dcel.config = { C: new C(2) };
+    expect(s.o.isSignificant()).toBe(SIGNIFICANCE.S);
   });
 
   it("classifies a vertex with edges in disjoint sectors as not significant.", function () {
     s.o.edges.push(s.od217, s.od37);
-    expect(s.o.isSignificant(s.c2)).toBe(SIGNIFICANCE.I);
+    s.dcel.config = { C: new C(2) };
+    expect(s.o.isSignificant()).toBe(SIGNIFICANCE.I);
   });
 });
 
@@ -135,65 +141,39 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
   });
 
   it("using getAssociatedSector() for C2", function () {
-    expect(s.od0.getAssociatedSector(s.c2.getSectors())).toEqual([
-      s.c2.getSector(0),
-      s.c2.getSector(3),
-    ]);
-    expect(s.od90.getAssociatedSector(s.c2.getSectors())).toEqual([
-      s.c2.getSector(0),
-      s.c2.getSector(1),
-    ]);
-    expect(s.od180.getAssociatedSector(s.c2.getSectors())).toEqual([
-      s.c2.getSector(1),
-      s.c2.getSector(2),
-    ]);
-    expect(s.od270.getAssociatedSector(s.c2.getSectors())).toEqual([
-      s.c2.getSector(2),
-      s.c2.getSector(3),
-    ]);
+    s.dcel.config = { C: new C(2) };
+    expect(s.od0.getAssociatedSector()).toEqual([new C(2).getSector(0), new C(2).getSector(3)]);
+    expect(s.od90.getAssociatedSector()).toEqual([new C(2).getSector(0), new C(2).getSector(1)]);
+    expect(s.od180.getAssociatedSector()).toEqual([new C(2).getSector(1), new C(2).getSector(2)]);
+    expect(s.od270.getAssociatedSector()).toEqual([new C(2).getSector(2), new C(2).getSector(3)]);
   });
 
   it("using getAssociatedSector() for C4", function () {
-    expect(s.od0.getAssociatedSector(s.c4.getSectors())).toEqual([
-      s.c4.getSector(0),
-      s.c4.getSector(7),
-    ]);
-    expect(s.od90.getAssociatedSector(s.c4.getSectors())).toEqual([
-      s.c4.getSector(1),
-      s.c4.getSector(2),
-    ]);
-    expect(s.od180.getAssociatedSector(s.c4.getSectors())).toEqual([
-      s.c4.getSector(3),
-      s.c4.getSector(4),
-    ]);
-    expect(s.od270.getAssociatedSector(s.c4.getSectors())).toEqual([
-      s.c4.getSector(5),
-      s.c4.getSector(6),
-    ]);
+    s.dcel.config = { C: new C(4) };
+    expect(s.od0.getAssociatedSector()).toEqual([new C(4).getSector(0), new C(4).getSector(7)]);
+    expect(s.od90.getAssociatedSector()).toEqual([new C(4).getSector(1), new C(4).getSector(2)]);
+    expect(s.od180.getAssociatedSector()).toEqual([new C(4).getSector(3), new C(4).getSector(4)]);
+    expect(s.od270.getAssociatedSector()).toEqual([new C(4).getSector(5), new C(4).getSector(6)]);
   });
 
   it("using getAssociatedDirections() for C2", function () {
-    expect(s.od0.getAssociatedDirections(s.c2.getSectors())).toEqual([0]);
-    expect(s.od90.getAssociatedDirections(s.c2.getSectors())).toEqual([Math.PI * 0.5]);
-    expect(s.od180.getAssociatedDirections(s.c2.getSectors())).toEqual([Math.PI]);
-    expect(s.od270.getAssociatedDirections(s.c2.getSectors())).toEqual([Math.PI * 1.5]);
-    expect(s.od37.getAssociatedDirections(s.c2.getSectors())).toEqual([0, Math.PI * 0.5]);
-    expect(s.od284.getAssociatedDirections(s.c2.getSectors())).toEqual([
-      Math.PI * 1.5,
-      Math.PI * 2,
-    ]);
+    s.dcel.config = { C: new C(2) };
+    expect(s.od0.getAssociatedDirections()).toEqual([0]);
+    expect(s.od90.getAssociatedDirections()).toEqual([Math.PI * 0.5]);
+    expect(s.od180.getAssociatedDirections()).toEqual([Math.PI]);
+    expect(s.od270.getAssociatedDirections()).toEqual([Math.PI * 1.5]);
+    expect(s.od37.getAssociatedDirections()).toEqual([0, Math.PI * 0.5]);
+    expect(s.od284.getAssociatedDirections()).toEqual([Math.PI * 1.5, Math.PI * 2]);
   });
 
   it("using getAssociatedDirections() for C4", function () {
-    expect(s.od0.getAssociatedDirections(s.c4.getSectors())).toEqual([0]);
-    expect(s.od90.getAssociatedDirections(s.c4.getSectors())).toEqual([Math.PI * 0.5]);
-    expect(s.od180.getAssociatedDirections(s.c4.getSectors())).toEqual([Math.PI]);
-    expect(s.od270.getAssociatedDirections(s.c4.getSectors())).toEqual([Math.PI * 1.5]);
-    expect(s.od37.getAssociatedDirections(s.c4.getSectors())).toEqual([0, Math.PI * 0.25]);
-    expect(s.od284.getAssociatedDirections(s.c4.getSectors())).toEqual([
-      Math.PI * 1.5,
-      Math.PI * 1.75,
-    ]);
+    s.dcel.config = { C: new C(4) };
+    expect(s.od0.getAssociatedDirections()).toEqual([0]);
+    expect(s.od90.getAssociatedDirections()).toEqual([Math.PI * 0.5]);
+    expect(s.od180.getAssociatedDirections()).toEqual([Math.PI]);
+    expect(s.od270.getAssociatedDirections()).toEqual([Math.PI * 1.5]);
+    expect(s.od37.getAssociatedDirections()).toEqual([0, Math.PI * 0.25]);
+    expect(s.od284.getAssociatedDirections()).toEqual([Math.PI * 1.5, Math.PI * 1.75]);
   });
 });
 

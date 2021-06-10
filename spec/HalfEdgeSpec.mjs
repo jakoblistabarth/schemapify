@@ -138,7 +138,7 @@ describe("bisect() on geodata results in a DCEL", function () {
       function () {
         const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
         const dcel = DCEL.fromGeoJSON(json);
-        dcel.getBoundedFaces().forEach((f) => f.getEdges().forEach((e) => e.bisect()));
+        dcel.preProcess();
 
         const cycles = [];
         dcel.getBoundedFaces().forEach((f) => {

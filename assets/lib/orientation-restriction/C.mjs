@@ -19,7 +19,7 @@ class C {
   getSectors() {
     return this.angles.map((angle, idx) => {
       const upperBound = idx + 1 == this.angles.length ? Math.PI * 2 : this.angles[idx + 1];
-      return new Sector(idx, angle, upperBound);
+      return new Sector(this, idx, angle, upperBound);
     });
   }
 
