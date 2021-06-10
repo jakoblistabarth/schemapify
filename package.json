@@ -26,6 +26,7 @@
     "@mapbox/geojsonhint": "^3.0.1",
     "browser-sync": "^2.26.14",
     "esbuild": "^0.11.9",
+    "graham_scan": "^1.0.4",
     "jasmine": "^3.7.0",
     "leaflet": "^1.7.1",
     "nodemon": "^2.0.7",
