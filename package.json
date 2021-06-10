@@ -17,7 +17,10 @@
     ],
     "exec": "npm run build"
   },
-  "author": "",
+  "pre-commit": [
+    "test"
+  ],
+  "author": "Jakob Listabarth",
   "license": "ISC",
   "dependencies": {
     "@mapbox/geojsonhint": "^3.0.1",
@@ -29,5 +32,8 @@
     "shpjs": "^3.6.3",
     "turf": "^3.0.14",
     "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "pre-commit": "^1.2.2"
   }
 }
