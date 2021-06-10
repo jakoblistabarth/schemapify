@@ -55,7 +55,7 @@ class HalfEdge {
   }
 
   getLength() {
-    return this.getTail().getDistance(this.getHead());
+    return this.getTail().distanceToVertex(this.getHead());
   }
 
   getMidpoint() {
@@ -222,6 +222,14 @@ class HalfEdge {
   isAligned(sectors = config.C.getSectors()) {
     const isAligned = this.getAssociatedDirections(sectors).length === 1;
     return (this.isAligning = isAligned);
+  }
+
+  distanceToEdge(edge) {
+    const verticesThis = [this.getTail(), this.getHead()];
+    const verticesEdge = [edge.getTail(), edge.getHead()];
+    const distances = verticesThis.map((v) => v.distanceToEdge(edge));
+    distances.push(...verticesEdge.map((v) => v.distanceToEdge(this)));
+    return Math.min(...distances);
   }
 
   classify(c = config.C) {

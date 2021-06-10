@@ -221,7 +221,7 @@ class Dcel {
     const bbox = this.getBbox();
     const [a, c] = [new Vertex(bbox[0], bbox[1]), new Vertex(bbox[2], bbox[3])];
 
-    const diagonal = a.getDistance(c);
+    const diagonal = a.distanceToVertex(c);
     return diagonal;
   }
 

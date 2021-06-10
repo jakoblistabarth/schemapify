@@ -5,17 +5,32 @@ import HalfEdge from "../assets/lib/dcel/Halfedge.mjs";
 import DCEL from "../assets/lib/dcel/Dcel.mjs";
 import { getTestFiles } from "./test-helpers.mjs";
 
-describe("getDistance()", function () {
-  it("returns the correct distance between 2 points", function () {
+describe("distanceToVertex()", function () {
+  it("returns the correct distance between 2 vertices", function () {
     const a = new Vertex(0, 0);
     const b = new Vertex(4, 0);
     const c = new Vertex(4, 4);
     const d = new Vertex(-4, -4);
 
-    expect(b.getDistance(a)).toEqual(b.getDistance(a));
-    expect(a.getDistance(b)).toEqual(4);
-    expect(a.getDistance(c)).toEqual(Math.sqrt(4 * 4 + 4 * 4));
-    expect(d.getDistance(a)).toEqual(Math.sqrt(-4 * -4 + -4 * -4));
+    expect(b.distanceToVertex(a)).toEqual(b.distanceToVertex(a));
+    expect(a.distanceToVertex(b)).toEqual(4);
+    expect(a.distanceToVertex(c)).toEqual(Math.sqrt(4 * 4 + 4 * 4));
+    expect(d.distanceToVertex(a)).toEqual(Math.sqrt(-4 * -4 + -4 * -4));
+  });
+});
+
+describe("distanceToEdge()", function () {
+  it("returns the minimum distance between a vertex and an edge", function () {
+    const a = new Vertex(0, 0);
+    const v = new Vertex(-1, -2);
+    const w = new Vertex(2, 1);
+
+    const edge = new HalfEdge(v);
+    edge.twin = new HalfEdge(w);
+    edge.twin.twin = edge;
+
+    expect(a.distanceToEdge(edge)).toEqual(Math.sqrt(0.5));
+    expect(v.distanceToEdge(edge)).toEqual(0);
   });
 });
 

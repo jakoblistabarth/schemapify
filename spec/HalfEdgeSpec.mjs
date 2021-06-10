@@ -58,6 +58,26 @@ describe("getMidpoint()", function () {
   });
 });
 
+describe("distanceToEdge()", function () {
+  it("returns the minimum distance between 2 edges", function () {
+    const a = new Vertex(0, 0);
+    const b = new Vertex(-10, 10);
+    const v = new Vertex(-1, -2);
+    const w = new Vertex(2, 1);
+
+    const ab = new HalfEdge(a);
+    ab.twin = new HalfEdge(b);
+    ab.twin.twin = ab;
+
+    const vw = new HalfEdge(v);
+    vw.twin = new HalfEdge(w);
+    vw.twin.twin = vw;
+
+    expect(ab.distanceToEdge(vw)).toEqual(Math.sqrt(0.5));
+    expect(vw.distanceToEdge(ab)).toEqual(Math.sqrt(0.5));
+  });
+});
+
 describe("getAngle()", function () {
   it("returns the correct angle", function () {
     const center = new Vertex(0, 0);
