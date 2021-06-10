@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
 import config from "../../schematization.config.mjs";
+import Point from "../Point.mjs";
 import { crawlArray, getOccurrence } from "../utilities.mjs";
 
 export const SIGNIFICANCE = {
@@ -8,11 +9,10 @@ export const SIGNIFICANCE = {
   T: "treatedAsSignificant",
 };
 
-class Vertex {
+class Vertex extends Point {
   constructor(x, y) {
+    super(x, y);
     this.uuid = uuid();
-    this.x = x;
-    this.y = y;
     this.edges = [];
     this.significance = null;
   }
@@ -21,29 +21,15 @@ class Vertex {
     return `${x}/${y}`;
   }
 
-  sortEdges(clockwise = true) {
-    this.edges = this.edges.sort((a, b) => {
-      if (clockwise) return b.getAngle() - a.getAngle();
-      else return a.getAngle() - b.getAngle();
-    });
-    return this.edges;
-  }
-
   distanceToVertex(p) {
-    const [x1, y1] = [this.x, this.y];
-    const [x2, y2] = [p.x, p.y];
-
-    const a = x1 - x2;
-    const b = y1 - y2;
-
-    return Math.sqrt(a * a + b * b);
+    return this.distanceToPoint(p);
   }
 
   // adapted from https://github.com/scottglz/distance-to-line-segment/blob/master/index.js
   distanceToEdge(edge) {
-    const [vx, vy] = [this.x, this.y];
-    const [e1x, e1y] = [edge.getTail().x, edge.getTail().y];
-    const [e2x, e2y] = [edge.getHead().x, edge.getHead().y];
+    const [vx, vy] = this.xy();
+    const [e1x, e1y] = edge.getTail().xy();
+    const [e2x, e2y] = edge.getHead().xy();
     const edx = e2x - e1x;
     const edy = e2y - e1y;
     const lineLengthSquared = edx ** 2 + edy ** 2;
@@ -57,6 +43,14 @@ class Vertex {
       dx = vx - ex,
       dy = vy - ey;
     return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  sortEdges(clockwise = true) {
+    this.edges = this.edges.sort((a, b) => {
+      if (clockwise) return b.getAngle() - a.getAngle();
+      else return a.getAngle() - b.getAngle();
+    });
+    return this.edges;
   }
 
   removeIncidentEdge(edge) {

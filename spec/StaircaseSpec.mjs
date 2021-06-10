@@ -1,9 +1,11 @@
 import Dcel from "../assets/lib/dcel/Dcel.mjs";
+import C from "../assets/lib/orientation-restriction/C.mjs";
 import { EDGE_CLASSES } from "../assets/lib/dcel/HalfEdge.mjs";
 import Vertex from "../assets/lib/dcel/Vertex.mjs";
+import Point from "../assets/lib/Point.mjs";
 import Staircase from "../assets/lib/Staircase.mjs";
 
-describe("getPointOnLine", function () {
+describe("The Staircase class", function () {
   it("returns a Staircase region for an unaligned basic halfEdge", function () {
     const dcel = new Dcel();
     const o = new Vertex(0, 0);
@@ -16,10 +18,10 @@ describe("getPointOnLine", function () {
 
     const staircase = new Staircase(edge);
     expect(staircase.region).toEqual([
-      [0, 0],
-      [2, 0],
-      [2, 2],
-      [0, 2],
+      new Point(0, 0),
+      new Point(2, 0),
+      new Point(2, 2),
+      new Point(0, 2),
     ]);
   });
 
@@ -35,10 +37,10 @@ describe("getPointOnLine", function () {
 
     const staircase = new Staircase(edge);
     expect(staircase.region).toEqual([
-      [0, 0],
-      [-2, 0],
-      [-2, -2],
-      [0, -2],
+      new Point(0, 0),
+      new Point(-2, 0),
+      new Point(-2, -2),
+      new Point(0, -2),
     ]);
   });
 

@@ -1,5 +1,5 @@
-import HalfEdge from "./dcel/HalfEdge.mjs";
 import { EDGE_CLASSES } from "./dcel/HalfEdge.mjs";
+import Point from "./Point.mjs";
 import Line from "./Line.mjs";
 
 class Staircase {
@@ -21,12 +21,12 @@ class Staircase {
       ];
     } else if (edgeClass === EDGE_CLASSES.UB || edgeClass === EDGE_CLASSES.E) {
       const [lower, upper] = edge.getAssociatedSector()[0].getBounds();
-      const A = [edge.getTail().x, edge.getTail().y];
-      const a = new Line(A[0], A[1], lower);
-      const d = new Line(A[0], A[1], upper);
-      const C = [edge.getHead().x, edge.getHead().y];
-      const b = new Line(C[0], C[1], upper);
-      const c = new Line(C[0], C[1], lower);
+      const A = new Point(...edge.getTail().xy());
+      const a = new Line(A, lower);
+      const d = new Line(A, upper);
+      const C = new Point(...edge.getHead().xy());
+      const b = new Line(C, upper);
+      const c = new Line(C, lower);
       const B = a.intersectsLine(b);
       const D = d.intersectsLine(c);
       return [A, B, C, D];
