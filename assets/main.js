@@ -1,4 +1,5 @@
 import Dcel from "./lib/dcel/Dcel.mjs";
+import config from "./schematization.config.mjs";
 
 async function getJSON(path) {
   const response = await fetch(path);
@@ -52,6 +53,8 @@ function calculateMapGrid(mapGridID) {
 }
 
 calculateMapGrid("map-grid");
+config.C.drawSVG(document.getElementById("c"));
+document.getElementById("c-text").innerText = `C(${config.C.orientations})`;
 
 tests.forEach(async (test) => {
   const name = test.slice(test.lastIndexOf("/") + 1, -5);

@@ -66,6 +66,19 @@ nav {
   padding: 1em;
 }
 
+.divider {
+  width: 1px;
+  height: 100%;
+  border-left: 1px solid grey;
+  margin: 0 1em;
+}
+
+#c {
+  display: flex;
+  height: 20px;
+  margin-right: 0.5em;
+}
+
 .slider-label {
   opacity: 0.3;
   transition: opacity 0.5s;
