@@ -2,7 +2,9 @@ import config from "../../schematization.config.mjs";
 import Vertex from "./Vertex.mjs";
 import { SIGNIFICANCE } from "./Vertex.mjs";
 import HalfEdge from "./HalfEdge.mjs";
+import { EDGE_CLASSES } from "./HalfEdge.mjs";
 import Face from "./Face.mjs";
+import Staircase from "./../orientation-restriction/Staircase.mjs";
 import { createGeoJSON, groupBy } from "../utilities.mjs";
 
 class Dcel {
@@ -273,9 +275,17 @@ class Dcel {
   }
 
   edgesToStaircases() {
-    // TODO: loop over all (simple?) edges replace them with staircase
-    return this;
+    this.getSimpleEdges()
+      .filter((edge) => edge.class === EDGE_CLASSES.AD) // TODO: remove when all staircases are implemented
+      .forEach((edge) => {
+        const stepPoints = new Staircase(edge).points.slice(1, -1);
+        let edgeToSplit = edge;
+        for (let p of stepPoints) {
+          edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
+        }
+      });
   }
+  s;
 
   constrainAngles() {
     this.classify();

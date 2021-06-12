@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { SIGNIFICANCE } from "./Vertex.mjs";
+import Point from "../Point.mjs";
 
 export const EDGE_CLASSES = {
   AB: "alignedBasic",
@@ -58,13 +59,13 @@ class HalfEdge {
   }
 
   getMidpoint() {
-    const [x1, y1] = [this.getTail().x, this.getTail().y];
-    const [x2, y2] = [this.getHead().x, this.getHead().y];
+    const [x1, y1] = this.getTail().xy();
+    const [x2, y2] = this.getHead().xy();
 
     const mx = (x1 + x2) / 2;
     const my = (y1 + y2) / 2;
 
-    return [mx, my];
+    return new Point(mx, my);
   }
 
   remove() {
@@ -73,7 +74,7 @@ class HalfEdge {
     if (this.face.outerRing) this.face.outerRing.removeInnerEdge(this);
   }
 
-  bisect() {
+  bisect(newPoint = this.getMidpoint()) {
     const e = this;
     const et = e.twin;
     const f1 = e.face;
@@ -84,7 +85,7 @@ class HalfEdge {
     const c = et.next;
     const d = et.prev;
 
-    const [x, y] = e.getMidpoint();
+    const [x, y] = newPoint.xy();
     const N = this.dcel.makeVertex(x, y);
 
     const et_ = this.dcel.makeHalfEdge(N, e.tail);

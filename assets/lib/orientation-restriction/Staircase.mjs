@@ -1,6 +1,6 @@
-import { EDGE_CLASSES } from "./dcel/HalfEdge.mjs";
-import Point from "./Point.mjs";
-import Line from "./Line.mjs";
+import { EDGE_CLASSES } from "../dcel/HalfEdge.mjs";
+import Point from "../Point.mjs";
+import Line from "../Line.mjs";
 import ConvexHullGrahamScan from "graham_scan";
 
 class Staircase {
@@ -9,7 +9,7 @@ class Staircase {
     this.region = this.getRegion();
     this.de; // TODO: move this to HalfEdge? not really related to edge
     this.stepNumbers;
-    this.stepPoints;
+    this.points;
   }
 
   getRegion() {
@@ -32,9 +32,9 @@ class Staircase {
       // TODO: like UB and E but accommodate for the appendex area
       return;
     } else if (edgeClass === EDGE_CLASSES.AD) {
-      this.stepPoints = this.getStaircasePoints(this.edge);
+      this.points = this.getStaircasePoints(this.edge);
       const convexHull = new ConvexHullGrahamScan();
-      this.stepPoints.forEach((p) => convexHull.addPoint(p.x, p.y));
+      this.points.forEach((p) => convexHull.addPoint(p.x, p.y));
       return convexHull.getHull();
     }
   }
@@ -68,18 +68,19 @@ class Staircase {
     const d1 = this.edge.dcel.config.C.getAngles()[edge.assignedAngle];
     const d2 = edge.getAngle();
     const d1Opposite = (d1 + Math.PI) % (Math.PI * 2);
-    // console.log("d1", d1, "d2", d2, "deltaE", deltaE);
 
     const points = [];
 
-    points[0] = edge.getTail();
-    points[6] = edge.getHead();
+    const tail = edge.getTail();
+    const head = edge.getHead();
 
-    points[1] = points[0].getNewPoint(deltaE, d1);
+    points[0] = tail;
+    points[1] = tail.getNewPoint(deltaE, d1);
     points[2] = points[1].getNewPoint((edge.getLength() * (1 - epsilon)) / 2, d2);
     points[3] = points[2].getNewPoint(deltaE * 2, d1Opposite);
     points[4] = points[3].getNewPoint((edge.getLength() * (1 - epsilon)) / 2, d2);
     points[5] = points[4].getNewPoint(deltaE, d1);
+    points[6] = head;
 
     return points;
   }

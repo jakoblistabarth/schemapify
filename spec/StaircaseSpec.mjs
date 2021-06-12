@@ -3,7 +3,7 @@ import C from "../assets/lib/orientation-restriction/C.mjs";
 import { EDGE_CLASSES } from "../assets/lib/dcel/HalfEdge.mjs";
 import Vertex from "../assets/lib/dcel/Vertex.mjs";
 import Point from "../assets/lib/Point.mjs";
-import Staircase from "../assets/lib/Staircase.mjs";
+import Staircase from "../assets/lib/orientation-restriction/Staircase.mjs";
 
 describe("The Staircase class", function () {
   it("returns a Staircase region for an unaligned basic halfEdge", function () {
@@ -86,7 +86,7 @@ describe("buildStaircaseAD", function () {
     edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
-    expect(staircase.stepPoints.length).toBe(7);
-    expect(staircase.region.length).toBeLessThanOrEqual(staircase.stepPoints.length);
+    expect(staircase.points.length).toBe(7);
+    expect(staircase.region.length).toBeLessThanOrEqual(staircase.points.length);
   });
 });

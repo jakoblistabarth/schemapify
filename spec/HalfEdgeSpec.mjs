@@ -1,6 +1,7 @@
 import DCEL from "../assets/lib/dcel/Dcel.mjs";
 import HalfEdge from "../assets/lib/dcel/HalfEdge.mjs";
 import Vertex from "../assets/lib/dcel/Vertex.mjs";
+import Point from "../assets/lib/Point.mjs";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { getTestFiles } from "./test-helpers.mjs";
@@ -53,8 +54,8 @@ describe("getMidpoint()", function () {
     edge2.twin = new HalfEdge(c);
     edge2.twin.twin = edge2;
 
-    expect(edge.getMidpoint()).toEqual([1, 0]);
-    expect(edge2.getMidpoint()).toEqual([0, 5]);
+    expect(edge.getMidpoint()).toEqual(new Point(1, 0));
+    expect(edge2.getMidpoint()).toEqual(new Point(0, 5));
   });
 });
 
@@ -214,6 +215,18 @@ describe("bisect()", function () {
     const json = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
     const dcel = DCEL.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].edge.bisect();
+
+    expect(dcel.getFaces().length).toBe(2);
+    expect(dcel.halfEdges.length).toBe(10);
+
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle(false).length).toBe(5);
+  });
+
+  it("on a square with a specified point, which is not on the origina edge, restults in a correct dcel", function () {
+    const json = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
+    const dcel = DCEL.fromGeoJSON(json);
+    dcel.getBoundedFaces()[0].edge.bisect(new Point(1, 1));
 
     expect(dcel.getFaces().length).toBe(2);
     expect(dcel.halfEdges.length).toBe(10);

@@ -130,7 +130,47 @@ describe("getDiameter()", function () {
   });
 });
 
-describe("schematize() returns a result which can be turned into a valid geojson", function () {
+describe("classify() returns a result which can be turned into a valid geojson", function () {
+  const dir = "assets/data/shapes";
+  const testFiles = getTestFiles(dir);
+
+  testFiles.forEach((file) => {
+    it("for the simple input " + file, function () {
+      const inputJson = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
+      const dcel = DCEL.fromGeoJSON(inputJson);
+      dcel.preProcess();
+      dcel.classify();
+      const outputJson = dcel.toGeoJSON(file);
+      const outputJsonPretty = JSON.stringify(outputJson, null, 4);
+      const errors = hint(outputJsonPretty);
+      if (errors.length > 0) console.log(errors);
+      expect(errors.length).toBe(0);
+      expect(inputJson.features.length).toBe(outputJson.features.length);
+    });
+  });
+});
+
+describe("classify() returns a result which can be turned into a valid geojson", function () {
+  const dir = "assets/data/geodata";
+  const testFiles = getTestFiles(dir);
+
+  testFiles.forEach((file) => {
+    it("for the geodata input " + file, function () {
+      const inputJson = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
+      const dcel = DCEL.fromGeoJSON(inputJson);
+      dcel.preProcess();
+      dcel.classify();
+      const outputJson = dcel.toGeoJSON(file);
+      const outputJsonPretty = JSON.stringify(outputJson, null, 4);
+      const errors = hint(outputJsonPretty);
+      if (errors.length > 0) console.log(errors);
+      expect(errors.length).toBe(0);
+      expect(inputJson.features.length).toBe(outputJson.features.length);
+    });
+  });
+});
+
+xdescribe("schematize() returns a result which can be turned into a valid geojson", function () {
   const dir = "assets/data/geodata";
   const testFiles = getTestFiles(dir);
 
@@ -149,7 +189,7 @@ describe("schematize() returns a result which can be turned into a valid geojson
   });
 });
 
-describe("schematize() returns a result which can be turned into a valid geojson", function () {
+xdescribe("schematize() returns a result which can be turned into a valid geojson", function () {
   const dir = "assets/data/shapes";
   const testFiles = getTestFiles(dir);
 
