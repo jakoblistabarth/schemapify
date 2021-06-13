@@ -285,7 +285,6 @@ class Dcel {
         }
       });
   }
-  s;
 
   constrainAngles() {
     this.classify();
@@ -410,7 +409,7 @@ class Dcel {
     return createGeoJSON(faceFeatures, name + "_polygons");
   }
 
-  EdgesToGeoJSON(name) {
+  edgesToGeoJSON(name) {
     const edgeFeatures = this.getSimpleEdges().map((e) => {
       const a = e.tail;
       const b = e.twin.tail;
@@ -474,20 +473,20 @@ class Dcel {
             const head = edge.getHead();
             const tail = edge.getTail();
             return `
-                <tr>
-                  <td>${edge.uuid.substring(0, 5)}</td>
-                  <td>
-                    (${tail.x}/${tail.y})
-                    <span class="material-icons">arrow_forward</span>
-                    (${head.x}/${head.y})
-                  </td>
-                  <td>Sectors: ${edge
-                    .getAssociatedSector()
-                    .map((s) => s.idx)
-                    .join(",")}</td>
-                  <td>${edge.class}</td>
-                </tr>
-              `;
+              <tr>
+                <td>${edge.uuid.substring(0, 5)}</td>
+                <td>
+                  (${tail.x}/${tail.y})
+                  <span class="material-icons">arrow_forward</span>
+                  (${head.x}/${head.y})
+                </td>
+                <td>Sectors: ${edge
+                  .getAssociatedSector()
+                  .map((s) => s.idx)
+                  .join(",")}</td>
+                <td>${edge.class}</td>
+              </tr>
+            `;
           })
           .join("");
         return L.circleMarker(latlng, {
@@ -499,12 +498,12 @@ class Dcel {
           opacity: 1,
           fillOpacity: 1,
         }).bindTooltip(`
-            <span class="material-icons">radio_button_checked</span> ${props.uuid.substring(0, 5)}
-            (${v[0]}/${v[1]})<br>
-            significance: ${props.significance}<br>
-            <table>
-              ${edges}
-            </table>
+          <span class="material-icons">radio_button_checked</span> ${props.uuid.substring(0, 5)}
+          (${v[0]}/${v[1]})<br>
+          significance: ${props.significance}<br>
+          <table>
+            ${edges}
+          </table>
         `);
       },
       onEachFeature: function (feature, layer) {
@@ -542,16 +541,17 @@ class Dcel {
         })
         .join("");
       return `
-                <table>
-                <tr>
-                    <td><span class="material-icons">highlight_alt</span> </td>
-                    <td><strong>${layer.feature.properties.uuid.substring(0, 5)}</strong></td>
-                </tr>
-                ${properties}
-                `;
+        <table>
+          <tr>
+              <td><span class="material-icons">highlight_alt</span> </td>
+              <td><strong>${layer.feature.properties.uuid.substring(0, 5)}</strong></td>
+          </tr>
+          ${properties}
+        </table>
+      `;
     });
 
-    const edgeLayer = L.geoJSON(this.EdgesToGeoJSON(), {
+    const edgeLayer = L.geoJSON(this.edgesToGeoJSON(), {
       style: function (feature) {
         return {
           color: "black",
@@ -576,9 +576,9 @@ class Dcel {
       },
     }).bindTooltip(function (layer) {
       return `
-                ${layer.feature.properties.edge}<br>
-                ${layer.feature.properties.twin}
-                `;
+        ${layer.feature.properties.edge}<br>
+        ${layer.feature.properties.twin}
+      `;
     });
 
     const polygonLayer = L.geoJSON(this.toGeoJSON(this.dcel), {
@@ -607,15 +607,20 @@ class Dcel {
       const properties = Object.entries(layer.feature.properties)
         .slice(0, 5)
         .map((elem) => {
-          return `<tr><td>${elem[0]}</td> <td><strong>${elem[1]}</strong></td></tr>`;
+          return `
+            <tr>
+              <td>${elem[0]}</td>
+              <td><strong>${elem[1]}</strong></td>
+            </tr>
+          `;
         })
         .join("");
 
       return `
-                <table>
-                ${properties}
-                </table>
-                `;
+        <table>
+          ${properties}
+        </table>
+      `;
     });
 
     faceLayer.addTo(DCELMap);
