@@ -1,10 +1,16 @@
-import { EDGE_CLASSES } from "../dcel/HalfEdge.mjs";
-import Point from "../Point.mjs";
-import Line from "../Line.mjs";
+import HalfEdge, { EdgeClasses } from "../Dcel/HalfEdge.js";
+import Point from "../Geometry/Point.js";
+import Line from "../Geometry/Line.js";
 import ConvexHullGrahamScan from "graham_scan";
 
 class Staircase {
-  constructor(edge) {
+  edge: HalfEdge;
+  region: Array<Point>;
+  de: number;
+  stepNumbers: number;
+  points: Array<Point>;
+
+  constructor(edge: HalfEdge) {
     this.edge = edge;
     this.region = this.getRegion();
     this.de; // TODO: move this to HalfEdge? not really related to edge
@@ -12,60 +18,63 @@ class Staircase {
     this.points;
   }
 
-  getRegion() {
+  getRegion(): Array<Point> {
     const edge = this.edge;
     const edgeClass = edge.class;
-    if (edgeClass === EDGE_CLASSES.AB) {
-      return [edge.getTail().xy(), edge.getHead().xy()]; // QUESTION: better 4 coordinates to span an area?
-    } else if (edgeClass === EDGE_CLASSES.UB || edgeClass === EDGE_CLASSES.E) {
+    if (edgeClass === EdgeClasses.AB) {
+      return [
+        new Point(edge.getTail().x, edge.getTail().y),
+        new Point(edge.getHead().x, edge.getHead().y),
+      ]; // QUESTION: better 4 coordinates to span an area?
+    } else if (edgeClass === EdgeClasses.UB || edgeClass === EdgeClasses.E) {
       const [lower, upper] = edge.getAssociatedSector()[0].getBounds();
-      const A = new Point(...edge.getTail().xy());
+      const A = new Point(edge.getTail().x, edge.getTail().y);
       const a = new Line(A, lower);
       const d = new Line(A, upper);
-      const C = new Point(...edge.getHead().xy());
+      const C = new Point(edge.getHead().x, edge.getHead().y);
       const b = new Line(C, upper);
       const c = new Line(C, lower);
       const B = a.intersectsLine(b);
       const D = d.intersectsLine(c);
       return [A, B, C, D];
-    } else if (edgeClass === EDGE_CLASSES.UD) {
+    } else if (edgeClass === EdgeClasses.UD) {
       // TODO: like UB and E but accommodate for the appendex area
       return;
-    } else if (edgeClass === EDGE_CLASSES.AD) {
+    } else if (edgeClass === EdgeClasses.AD) {
       this.points = this.getStaircasePoints(this.edge);
       const convexHull = new ConvexHullGrahamScan();
       this.points.forEach((p) => convexHull.addPoint(p.x, p.y));
-      return convexHull.getHull();
+      return convexHull.getHull().map((p) => new Point(p.x, p.y));
     }
   }
 
   getEdgeDistance() {
-    if (this.class === EDGE_CLASSES.AB) {
+    if (this.edge.class === EdgeClasses.AB) {
       return;
     }
     // TODO: implement other cases
   }
 
   getStepNumbers() {
-    const staircaseRegion = this.getStaircaseRegion();
+    const staircaseRegion = this.getRegion();
 
     let stepNumbers;
     return stepNumbers;
   }
 
-  getStaircasePoints(edge) {
+  getStaircasePoints(edge: HalfEdge) {
     switch (edge.class) {
-      case EDGE_CLASSES.AD:
+      case EdgeClasses.AD:
         return this.getStairCasePointsAD(edge);
-      case EDGE_CLASSES.A:
+      case EdgeClasses.AB:
         return; // TODO: implement other cases
     }
   }
 
-  getStairCasePointsAD(edge) {
+  getStairCasePointsAD(edge: HalfEdge) {
     const epsilon = 0.1;
     const deltaE = edge.getLength() * epsilon;
-    const d1 = this.edge.dcel.config.C.getAngles()[edge.assignedAngle];
+    const d1 = this.edge.dcel.config.c.getAngles()[edge.assignedAngle];
     const d2 = edge.getAngle();
     const d1Opposite = (d1 + Math.PI) % (Math.PI * 2);
 

@@ -1,18 +1,24 @@
-import Sector from "./Sector.mjs";
+import Sector from "./Sector.js";
 
 class Cirregular {
-  constructor(orientations) {
+  angles: number[];
+
+  constructor(orientations: number[]) {
     this.angles = orientations; // TODO: at least 4
   }
 
-  getSectors() {
+  getSectors(): Array<Sector> {
     return this.angles.map((angle, idx) => {
       return new Sector(this, idx, angle, this.angles[idx + (1 % this.angles.length)]);
     });
   }
 
-  getSector(idx) {
+  getSector(idx: number): Sector {
     return this.getSectors().find((sector) => sector.idx == idx);
+  }
+
+  getAngles(): number[] {
+    return this.angles;
   }
 }
 

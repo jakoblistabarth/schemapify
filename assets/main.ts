@@ -1,7 +1,9 @@
-import Dcel from "./lib/dcel/Dcel.mjs";
-import config from "./schematization.config.mjs";
+import Dcel from "./lib/Dcel/Dcel.js";
+import config from "./schematization.config.js";
+import { getMapFrom } from "./lib/Ui/mapOutput.js";
+import { drawC } from "./lib/Ui/cOutput.js";
 
-async function getJSON(path) {
+async function getJSON(path: string) {
   const response = await fetch(path);
   return response.json();
 }
@@ -33,7 +35,7 @@ const tests = [
   "assets/data/shapes/edge-cases.json",
 ];
 
-function calculateMapGrid(mapGridID) {
+function calculateMapGrid(mapGridID: string) {
   const grid = document.getElementById(mapGridID);
   let templateColumns;
   if (tests.length === 1) {
@@ -55,8 +57,8 @@ function calculateMapGrid(mapGridID) {
 }
 
 calculateMapGrid("map-grid");
-config.C.drawSVG(document.getElementById("c"));
-document.getElementById("c-text").innerText = `C(${config.C.orientations})`;
+drawC(document.getElementById("c"));
+document.getElementById("c-text").innerText = `C(${config.c.orientations})`;
 
 tests.forEach(async (test) => {
   const name = test.slice(test.lastIndexOf("/") + 1, -5);
@@ -66,5 +68,5 @@ tests.forEach(async (test) => {
   dcel.schematize();
 
   dcel.log(name);
-  dcel.toMap(name);
+  getMapFrom(dcel, name);
 });

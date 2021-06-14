@@ -6,16 +6,16 @@
   "main": "index.js",
   "scripts": {
     "test": "jasmine",
-    "build": "esbuild --bundle assets/main.js --sourcemap --outfile=dist/main.bundle.js",
-    "dev": "nodemon",
+    "build": "tsc",
+    "watch-and-build": "tsc -p -w & nodemon -q -w dist dist/main.js",
+    "dev": "tsc -w & nodemon -q -w",
     "start": "browser-sync --config config/bs-config.js"
   },
   "nodemonConfig": {
     "ignore": [
       "spec/*",
       "dist/*"
-    ],
-    "exec": "npm run build"
+    ]
   },
   "pre-commit": [
     "test"
@@ -35,6 +35,10 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "pre-commit": "^1.2.2"
+    "@types/graham_scan": "^1.0.28",
+    "@types/leaflet": "^1.7.2",
+    "@types/uuid": "^8.3.0",
+    "pre-commit": "^1.2.2",
+    "typescript": "^4.3.2"
   }
 }

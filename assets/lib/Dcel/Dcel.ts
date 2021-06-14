@@ -1,22 +1,28 @@
-import config from "../../schematization.config.mjs";
-import Vertex from "./Vertex.mjs";
-import { SIGNIFICANCE } from "./Vertex.mjs";
-import HalfEdge from "./HalfEdge.mjs";
-import { EDGE_CLASSES } from "./HalfEdge.mjs";
-import Face from "./Face.mjs";
-import Staircase from "./../orientation-restriction/Staircase.mjs";
-import { createGeoJSON, groupBy } from "../utilities.mjs";
+import config, { Config } from "../../schematization.config.js";
+import Vertex, { Significance } from "./Vertex.js";
+import Point from "../Geometry/Point.js";
+import HalfEdge, { EdgeClasses } from "./HalfEdge.js";
+import Face from "./Face.js";
+import Staircase from "../OrientationRestriction/Staircase.js";
+import { createGeoJSON, groupBy } from "../utilities.js";
+import * as geojson from "geojson";
 
 class Dcel {
+  vertices: Map<String, Vertex>;
+  halfEdges: Array<HalfEdge>;
+  faces: Array<Face>;
+  featureProperties: geojson.GeoJsonProperties;
+  config: Config;
+
   constructor() {
     this.vertices = new Map();
     this.halfEdges = [];
     this.faces = [];
-    this.featureProperties;
+    this.featureProperties = {};
     this.config;
   }
 
-  makeVertex(x, y) {
+  makeVertex(x: number, y: number): Vertex {
     const key = Vertex.getKey(x, y);
     if (this.vertices.has(key)) return this.vertices.get(key);
 
@@ -25,7 +31,7 @@ class Dcel {
     return vertex;
   }
 
-  makeHalfEdge(tail, head) {
+  makeHalfEdge(tail: Vertex, head: Vertex): HalfEdge {
     const existingHalfEdge = this.halfEdges.find((edge) => {
       return tail == edge.tail && edge.twin?.tail == head; // TODO: check why .twin is only not defined in bisect()
     });
@@ -38,27 +44,27 @@ class Dcel {
     return halfEdge;
   }
 
-  makeFace() {
+  makeFace(): Face {
     const face = new Face();
     this.faces.push(face);
     return face;
   }
 
-  getFaces() {
+  getFaces(): Array<Face> {
     return this.faces;
   }
 
-  getBoundedFaces() {
+  getBoundedFaces(): Array<Face> {
     return this.faces.filter((f) => f.edge !== null);
   }
 
-  getUnboundedFace() {
+  getUnboundedFace(): Face {
     return this.faces.find((f) => f.edge === null);
   }
 
-  getSimpleEdges() {
+  getSimpleEdges(): Array<HalfEdge> {
     // FIXME: confusing for map output: sometimes clockwise/counterclockwise assignment in map output wrong
-    let simpleEdges = [];
+    let simpleEdges: Array<HalfEdge> = [];
     this.getBoundedFaces().forEach((f) => {
       f.getEdges().forEach((halfEdge) => {
         const idx = simpleEdges.indexOf(halfEdge.twin);
@@ -68,11 +74,11 @@ class Dcel {
     return simpleEdges;
   }
 
-  findVertex(x, y) {
+  findVertex(x: number, y: number): Vertex {
     return this.vertices.get(Vertex.getKey(x, y));
   }
 
-  removeHalfEdge(edge) {
+  removeHalfEdge(edge: HalfEdge): Array<HalfEdge> {
     const idx = this.halfEdges.indexOf(edge);
     if (idx > -1) {
       this.halfEdges.splice(idx, 1);
@@ -80,41 +86,52 @@ class Dcel {
     return this.halfEdges;
   }
 
-  static fromGeoJSON(geoJSON) {
+  static fromGeoJSON(geoJSON: geojson.FeatureCollection): Dcel {
     const subdivision = new Dcel();
 
-    subdivision.featureProperties = geoJSON.features.map((feature) => feature.properties);
+    subdivision.featureProperties = geoJSON.features.map(
+      (feature: geojson.Feature) => feature.properties
+    );
 
-    const polygons = geoJSON.features.reduce((acc, feature) => {
-      const multiPolygons =
-        feature.geometry.type !== "MultiPolygon" // TODO: check in e.g, parseGeoJSON()? if only polygons in Multipolygons
-          ? [feature.geometry.coordinates]
-          : feature.geometry.coordinates;
+    const polygons = geoJSON.features.reduce(
+      (acc: Array<geojson.Feature>, feature: geojson.Feature) => {
+        const multiPolygons =
+          feature.geometry.type !== "MultiPolygon" // TODO: check in e.g, parseGeoJSON()? if only polygons in Multipolygons
+            ? [feature.geometry.coordinates]
+            : feature.geometry.coordinates;
 
-      acc.push(
-        ...multiPolygons.map((polygon) =>
-          polygon.map((ring) => {
-            return ring.map((point) => {
-              return (
-                subdivision.findVertex(point[0], point[1]) ||
-                subdivision.makeVertex(point[0], point[1])
-              );
-            });
-          })
-        )
-      );
-      return acc;
-    }, []);
+        acc.push(
+          ...multiPolygons.map((polygon) =>
+            polygon.map((ring: Array<number[]>) => {
+              return ring.map((point: number[]) => {
+                return (
+                  subdivision.findVertex(point[0], point[1]) ||
+                  subdivision.makeVertex(point[0], point[1])
+                );
+              });
+            })
+          )
+        );
+        return acc;
+      },
+      []
+    );
 
     polygons.forEach((polygon) =>
-      polygon.forEach((ring, idx) => {
+      polygon.forEach((ring: number[][], idx: number) => {
         ring = idx > 0 ? ring.reverse() : ring; // sort clockwise ordered vertices of inner rings (geojson spec) counterclockwise
         const points = ring.slice(0, -1);
 
-        points.forEach((tail, idx) => {
-          const head = points[(idx + 1) % points.length]; // TODO: make this idx more elegant?
-          const halfEdge = subdivision.makeHalfEdge(tail, head);
-          const twinHalfEdge = subdivision.makeHalfEdge(head, tail);
+        points.forEach((tail: number[], idx: number) => {
+          const head: number[] = points[(idx + 1) % points.length]; // TODO: make this idx more elegant?
+          const halfEdge = subdivision.makeHalfEdge(
+            new Vertex(tail[0], tail[1], subdivision),
+            new Vertex(head[0], head[1], subdivision)
+          );
+          const twinHalfEdge = subdivision.makeHalfEdge(
+            new Vertex(head[0], head[1], subdivision),
+            new Vertex(tail[0], tail[1], subdivision)
+          );
           halfEdge.twin = twinHalfEdge;
           twinHalfEdge.twin = halfEdge;
         });
@@ -137,14 +154,14 @@ class Dcel {
     });
 
     // For every cycle, allocate and assign a face structure.
-    geoJSON.features.forEach((feature, idx) => {
+    geoJSON.features.forEach((feature: geojson.Feature, idx: number) => {
       const FID = idx;
       const multiPolygons =
         feature.geometry.type !== "MultiPolygon"
           ? [feature.geometry.coordinates]
           : feature.geometry.coordinates; // TODO: check in e.g, parseGeoJSON()? if only polygons in Multipolygons
 
-      let outerRingFace;
+      let outerRingFace: Face;
       multiPolygons.forEach((polygon) =>
         polygon.forEach((ring, idx) => {
           ring = idx > 0 ? ring.reverse() : ring;
@@ -220,11 +237,11 @@ class Dcel {
 
   // takes a dcel
   // returns its diameter
-  getDiameter() {
+  getDiameter(): number {
     const bbox = this.getBbox();
-    const [a, c] = [new Vertex(bbox[0], bbox[1]), new Vertex(bbox[2], bbox[3])]; // TODO: use point instead of Vertex
+    const [a, c] = [new Point(bbox[0], bbox[1]), new Point(bbox[2], bbox[3])];
 
-    const diagonal = a.distanceToVertex(c);
+    const diagonal = a.distanceToPoint(c);
     return diagonal;
   }
 
@@ -232,11 +249,11 @@ class Dcel {
   // – the threshold for max edge length
   // takes the factor lambda
   // returns the treshold as float
-  setEpsilon(lambda) {
+  setEpsilon(lambda: number): number {
     return (this.config.epsilon = this.getDiameter() * lambda);
   }
 
-  splitEdges(threshold = this.config.epsilon) {
+  splitEdges(threshold = this.config.epsilon): Dcel {
     this.getBoundedFaces().forEach((f) => {
       f.getEdges().forEach((e) => {
         e.subdivideToThreshold(threshold);
@@ -245,26 +262,26 @@ class Dcel {
     return this;
   }
 
-  preProcess() {
+  preProcess(): void {
     this.config = config;
     this.setEpsilon(this.config.lambda);
-    this.splitEdges(this.epsilon);
+    this.splitEdges();
   }
 
-  classifyVertices() {
+  classifyVertices(): void {
     this.vertices.forEach((v) => {
       v.isSignificant();
     });
     this.getSimpleEdges().forEach((edge) => {
       const [head, tail] = edge.getEndpoints();
-      if (head.isSignificant() === SIGNIFICANCE.S && tail.isSignificant() === SIGNIFICANCE.S) {
+      if (head.isSignificant() === Significance.S && tail.isSignificant() === Significance.S) {
         const newPoint = edge.bisect().getHead();
-        newPoint.significance = SIGNIFICANCE.I;
+        newPoint.significance = Significance.I;
       }
     });
   }
 
-  classify() {
+  classify(): void {
     this.classifyVertices();
 
     this.getSimpleEdges().forEach((edge) => {
@@ -274,9 +291,9 @@ class Dcel {
     });
   }
 
-  edgesToStaircases() {
+  edgesToStaircases(): void {
     this.getSimpleEdges()
-      .filter((edge) => edge.class === EDGE_CLASSES.AD) // TODO: remove when all staircases are implemented
+      .filter((edge) => edge.class === EdgeClasses.AD) // TODO: remove when all staircases are implemented
       .forEach((edge) => {
         const stepPoints = new Staircase(edge).points.slice(1, -1);
         let edgeToSplit = edge;
@@ -286,23 +303,23 @@ class Dcel {
       });
   }
 
-  constrainAngles() {
+  constrainAngles(): void {
     this.classify();
     this.edgesToStaircases();
   }
 
-  simplify() {
+  simplify(): Dcel {
     // TODO: implement edge move
     return this;
   }
 
-  schematize() {
+  schematize(): void {
     this.preProcess();
     this.constrainAngles();
     this.simplify();
   }
 
-  log(name, verbose = false) {
+  log(name: String, verbose: Boolean = false): void {
     if (!verbose) console.log("DCEL " + name, this);
     else {
       console.log("🡒 START DCEL:", this);
@@ -317,7 +334,7 @@ class Dcel {
     }
   }
 
-  toGeoJSON(name) {
+  toGeoJSON(name: string): geojson.FeatureCollection {
     // copy faces, so that every face has only one FID
     // console.log(this.getBoundedFaces());
     const flattenedFaces = this.getBoundedFaces().reduce((acc, f) => {
@@ -335,19 +352,19 @@ class Dcel {
     const outerRingsByFID = groupByFID(outerRings);
 
     const features = Object.entries(outerRingsByFID).map(([fid, feature]) => {
-      const featureProperties = this.featureProperties[fid];
-      let featureCoordinates = [];
+      const featureProperties: geojson.GeoJsonProperties = this.featureProperties[fid];
+      let featureCoordinates: number[][][] = [];
       let idx = 0;
-      feature.forEach((ring) => {
+      feature.forEach((ring: Face) => {
         const halfEdges = ring.getEdges();
         const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
         coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
         featureCoordinates.push([coordinates]);
         if (ring.innerEdges) {
-          const ringCoordinates = [];
-          ring.innerEdges.forEach((innerEdge) => {
-            const halfEdges = innerEdge.getCycle(false); // go backwards to go counterclockwise also for holes
-            const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
+          const ringCoordinates: number[][] = [];
+          ring.innerEdges.forEach((innerEdge: HalfEdge) => {
+            const halfEdges: Array<HalfEdge> = innerEdge.getCycle(false); // go backwards to go counterclockwise also for holes
+            const coordinates: number[][] = halfEdges.map((e) => [e.tail.x, e.tail.y]);
             coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
             ringCoordinates.push(coordinates);
           });
@@ -368,7 +385,7 @@ class Dcel {
     return createGeoJSON(features, name);
   }
 
-  verticesToGeoJSON(name) {
+  verticesToGeoJSON(name: String): geojson.GeoJSON {
     const vertexFeatures = [...this.vertices].map(([k, v]) => {
       return {
         type: "Feature",
@@ -387,7 +404,7 @@ class Dcel {
     return createGeoJSON(vertexFeatures, name + "_vertices");
   }
 
-  facesToGeoJSON(name) {
+  facesToGeoJSON(name: String): geojson.GeoJSON {
     const faceFeatures = this.getBoundedFaces().map((f) => {
       const halfEdges = f.getEdges();
       const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
@@ -409,7 +426,7 @@ class Dcel {
     return createGeoJSON(faceFeatures, name + "_polygons");
   }
 
-  edgesToGeoJSON(name) {
+  edgesToGeoJSON(name: String): geojson.GeoJSON {
     const edgeFeatures = this.getSimpleEdges().map((e) => {
       const a = e.tail;
       const b = e.twin.tail;
@@ -427,7 +444,7 @@ class Dcel {
           incidentFaceType: e.face.outerRing ? "inner" : "outer",
           length: e.getLength(),
           sector: e.getAssociatedSector(),
-          schematizationProperties: e.schematizationProperties,
+          class: e.class,
           edge: `
               <span class="material-icons">rotate_left</span>
               ${e.uuid.substring(0, 5)} (${e.tail.x}/${e.tail.y})
@@ -447,214 +464,6 @@ class Dcel {
     });
 
     return createGeoJSON(edgeFeatures, name + "_edges");
-  }
-
-  toMap(name) {
-    const DCELMap = L.map(name, {
-      zoomControl: false,
-    });
-    DCELMap.attributionControl.addAttribution(name);
-
-    function highlightDCELFeature(e) {
-      var feature = e.target;
-      feature.setStyle({
-        weight: 3,
-        fillColor: "black",
-        fillOpacity: feature.feature.properties.ringType === "inner" ? 0.25 : 0.5,
-      });
-    }
-
-    const vertexLayer = L.geoJson(this.verticesToGeoJSON(name), {
-      pointToLayer: function (feature, latlng) {
-        const props = feature.properties;
-        const v = feature.geometry.coordinates;
-        const edges = props.edges
-          .map((edge) => {
-            const head = edge.getHead();
-            const tail = edge.getTail();
-            return `
-              <tr>
-                <td>${edge.uuid.substring(0, 5)}</td>
-                <td>
-                  (${tail.x}/${tail.y})
-                  <span class="material-icons">arrow_forward</span>
-                  (${head.x}/${head.y})
-                </td>
-                <td>Sectors: ${edge
-                  .getAssociatedSector()
-                  .map((s) => s.idx)
-                  .join(",")}</td>
-                <td>${edge.class}</td>
-              </tr>
-            `;
-          })
-          .join("");
-        return L.circleMarker(latlng, {
-          radius:
-            props.significance === SIGNIFICANCE.S || props.significance === SIGNIFICANCE.T ? 4 : 2,
-          fillColor: props.significance === SIGNIFICANCE.T ? "grey" : "white",
-          color: "black",
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 1,
-        }).bindTooltip(`
-          <span class="material-icons">radio_button_checked</span> ${props.uuid.substring(0, 5)}
-          (${v[0]}/${v[1]})<br>
-          significance: ${props.significance}<br>
-          <table>
-            ${edges}
-          </table>
-        `);
-      },
-      onEachFeature: function (feature, layer) {
-        layer.on({
-          mouseover: highlightDCELFeature,
-          mouseout: function (e) {
-            vertexLayer.resetStyle(e.target);
-          },
-        });
-      },
-    });
-
-    const faceLayer = L.geoJSON(this.facesToGeoJSON(), {
-      style: function (feature) {
-        return {
-          color: "transparent",
-          fillColor: feature.properties.ringType === "inner" ? "transparent" : "black",
-          weight: 1,
-        };
-      },
-      onEachFeature: function (feature, layer) {
-        layer.on({
-          mouseover: highlightDCELFeature,
-          mouseout: function (e) {
-            e.target.bringToBack();
-            faceLayer.resetStyle(e.target);
-          },
-        });
-      },
-    }).bindTooltip(function (layer) {
-      const properties = Object.entries(layer.feature.properties)
-        .map((elem) => {
-          if (elem[0] !== "uuid")
-            return `<tr><td>${elem[0]}</td> <td><strong>${elem[1]}</strong></td></tr>`;
-        })
-        .join("");
-      return `
-        <table>
-          <tr>
-              <td><span class="material-icons">highlight_alt</span> </td>
-              <td><strong>${layer.feature.properties.uuid.substring(0, 5)}</strong></td>
-          </tr>
-          ${properties}
-        </table>
-      `;
-    });
-
-    const edgeLayer = L.geoJSON(this.edgesToGeoJSON(), {
-      style: function (feature) {
-        return {
-          color: "black",
-          weight: 1,
-          dashArray: feature.properties.incidentFaceType === "inner" ? "3,3" : "0",
-        };
-      },
-      onEachFeature: function (feature, layer) {
-        layer.on({
-          mouseover: highlightDCELFeature,
-          mouseout: function (e) {
-            edgeLayer.resetStyle(e.target);
-          },
-          click: function (e) {
-            const edge = e.target.feature;
-            console.log(
-              `edge => length: ${edge.properties.length} sector: ${edge.properties.sector}`,
-              edge.properties.schematizationProperties
-            );
-          },
-        });
-      },
-    }).bindTooltip(function (layer) {
-      return `
-        ${layer.feature.properties.edge}<br>
-        ${layer.feature.properties.twin}
-      `;
-    });
-
-    const polygonLayer = L.geoJSON(this.toGeoJSON(this.dcel), {
-      style: function (feature) {
-        return {
-          color: "grey",
-          weight: 2,
-        };
-      },
-      onEachFeature: function (feature, layer) {
-        layer.on({
-          mouseover: function (e) {
-            var feature = e.target;
-            feature.setStyle({
-              weight: 4,
-              fillOpacity: 0.5,
-            });
-          },
-          mouseout: function (e) {
-            e.target.bringToBack();
-            polygonLayer.resetStyle(e.target);
-          },
-        });
-      },
-    }).bindTooltip(function (layer) {
-      const properties = Object.entries(layer.feature.properties)
-        .slice(0, 5)
-        .map((elem) => {
-          return `
-            <tr>
-              <td>${elem[0]}</td>
-              <td><strong>${elem[1]}</strong></td>
-            </tr>
-          `;
-        })
-        .join("");
-
-      return `
-        <table>
-          ${properties}
-        </table>
-      `;
-    });
-
-    faceLayer.addTo(DCELMap);
-    edgeLayer.addTo(DCELMap);
-    vertexLayer.addTo(DCELMap);
-    DCELMap.fitBounds(vertexLayer.getBounds());
-
-    function toggleLayer() {
-      if (showPolygons) {
-        polygonLayer.addTo(DCELMap);
-        faceLayer.remove();
-        vertexLayer.remove();
-        edgeLayer.remove();
-        facesLabel.classList.remove("active");
-        polygonsLabel.classList.add("active");
-      } else {
-        polygonLayer.remove();
-        faceLayer.addTo(DCELMap);
-        edgeLayer.addTo(DCELMap);
-        vertexLayer.addTo(DCELMap);
-        facesLabel.classList.add("active");
-        polygonsLabel.classList.remove("active");
-      }
-    }
-    const toggleBtn = document.querySelector("#layer-toggle");
-    const polygonsLabel = document.querySelector("#polygons-label");
-    const facesLabel = document.querySelector("#faces-label");
-    let showPolygons = toggleBtn.checked ? true : false;
-    toggleLayer();
-    toggleBtn.addEventListener("click", function () {
-      showPolygons = !showPolygons;
-      toggleLayer();
-    });
-    return DCELMap;
   }
 }
 

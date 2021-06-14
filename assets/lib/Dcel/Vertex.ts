@@ -1,15 +1,23 @@
 import { v4 as uuid } from "uuid";
-import Point from "../Point.mjs";
-import { crawlArray, getOccurrence } from "../utilities.mjs";
+import Sector from "../OrientationRestriction/Sector.js";
+import Point from "../Geometry/Point.js";
+import { crawlArray, getOccurrence } from "../utilities.js";
+import Dcel from "./Dcel.js";
+import HalfEdge from "./HalfEdge.js";
 
-export const SIGNIFICANCE = {
-  S: "significant",
-  I: "insignificant",
-  T: "treatedAsSignificant",
-};
+export enum Significance {
+  S = "significant",
+  I = "insignificant",
+  T = "treatedAsSignificant",
+}
 
 class Vertex extends Point {
-  constructor(x, y, dcel) {
+  dcel: Dcel;
+  uuid: string;
+  edges: Array<HalfEdge>;
+  significance: Significance;
+
+  constructor(x: number, y: number, dcel: Dcel) {
     super(x, y);
     this.dcel = dcel;
     this.uuid = uuid();
@@ -17,16 +25,16 @@ class Vertex extends Point {
     this.significance = null;
   }
 
-  static getKey(x, y) {
+  static getKey(x: number, y: number): string {
     return `${x}/${y}`;
   }
 
-  distanceToVertex(p) {
+  distanceToVertex(p: Point): number {
     return this.distanceToPoint(p);
   }
 
   // adapted from https://github.com/scottglz/distance-to-line-segment/blob/master/index.js
-  distanceToEdge(edge) {
+  distanceToEdge(edge: HalfEdge): number {
     const [vx, vy] = this.xy();
     const [e1x, e1y] = edge.getTail().xy();
     const [e2x, e2y] = edge.getHead().xy();
@@ -45,7 +53,7 @@ class Vertex extends Point {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  sortEdges(clockwise = true) {
+  sortEdges(clockwise: boolean = true): Array<HalfEdge> {
     this.edges = this.edges.sort((a, b) => {
       if (clockwise) return b.getAngle() - a.getAngle();
       else return a.getAngle() - b.getAngle();
@@ -53,7 +61,7 @@ class Vertex extends Point {
     return this.edges;
   }
 
-  removeIncidentEdge(edge) {
+  removeIncidentEdge(edge: HalfEdge): Array<HalfEdge> {
     const idx = this.edges.indexOf(edge);
     if (idx > -1) {
       this.edges.splice(idx, 1);
@@ -61,17 +69,17 @@ class Vertex extends Point {
     return this.edges;
   }
 
-  allEdgesAligned() {
+  allEdgesAligned(): boolean {
     return this.edges.every((edge) => edge.isAligned());
   }
 
-  isSignificant() {
+  isSignificant(): Significance {
     // QUESTION: are vertices with only aligned edges never significant?
     // TODO: move to another class? to not mix dcel and schematization?
 
     // classify as insignificant if all edges are already aligned
     if (this.allEdgesAligned()) {
-      return (this.significance = SIGNIFICANCE.I);
+      return (this.significance = Significance.I);
     }
 
     // classify as significant if one sector occurs multiple times
@@ -83,7 +91,7 @@ class Vertex extends Point {
     }, []);
 
     if (occupiedSectors.length !== uniqueSectors.length) {
-      return (this.significance = SIGNIFICANCE.S);
+      return (this.significance = Significance.S);
     }
 
     // classify as significant if neighbor sectors are not empty
@@ -93,16 +101,16 @@ class Vertex extends Point {
         this.getEdgesInSector(prevSector).length > 0 || this.getEdgesInSector(nextSector).length > 0
       );
     });
-    return (this.significance = isSignificant ? SIGNIFICANCE.S : SIGNIFICANCE.I);
+    return (this.significance = isSignificant ? Significance.S : Significance.I);
   }
 
-  getEdgesInSector(sector) {
+  getEdgesInSector(sector: Sector): Array<HalfEdge> {
     return this.edges.filter((edge) => sector.encloses(edge.getAngle()));
   }
 
-  assignAngles() {
+  assignAngles(): Array<HalfEdge> {
     const edges = this.sortEdges(false);
-    let anglesToAssign = [];
+    let anglesToAssign: number[] = [];
     const closestBounds = edges.map((edge) => {
       let direction;
 
@@ -110,7 +118,7 @@ class Vertex extends Point {
       direction = edge.getAngle() - lower <= upper - edge.getAngle() ? lower : upper;
       direction = direction == Math.PI * 2 ? 0 : direction;
 
-      return this.dcel.config.C.getAngles().indexOf(direction);
+      return this.dcel.config.c.getAngles().indexOf(direction);
     });
 
     anglesToAssign = closestBounds;
@@ -121,8 +129,8 @@ class Vertex extends Point {
         return;
       }
 
-      const nextDirection = crawlArray(this.dcel.config.C.getAngles(), direction, +1);
-      const prevDirection = crawlArray(this.dcel.config.C.getAngles(), direction, -1);
+      const nextDirection = crawlArray(this.dcel.config.c.getAngles(), direction, +1);
+      const prevDirection = crawlArray(this.dcel.config.c.getAngles(), direction, -1);
       if (getOccurrence(anglesToAssign, nextDirection) > 0) {
         anglesToAssign[idx] = prevDirection;
       } else {

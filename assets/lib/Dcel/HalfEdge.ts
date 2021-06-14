@@ -1,17 +1,31 @@
 import { v4 as uuid } from "uuid";
-import { SIGNIFICANCE } from "./Vertex.mjs";
-import Point from "../Point.mjs";
+import Vertex, { Significance } from "./Vertex.js";
+import Point from "../Geometry/Point.js";
+import Dcel from "./Dcel.js";
+import Face from "./Face.js";
+import Sector from "../OrientationRestriction/Sector.js";
 
-export const EDGE_CLASSES = {
-  AB: "alignedBasic",
-  UB: "unalignedBasic",
-  E: "evading",
-  AD: "alignedDeviating",
-  UD: "unalignedDeviating",
-};
+export enum EdgeClasses {
+  AB = "alignedBasic",
+  UB = "unalignedBasic",
+  E = "evading",
+  AD = "alignedDeviating",
+  UD = "unalignedDeviating",
+}
 
 class HalfEdge {
-  constructor(tail, dcel) {
+  uuid: string;
+  dcel: Dcel;
+  tail: Vertex;
+  twin: HalfEdge;
+  face: Face;
+  prev: HalfEdge;
+  next: HalfEdge;
+  assignedAngle: number;
+  isAligning: boolean;
+  class: EdgeClasses;
+
+  constructor(tail: Vertex, dcel: Dcel) {
     this.uuid = uuid();
     this.dcel = dcel;
     this.tail = tail;
@@ -23,22 +37,22 @@ class HalfEdge {
     this.isAligning = null;
   }
 
-  getTail() {
+  getTail(): Vertex {
     return this.tail;
   }
 
-  getHead() {
+  getHead(): Vertex {
     return this.twin.tail;
   }
 
-  getEndpoints() {
+  getEndpoints(): Array<Vertex> {
     return [this.getTail(), this.getHead()];
   }
 
-  getCycle(forwards = true) {
-    let currentEdge = this;
-    const initialEdge = currentEdge;
-    const halfEdges = [];
+  getCycle(forwards: boolean = true): Array<HalfEdge> {
+    let currentEdge: HalfEdge = this;
+    const initialEdge: HalfEdge = currentEdge;
+    const halfEdges: Array<HalfEdge> = [];
 
     do {
       halfEdges.push(currentEdge);
@@ -48,17 +62,17 @@ class HalfEdge {
     return halfEdges;
   }
 
-  getAngle() {
+  getAngle(): number {
     const vector = [this.twin.tail.x - this.tail.x, this.twin.tail.y - this.tail.y];
     const angle = Math.atan2(vector[1], vector[0]);
     return angle < 0 ? angle + 2 * Math.PI : angle;
   }
 
-  getLength() {
+  getLength(): number {
     return this.getTail().distanceToVertex(this.getHead());
   }
 
-  getMidpoint() {
+  getMidpoint(): Point {
     const [x1, y1] = this.getTail().xy();
     const [x2, y2] = this.getHead().xy();
 
@@ -68,13 +82,13 @@ class HalfEdge {
     return new Point(mx, my);
   }
 
-  remove() {
+  remove(): void {
     this.tail.removeIncidentEdge(this);
     this.dcel.removeHalfEdge(this);
     if (this.face.outerRing) this.face.outerRing.removeInnerEdge(this);
   }
 
-  bisect(newPoint = this.getMidpoint()) {
+  bisect(newPoint: Point = this.getMidpoint()): HalfEdge {
     const e = this;
     const et = e.twin;
     const f1 = e.face;
@@ -148,24 +162,24 @@ class HalfEdge {
     return e_;
   }
 
-  subdivideToThreshold(threshold) {
-    const initialHalfEdge = this;
-    let currentHalfEdge = initialHalfEdge;
+  subdivideToThreshold(threshold: number): void {
+    const initialHalfEdge: HalfEdge = this;
+    let currentHalfEdge: HalfEdge = initialHalfEdge;
 
     while (currentHalfEdge != initialHalfEdge.next) {
       if (currentHalfEdge.getLength() < threshold) {
         currentHalfEdge = currentHalfEdge.next;
       } else {
-        const newHalfEdge = currentHalfEdge.bisect();
+        const newHalfEdge: HalfEdge = currentHalfEdge.bisect();
         currentHalfEdge = newHalfEdge;
       }
     }
   }
 
-  getAssociatedDirections() {
-    const sectors = this.dcel.config.C.getSectors();
+  getAssociatedDirections(): number[] {
+    const sectors = this.dcel.config.c.getSectors();
     const angle = this.getAngle();
-    let directions = [];
+    let directions: number[] = [];
     sectors.some(function (sector) {
       if (angle === sector.lower) {
         return directions.push(sector.lower);
@@ -179,8 +193,8 @@ class HalfEdge {
     return directions;
   }
 
-  getAssociatedSector() {
-    const sectors = this.dcel.config.C.getSectors();
+  getAssociatedSector(): Array<Sector> {
+    const sectors = this.dcel.config.c.getSectors();
     const direction = this.getAssociatedDirections();
     return sectors.reduce((acc, sector) => {
       if (
@@ -195,19 +209,19 @@ class HalfEdge {
     }, []);
   }
 
-  getSignificantEndpoint() {
+  getSignificantEndpoint(): Vertex {
     const endpoints = this.getEndpoints();
     const significantEndpoint =
       endpoints.find(
-        (vertex) => vertex.significance === SIGNIFICANCE.S || vertex.significance === SIGNIFICANCE.T
+        (vertex) => vertex.significance === Significance.S || vertex.significance === Significance.T
       ) || endpoints[Math.round(Math.random())];
-    if (significantEndpoint.significance === SIGNIFICANCE.I)
-      significantEndpoint.significance = SIGNIFICANCE.T;
+    if (significantEndpoint.significance === Significance.I)
+      significantEndpoint.significance = Significance.T;
     return significantEndpoint;
   }
 
-  isDeviating() {
-    const sectors = this.dcel.config.C.getSectors();
+  isDeviating(): boolean {
+    const sectors = this.dcel.config.c.getSectors();
     //TODO: refactor isDeviating(), find better solution for last sector (idx=0) should be 8???
     let assignedAngle = (this.assignedAngle * Math.PI * 2) / sectors.length;
 
@@ -222,12 +236,12 @@ class HalfEdge {
     }
   }
 
-  isAligned() {
+  isAligned(): boolean {
     const isAligned = this.getAssociatedDirections().length === 1;
     return (this.isAligning = isAligned);
   }
 
-  distanceToEdge(edge) {
+  distanceToEdge(edge: HalfEdge): number {
     const verticesThis = [this.getTail(), this.getHead()];
     const verticesEdge = [edge.getTail(), edge.getHead()];
     const distances = verticesThis.map((v) => v.distanceToEdge(edge));
@@ -235,7 +249,7 @@ class HalfEdge {
     return Math.min(...distances);
   }
 
-  classify() {
+  classify(): EdgeClasses {
     let classification;
 
     if (this.twin.class) {
@@ -252,13 +266,13 @@ class HalfEdge {
       .filter((edge) => !edge.isAligned() && !edge.isDeviating());
 
     if (this.isAligned()) {
-      classification = this.isDeviating() ? EDGE_CLASSES.AD : EDGE_CLASSES.AB;
+      classification = this.isDeviating() ? EdgeClasses.AD : EdgeClasses.AB;
     } else if (this.isDeviating()) {
-      classification = EDGE_CLASSES.UD;
+      classification = EdgeClasses.UD;
     } else if (edges.length == 2) {
-      classification = EDGE_CLASSES.E;
+      classification = EdgeClasses.E;
     } else {
-      classification = EDGE_CLASSES.UB;
+      classification = EdgeClasses.UB;
     }
 
     this.class = classification;
