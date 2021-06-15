@@ -3,6 +3,7 @@ import { resolve } from "path";
 import { getTestFiles } from "./test-helpers.mjs";
 import DCEL from "../assets/lib/dcel/Dcel.mjs";
 import { hint } from "@mapbox/geojsonhint";
+import { SIGNIFICANCE } from "../assets/lib/dcel/Vertex.mjs";
 
 describe("fromGeoJSON() on geodata creates only complete cycles", function () {
   const dir = "assets/data/geodata";
@@ -117,6 +118,31 @@ describe("getBbox()", function () {
     expect(bboxPlgn1).toEqual([0, 0, 2, 2]);
     expect(bboxPlgn2).toEqual([0, 0, 4, 2]);
     expect(bboxPlgn3).toEqual([0, 0, 2, 2]);
+  });
+});
+
+describe("getVertices()", function () {
+  let dcel;
+
+  beforeEach(function () {
+    const polygon = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
+    dcel = DCEL.fromGeoJSON(polygon);
+    dcel.preProcess();
+    dcel.classify();
+  });
+
+  it("returns vertices of type insignificant if specified", function () {
+    expect(
+      dcel.getVertices(SIGNIFICANCE.I).every((v) => v.significance === SIGNIFICANCE.I)
+    ).toBeTruthy();
+  });
+  it("returns vertices of type treatedAsSignificant if specified", function () {
+    expect(
+      dcel.getVertices(SIGNIFICANCE.T).every((v) => v.significance === SIGNIFICANCE.T)
+    ).toBeTruthy();
+  });
+  it("returns all vertices if no type specified", function () {
+    expect(dcel.getVertices().length).toBe([...dcel.vertices].length);
   });
 });
 

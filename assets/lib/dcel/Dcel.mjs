@@ -56,6 +56,14 @@ class Dcel {
     return this.faces.find((f) => f.edge === null);
   }
 
+  getVertices(significance) {
+    if (significance)
+      return [...this.vertices]
+        .filter(([k, v]) => v.significance === significance)
+        .map(([k, v]) => v);
+    return [...this.vertices].map(([k, v]) => v);
+  }
+
   getSimpleEdges() {
     // FIXME: confusing for map output: sometimes clockwise/counterclockwise assignment in map output wrong
     let simpleEdges = [];
