@@ -130,7 +130,9 @@ class Vertex extends Point {
       }
     });
 
-    edges.forEach((edge, idx) => (edge.assignedAngle = anglesToAssign[idx]));
+    edges.forEach((edge, idx) => {
+      if (!edge.assignAngle) edge.assignedAngle = anglesToAssign[idx];
+    });
 
     return this.edges;
   }

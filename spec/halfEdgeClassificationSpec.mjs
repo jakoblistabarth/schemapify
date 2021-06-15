@@ -297,7 +297,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
   });
 });
 
-describe("classifyEdges() in a classification where all edges are classified and a halfedge and its twin share the same class", function () {
+fdescribe("classifyEdges() in a classification where all edges are classified and a halfedge and its twin share the same class", function () {
   it("on simple test data", function () {
     const json = JSON.parse(readFileSync(resolve("assets/data/shapes/edge-cases.json"), "utf8"));
     const dcel = DCEL.fromGeoJSON(json);

@@ -263,11 +263,14 @@ class Dcel {
     this.vertices.forEach((v) => {
       v.isSignificant();
     });
+
     this.getSimpleEdges().forEach((edge) => {
-      const [head, tail] = edge.getEndpoints();
-      if (head.isSignificant() === SIGNIFICANCE.S && tail.isSignificant() === SIGNIFICANCE.S) {
+      const [tail, head] = edge.getEndpoints();
+      if (tail.significance === SIGNIFICANCE.S && head.significance === SIGNIFICANCE.S) {
         const newPoint = edge.bisect().getHead();
         newPoint.significance = SIGNIFICANCE.I;
+      } else if (tail.significance === SIGNIFICANCE.I && head.significance === SIGNIFICANCE.I) {
+        edge.getSignificantEndpoint();
       }
     });
   }
@@ -275,28 +278,31 @@ class Dcel {
   classify() {
     this.classifyVertices();
 
-    this.getSimpleEdges().forEach((edge) => {
-      edge.getSignificantEndpoint().edges.forEach((edge) => {
-        edge.classify();
-      });
+    this.getVertices(SIGNIFICANCE.S).forEach((v) => {
+      v.edges.forEach((e) => e.classify());
+    });
+
+    this.getVertices(SIGNIFICANCE.T).forEach((v) => {
+      v.edges.forEach((e) => e.classify());
     });
   }
 
   edgesToStaircases() {
-    this.getSimpleEdges()
-      .filter((edge) => edge.class === EDGE_CLASSES.AD) // TODO: remove when all staircases are implemented
-      .forEach((edge) => {
+    for (let idx in this.halfEdges) {
+      const edge = this.halfEdges[idx];
+      if (edge.class === EDGE_CLASSES.AD) {
+        console.log(edge);
+        // TODO: remove when other staircase implemented
         const stepPoints = new Staircase(edge).points.slice(1, -1);
         let edgeToSplit = edge;
-        for (let p of stepPoints) {
-          edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
-        }
-      });
+        for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
+      }
+    }
   }
 
   constrainAngles() {
     this.classify();
-    this.edgesToStaircases();
+    // this.edgesToStaircases();
   }
 
   simplify() {
@@ -435,7 +441,7 @@ class Dcel {
           incidentFaceType: e.face.outerRing ? "inner" : "outer",
           length: e.getLength(),
           sector: e.getAssociatedSector(),
-          schematizationProperties: e.schematizationProperties,
+          class: e.class,
           edge: `
               <span class="material-icons">rotate_left</span>
               ${e.uuid.substring(0, 5)} (${e.tail.x}/${e.tail.y})
@@ -562,8 +568,8 @@ class Dcel {
     const edgeLayer = L.geoJSON(this.edgesToGeoJSON(), {
       style: function (feature) {
         return {
-          color: "black",
-          weight: 1,
+          color: !feature.properties.class ? "red" : "black",
+          weight: !feature.properties.class ? 4 : 1,
           dashArray: feature.properties.incidentFaceType === "inner" ? "3,3" : "0",
         };
       },
@@ -577,7 +583,7 @@ class Dcel {
             const edge = e.target.feature;
             console.log(
               `edge => length: ${edge.properties.length} sector: ${edge.properties.sector}`,
-              edge.properties.schematizationProperties
+              edge.properties.class
             );
           },
         });

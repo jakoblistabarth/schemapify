@@ -21,6 +21,7 @@ class HalfEdge {
     this.next = null;
     this.assignedAngle = null;
     this.isAligning = null;
+    this.class = undefined;
   }
 
   getTail() {
@@ -197,13 +198,15 @@ class HalfEdge {
 
   getSignificantEndpoint() {
     const endpoints = this.getEndpoints();
-    const significantEndpoint =
-      endpoints.find(
-        (vertex) => vertex.significance === SIGNIFICANCE.S || vertex.significance === SIGNIFICANCE.T
-      ) || endpoints[Math.round(Math.random())];
-    if (significantEndpoint.significance === SIGNIFICANCE.I)
+    if (endpoints.find((p) => p.significance === SIGNIFICANCE.S))
+      return endpoints.find((p) => p.significance === SIGNIFICANCE.S);
+    else if (endpoints.find((p) => p.significance === SIGNIFICANCE.T))
+      return endpoints.find((p) => p.significance === SIGNIFICANCE.T);
+    else {
+      const significantEndpoint = endpoints[Math.round(Math.random())];
       significantEndpoint.significance = SIGNIFICANCE.T;
-    return significantEndpoint;
+      return significantEndpoint;
+    }
   }
 
   isDeviating() {
@@ -238,10 +241,7 @@ class HalfEdge {
   classify() {
     let classification;
 
-    if (this.twin.class) {
-      classification = this.twin.class;
-      return (this.class = classification);
-    }
+    if (this.class) return this.class;
 
     const significantEndpoint = this.getSignificantEndpoint();
     significantEndpoint.assignAngles();

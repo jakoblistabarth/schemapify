@@ -8,7 +8,7 @@ async function getJSON(path) {
 
 const tests = [
   // "assets/data/geodata/ne_110m_africa_admin0.json",
-  // "assets/data/geodata/AUT_adm1-simple.json",
+  "assets/data/geodata/AUT_adm1-simple.json",
   // "assets/data/geodata/AUT_adm1.json",
   // "assets/data/geodata/central-austria.json",
   // "assets/data/shapes/triangle.json",
@@ -17,7 +17,7 @@ const tests = [
   // "assets/data/shapes/enclave2.json",
   // "assets/data/shapes/triangle-hole.json",
   // "assets/data/shapes/2triangle-adjacent.json",
-  // "assets/data/shapes/square.json",
+  "assets/data/shapes/square.json",
   // "assets/data/shapes/square-islands.json",
   // "assets/data/shapes/square-hole.json",
   // "assets/data/shapes/square-hole-island.json",
@@ -29,7 +29,7 @@ const tests = [
   // "assets/data/shapes/2plgn-islands-holes.json",
   // "assets/data/shapes/3plgn.json",
   // "assets/data/shapes/3plgn-complex.json",
-  "assets/data/shapes/aligned-deviating.json",
+  // "assets/data/shapes/aligned-deviating.json",
   "assets/data/shapes/edge-cases.json",
 ];
 
