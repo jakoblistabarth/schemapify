@@ -124,14 +124,8 @@ class Dcel {
 
         points.forEach((tail: number[], idx: number) => {
           const head: number[] = points[(idx + 1) % points.length]; // TODO: make this idx more elegant?
-          const halfEdge = subdivision.makeHalfEdge(
-            new Vertex(tail[0], tail[1], subdivision),
-            new Vertex(head[0], head[1], subdivision)
-          );
-          const twinHalfEdge = subdivision.makeHalfEdge(
-            new Vertex(head[0], head[1], subdivision),
-            new Vertex(tail[0], tail[1], subdivision)
-          );
+          const halfEdge = subdivision.makeHalfEdge(tail, head);
+          const twinHalfEdge = subdivision.makeHalfEdge(head, tail);
           halfEdge.twin = twinHalfEdge;
           twinHalfEdge.twin = halfEdge;
         });
