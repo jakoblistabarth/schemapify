@@ -6,16 +6,18 @@
   "main": "index.js",
   "scripts": {
     "test": "jasmine",
-    "build": "tsc",
-    "watch-and-build": "tsc -p -w & nodemon -q -w dist dist/main.js",
-    "dev": "tsc -w & nodemon -q -w",
+    "type-check": "tsc -p ./ -w --noEmit",
+    "dev": "nodemon",
+    "build": "esbuild --bundle assets/main.ts --sourcemap --outfile=dist/main.bundle.js",
     "start": "browser-sync --config config/bs-config.js"
   },
   "nodemonConfig": {
     "ignore": [
       "spec/*",
       "dist/*"
-    ]
+    ],
+    "ext": "js,mjs,ts,json",
+    "exec": "npm run build"
   },
   "pre-commit": [
     "test"
