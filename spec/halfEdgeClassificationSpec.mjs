@@ -301,9 +301,9 @@ describe("classifyEdges() in a classification where all edges are classified and
   it("on simple test data", function () {
     const json = JSON.parse(readFileSync(resolve("assets/data/shapes/edge-cases.json"), "utf8"));
     const dcel = DCEL.fromGeoJSON(json);
-    const edgesWithoutClassification = dcel.halfEdges.filter(
-      (edge) => typeof edge.class === undefined
-    );
+    dcel.preProcess();
+    dcel.classify();
+    const edgesWithoutClassification = dcel.halfEdges.filter((edge) => edge.class === undefined);
     const edgesWithDivergingClasses = dcel.halfEdges.filter(
       (edge) => edge.class !== edge.twin.class
     );
@@ -317,9 +317,9 @@ describe("classifyEdges() in a classification where all edges are classified and
       readFileSync(resolve("assets/data/geodata/ne_110m_admin_0_countries.json"), "utf8")
     );
     const dcel = DCEL.fromGeoJSON(json);
-    const edgesWithoutClassification = dcel.halfEdges.filter(
-      (edge) => typeof edge.class === undefined
-    );
+    dcel.preProcess();
+    dcel.classify();
+    const edgesWithoutClassification = dcel.halfEdges.filter((edge) => edge.class === undefined);
     const edgesWithDivergingClasses = dcel.halfEdges.filter(
       (edge) => edge.class !== edge.twin.class
     );
