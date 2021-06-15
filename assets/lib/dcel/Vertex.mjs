@@ -5,7 +5,6 @@ import { crawlArray, getOccurrence } from "../utilities.mjs";
 export const SIGNIFICANCE = {
   S: "significant",
   I: "insignificant",
-  T: "treatedAsSignificant",
 };
 
 class Vertex extends Point {
@@ -101,7 +100,7 @@ class Vertex extends Point {
   }
 
   assignAngles() {
-    const edges = this.sortEdges(false);
+    const edges = this.sortEdges(false); // QUESTION: don't we need to sort them counterclockwise again?
     let anglesToAssign = [];
     const closestBounds = edges.map((edge) => {
       let direction;
@@ -109,10 +108,8 @@ class Vertex extends Point {
       const [lower, upper] = edge.getAssociatedSector()[0].getBounds();
       direction = edge.getAngle() - lower <= upper - edge.getAngle() ? lower : upper;
       direction = direction == Math.PI * 2 ? 0 : direction;
-
       return this.dcel.config.C.getAngles().indexOf(direction);
     });
-
     anglesToAssign = closestBounds;
 
     closestBounds.forEach((direction, idx) => {
@@ -131,7 +128,7 @@ class Vertex extends Point {
     });
 
     edges.forEach((edge, idx) => {
-      if (!edge.assignAngle) edge.assignedAngle = anglesToAssign[idx];
+      if (!edge.assignedAngle) edge.assignedAngle = anglesToAssign[idx];
     });
 
     return this.edges;

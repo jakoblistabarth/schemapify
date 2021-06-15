@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
-import { SIGNIFICANCE } from "./Vertex.mjs";
 import Point from "../Point.mjs";
+import { SIGNIFICANCE } from "./Vertex.mjs";
 
 export const EDGE_CLASSES = {
   AB: "alignedBasic",
@@ -196,19 +196,6 @@ class HalfEdge {
     }, []);
   }
 
-  getSignificantEndpoint() {
-    const endpoints = this.getEndpoints();
-    if (endpoints.find((p) => p.significance === SIGNIFICANCE.S))
-      return endpoints.find((p) => p.significance === SIGNIFICANCE.S);
-    else if (endpoints.find((p) => p.significance === SIGNIFICANCE.T))
-      return endpoints.find((p) => p.significance === SIGNIFICANCE.T);
-    else {
-      const significantEndpoint = endpoints[Math.round(Math.random())];
-      significantEndpoint.significance = SIGNIFICANCE.T;
-      return significantEndpoint;
-    }
-  }
-
   isDeviating() {
     const sectors = this.dcel.config.C.getSectors();
     //TODO: refactor isDeviating(), find better solution for last sector (idx=0) should be 8???
@@ -239,18 +226,21 @@ class HalfEdge {
   }
 
   classify() {
-    let classification;
+    this.getTail().assignAngles();
 
-    if (this.class) return this.class;
-
-    const significantEndpoint = this.getSignificantEndpoint();
-    significantEndpoint.assignAngles();
+    if (this.class) return;
+    if (
+      this.getTail().significance === SIGNIFICANCE.I &&
+      this.getHead().significance === SIGNIFICANCE.S
+    )
+      return;
 
     const sector = this.getAssociatedSector()[0];
-    const edges = significantEndpoint
+    const edges = this.getTail()
       .getEdgesInSector(sector)
       .filter((edge) => !edge.isAligned() && !edge.isDeviating());
 
+    let classification;
     if (this.isAligned()) {
       classification = this.isDeviating() ? EDGE_CLASSES.AD : EDGE_CLASSES.AB;
     } else if (this.isDeviating()) {

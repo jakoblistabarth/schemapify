@@ -1,5 +1,6 @@
 import Dcel from "./lib/dcel/Dcel.mjs";
 import config from "./schematization.config.mjs";
+import { SIGNIFICANCE } from "./lib/dcel/Vertex.mjs";
 
 async function getJSON(path) {
   const response = await fetch(path);
@@ -7,17 +8,18 @@ async function getJSON(path) {
 }
 
 const tests = [
+  // "assets/data/geodata/ne_110m_admin_0_countries.json",
   // "assets/data/geodata/ne_110m_africa_admin0.json",
-  "assets/data/geodata/AUT_adm1-simple.json",
+  // "assets/data/geodata/AUT_adm1-simple.json",
   // "assets/data/geodata/AUT_adm1.json",
   // "assets/data/geodata/central-austria.json",
   // "assets/data/shapes/triangle.json",
-  // "assets/data/shapes/triangle-unaligned.json",
+  "assets/data/shapes/triangle-unaligned.json",
   // "assets/data/shapes/enclave.json",
   // "assets/data/shapes/enclave2.json",
   // "assets/data/shapes/triangle-hole.json",
   // "assets/data/shapes/2triangle-adjacent.json",
-  "assets/data/shapes/square.json",
+  // "assets/data/shapes/square.json",
   // "assets/data/shapes/square-islands.json",
   // "assets/data/shapes/square-hole.json",
   // "assets/data/shapes/square-hole-island.json",
@@ -28,9 +30,9 @@ const tests = [
   // "assets/data/shapes/2plgn-islands-hole.json",
   // "assets/data/shapes/2plgn-islands-holes.json",
   // "assets/data/shapes/3plgn.json",
-  // "assets/data/shapes/3plgn-complex.json",
+  "assets/data/shapes/3plgn-complex.json",
   // "assets/data/shapes/aligned-deviating.json",
-  "assets/data/shapes/edge-cases.json",
+  // "assets/data/shapes/edge-cases.json",
 ];
 
 function calculateMapGrid(mapGridID) {
@@ -67,4 +69,12 @@ tests.forEach(async (test) => {
 
   dcel.log(name);
   dcel.toMap(name);
+
+  const unclassified = dcel.halfEdges.filter((e) => e.class === undefined);
+  console.log("unclassified edges:", unclassified.length);
+  const towardsSignificantEndpoint = dcel.halfEdges.filter(
+    (e) =>
+      e.getTail().significance === SIGNIFICANCE.I && e.getHead().significance === SIGNIFICANCE.S
+  );
+  console.log("pointing towards significant vertex:", towardsSignificantEndpoint.length);
 });

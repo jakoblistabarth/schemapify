@@ -72,21 +72,6 @@ describe("isDeviating()", function () {
   });
 });
 
-describe("getSignificantEndpoint()", function () {
-  let s;
-  beforeEach(function () {
-    s = createEdgeVertexSetup();
-  });
-
-  it("returns an significant endpoint if one is specified", function () {
-    expect(s.od53.getSignificantEndpoint()).toEqual(s.o);
-  });
-  it("returns randomly one of its endpoints if neither of them are significant", function () {
-    s.o.significance = false;
-    expect(s.od53.getSignificantEndpoint()).toBeInstanceOf(Vertex);
-  });
-});
-
 describe("Given the examples in the paper of buchin et al., directions are assigned, correctly on example", function () {
   let s;
   beforeEach(function () {
@@ -297,7 +282,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
   });
 });
 
-fdescribe("classifyEdges() in a classification where all edges are classified and a halfedge and its twin share the same class", function () {
+describe("classifyEdges() in a classification where all edges are classified and a halfedge and its twin share the same class", function () {
   it("on simple test data", function () {
     const json = JSON.parse(readFileSync(resolve("assets/data/shapes/edge-cases.json"), "utf8"));
     const dcel = DCEL.fromGeoJSON(json);

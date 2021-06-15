@@ -136,9 +136,9 @@ describe("getVertices()", function () {
       dcel.getVertices(SIGNIFICANCE.I).every((v) => v.significance === SIGNIFICANCE.I)
     ).toBeTruthy();
   });
-  it("returns vertices of type treatedAsSignificant if specified", function () {
+  it("returns vertices of type significant if specified", function () {
     expect(
-      dcel.getVertices(SIGNIFICANCE.T).every((v) => v.significance === SIGNIFICANCE.T)
+      dcel.getVertices(SIGNIFICANCE.S).every((v) => v.significance === SIGNIFICANCE.S)
     ).toBeTruthy();
   });
   it("returns all vertices if no type specified", function () {

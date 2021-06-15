@@ -269,8 +269,6 @@ class Dcel {
       if (tail.significance === SIGNIFICANCE.S && head.significance === SIGNIFICANCE.S) {
         const newPoint = edge.bisect().getHead();
         newPoint.significance = SIGNIFICANCE.I;
-      } else if (tail.significance === SIGNIFICANCE.I && head.significance === SIGNIFICANCE.I) {
-        edge.getSignificantEndpoint();
       }
     });
   }
@@ -278,11 +276,7 @@ class Dcel {
   classify() {
     this.classifyVertices();
 
-    this.getVertices(SIGNIFICANCE.S).forEach((v) => {
-      v.edges.forEach((e) => e.classify());
-    });
-
-    this.getVertices(SIGNIFICANCE.T).forEach((v) => {
+    this.getVertices().forEach((v) => {
       v.edges.forEach((e) => e.classify());
     });
   }
@@ -442,6 +436,8 @@ class Dcel {
           length: e.getLength(),
           sector: e.getAssociatedSector(),
           class: e.class,
+          assignedAngle: e.assignedAngle,
+          twinClass: e.twin.class,
           edge: `
               <span class="material-icons">rotate_left</span>
               ${e.uuid.substring(0, 5)} (${e.tail.x}/${e.tail.y})
@@ -494,19 +490,23 @@ class Dcel {
                   <span class="material-icons">arrow_forward</span>
                   (${head.x}/${head.y})
                 </td>
-                <td>Sectors: ${edge
-                  .getAssociatedSector()
-                  .map((s) => s.idx)
-                  .join(",")}</td>
+                <td>
+                  Sectors: ${edge
+                    .getAssociatedSector()
+                    .map((s) => s.idx)
+                    .join(",")}
+                </td>
+                <td>
+                  assignedAngle: ${edge.assignedAngle}
+                </td>
                 <td>${edge.class}</td>
               </tr>
             `;
           })
           .join("");
         return L.circleMarker(latlng, {
-          radius:
-            props.significance === SIGNIFICANCE.S || props.significance === SIGNIFICANCE.T ? 4 : 2,
-          fillColor: props.significance === SIGNIFICANCE.T ? "grey" : "white",
+          radius: props.significance === SIGNIFICANCE.S ? 4 : 2,
+          fillColor: props.significance === SIGNIFICANCE.S ? "white" : "grey",
           color: "black",
           weight: 2,
           opacity: 1,
@@ -565,10 +565,16 @@ class Dcel {
       `;
     });
 
+    function getEdgeColor(feature) {
+      if (!feature.properties.class) return "red";
+      else if (feature.properties.class !== feature.properties.twinClass) return "blue";
+      else return "black";
+    }
+
     const edgeLayer = L.geoJSON(this.edgesToGeoJSON(), {
       style: function (feature) {
         return {
-          color: !feature.properties.class ? "red" : "black",
+          color: getEdgeColor(feature),
           weight: !feature.properties.class ? 4 : 1,
           dashArray: feature.properties.incidentFaceType === "inner" ? "3,3" : "0",
         };
@@ -582,8 +588,11 @@ class Dcel {
           click: function (e) {
             const edge = e.target.feature;
             console.log(
-              `edge => length: ${edge.properties.length} sector: ${edge.properties.sector}`,
-              edge.properties.class
+              `edge => length: ${edge.properties.length} sector: ${edge.properties.sector.map(
+                (s) => s.idx
+              )}`,
+              edge.properties.class,
+              edge.properties.assignedAngle
             );
           },
         });
