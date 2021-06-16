@@ -1,7 +1,7 @@
-import DCEL from "../assets/lib/dcel/Dcel.mjs";
-import HalfEdge from "../assets/lib/dcel/HalfEdge.mjs";
-import Vertex from "../assets/lib/dcel/Vertex.mjs";
-import Point from "../assets/lib/Point.mjs";
+import DCEL from "../dist/cjs/lib/dcel/Dcel.js";
+import HalfEdge from "../dist/cjs/lib/dcel/HalfEdge.js";
+import Vertex from "../dist/cjs/lib/dcel/Vertex.js";
+import Point from "../dist/cjs/lib/Geometry/Point.js";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { getTestFiles } from "./test-helpers.mjs";

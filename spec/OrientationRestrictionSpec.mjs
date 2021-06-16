@@ -1,8 +1,7 @@
-import { crawlArray } from "../assets/lib/utilities.mjs";
-import Sector from "../assets/lib/orientation-restriction/Sector.mjs";
-import C from "../assets/lib/orientation-restriction/C.mjs";
 import { createEdgeVertexSetup } from "./test-helpers.mjs";
-import { SIGNIFICANCE } from "../assets/lib/dcel/Vertex.mjs";
+import { crawlArray } from "../dist/cjs/lib/utilities.js";
+import Sector from "../dist/cjs/lib/OrientationRestriction/Sector.js";
+import C from "../dist/cjs/lib/OrientationRestriction/C.js";
 
 describe("isAligned() works properly", function () {
   let s;

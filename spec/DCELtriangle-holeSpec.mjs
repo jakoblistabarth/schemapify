@@ -1,5 +1,5 @@
-import DCEL from "../assets/lib/dcel/Dcel.mjs";
-import Vertex from "../assets/lib/dcel/Vertex.mjs";
+import DCEL from "../dist/cjs/lib/dcel/Dcel.js";
+import Vertex from "../dist/cjs/lib/dcel/Vertex.js";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 

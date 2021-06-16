@@ -1,9 +1,8 @@
-import Dcel from "../assets/lib/dcel/Dcel.mjs";
-import C from "../assets/lib/orientation-restriction/C.mjs";
-import { EDGE_CLASSES } from "../assets/lib/dcel/HalfEdge.mjs";
-import Vertex from "../assets/lib/dcel/Vertex.mjs";
-import Point from "../assets/lib/Point.mjs";
-import Staircase from "../assets/lib/orientation-restriction/Staircase.mjs";
+import Dcel from "../dist/cjs/lib/dcel/Dcel.js";
+import C from "../dist/cjs/lib/OrientationRestriction/C.js";
+import Vertex from "../dist/cjs/lib/dcel/Vertex.js";
+import Point from "../dist/cjs/lib/Geometry/Point.js";
+import Staircase from "../dist/cjs/lib/OrientationRestriction/Staircase.js";
 
 describe("The Staircase class", function () {
   it("returns a Staircase region for an unaligned basic halfEdge", function () {

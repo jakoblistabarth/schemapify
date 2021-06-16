@@ -3,16 +3,14 @@
     "module": "ES2020",
     "target": "ES6",
     "moduleResolution": "node",
-    "baseUrl": ".",
+    "baseUrl": "./",
     "allowSyntheticDefaultImports": true,
     "lib": ["es2019", "dom"],
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
-    "outDir": "dist/",
-    // "outFile": "dist/main.js",
     "sourceMap": true
   },
-  "include": ["./assets/**/*"],
+  "include": [".././assets/**/*"],
   "exclude": ["**/*.spec.mjs"]
 }

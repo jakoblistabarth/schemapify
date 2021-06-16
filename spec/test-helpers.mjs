@@ -1,8 +1,7 @@
 import { readdirSync } from "fs";
-import Dcel from "../assets/lib/dcel/Dcel.mjs";
-import HalfEdge from "../assets/lib/dcel/HalfEdge.mjs";
-import Vertex from "../assets/lib/dcel/Vertex.mjs";
-import { SIGNIFICANCE } from "../assets/lib/dcel/Vertex.mjs";
+import Dcel from "../dist/cjs/lib/dcel/Dcel.js";
+import HalfEdge from "../dist/cjs/lib/dcel/HalfEdge.js";
+import Vertex from "../dist/cjs/lib/dcel/Vertex.js";
 
 export function getTestFiles(dir) {
   const filesInDir = readdirSync(dir, function (err, files) {

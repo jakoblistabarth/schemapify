@@ -1,9 +1,9 @@
-import Vertex from "../assets/lib/dcel/Vertex.mjs";
-import DCEL from "../assets/lib/dcel/Dcel.mjs";
+import Vertex from "../dist/cjs/lib/dcel/Vertex.js";
+import DCEL from "../dist/cjs/lib/dcel/Dcel.js";
 import { createEdgeVertexSetup } from "./test-helpers.mjs";
 import { readFileSync } from "fs";
 import { resolve } from "path";
-import C from "../assets/lib/orientation-restriction/C.mjs";
+import C from "../dist/cjs/lib/OrientationRestriction/C.js";
 
 describe("isDeviating()", function () {
   let s;

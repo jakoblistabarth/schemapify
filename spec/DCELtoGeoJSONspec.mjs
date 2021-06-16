@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
 import { getTestFiles } from "./test-helpers.mjs";
-import Dcel from "../assets/lib/dcel/Dcel.mjs";
+import Dcel from "../dist/cjs/lib/dcel/Dcel.js";
 import { hint } from "@mapbox/geojsonhint";
 
 describe("DCELtoGeoJSON creates a valid geoJSON of simple shapes", function () {

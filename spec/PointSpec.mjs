@@ -1,4 +1,4 @@
-import Point from "../assets/lib/Point.mjs";
+import Point from "../dist/cjs/lib/Geometry/Point.js";
 
 describe("distanceToPoint()", function () {
   it("returns the correct distance between 2 vertices", function () {

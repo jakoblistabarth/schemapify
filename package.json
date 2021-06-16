@@ -5,10 +5,12 @@
   "repository": "https://github.com/jakoblistabarth/area-preserving-polygon-schematization",
   "main": "index.js",
   "scripts": {
-    "test": "jasmine",
-    "type-check": "tsc -p ./ -w --noEmit",
+    "jasmine": "jasmine",
+    "test": "npm run test-build && run jasmine",
+    "type-check": "tsc -p config/tsconfig-base.json -w --noEmit",
     "dev": "nodemon",
-    "build": "esbuild --bundle assets/main.ts --sourcemap --outfile=dist/main.bundle.js",
+    "test-build": "tsc -p config/tsconfig-cjs.json",
+    "build": "esbuild --bundle assets/main.ts --sourcemap --outfile=dist/esm/main.bundle.js",
     "start": "browser-sync --config config/bs-config.js"
   },
   "nodemonConfig": {

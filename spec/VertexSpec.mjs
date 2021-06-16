@@ -1,8 +1,8 @@
 import { readFileSync } from "fs";
 import { resolve } from "path";
-import Vertex from "../assets/lib/dcel/Vertex.mjs";
-import HalfEdge from "../assets/lib/dcel/Halfedge.mjs";
-import DCEL from "../assets/lib/dcel/Dcel.mjs";
+import Vertex from "../dist/cjs/lib/dcel/Vertex.js";
+import HalfEdge from "../dist/cjs/lib/dcel/Halfedge.js";
+import DCEL from "../dist/cjs/lib/dcel/Dcel.js";
 import { getTestFiles } from "./test-helpers.mjs";
 
 describe("distanceToVertex()", function () {

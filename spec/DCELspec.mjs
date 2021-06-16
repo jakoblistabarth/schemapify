@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { getTestFiles } from "./test-helpers.mjs";
-import DCEL from "../assets/lib/dcel/Dcel.ts";
+import DCEL from "../dist/cjs/lib/dcel/Dcel.js";
 import { hint } from "@mapbox/geojsonhint";
 
 describe("fromGeoJSON() on geodata creates only complete cycles", function () {
