@@ -8,7 +8,7 @@ import { createGeoJSON, groupBy } from "../utilities.js";
 import * as geojson from "geojson";
 
 class Dcel {
-  vertices: Map<String, Vertex>;
+  vertices: Map<string, Vertex>;
   halfEdges: Array<HalfEdge>;
   faces: Array<Face>;
   featureProperties: geojson.GeoJsonProperties;
@@ -93,37 +93,34 @@ class Dcel {
       (feature: geojson.Feature) => feature.properties
     );
 
-    const polygons = geoJSON.features.reduce(
-      (acc: Array<geojson.Feature>, feature: geojson.Feature) => {
-        const multiPolygons =
-          feature.geometry.type !== "MultiPolygon" // TODO: check in e.g, parseGeoJSON()? if only polygons in Multipolygons
-            ? [feature.geometry.coordinates]
-            : feature.geometry.coordinates;
+    const polygons = geoJSON.features.reduce((acc: Vertex[][][], feature: geojson.Feature) => {
+      const multiPolygons =
+        feature.geometry.type !== "MultiPolygon" // TODO: check in e.g, parseGeoJSON()? if only polygons in Multipolygons
+          ? [feature.geometry.coordinates]
+          : feature.geometry.coordinates;
 
-        acc.push(
-          ...multiPolygons.map((polygon) =>
-            polygon.map((ring: Array<number[]>) => {
-              return ring.map((point: number[]) => {
-                return (
-                  subdivision.findVertex(point[0], point[1]) ||
-                  subdivision.makeVertex(point[0], point[1])
-                );
-              });
-            })
-          )
-        );
-        return acc;
-      },
-      []
-    );
+      acc.push(
+        ...multiPolygons.map((polygon) =>
+          polygon.map((ring: Array<number[]>) => {
+            return ring.map((point: number[]) => {
+              return (
+                subdivision.findVertex(point[0], point[1]) ||
+                subdivision.makeVertex(point[0], point[1])
+              );
+            });
+          })
+        )
+      );
+      return acc;
+    }, []);
 
-    polygons.forEach((polygon) =>
-      polygon.forEach((ring: number[][], idx: number) => {
+    polygons.forEach((polygon: Vertex[][]) =>
+      polygon.forEach((ring: Vertex[], idx: number) => {
         ring = idx > 0 ? ring.reverse() : ring; // sort clockwise ordered vertices of inner rings (geojson spec) counterclockwise
         const points = ring.slice(0, -1);
 
-        points.forEach((tail: number[], idx: number) => {
-          const head: number[] = points[(idx + 1) % points.length]; // TODO: make this idx more elegant?
+        points.forEach((tail: Vertex, idx: number) => {
+          const head: Vertex = points[(idx + 1) % points.length]; // TODO: make this idx more elegant?
           const halfEdge = subdivision.makeHalfEdge(tail, head);
           const twinHalfEdge = subdivision.makeHalfEdge(head, tail);
           halfEdge.twin = twinHalfEdge;
@@ -157,9 +154,10 @@ class Dcel {
 
       let outerRingFace: Face;
       multiPolygons.forEach((polygon) =>
-        polygon.forEach((ring, idx) => {
+        polygon.forEach((ring: number[][], idx: number) => {
           ring = idx > 0 ? ring.reverse() : ring;
           const [firstPoint, secondPoint] = ring;
+
           const edge = subdivision.halfEdges.find((e) => {
             return (
               e.tail.x === firstPoint[0] &&
@@ -313,7 +311,7 @@ class Dcel {
     this.simplify();
   }
 
-  log(name: String, verbose: Boolean = false): void {
+  log(name: string, verbose: boolean = false): void {
     if (!verbose) console.log("DCEL " + name, this);
     else {
       console.log("🡒 START DCEL:", this);
@@ -328,9 +326,8 @@ class Dcel {
     }
   }
 
-  toGeoJSON(name: string): geojson.FeatureCollection {
+  toGeoJSON(): geojson.GeoJSON {
     // copy faces, so that every face has only one FID
-    // console.log(this.getBoundedFaces());
     const flattenedFaces = this.getBoundedFaces().reduce((acc, f) => {
       f.FID.forEach((id, idx) => {
         let newFace = Object.assign(Object.create(Object.getPrototypeOf(f)), f); // clone the object
@@ -345,42 +342,45 @@ class Dcel {
     const groupByFID = groupBy("FID");
     const outerRingsByFID = groupByFID(outerRings);
 
-    const features = Object.entries(outerRingsByFID).map(([fid, feature]) => {
-      const featureProperties: geojson.GeoJsonProperties = this.featureProperties[fid];
-      let featureCoordinates: number[][][] = [];
-      let idx = 0;
-      feature.forEach((ring: Face) => {
-        const halfEdges = ring.getEdges();
-        const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
-        coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
-        featureCoordinates.push([coordinates]);
-        if (ring.innerEdges) {
-          const ringCoordinates: number[][] = [];
-          ring.innerEdges.forEach((innerEdge: HalfEdge) => {
-            const halfEdges: Array<HalfEdge> = innerEdge.getCycle(false); // go backwards to go counterclockwise also for holes
-            const coordinates: number[][] = halfEdges.map((e) => [e.tail.x, e.tail.y]);
-            coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
-            ringCoordinates.push(coordinates);
-          });
-          featureCoordinates[idx].push(...ringCoordinates);
-        }
-        idx++;
-      });
-      return {
-        type: "Feature",
-        geometry: {
-          type: "MultiPolygon",
-          coordinates: featureCoordinates,
-        },
-        properties: featureProperties,
-      };
-    });
+    const features = Object.values(outerRingsByFID).map(
+      (feature: Face[], idx: number): geojson.Feature => {
+        const featureProperties: geojson.GeoJsonProperties =
+          this.featureProperties[Object.keys(outerRingsByFID)[idx]];
+        let featureCoordinates: number[][][][] = [];
+        let ringIdx = 0;
+        feature.forEach((ring: Face) => {
+          const halfEdges = ring.getEdges();
+          const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
+          coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
+          featureCoordinates.push([coordinates]);
+          if (ring.innerEdges) {
+            const ringCoordinates: number[][][] = [];
+            ring.innerEdges.forEach((innerEdge: HalfEdge) => {
+              const halfEdges: Array<HalfEdge> = innerEdge.getCycle(false); // go backwards to go counterclockwise also for holes
+              const coordinates: number[][] = halfEdges.map((e) => [e.tail.x, e.tail.y]);
+              coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
+              ringCoordinates.push(coordinates);
+            });
+            featureCoordinates[ringIdx].push(...ringCoordinates);
+          }
+          ringIdx++;
+        });
+        return {
+          type: "Feature",
+          geometry: {
+            type: "MultiPolygon",
+            coordinates: featureCoordinates,
+          },
+          properties: featureProperties,
+        };
+      }
+    );
 
-    return createGeoJSON(features, name);
+    return createGeoJSON(features);
   }
 
-  verticesToGeoJSON(name: String): geojson.GeoJSON {
-    const vertexFeatures = [...this.vertices].map(([k, v]) => {
+  verticesToGeoJSON(): geojson.GeoJSON {
+    const vertexFeatures = [...this.vertices].map(([k, v]): geojson.Feature => {
       return {
         type: "Feature",
         geometry: {
@@ -395,11 +395,11 @@ class Dcel {
       };
     });
 
-    return createGeoJSON(vertexFeatures, name + "_vertices");
+    return createGeoJSON(vertexFeatures);
   }
 
-  facesToGeoJSON(name: String): geojson.GeoJSON {
-    const faceFeatures = this.getBoundedFaces().map((f) => {
+  facesToGeoJSON(): geojson.GeoJSON {
+    const faceFeatures = this.getBoundedFaces().map((f): geojson.Feature => {
       const halfEdges = f.getEdges();
       const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
       coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
@@ -417,11 +417,11 @@ class Dcel {
       };
     });
 
-    return createGeoJSON(faceFeatures, name + "_polygons");
+    return createGeoJSON(faceFeatures);
   }
 
-  edgesToGeoJSON(name: String): geojson.GeoJSON {
-    const edgeFeatures = this.getSimpleEdges().map((e) => {
+  edgesToGeoJSON(): geojson.GeoJSON {
+    const edgeFeatures = this.getSimpleEdges().map((e): geojson.Feature => {
       const a = e.tail;
       const b = e.twin.tail;
 
@@ -457,7 +457,7 @@ class Dcel {
       };
     });
 
-    return createGeoJSON(edgeFeatures, name + "_edges");
+    return createGeoJSON(edgeFeatures);
   }
 }
 

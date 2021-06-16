@@ -19,7 +19,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     });
   }
 
-  const vertexLayer = L.geoJSON(dcel.verticesToGeoJSON(name), {
+  const vertexLayer = L.geoJSON(dcel.verticesToGeoJSON(), {
     pointToLayer: function (feature, latlng) {
       const props = feature.properties;
       const v = feature.geometry.coordinates;
@@ -71,7 +71,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  const faceLayer = L.geoJSON(dcel.facesToGeoJSON(name), {
+  const faceLayer = L.geoJSON(dcel.facesToGeoJSON(), {
     style: function (feature) {
       return {
         color: "transparent",
@@ -106,7 +106,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
       `;
   });
 
-  const edgeLayer = L.geoJSON(dcel.edgesToGeoJSON(name), {
+  const edgeLayer = L.geoJSON(dcel.edgesToGeoJSON(), {
     style: function (feature) {
       return {
         color: "black",
@@ -136,7 +136,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
       `;
   });
 
-  const polygonLayer = L.geoJSON(dcel.toGeoJSON(name), {
+  const polygonLayer = L.geoJSON(dcel.toGeoJSON(), {
     style: function (feature) {
       return {
         color: "grey",
