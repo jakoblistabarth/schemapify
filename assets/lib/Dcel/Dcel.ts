@@ -94,8 +94,12 @@ class Dcel {
     );
 
     const polygons = geoJSON.features.reduce((acc: Vertex[][][], feature: geojson.Feature) => {
+      if (feature.geometry.type !== "Polygon" && feature.geometry.type !== "MultiPolygon") return;
+      // TODO: check in e.g, parseGeoJSON()? if only polygons or multipolygons in geojson
+      // TODO: add error-handling
+
       const multiPolygons =
-        feature.geometry.type !== "MultiPolygon" // TODO: check in e.g, parseGeoJSON()? if only polygons in Multipolygons
+        feature.geometry.type !== "MultiPolygon"
           ? [feature.geometry.coordinates]
           : feature.geometry.coordinates;
 
@@ -146,11 +150,15 @@ class Dcel {
 
     // For every cycle, allocate and assign a face structure.
     geoJSON.features.forEach((feature: geojson.Feature, idx: number) => {
+      if (feature.geometry.type !== "Polygon" && feature.geometry.type !== "MultiPolygon") return;
+      // TODO: check in e.g, parseGeoJSON()? if only polygons or  multipolygons in geojson
+      // TODO: add error handling
+
       const FID = idx;
       const multiPolygons =
         feature.geometry.type !== "MultiPolygon"
           ? [feature.geometry.coordinates]
-          : feature.geometry.coordinates; // TODO: check in e.g, parseGeoJSON()? if only polygons in Multipolygons
+          : feature.geometry.coordinates;
 
       let outerRingFace: Face;
       multiPolygons.forEach((polygon) =>
