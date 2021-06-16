@@ -1,3 +1,3 @@
 module.exports = {
-  files: ["index.html", "dist/*", "assets/main.css"],
+  files: ["index.html", "dist/esm/*", "assets/main.css"],
 };
