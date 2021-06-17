@@ -9,7 +9,7 @@
     "test": "npm run test-build && run jasmine",
     "type-check": "tsc -p config/tsconfig-base.json -w --noEmit",
     "dev": "nodemon",
-    "test-build": "tsc -p config/tsconfig-esm.json",
+    "test-build": "tsc -p config/tsconfig-cjs.json",
     "build": "esbuild --bundle assets/main.ts --sourcemap --outfile=dist/esm-bundle/main.bundle.js",
     "start": "browser-sync --config config/bs-config.js"
   },
