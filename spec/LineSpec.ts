@@ -1,5 +1,5 @@
-const Line = require("../dist/cjs/lib/Geometry/Line.js").default;
-const Point = require("../dist/cjs/lib/Geometry/Point.js").default;
+import Line from "../assets/lib/Geometry/Line.js";
+import Point from "../assets/lib/Geometry/Point.js";
 
 describe("getPointOnLine", function () {
   it("returns a 2 point on a vertical line", function () {

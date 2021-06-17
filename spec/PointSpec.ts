@@ -1,4 +1,4 @@
-const Point = require("../dist/cjs/lib/Geometry/Point.js").default;
+import Point from "../assets/lib/Geometry/Point";
 
 describe("distanceToPoint()", function () {
   it("returns the correct distance between 2 vertices", function () {
