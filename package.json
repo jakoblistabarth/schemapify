@@ -5,9 +5,10 @@
   "repository": "https://github.com/jakoblistabarth/area-preserving-polygon-schematization",
   "main": "index.js",
   "scripts": {
-    "test": "jasmine",
-    "build": "esbuild --bundle assets/main.js --sourcemap --outfile=dist/main.bundle.js",
+    "test": "jasmine-ts -P config/tsconfig-cjs.json",
+    "type-check": "tsc -p config/tsconfig-base.json -w --noEmit",
     "dev": "nodemon",
+    "build": "esbuild --bundle assets/main.ts --sourcemap --outfile=dist/esm-bundle/main.bundle.js",
     "start": "browser-sync --config config/bs-config.js"
   },
   "nodemonConfig": {
@@ -15,6 +16,7 @@
       "spec/*",
       "dist/*"
     ],
+    "ext": "js,mjs,ts,json",
     "exec": "npm run build"
   },
   "pre-commit": [
@@ -24,17 +26,24 @@
   "license": "ISC",
   "dependencies": {
     "@mapbox/geojsonhint": "^3.0.1",
+    "@types/jasmine": "^3.7.7",
+    "@types/node": "^15.12.2",
     "browser-sync": "^2.26.14",
     "esbuild": "^0.11.9",
     "graham_scan": "^1.0.4",
     "jasmine": "^3.7.0",
+    "jasmine-ts": "^0.4.0",
     "leaflet": "^1.7.1",
     "nodemon": "^2.0.7",
     "shpjs": "^3.6.3",
-    "turf": "^3.0.14",
+    "ts-node": "^10.0.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "pre-commit": "^1.2.2"
+    "@types/graham_scan": "^1.0.28",
+    "@types/leaflet": "^1.7.2",
+    "@types/uuid": "^8.3.0",
+    "pre-commit": "^1.2.2",
+    "typescript": "^4.3.2"
   }
 }
