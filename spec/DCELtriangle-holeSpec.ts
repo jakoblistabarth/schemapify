@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "../dist/cjs/lib/dcel/Dcel";
+import Dcel from "../assets/lib/dcel/Dcel";
 
 describe("A Dcel of a single triangle with one triangular hole", function () {
   let dcel;

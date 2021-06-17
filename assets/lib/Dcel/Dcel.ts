@@ -334,7 +334,7 @@ class Dcel {
     }
   }
 
-  toGeoJSON(): geojson.GeoJSON {
+  toGeoJSON(): geojson.FeatureCollection {
     // copy faces, so that every face has only one FID
     const flattenedFaces = this.getBoundedFaces().reduce((acc, f) => {
       f.FID.forEach((id, idx) => {

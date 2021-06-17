@@ -1,13 +1,13 @@
-const setup = require("./test-setup.js");
-const crawlArray = require("../dist/cjs/lib/utilities.js").crawlArray;
-const Sector = require("../dist/cjs/lib/OrientationRestriction/Sector.js").default;
-const C = require("../dist/cjs/lib/OrientationRestriction/C.js").default;
-const Significance = require("../dist/cjs/lib/dcel/Vertex.js").Significance;
+import { createEdgeVertexSetup } from "./test-setup";
+import { crawlArray } from "../assets/lib/utilities";
+import Sector from "../assets/lib/OrientationRestriction/Sector";
+import C from "../assets/lib/OrientationRestriction/C";
+import { Significance } from "../assets/lib/dcel/Vertex";
 
 describe("isAligned() works properly", function () {
   let s;
   beforeEach(function () {
-    s = setup.createEdgeVertexSetup();
+    s = createEdgeVertexSetup();
   });
 
   it("for an aligned edge in a rectilinear schematization.", function () {
@@ -77,7 +77,7 @@ describe("encloses()", function () {
 describe("getEdgesInSector()", function () {
   let s;
   beforeEach(function () {
-    s = setup.createEdgeVertexSetup();
+    s = createEdgeVertexSetup();
   });
 
   it("get correct edges in specified sector", function () {
@@ -94,7 +94,7 @@ describe("getEdgesInSector()", function () {
 describe("isSignficant()", function () {
   let s;
   beforeEach(function () {
-    s = setup.createEdgeVertexSetup();
+    s = createEdgeVertexSetup();
   });
 
   it("classifies a vertex correctly", function () {
@@ -137,7 +137,7 @@ describe("isSignficant()", function () {
 describe("the sector of edges incident to a vertex are correctly identified", function () {
   let s;
   beforeEach(function () {
-    s = setup.createEdgeVertexSetup();
+    s = createEdgeVertexSetup();
   });
 
   it("using getAssociatedSector() for C2", function () {

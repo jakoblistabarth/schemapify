@@ -8,7 +8,7 @@ export function getOccurrence(array: any[], value: string | number) {
   return array.filter((v) => v === value).length;
 }
 
-export function createGeoJSON(features: geojson.Feature[]): geojson.GeoJSON {
+export function createGeoJSON(features: geojson.Feature[]): geojson.FeatureCollection {
   return {
     type: "FeatureCollection",
     features: features,

@@ -1,15 +1,15 @@
 import fs from "fs";
 import path from "path";
-import setup from "./test-setup.js";
-import Dcel from "../dist/cjs/lib/dcel/Dcel";
-import Vertex from "../dist/cjs/lib/dcel/Vertex";
-import C from "../dist/cjs/lib/OrientationRestriction/C";
+import { createEdgeVertexSetup } from "./test-setup";
+import Dcel from "../assets/lib/dcel/Dcel";
+import Vertex from "../assets/lib/dcel/Vertex";
+import C from "../assets/lib/OrientationRestriction/C";
 
 describe("isDeviating()", function () {
   let s;
 
   beforeEach(function () {
-    s = setup.createEdgeVertexSetup();
+    s = createEdgeVertexSetup();
   });
 
   it("returns true for an deviating edge", function () {
@@ -76,7 +76,7 @@ describe("isDeviating()", function () {
 describe("getSignificantEndpoint()", function () {
   let s;
   beforeEach(function () {
-    s = setup.createEdgeVertexSetup();
+    s = createEdgeVertexSetup();
   });
 
   it("returns an significant endpoint if one is specified", function () {
@@ -91,7 +91,7 @@ describe("getSignificantEndpoint()", function () {
 describe("Given the examples in the paper of buchin et al., directions are assigned, correctly on example", function () {
   let s;
   beforeEach(function () {
-    s = setup.createEdgeVertexSetup();
+    s = createEdgeVertexSetup();
   });
 
   it("a", function () {
@@ -182,7 +182,7 @@ describe("Given the examples in the paper of buchin et al., directions are assig
 describe("Given the examples in the paper of buchin et al., classify() works as expected on example", function () {
   let s;
   beforeEach(function () {
-    s = setup.createEdgeVertexSetup();
+    s = createEdgeVertexSetup();
   });
 
   it("a", function () {

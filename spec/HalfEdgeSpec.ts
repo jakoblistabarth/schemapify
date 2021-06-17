@@ -1,17 +1,17 @@
 import fs from "fs";
 import path from "path";
-import setup from "./test-setup.js";
-import Dcel from "../dist/cjs/lib/dcel/Dcel";
-import HalfEdge from "../dist/cjs/lib/dcel/HalfEdge";
-import Vertex from "../dist/cjs/lib/dcel/Vertex";
-import Point from "../dist/cjs/lib/Geometry/Point";
+import { getTestFiles } from "./test-setup";
+import Dcel from "../assets/lib/dcel/Dcel";
+import HalfEdge from "../assets/lib/dcel/HalfEdge";
+import Vertex from "../assets/lib/dcel/Vertex";
+import Point from "../assets/lib/Geometry/Point";
 
 describe("getLength()", function () {
   it("returns the correct length for a single halfEdge", function () {
-    const a = new Vertex(0, 0);
-    const b = new Vertex(2, 0);
-    const edge = new HalfEdge(a);
-    edge.twin = new HalfEdge(b);
+    const a = new Vertex(0, 0, null);
+    const b = new Vertex(2, 0, null);
+    const edge = new HalfEdge(a, null);
+    edge.twin = new HalfEdge(b, null);
     edge.twin.twin = edge;
 
     expect(edge.getLength()).toEqual(2);
@@ -47,15 +47,15 @@ describe("getLength()", function () {
 
 describe("getMidpoint()", function () {
   it("returns the correct length", function () {
-    const a = new Vertex(0, 0);
-    const b = new Vertex(2, 0);
-    const edge = new HalfEdge(a);
-    edge.twin = new HalfEdge(b);
+    const a = new Vertex(0, 0, null);
+    const b = new Vertex(2, 0, null);
+    const edge = new HalfEdge(a, null);
+    edge.twin = new HalfEdge(b, null);
     edge.twin.twin = edge;
 
-    const c = new Vertex(0, 10);
-    const edge2 = new HalfEdge(a);
-    edge2.twin = new HalfEdge(c);
+    const c = new Vertex(0, 10, null);
+    const edge2 = new HalfEdge(a, null);
+    edge2.twin = new HalfEdge(c, null);
     edge2.twin.twin = edge2;
 
     expect(edge.getMidpoint()).toEqual(new Point(1, 0));
@@ -65,17 +65,17 @@ describe("getMidpoint()", function () {
 
 describe("distanceToEdge()", function () {
   it("returns the minimum distance between 2 edges", function () {
-    const a = new Vertex(0, 0);
-    const b = new Vertex(-10, 10);
-    const v = new Vertex(-1, -2);
-    const w = new Vertex(2, 1);
+    const a = new Vertex(0, 0, null);
+    const b = new Vertex(-10, 10, null);
+    const v = new Vertex(-1, -2, null);
+    const w = new Vertex(2, 1, null);
 
-    const ab = new HalfEdge(a);
-    ab.twin = new HalfEdge(b);
+    const ab = new HalfEdge(a, null);
+    ab.twin = new HalfEdge(b, null);
     ab.twin.twin = ab;
 
-    const vw = new HalfEdge(v);
-    vw.twin = new HalfEdge(w);
+    const vw = new HalfEdge(v, null);
+    vw.twin = new HalfEdge(w, null);
     vw.twin.twin = vw;
 
     expect(ab.distanceToEdge(vw)).toEqual(Math.sqrt(0.5));
@@ -85,26 +85,26 @@ describe("distanceToEdge()", function () {
 
 describe("getAngle()", function () {
   it("returns the correct angle", function () {
-    const center = new Vertex(0, 0);
+    const center = new Vertex(0, 0, null);
 
-    const headRight = new Vertex(4, 0);
-    const edgeRight = new HalfEdge(center);
-    edgeRight.twin = new HalfEdge(headRight);
+    const headRight = new Vertex(4, 0, null);
+    const edgeRight = new HalfEdge(center, null);
+    edgeRight.twin = new HalfEdge(headRight, null);
     edgeRight.twin.twin = edgeRight;
 
-    const headBottom = new Vertex(0, -1);
-    const edgeBottom = new HalfEdge(center);
-    edgeBottom.twin = new HalfEdge(headBottom);
+    const headBottom = new Vertex(0, -1, null);
+    const edgeBottom = new HalfEdge(center, null);
+    edgeBottom.twin = new HalfEdge(headBottom, null);
     edgeBottom.twin.twin = edgeBottom;
 
-    const headLeft = new Vertex(-20, 0);
-    const edgeLeft = new HalfEdge(center);
-    edgeLeft.twin = new HalfEdge(headLeft);
+    const headLeft = new Vertex(-20, 0, null);
+    const edgeLeft = new HalfEdge(center, null);
+    edgeLeft.twin = new HalfEdge(headLeft, null);
     edgeLeft.twin.twin = edgeLeft;
 
-    const headTop = new Vertex(0, 100);
-    const edgeTop = new HalfEdge(center);
-    edgeTop.twin = new HalfEdge(headTop);
+    const headTop = new Vertex(0, 100, null);
+    const edgeTop = new HalfEdge(center, null);
+    edgeTop.twin = new HalfEdge(headTop, null);
     edgeTop.twin.twin = edgeTop;
 
     expect(edgeRight.getAngle()).toBe(0);
@@ -138,7 +138,7 @@ describe("getCycle()", function () {
 
 describe("bisect() on geodata results in a Dcel", function () {
   const dir = "assets/data/geodata";
-  const testFiles = setup.getTestFiles(dir);
+  const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
     it(
@@ -164,7 +164,7 @@ describe("bisect() on geodata results in a Dcel", function () {
 
 describe("bisect() on simple shapes results in a Dcel", function () {
   const dir = "assets/data/shapes";
-  const testFiles = setup.getTestFiles(dir);
+  const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
     it(

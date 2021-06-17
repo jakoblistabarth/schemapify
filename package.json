@@ -5,9 +5,7 @@
   "repository": "https://github.com/jakoblistabarth/area-preserving-polygon-schematization",
   "main": "index.js",
   "scripts": {
-    "test-build": "tsc -p config/tsconfig-cjs.json",
-    "jasmine": "jasmine-ts -P config/tsconfig-cjs.json",
-    "test": "npm run test-build && run jasmine",
+    "test": "jasmine-ts -P config/tsconfig-cjs.json",
     "type-check": "tsc -p config/tsconfig-base.json -w --noEmit",
     "dev": "nodemon",
     "build": "esbuild --bundle assets/main.ts --sourcemap --outfile=dist/esm-bundle/main.bundle.js",
