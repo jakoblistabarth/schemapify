@@ -1,10 +1,11 @@
-import { readdirSync } from "fs";
-import Dcel from "../dist/cjs/lib/dcel/Dcel.js";
-import HalfEdge from "../dist/cjs/lib/dcel/HalfEdge.js";
-import Vertex from "../dist/cjs/lib/dcel/Vertex.js";
+const fs = require("fs");
+const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
+const HalfEdge = require("../dist/cjs/lib/dcel/HalfEdge.js").default;
+const Vertex = require("../dist/cjs/lib/dcel/Vertex.js").default;
+const Significance = require("../dist/cjs/lib/dcel/Vertex.js").Significance;
 
-export function getTestFiles(dir) {
-  const filesInDir = readdirSync(dir, function (err, files) {
+const getTestFiles = (dir) => {
+  const filesInDir = fs.readdirSync(dir, function (err, files) {
     if (err) {
       return console.log("Unable to scan directory: " + err);
     }
@@ -12,14 +13,14 @@ export function getTestFiles(dir) {
   });
 
   return filesInDir.filter((f) => f.substr(-5, f.length) === ".json");
-}
+};
 
-export function createEdgeVertexSetup() {
+const createEdgeVertexSetup = () => {
   const setup = {};
   setup.dcel = new Dcel();
 
   setup.o = new Vertex(0, 0, setup.dcel);
-  setup.o.significance = SIGNIFICANCE.S;
+  setup.o.significance = Significance.S;
 
   const destinations = {
     d0: new Vertex(4, 0, setup.dcel),
@@ -48,4 +49,7 @@ export function createEdgeVertexSetup() {
   });
 
   return setup;
-}
+};
+
+exports.getTestFiles = getTestFiles;
+exports.createEdgeVertexSetup = createEdgeVertexSetup;

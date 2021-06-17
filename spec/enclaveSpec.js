@@ -1,13 +1,15 @@
-import DCEL from "../dist/cjs/lib/dcel/Dcel.js";
-import { readFileSync } from "fs";
-import { resolve } from "path";
+const fs = require("fs");
+const path = require("path");
+const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
 
-describe("A DCEL of an simplified enclave model", function () {
+describe("A Dcel of an simplified enclave model", function () {
   let dcel;
 
   beforeEach(function () {
-    const polygon = JSON.parse(readFileSync(resolve("assets/data/shapes/enclave.json"), "utf8"));
-    dcel = DCEL.fromGeoJSON(polygon);
+    const polygon = JSON.parse(
+      fs.readFileSync(path.resolve("assets/data/shapes/enclave.json"), "utf8")
+    );
+    dcel = Dcel.fromGeoJSON(polygon);
   });
 
   it("has 1 unbounded face", function () {
@@ -24,12 +26,14 @@ describe("A DCEL of an simplified enclave model", function () {
   });
 });
 
-describe("A DCEL of an simplified enclave model (reversed order)", function () {
+describe("A Dcel of an simplified enclave model (reversed order)", function () {
   let dcel;
 
   beforeEach(function () {
-    const polygon = JSON.parse(readFileSync(resolve("assets/data/shapes/enclave2.json"), "utf8"));
-    dcel = DCEL.fromGeoJSON(polygon);
+    const polygon = JSON.parse(
+      fs.readFileSync(path.resolve("assets/data/shapes/enclave2.json"), "utf8")
+    );
+    dcel = Dcel.fromGeoJSON(polygon);
   });
 
   it("has 1 unbounded face", function () {

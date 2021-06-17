@@ -1,16 +1,17 @@
-import { createEdgeVertexSetup } from "./test-helpers.mjs";
-import { crawlArray } from "../dist/cjs/lib/utilities.js";
-import Sector from "../dist/cjs/lib/OrientationRestriction/Sector.js";
-import C from "../dist/cjs/lib/OrientationRestriction/C.js";
+const setup = require("./test-setup.js");
+const crawlArray = require("../dist/cjs/lib/utilities.js").crawlArray;
+const Sector = require("../dist/cjs/lib/OrientationRestriction/Sector.js").default;
+const C = require("../dist/cjs/lib/OrientationRestriction/C.js").default;
+const Significance = require("../dist/cjs/lib/dcel/Vertex.js").Significance;
 
 describe("isAligned() works properly", function () {
   let s;
   beforeEach(function () {
-    s = createEdgeVertexSetup();
+    s = setup.createEdgeVertexSetup();
   });
 
   it("for an aligned edge in a rectilinear schematization.", function () {
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od0.isAligned()).toBe(true);
     expect(s.od90.isAligned()).toBe(true);
     expect(s.od180.isAligned()).toBe(true);
@@ -18,7 +19,7 @@ describe("isAligned() works properly", function () {
   });
 
   it("for an aligned edge in an octilinear schematization.", function () {
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od0.isAligned()).toBe(true);
     expect(s.od90.isAligned()).toBe(true);
     expect(s.od180.isAligned()).toBe(true);
@@ -26,7 +27,7 @@ describe("isAligned() works properly", function () {
   });
 
   it("for an unaligned edge in a rectilinear schematization.", function () {
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od37.isAligned()).toBe(false);
     expect(s.od53.isAligned()).toBe(false);
     expect(s.od76.isAligned()).toBe(false);
@@ -35,7 +36,7 @@ describe("isAligned() works properly", function () {
   });
 
   it("for an unaligned edge in an octilinear schematization.", function () {
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od37.isAligned()).toBe(false);
     expect(s.od53.isAligned()).toBe(false);
     expect(s.od76.isAligned()).toBe(false);
@@ -76,7 +77,7 @@ describe("encloses()", function () {
 describe("getEdgesInSector()", function () {
   let s;
   beforeEach(function () {
-    s = createEdgeVertexSetup();
+    s = setup.createEdgeVertexSetup();
   });
 
   it("get correct edges in specified sector", function () {
@@ -93,54 +94,54 @@ describe("getEdgesInSector()", function () {
 describe("isSignficant()", function () {
   let s;
   beforeEach(function () {
-    s = createEdgeVertexSetup();
+    s = setup.createEdgeVertexSetup();
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od0, s.od90);
-    s.dcel.config = { C: new C(2) };
-    expect(s.o.isSignificant()).toBe(SIGNIFICANCE.I);
+    s.dcel.config = { c: new C(2) };
+    expect(s.o.isSignificant()).toBe(Significance.I);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od37, s.od284);
-    s.dcel.config = { C: new C(2) };
-    expect(s.o.isSignificant()).toBe(SIGNIFICANCE.S);
+    s.dcel.config = { c: new C(2) };
+    expect(s.o.isSignificant()).toBe(Significance.S);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od0, s.od180);
-    s.dcel.config = { C: new C(2) };
-    expect(s.o.isSignificant()).toBe(SIGNIFICANCE.I);
+    s.dcel.config = { c: new C(2) };
+    expect(s.o.isSignificant()).toBe(Significance.I);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od0, s.od37);
-    s.dcel.config = { C: new C(2) };
-    expect(s.o.isSignificant()).toBe(SIGNIFICANCE.S);
+    s.dcel.config = { c: new C(2) };
+    expect(s.o.isSignificant()).toBe(Significance.S);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.od104, s.od37);
-    s.dcel.config = { C: new C(2) };
-    expect(s.o.isSignificant()).toBe(SIGNIFICANCE.S);
+    s.dcel.config = { c: new C(2) };
+    expect(s.o.isSignificant()).toBe(Significance.S);
   });
 
   it("classifies a vertex with edges in disjoint sectors as not significant.", function () {
     s.o.edges.push(s.od217, s.od37);
-    s.dcel.config = { C: new C(2) };
-    expect(s.o.isSignificant()).toBe(SIGNIFICANCE.I);
+    s.dcel.config = { c: new C(2) };
+    expect(s.o.isSignificant()).toBe(Significance.I);
   });
 });
 
 describe("the sector of edges incident to a vertex are correctly identified", function () {
   let s;
   beforeEach(function () {
-    s = createEdgeVertexSetup();
+    s = setup.createEdgeVertexSetup();
   });
 
   it("using getAssociatedSector() for C2", function () {
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od0.getAssociatedSector()).toEqual([new C(2).getSector(0), new C(2).getSector(3)]);
     expect(s.od90.getAssociatedSector()).toEqual([new C(2).getSector(0), new C(2).getSector(1)]);
     expect(s.od180.getAssociatedSector()).toEqual([new C(2).getSector(1), new C(2).getSector(2)]);
@@ -148,7 +149,7 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
   });
 
   it("using getAssociatedSector() for C4", function () {
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od0.getAssociatedSector()).toEqual([new C(4).getSector(0), new C(4).getSector(7)]);
     expect(s.od90.getAssociatedSector()).toEqual([new C(4).getSector(1), new C(4).getSector(2)]);
     expect(s.od180.getAssociatedSector()).toEqual([new C(4).getSector(3), new C(4).getSector(4)]);
@@ -156,7 +157,7 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
   });
 
   it("using getAssociatedDirections() for C2", function () {
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od0.getAssociatedDirections()).toEqual([0]);
     expect(s.od90.getAssociatedDirections()).toEqual([Math.PI * 0.5]);
     expect(s.od180.getAssociatedDirections()).toEqual([Math.PI]);
@@ -166,7 +167,7 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
   });
 
   it("using getAssociatedDirections() for C4", function () {
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od0.getAssociatedDirections()).toEqual([0]);
     expect(s.od90.getAssociatedDirections()).toEqual([Math.PI * 0.5]);
     expect(s.od180.getAssociatedDirections()).toEqual([Math.PI]);

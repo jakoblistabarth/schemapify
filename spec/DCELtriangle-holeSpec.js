@@ -1,16 +1,16 @@
-import DCEL from "../dist/cjs/lib/dcel/Dcel.js";
-import Vertex from "../dist/cjs/lib/dcel/Vertex.js";
-import { readFileSync } from "fs";
-import { resolve } from "path";
+const fs = require("fs");
+const path = require("path");
+const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
+const Vertex = require("../dist/cjs/lib/dcel/Vertex.js").default;
 
-describe("A DCEL of a single triangle with one triangular hole", function () {
+describe("A Dcel of a single triangle with one triangular hole", function () {
   let dcel;
 
   beforeEach(function () {
     const polygon = JSON.parse(
-      readFileSync(resolve("assets/data/shapes/triangle-hole.json"), "utf8")
+      fs.readFileSync(path.resolve("assets/data/shapes/triangle-hole.json"), "utf8")
     );
-    dcel = DCEL.fromGeoJSON(polygon);
+    dcel = Dcel.fromGeoJSON(polygon);
   });
 
   it("has 1 unbounded face", function () {

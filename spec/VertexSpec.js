@@ -1,9 +1,9 @@
-import { readFileSync } from "fs";
-import { resolve } from "path";
-import Vertex from "../dist/cjs/lib/dcel/Vertex.js";
-import HalfEdge from "../dist/cjs/lib/dcel/Halfedge.js";
-import DCEL from "../dist/cjs/lib/dcel/Dcel.js";
-import { getTestFiles } from "./test-helpers.mjs";
+const fs = require("fs");
+const path = require("path");
+const Vertex = require("../dist/cjs/lib/dcel/Vertex.js").default;
+const HalfEdge = require("../dist/cjs/lib/dcel/Halfedge.js").default;
+const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
+const setup = require("./test-setup.js");
 
 describe("distanceToVertex()", function () {
   it("returns the correct distance between 2 vertices", function () {
@@ -68,11 +68,11 @@ describe("sortEdges()", function () {
 
   it("sorts outgoing edges of all vertices in clockwise order", function () {
     const dir = "assets/data/shapes";
-    const testFiles = getTestFiles(dir);
+    const testFiles = setup.getTestFiles(dir);
 
     testFiles.forEach((file) => {
-      const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-      let dcel = DCEL.fromGeoJSON(json);
+      const json = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
+      let dcel = Dcel.fromGeoJSON(json);
 
       dcel.vertices.forEach((vertex) => {
         const angles = vertex.edges.map((e) => e.getAngle());

@@ -1,5 +1,5 @@
-import ConvexHullGrahamScan from "graham_scan";
-import Point from "../dist/cjs/lib/Geometry/Point.js";
+const grahamScanConvexHull = require("graham_scan");
+const Point = require("../dist/cjs/lib/Geometry/Point.js").default;
 
 describe("ConvexHull()", function () {
   it("returns a convex hull on an array of point arrays", function () {
@@ -10,7 +10,7 @@ describe("ConvexHull()", function () {
       [0, 2],
       [1, 1],
     ];
-    const convexHull = new ConvexHullGrahamScan();
+    const convexHull = new grahamScanConvexHull();
     points.forEach((p) => {
       convexHull.addPoint(p[0], p[1]);
     });
@@ -28,7 +28,7 @@ describe("ConvexHull()", function () {
       new Point(0, 2),
       new Point(1, 1),
     ];
-    const convexHull = new ConvexHullGrahamScan();
+    const convexHull = new grahamScanConvexHull();
     points.forEach((p) => {
       convexHull.addPoint(p.x, p.y);
     });

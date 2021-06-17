@@ -1,5 +1,5 @@
-import Line from "../dist/cjs/lib/Geometry/Line.js";
-import Point from "../dist/cjs/lib/Geometry/Point.js";
+const Line = require("../dist/cjs/lib/Geometry/Line.js").default;
+const Point = require("../dist/cjs/lib/Geometry/Point.js").default;
 
 describe("getPointOnLine", function () {
   it("returns a 2 point on a vertical line", function () {
@@ -59,6 +59,6 @@ describe("intersectsLine()", function () {
     const a = new Line(new Point(0, 0), Math.PI * 0.5);
     const b = new Line(new Point(2, 2), Math.PI * 0.5);
 
-    expect(a.intersectsLine(b)).toBe(false);
+    expect(a.intersectsLine(b)).toBe(undefined);
   });
 });

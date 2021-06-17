@@ -1,73 +1,74 @@
-import Vertex from "../dist/cjs/lib/dcel/Vertex.js";
-import DCEL from "../dist/cjs/lib/dcel/Dcel.js";
-import { createEdgeVertexSetup } from "./test-helpers.mjs";
-import { readFileSync } from "fs";
-import { resolve } from "path";
-import C from "../dist/cjs/lib/OrientationRestriction/C.js";
+const fs = require("fs");
+const path = require("path");
+const setup = require("./test-setup.js");
+const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
+const Vertex = require("../dist/cjs/lib/dcel/Vertex.js").default;
+const C = require("../dist/cjs/lib/OrientationRestriction/C.js").default;
 
 describe("isDeviating()", function () {
   let s;
+
   beforeEach(function () {
-    s = createEdgeVertexSetup();
+    s = setup.createEdgeVertexSetup();
   });
 
   it("returns true for an deviating edge", function () {
     s.od53.assignedAngle = 2;
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od53.isDeviating()).toBe(true);
   });
 
   it("returns true for an deviating edge", function () {
     s.od53.assignedAngle = 3;
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od53.isDeviating()).toBe(true);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od53.isDeviating()).toBe(true);
   });
 
   it("returns false for a basic edge", function () {
     s.od53.assignedAngle = 1;
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od53.isDeviating()).toBe(false);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od53.isDeviating()).toBe(false);
   });
 
   it("returns false for a basic edge", function () {
     s.od333.assignedAngle = 0;
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od333.isDeviating()).toBe(false);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od333.isDeviating()).toBe(false);
   });
 
   it("returns false for a basic edge", function () {
     s.od53.assignedAngle = 0;
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od53.isDeviating()).toBe(false);
   });
 
   it("returns false for a for a basic aligned edge", function () {
     s.od90.assignedAngle = 1;
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od90.isDeviating()).toBe(false);
   });
 
   it("returns true for a for a deviating aligned edge", function () {
     s.od90.assignedAngle = 2;
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od90.isDeviating()).toBe(true);
   });
 
   it("returns false for a for a basic aligned edge", function () {
     s.od90.assignedAngle = 2;
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od90.isDeviating()).toBe(false);
   });
 
   it("returns false for a for a basic aligned edge", function () {
     s.od315.assignedAngle = 7;
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od315.isDeviating()).toBe(false);
   });
 });
@@ -75,7 +76,7 @@ describe("isDeviating()", function () {
 describe("getSignificantEndpoint()", function () {
   let s;
   beforeEach(function () {
-    s = createEdgeVertexSetup();
+    s = setup.createEdgeVertexSetup();
   });
 
   it("returns an significant endpoint if one is specified", function () {
@@ -90,90 +91,90 @@ describe("getSignificantEndpoint()", function () {
 describe("Given the examples in the paper of buchin et al., directions are assigned, correctly on example", function () {
   let s;
   beforeEach(function () {
-    s = createEdgeVertexSetup();
+    s = setup.createEdgeVertexSetup();
   });
 
   it("a", function () {
     s.o.edges.push(s.od53, s.od217);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([1, 2]);
   });
 
   it("b", function () {
     s.o.edges.push(s.od53, s.od180, s.od270);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([1, 2, 3]);
   });
 
   it("c", function () {
     s.o.edges.push(s.od37, s.od90, s.od143);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([0, 1, 2]);
   });
 
   it("d", function () {
     s.o.edges.push(s.od37, s.od76);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([0, 1]);
   });
 
   it("e", function () {
     s.o.edges.push(s.od37, s.od53, s.od76);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([0, 1, 2]);
   });
 
   it("f", function () {
     s.o.edges.push(s.od0, s.od37, s.od53, s.od76);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([3, 0, 1, 2]);
   });
 
   it("g", function () {
     s.o.edges.push(s.od315, s.od333, s.od53, s.od76);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([1, 2, 3, 0]);
   });
 
   it("h", function () {
     s.o.edges.push(s.od53, s.od217);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([1, 5]);
   });
 
   it("i", function () {
     s.o.edges.push(s.od53, s.od180, s.od270);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([1, 4, 6]);
   });
 
   it("j", function () {
     s.o.edges.push(s.od37, s.od90, s.od143);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([1, 2, 3]);
   });
 
   it("k", function () {
     s.o.edges.push(s.od37, s.od76);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([1, 2]);
   });
 
   it("l", function () {
     s.o.edges.push(s.od37, s.od53, s.od76);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([0, 1, 2]);
   });
 
   it("m", function () {
     s.o.edges.push(s.od0, s.od14, s.od53, s.od76);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([7, 0, 1, 2]);
   });
 
   it("n", function () {
     s.o.edges.push(s.od315, s.od333, s.od53, s.od76);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.o.assignAngles().map((edge) => edge.assignedAngle)).toEqual([1, 2, 7, 0]);
   });
 });
@@ -181,19 +182,19 @@ describe("Given the examples in the paper of buchin et al., directions are assig
 describe("Given the examples in the paper of buchin et al., classify() works as expected on example", function () {
   let s;
   beforeEach(function () {
-    s = createEdgeVertexSetup();
+    s = setup.createEdgeVertexSetup();
   });
 
   it("a", function () {
     s.o.edges.push(s.od53, s.od217);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od53.classify()).toBe("unalignedBasic");
     expect(s.od217.classify()).toBe("unalignedBasic");
   });
 
   it("b", function () {
     s.o.edges.push(s.od53, s.od180, s.od270);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od53.classify()).toBe("unalignedBasic");
     expect(s.od180.classify()).toBe("alignedBasic");
     expect(s.od270.classify()).toBe("alignedBasic");
@@ -201,7 +202,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("c", function () {
     s.o.edges.push(s.od37, s.od90, s.od104);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od37.classify()).toBe("unalignedBasic");
     expect(s.od90.classify()).toBe("alignedBasic");
     expect(s.od104.classify()).toBe("unalignedBasic");
@@ -209,14 +210,14 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("d", function () {
     s.o.edges.push(s.od37, s.od53);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od37.classify()).toBe("evading");
     expect(s.od53.classify()).toBe("evading");
   });
 
   it("e", function () {
     s.o.edges.push(s.od37, s.od53, s.od76);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od37.classify()).toBe("evading");
     expect(s.od53.classify()).toBe("evading");
     expect(s.od76.classify()).toBe("unalignedDeviating");
@@ -224,7 +225,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("f", function () {
     s.o.edges.push(s.od0, s.od37, s.od53, s.od76);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od0.classify()).toBe("alignedDeviating");
     expect(s.od37.classify()).toBe("evading");
     expect(s.od53.classify()).toBe("evading");
@@ -233,7 +234,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("g", function () {
     s.o.edges.push(s.od315, s.od333, s.od53, s.od76);
-    s.dcel.config = { C: new C(2) };
+    s.dcel.config = { c: new C(2) };
     expect(s.od315.classify()).toBe("evading");
     expect(s.od333.classify()).toBe("evading");
     expect(s.od53.classify()).toBe("unalignedBasic");
@@ -242,14 +243,14 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("h", function () {
     s.o.edges.push(s.od53, s.od217);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od53.classify()).toBe("unalignedBasic");
     expect(s.od217.classify()).toBe("unalignedBasic");
   });
 
   it("i", function () {
     s.o.edges.push(s.od53, s.od180, s.od270);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od53.classify()).toBe("unalignedBasic");
     expect(s.od180.classify()).toBe("alignedBasic");
     expect(s.od270.classify()).toBe("alignedBasic");
@@ -257,7 +258,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("j", function () {
     s.o.edges.push(s.od53, s.od90, s.od104);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od53.classify()).toBe("unalignedBasic");
     expect(s.od90.classify()).toBe("alignedBasic");
     expect(s.od104.classify()).toBe("unalignedBasic");
@@ -265,14 +266,14 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("k", function () {
     s.o.edges.push(s.od37, s.od53);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od37.classify()).toBe("unalignedBasic");
     expect(s.od53.classify()).toBe("unalignedBasic");
   });
 
   it("l", function () {
     s.o.edges.push(s.od37, s.od53, s.od76);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od37.classify()).toBe("unalignedBasic");
     expect(s.od53.classify()).toBe("evading");
     expect(s.od76.classify()).toBe("evading");
@@ -280,7 +281,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("m", function () {
     s.o.edges.push(s.od0, s.od14, s.od53, s.od76);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od0.classify()).toBe("alignedDeviating");
     expect(s.od14.classify()).toBe("unalignedBasic");
     expect(s.od53.classify()).toBe("evading");
@@ -289,7 +290,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("n", function () {
     s.o.edges.push(s.od315, s.od333, s.od53, s.od76);
-    s.dcel.config = { C: new C(4) };
+    s.dcel.config = { c: new C(4) };
     expect(s.od315.classify(s.c4)).toBe("alignedBasic");
     expect(s.od333.classify(s.c4)).toBe("unalignedBasic");
     expect(s.od53.classify(s.c4)).toBe("evading");
@@ -299,8 +300,10 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
 describe("classifyEdges() in a classification where all edges are classified and a halfedge and its twin share the same class", function () {
   it("on simple test data", function () {
-    const json = JSON.parse(readFileSync(resolve("assets/data/shapes/edge-cases.json"), "utf8"));
-    const dcel = DCEL.fromGeoJSON(json);
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("assets/data/shapes/edge-cases.json"), "utf8")
+    );
+    const dcel = Dcel.fromGeoJSON(json);
     const edgesWithoutClassification = dcel.halfEdges.filter(
       (edge) => typeof edge.class === undefined
     );
@@ -314,9 +317,9 @@ describe("classifyEdges() in a classification where all edges are classified and
 
   it("on geo data", function () {
     const json = JSON.parse(
-      readFileSync(resolve("assets/data/geodata/ne_110m_admin_0_countries.json"), "utf8")
+      fs.readFileSync(path.resolve("assets/data/geodata/ne_110m_admin_0_countries.json"), "utf8")
     );
-    const dcel = DCEL.fromGeoJSON(json);
+    const dcel = Dcel.fromGeoJSON(json);
     const edgesWithoutClassification = dcel.halfEdges.filter(
       (edge) => typeof edge.class === undefined
     );

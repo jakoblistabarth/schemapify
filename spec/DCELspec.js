@@ -1,16 +1,16 @@
-import { readFileSync } from "fs";
-import { resolve } from "path";
-import { getTestFiles } from "./test-helpers.mjs";
-import DCEL from "../dist/cjs/lib/dcel/Dcel.js";
-import { hint } from "@mapbox/geojsonhint";
+const fs = require("fs");
+const path = require("path");
+const gjh = require("@mapbox/geojsonhint");
+const setup = require("./test-setup.js");
+const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
 
 describe("fromGeoJSON() on geodata creates only complete cycles", function () {
   const dir = "assets/data/geodata";
-  const testFiles = getTestFiles(dir);
+  const testFiles = setup.getTestFiles(dir);
 
   testFiles.forEach((file) => {
-    const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-    const dcel = DCEL.fromGeoJSON(json);
+    const json = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
+    const dcel = Dcel.fromGeoJSON(json);
 
     const cycles = [];
     dcel.getBoundedFaces().forEach((f) => {
@@ -26,11 +26,11 @@ describe("fromGeoJSON() on geodata creates only complete cycles", function () {
 
 describe("fromGeoJSON() on simple shapes creates only complete cycles", function () {
   const dir = "assets/data/shapes";
-  const testFiles = getTestFiles(dir);
+  const testFiles = setup.getTestFiles(dir);
 
   testFiles.forEach((file) => {
-    const json = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-    const dcel = DCEL.fromGeoJSON(json);
+    const json = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
+    const dcel = Dcel.fromGeoJSON(json);
 
     const cycles = [];
     dcel.getBoundedFaces().forEach((f) => {
@@ -44,9 +44,11 @@ describe("fromGeoJSON() on simple shapes creates only complete cycles", function
   });
 });
 
-describe("A DCEL of 2 adjacent squares", function () {
-  const json = JSON.parse(readFileSync(resolve("assets/data/shapes/2plgn-adjacent.json"), "utf8"));
-  const dcel = DCEL.fromGeoJSON(json);
+describe("A Dcel of 2 adjacent squares", function () {
+  const json = JSON.parse(
+    fs.readFileSync(path.resolve("assets/data/shapes/2plgn-adjacent.json"), "utf8")
+  );
+  const dcel = Dcel.fromGeoJSON(json);
 
   it("has 1 unbounded face", function () {
     expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
@@ -73,9 +75,9 @@ describe("A DCEL of 2 adjacent squares", function () {
   });
 });
 
-describe("A DCEL of 3 adjacent squares", function () {
-  const json = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn.json"), "utf8"));
-  const dcel = DCEL.fromGeoJSON(json);
+describe("A Dcel of 3 adjacent squares", function () {
+  const json = JSON.parse(fs.readFileSync(path.resolve("assets/data/shapes/3plgn.json"), "utf8"));
+  const dcel = Dcel.fromGeoJSON(json);
 
   it("has 1 unbounded face", function () {
     expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
@@ -104,15 +106,19 @@ describe("A DCEL of 3 adjacent squares", function () {
 
 describe("getBbox()", function () {
   it("returns the correct boundingbox of a given dcel", function () {
-    const plgn1 = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
-    const plgn2 = JSON.parse(
-      readFileSync(resolve("assets/data/shapes/2plgn-adjacent.json"), "utf8")
+    const plgn1 = JSON.parse(
+      fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
     );
-    const plgn3 = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn.json"), "utf8"));
+    const plgn2 = JSON.parse(
+      fs.readFileSync(path.resolve("assets/data/shapes/2plgn-adjacent.json"), "utf8")
+    );
+    const plgn3 = JSON.parse(
+      fs.readFileSync(path.resolve("assets/data/shapes/3plgn.json"), "utf8")
+    );
 
-    let bboxPlgn1 = DCEL.fromGeoJSON(plgn1).getBbox();
-    let bboxPlgn2 = DCEL.fromGeoJSON(plgn2).getBbox();
-    let bboxPlgn3 = DCEL.fromGeoJSON(plgn3).getBbox();
+    let bboxPlgn1 = Dcel.fromGeoJSON(plgn1).getBbox();
+    let bboxPlgn2 = Dcel.fromGeoJSON(plgn2).getBbox();
+    let bboxPlgn3 = Dcel.fromGeoJSON(plgn3).getBbox();
 
     expect(bboxPlgn1).toEqual([0, 0, 2, 2]);
     expect(bboxPlgn2).toEqual([0, 0, 4, 2]);
@@ -122,27 +128,31 @@ describe("getBbox()", function () {
 
 describe("getDiameter()", function () {
   it("returns the correct diameter", function () {
-    const plgn1 = JSON.parse(readFileSync(resolve("assets/data/shapes/square.json"), "utf8"));
-    const plgn3 = JSON.parse(readFileSync(resolve("assets/data/shapes/3plgn.json"), "utf8"));
+    const plgn1 = JSON.parse(
+      fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
+    );
+    const plgn3 = JSON.parse(
+      fs.readFileSync(path.resolve("assets/data/shapes/3plgn.json"), "utf8")
+    );
 
-    expect(DCEL.fromGeoJSON(plgn1).getDiameter()).toBe(Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)));
-    expect(DCEL.fromGeoJSON(plgn3).getDiameter()).toBe(Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)));
+    expect(Dcel.fromGeoJSON(plgn1).getDiameter()).toBe(Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)));
+    expect(Dcel.fromGeoJSON(plgn3).getDiameter()).toBe(Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)));
   });
 });
 
 describe("classify() returns a result which can be turned into a valid geojson", function () {
   const dir = "assets/data/shapes";
-  const testFiles = getTestFiles(dir);
+  const testFiles = setup.getTestFiles(dir);
 
   testFiles.forEach((file) => {
     it("for the simple input " + file, function () {
-      const inputJson = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-      const dcel = DCEL.fromGeoJSON(inputJson);
+      const inputJson = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
+      const dcel = Dcel.fromGeoJSON(inputJson);
       dcel.preProcess();
       dcel.classify();
       const outputJson = dcel.toGeoJSON(file);
       const outputJsonPretty = JSON.stringify(outputJson, null, 4);
-      const errors = hint(outputJsonPretty);
+      const errors = gjh.hint(outputJsonPretty);
       if (errors.length > 0) console.log(errors);
       expect(errors.length).toBe(0);
       expect(inputJson.features.length).toBe(outputJson.features.length);
@@ -152,17 +162,17 @@ describe("classify() returns a result which can be turned into a valid geojson",
 
 describe("classify() returns a result which can be turned into a valid geojson", function () {
   const dir = "assets/data/geodata";
-  const testFiles = getTestFiles(dir);
+  const testFiles = setup.getTestFiles(dir);
 
   testFiles.forEach((file) => {
     it("for the geodata input " + file, function () {
-      const inputJson = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-      const dcel = DCEL.fromGeoJSON(inputJson);
+      const inputJson = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
+      const dcel = Dcel.fromGeoJSON(inputJson);
       dcel.preProcess();
       dcel.classify();
       const outputJson = dcel.toGeoJSON(file);
       const outputJsonPretty = JSON.stringify(outputJson, null, 4);
-      const errors = hint(outputJsonPretty);
+      const errors = gjh.hint(outputJsonPretty);
       if (errors.length > 0) console.log(errors);
       expect(errors.length).toBe(0);
       expect(inputJson.features.length).toBe(outputJson.features.length);
@@ -172,16 +182,16 @@ describe("classify() returns a result which can be turned into a valid geojson",
 
 xdescribe("schematize() returns a result which can be turned into a valid geojson", function () {
   const dir = "assets/data/geodata";
-  const testFiles = getTestFiles(dir);
+  const testFiles = setup.getTestFiles(dir);
 
   testFiles.forEach((file) => {
     it("for the geodata input " + file, function () {
-      const inputJson = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-      const dcel = DCEL.fromGeoJSON(inputJson);
+      const inputJson = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
+      const dcel = Dcel.fromGeoJSON(inputJson);
       dcel.schematize();
       const outputJson = dcel.toGeoJSON(file);
       const outputJsonPretty = JSON.stringify(outputJson, null, 4);
-      const errors = hint(outputJsonPretty);
+      const errors = gjh.hint(outputJsonPretty);
       if (errors.length > 0) console.log(errors);
       expect(errors.length).toBe(0);
       expect(inputJson.features.length).toBe(outputJson.features.length);
@@ -191,16 +201,16 @@ xdescribe("schematize() returns a result which can be turned into a valid geojso
 
 xdescribe("schematize() returns a result which can be turned into a valid geojson", function () {
   const dir = "assets/data/shapes";
-  const testFiles = getTestFiles(dir);
+  const testFiles = setup.getTestFiles(dir);
 
   testFiles.forEach((file) => {
     it("for the simple input " + file, function () {
-      const inputJson = JSON.parse(readFileSync(resolve(dir + "/" + file), "utf8"));
-      const dcel = DCEL.fromGeoJSON(inputJson);
+      const inputJson = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
+      const dcel = Dcel.fromGeoJSON(inputJson);
       dcel.schematize();
       const outputJson = dcel.toGeoJSON(file);
       const outputJsonPretty = JSON.stringify(outputJson, null, 4);
-      const errors = hint(outputJsonPretty);
+      const errors = gjh.hint(outputJsonPretty);
       if (errors.length > 0) console.log(errors);
       expect(errors.length).toBe(0);
       expect(inputJson.features.length).toBe(outputJson.features.length);

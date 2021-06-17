@@ -1,13 +1,14 @@
-import Dcel from "../dist/cjs/lib/dcel/Dcel.js";
-import C from "../dist/cjs/lib/OrientationRestriction/C.js";
-import Vertex from "../dist/cjs/lib/dcel/Vertex.js";
-import Point from "../dist/cjs/lib/Geometry/Point.js";
-import Staircase from "../dist/cjs/lib/OrientationRestriction/Staircase.js";
+const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
+const C = require("../dist/cjs/lib/OrientationRestriction/C.js").default;
+const Vertex = require("../dist/cjs/lib/dcel/Vertex.js").default;
+const Point = require("../dist/cjs/lib/Geometry/Point.js").default;
+const Staircase = require("../dist/cjs/lib/OrientationRestriction/Staircase.js").default;
+const EdgeClasses = require("../dist/cjs/lib/dcel/HalfEdge.js").EdgeClasses;
 
 describe("The Staircase class", function () {
   it("returns a Staircase region for an unaligned basic halfEdge", function () {
     const dcel = new Dcel();
-    dcel.config = { C: new C(2) };
+    dcel.config = { c: new C(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(2, 2, dcel);
@@ -15,7 +16,7 @@ describe("The Staircase class", function () {
     const twin = dcel.makeHalfEdge(d, o);
     edge.twin = twin;
     twin.twin = edge;
-    edge.class = EDGE_CLASSES.UB;
+    edge.class = EdgeClasses.UB;
 
     const staircase = new Staircase(edge);
     expect(staircase.region).toEqual([
@@ -28,7 +29,7 @@ describe("The Staircase class", function () {
 
   it("returns a Staircase region for an unaligned basic halfEdge", function () {
     const dcel = new Dcel();
-    dcel.config = { C: new C(2) };
+    dcel.config = { c: new C(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-2, -2, dcel);
@@ -36,9 +37,10 @@ describe("The Staircase class", function () {
     const twin = dcel.makeHalfEdge(d, o);
     edge.twin = twin;
     twin.twin = edge;
-    edge.class = EDGE_CLASSES.UB;
+    edge.class = EdgeClasses.UB;
 
     const staircase = new Staircase(edge);
+
     expect(staircase.region).toEqual([
       new Point(0, 0),
       new Point(-2, 0),
@@ -49,7 +51,7 @@ describe("The Staircase class", function () {
 
   it("returns a Staircase region for an unaligned basic halfEdge", function () {
     const dcel = new Dcel();
-    dcel.config = { C: new C(2) };
+    dcel.config = { c: new C(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, 2, dcel);
@@ -57,7 +59,7 @@ describe("The Staircase class", function () {
     const twin = dcel.makeHalfEdge(d, o);
     edge.twin = twin;
     twin.twin = edge;
-    edge.class = EDGE_CLASSES.UB;
+    edge.class = EdgeClasses.UB;
 
     const staircase = new Staircase(edge);
     expect(staircase.region).toEqual([
@@ -72,7 +74,7 @@ describe("The Staircase class", function () {
 describe("buildStaircaseAD", function () {
   it("returns a Staircase for an unaligned deviating halfEdge with 7 Vertices", function () {
     const dcel = new Dcel();
-    dcel.config = { C: new C(4) };
+    dcel.config = { c: new C(4) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 10, dcel);
@@ -80,7 +82,7 @@ describe("buildStaircaseAD", function () {
     const twin = dcel.makeHalfEdge(d, o);
     edge.twin = twin;
     twin.twin = edge;
-    edge.class = EDGE_CLASSES.AD;
+    edge.class = EdgeClasses.AD;
     edge.assignedAngle = 0;
     edge.dcel = dcel;
 
