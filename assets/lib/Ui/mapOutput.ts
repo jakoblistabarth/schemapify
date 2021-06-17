@@ -87,23 +87,25 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
           faceLayer.resetStyle(e.target);
         },
       });
+      const properties = Object.entries(feature.properties)
+        .map((elem) => {
+          if (elem[0] !== "uuid")
+            return `<tr><td>${elem[0]}</td> <td><strong>${elem[1]}</strong></td></tr>`;
+        })
+        .join("");
+
+      layer.bindTooltip(
+        `
+          <table>
+            <tr>
+                <td><span class="material-icons">highlight_alt</span> </td>
+                <td><strong>${feature.properties.uuid.substring(0, 5)}</strong></td>
+            </tr>
+            ${properties}
+          </table>
+        `
+      );
     },
-  }).bindTooltip(function (layer: L.Layer) {
-    const properties = Object.entries(layer.feature.properties)
-      .map((elem) => {
-        if (elem[0] !== "uuid")
-          return `<tr><td>${elem[0]}</td> <td><strong>${elem[1]}</strong></td></tr>`;
-      })
-      .join("");
-    return `
-        <table>
-          <tr>
-              <td><span class="material-icons">highlight_alt</span> </td>
-              <td><strong>${layer.feature.properties.uuid.substring(0, 5)}</strong></td>
-          </tr>
-          ${properties}
-        </table>
-      `;
   });
 
   const edgeLayer = L.geoJSON(dcel.edgesToGeoJSON(), {
@@ -128,12 +130,13 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
           );
         },
       });
+      layer.bindTooltip(
+        `
+          ${feature.properties.edge}<br>
+          ${feature.properties.twin}
+        `
+      );
     },
-  }).bindTooltip(function (layer) {
-    return `
-        ${layer.feature.properties.edge}<br>
-        ${layer.feature.properties.twin}
-      `;
   });
 
   const polygonLayer = L.geoJSON(dcel.toGeoJSON(), {
@@ -157,25 +160,27 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
           polygonLayer.resetStyle(e.target);
         },
       });
-    },
-  }).bindTooltip(function (layer) {
-    const properties = Object.entries(layer.feature.properties)
-      .slice(0, 5)
-      .map((elem) => {
-        return `
+
+      const properties = Object.entries(feature.properties)
+        .slice(0, 5)
+        .map((elem) => {
+          return `
             <tr>
               <td>${elem[0]}</td>
               <td><strong>${elem[1]}</strong></td>
             </tr>
           `;
-      })
-      .join("");
+        })
+        .join("");
 
-    return `
-        <table>
-          ${properties}
-        </table>
-      `;
+      layer.bindTooltip(
+        `
+          <table>
+            ${properties}
+          </table>
+        `
+      );
+    },
   });
 
   faceLayer.addTo(DCELMap);
