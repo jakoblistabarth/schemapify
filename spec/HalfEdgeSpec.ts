@@ -1,10 +1,10 @@
-const fs = require("fs");
-const path = require("path");
-const setup = require("./test-setup.js");
-const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
-const HalfEdge = require("../dist/cjs/lib/dcel/HalfEdge.js").default;
-const Vertex = require("../dist/cjs/lib/dcel/Vertex.js").default;
-const Point = require("../dist/cjs/lib/Geometry/Point.js").default;
+import fs from "fs";
+import path from "path";
+import setup from "./test-setup.js";
+import Dcel from "../dist/cjs/lib/dcel/Dcel";
+import HalfEdge from "../dist/cjs/lib/dcel/HalfEdge";
+import Vertex from "../dist/cjs/lib/dcel/Vertex";
+import Point from "../dist/cjs/lib/Geometry/Point";
 
 describe("getLength()", function () {
   it("returns the correct length for a single halfEdge", function () {
@@ -155,6 +155,7 @@ describe("bisect() on geodata results in a Dcel", function () {
           cycles.push(f.getEdges(false));
         });
 
+        // @ts-ignore // FIXME: ".nothing" feels wrong here
         expect(cycles).nothing();
       }
     );
@@ -180,6 +181,7 @@ describe("bisect() on simple shapes results in a Dcel", function () {
           cycles.push(f.getEdges(false));
         });
 
+        // @ts-ignore // FIXME: ".nothing" feels wrong here
         expect(cycles).nothing();
       }
     );

@@ -1,14 +1,15 @@
-const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
-const C = require("../dist/cjs/lib/OrientationRestriction/C.js").default;
-const Vertex = require("../dist/cjs/lib/dcel/Vertex.js").default;
-const Point = require("../dist/cjs/lib/Geometry/Point.js").default;
-const Staircase = require("../dist/cjs/lib/OrientationRestriction/Staircase.js").default;
-const EdgeClasses = require("../dist/cjs/lib/dcel/HalfEdge.js").EdgeClasses;
+import Dcel from "../assets/lib/Dcel/Dcel";
+import C from "../assets/lib/OrientationRestriction/C";
+import { EdgeClasses } from "../assets/lib/Dcel/HalfEdge";
+import Vertex from "../assets/lib/Dcel/Vertex";
+import Staircase from "../assets/lib/OrientationRestriction/Staircase";
+import Point from "../assets/lib/Geometry/Point";
+import config from "../assets/schematization.config";
 
 describe("The Staircase class", function () {
   it("returns a Staircase region for an unaligned basic halfEdge", function () {
     const dcel = new Dcel();
-    dcel.config = { c: new C(2) };
+    dcel.config = config;
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(2, 2, dcel);
@@ -29,7 +30,7 @@ describe("The Staircase class", function () {
 
   it("returns a Staircase region for an unaligned basic halfEdge", function () {
     const dcel = new Dcel();
-    dcel.config = { c: new C(2) };
+    dcel.config = config;
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-2, -2, dcel);
@@ -51,7 +52,7 @@ describe("The Staircase class", function () {
 
   it("returns a Staircase region for an unaligned basic halfEdge", function () {
     const dcel = new Dcel();
-    dcel.config = { c: new C(2) };
+    dcel.config = config;
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, 2, dcel);
@@ -74,7 +75,7 @@ describe("The Staircase class", function () {
 describe("buildStaircaseAD", function () {
   it("returns a Staircase for an unaligned deviating halfEdge with 7 Vertices", function () {
     const dcel = new Dcel();
-    dcel.config = { c: new C(4) };
+    dcel.config = { ...config, c: new C(4) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 10, dcel);

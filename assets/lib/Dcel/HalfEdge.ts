@@ -1,9 +1,9 @@
 import { v4 as uuid } from "uuid";
-import Vertex, { Significance } from "./Vertex.js";
-import Point from "../Geometry/Point.js";
-import Dcel from "./Dcel.js";
-import Face from "./Face.js";
-import Sector from "../OrientationRestriction/Sector.js";
+import Vertex, { Significance } from "./Vertex";
+import Point from "../Geometry/Point";
+import Dcel from "./Dcel";
+import Face from "./Face";
+import Sector from "../OrientationRestriction/Sector";
 
 export enum EdgeClasses {
   AB = "alignedBasic",

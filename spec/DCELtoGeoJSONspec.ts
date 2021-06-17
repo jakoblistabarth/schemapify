@@ -1,8 +1,8 @@
-const fs = require("fs");
-const path = require("path");
-const gjh = require("@mapbox/geojsonhint");
-const setup = require("./test-setup.js");
-const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
+import fs from "fs";
+import path from "path";
+import gjh from "@mapbox/geojsonhint";
+import setup from "./test-setup.js";
+import Dcel from "../dist/cjs/lib/dcel/Dcel";
 
 describe("DCELtoGeoJSON creates a valid geoJSON of simple shapes", function () {
   const dir = "assets/data/shapes";

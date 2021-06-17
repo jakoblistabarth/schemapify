@@ -1,5 +1,5 @@
-import Line from "../assets/lib/Geometry/Line.js";
-import Point from "../assets/lib/Geometry/Point.js";
+import Line from "../assets/lib/Geometry/Line";
+import Point from "../assets/lib/Geometry/Point";
 
 describe("getPointOnLine", function () {
   it("returns a 2 point on a vertical line", function () {

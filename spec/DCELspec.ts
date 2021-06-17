@@ -1,8 +1,8 @@
-const fs = require("fs");
-const path = require("path");
-const gjh = require("@mapbox/geojsonhint");
-const setup = require("./test-setup.js");
-const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
+import fs from "fs";
+import path from "path";
+import gjh from "@mapbox/geojsonhint";
+import setup from "./test-setup.js";
+import Dcel from "../dist/cjs/lib/dcel/Dcel";
 
 describe("fromGeoJSON() on geodata creates only complete cycles", function () {
   const dir = "assets/data/geodata";
@@ -19,6 +19,7 @@ describe("fromGeoJSON() on geodata creates only complete cycles", function () {
     });
 
     it("with complete cycles for all faces in counter-clockwise and clockwise direction", function () {
+      // @ts-ignore // FIXME: ".nothing" feels wrong here
       expect(cycles).nothing();
     });
   });
@@ -39,6 +40,7 @@ describe("fromGeoJSON() on simple shapes creates only complete cycles", function
     });
 
     it("with complete cycles for all faces in counter-clockwise and clockwise direction", function () {
+      // @ts-ignore // FIXME: ".nothing" feels wrong here
       expect(cycles).nothing();
     });
   });

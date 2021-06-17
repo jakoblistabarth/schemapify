@@ -1,7 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
-const Vertex = require("../dist/cjs/lib/dcel/Vertex.js").default;
+import fs from "fs";
+import path from "path";
+import Dcel from "../dist/cjs/lib/dcel/Dcel";
 
 describe("A Dcel of a single triangle with one triangular hole", function () {
   let dcel;

@@ -1,6 +1,6 @@
-import HalfEdge, { EdgeClasses } from "../Dcel/HalfEdge.js";
-import Point from "../Geometry/Point.js";
-import Line from "../Geometry/Line.js";
+import HalfEdge, { EdgeClasses } from "../Dcel/HalfEdge";
+import Point from "../Geometry/Point";
+import Line from "../Geometry/Line";
 import ConvexHullGrahamScan from "graham_scan";
 
 class Staircase {

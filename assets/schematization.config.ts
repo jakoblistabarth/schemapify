@@ -1,5 +1,5 @@
-import C from "./lib/OrientationRestriction/C.js";
-import Cirregular from "./lib/OrientationRestriction/Cirregular.js";
+import C from "./lib/OrientationRestriction/C";
+import Cirregular from "./lib/OrientationRestriction/Cirregular";
 
 export interface Config {
   lambda: number;

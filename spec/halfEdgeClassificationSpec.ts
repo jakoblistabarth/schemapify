@@ -1,9 +1,9 @@
-const fs = require("fs");
-const path = require("path");
-const setup = require("./test-setup.js");
-const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
-const Vertex = require("../dist/cjs/lib/dcel/Vertex.js").default;
-const C = require("../dist/cjs/lib/OrientationRestriction/C.js").default;
+import fs from "fs";
+import path from "path";
+import setup from "./test-setup.js";
+import Dcel from "../dist/cjs/lib/dcel/Dcel";
+import Vertex from "../dist/cjs/lib/dcel/Vertex";
+import C from "../dist/cjs/lib/OrientationRestriction/C";
 
 describe("isDeviating()", function () {
   let s;

@@ -1,4 +1,4 @@
-import Sector from "./Sector.js";
+import Sector from "./Sector";
 
 class C {
   beta: number;

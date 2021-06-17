@@ -1,7 +1,7 @@
-const fs = require("fs");
-const path = require("path");
-const setup = require("./test-setup.js");
-const gjh = require("@mapbox/geojsonhint");
+import fs from "fs";
+import path from "path";
+import setup from "./test-setup";
+import gjh from "@mapbox/geojsonhint";
 
 describe("validate geoJSON file (simple shape)", function () {
   const dir = "assets/data/shapes";

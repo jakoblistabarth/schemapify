@@ -1,9 +1,9 @@
 import { v4 as uuid } from "uuid";
-import Sector from "../OrientationRestriction/Sector.js";
-import Point from "../Geometry/Point.js";
-import { crawlArray, getOccurrence } from "../utilities.js";
-import Dcel from "./Dcel.js";
-import HalfEdge from "./HalfEdge.js";
+import Sector from "../OrientationRestriction/Sector";
+import Point from "../Geometry/Point";
+import { crawlArray, getOccurrence } from "../utilities";
+import Dcel from "./Dcel";
+import HalfEdge from "./HalfEdge";
 
 export enum Significance {
   S = "significant",

@@ -4,6 +4,7 @@
     "module": "CommonJS",
     "outDir": "../dist/cjs/",
     "declaration": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "noImplicitAny": false // FIXME: This is bad ;)
   }
 }

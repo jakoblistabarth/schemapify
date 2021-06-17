@@ -1,10 +1,10 @@
-import config, { Config } from "../../schematization.config.js";
-import Vertex, { Significance } from "./Vertex.js";
-import Point from "../Geometry/Point.js";
-import HalfEdge, { EdgeClasses } from "./HalfEdge.js";
-import Face from "./Face.js";
-import Staircase from "../OrientationRestriction/Staircase.js";
-import { createGeoJSON, groupBy } from "../utilities.js";
+import config, { Config } from "../../schematization.config";
+import Vertex, { Significance } from "./Vertex";
+import Point from "../Geometry/Point";
+import HalfEdge, { EdgeClasses } from "./HalfEdge";
+import Face from "./Face";
+import Staircase from "../OrientationRestriction/Staircase";
+import { createGeoJSON, groupBy } from "../utilities";
 import * as geojson from "geojson";
 
 class Dcel {

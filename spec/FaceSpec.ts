@@ -1,6 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-const Dcel = require("../dist/cjs/lib/dcel/Dcel.js").default;
+import fs from "fs";
+import path from "path";
+import Dcel from "../dist/cjs/lib/dcel/Dcel";
 
 describe("replaceOuterRingEdge()", function () {
   let innerRing;

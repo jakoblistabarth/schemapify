@@ -1,5 +1,5 @@
-const grahamScanConvexHull = require("graham_scan");
-const Point = require("../dist/cjs/lib/Geometry/Point.js").default;
+import grahamScanConvexHull from "graham_scan";
+import Point from "../assets/lib/Geometry/Point";
 
 describe("ConvexHull()", function () {
   it("returns a convex hull on an array of point arrays", function () {
