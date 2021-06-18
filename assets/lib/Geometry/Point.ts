@@ -27,6 +27,34 @@ class Point {
     const dy = angle === Math.PI * 1 || angle === Math.PI * 2 ? 0 : Math.sin(angle);
     return new Point(this.x + distance * dx, this.y + distance * dy);
   }
+
+  // as seen @ https://algorithmtutor.com/Computational-Geometry/Check-if-a-point-is-inside-a-polygon/
+  // Works only on convex Polygons!!
+  isInPolygon(polygon: Point[]) {
+    const A: number[] = [];
+    const B: number[] = [];
+    const C: number[] = [];
+
+    polygon.forEach((p, idx) => {
+      const p1 = p;
+      const p2 = polygon[(idx + 1) % polygon.length];
+
+      // calculate A, B and C
+      const a = -(p2.y - p1.y);
+      const b = p2.x - p1.x;
+      const c = -(a * p1.x + b * p1.y);
+
+      A.push(a);
+      B.push(b);
+      C.push(c);
+    });
+
+    const D = A.map((elem, idx) => elem * this.x + B[idx] * this.y + C[idx]);
+
+    const t1 = D.every((d) => d >= 0);
+    const t2 = D.every((d) => d <= 0);
+    return t1 || t2;
+  }
 }
 
 export default Point;
