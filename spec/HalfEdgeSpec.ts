@@ -1,10 +1,10 @@
 import fs from "fs";
 import path from "path";
-import { getTestFiles } from "./test-setup";
 import Dcel from "../assets/lib/dcel/Dcel";
 import HalfEdge from "../assets/lib/dcel/HalfEdge";
 import Vertex from "../assets/lib/dcel/Vertex";
 import Point from "../assets/lib/Geometry/Point";
+import { getTestFiles } from "./test-setup";
 
 describe("getLength()", function () {
   it("returns the correct length for a single halfEdge", function () {
@@ -149,7 +149,7 @@ describe("bisect() on geodata results in a Dcel", function () {
         const dcel = Dcel.fromGeoJSON(json);
         dcel.preProcess();
 
-        const cycles = [];
+        const cycles: HalfEdge[][] = [];
         dcel.getBoundedFaces().forEach((f) => {
           cycles.push(f.getEdges());
           cycles.push(f.getEdges(false));
@@ -175,7 +175,7 @@ describe("bisect() on simple shapes results in a Dcel", function () {
         const dcel = Dcel.fromGeoJSON(json);
         dcel.getBoundedFaces().forEach((f) => f.getEdges().forEach((e) => e.bisect()));
 
-        const cycles = [];
+        const cycles: HalfEdge[][] = [];
         dcel.getBoundedFaces().forEach((f) => {
           cycles.push(f.getEdges());
           cycles.push(f.getEdges(false));

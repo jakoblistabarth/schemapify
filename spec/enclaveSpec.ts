@@ -3,7 +3,7 @@ import path from "path";
 import Dcel from "../assets/lib/dcel/Dcel";
 
 describe("A Dcel of an simplified enclave model", function () {
-  let dcel;
+  let dcel: Dcel;
 
   beforeEach(function () {
     const polygon = JSON.parse(
@@ -21,13 +21,13 @@ describe("A Dcel of an simplified enclave model", function () {
   });
 
   it("returns a geojson with 2 polygons", function () {
-    const json = dcel.toGeoJSON("enclave");
+    const json = dcel.toGeoJSON();
     expect(json.features.length).toBe(2);
   });
 });
 
 describe("A Dcel of an simplified enclave model (reversed order)", function () {
-  let dcel;
+  let dcel: Dcel;
 
   beforeEach(function () {
     const polygon = JSON.parse(
@@ -45,7 +45,7 @@ describe("A Dcel of an simplified enclave model (reversed order)", function () {
   });
 
   it("returns a geojson with 2 polygons", function () {
-    const json = dcel.toGeoJSON("enclave2");
+    const json = dcel.toGeoJSON();
     expect(json.features.length).toBe(2);
   });
 });

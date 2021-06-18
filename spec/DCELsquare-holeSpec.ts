@@ -3,7 +3,7 @@ import path from "path";
 import Dcel from "../assets/lib/dcel/Dcel";
 
 describe("A Dcel of a single square with one square hole", function () {
-  let dcel;
+  let dcel: Dcel;
 
   beforeEach(function () {
     const polygon = JSON.parse(
