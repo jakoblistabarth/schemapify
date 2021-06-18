@@ -62,6 +62,11 @@ class Dcel {
     return this.faces.find((f) => f.edge === null);
   }
 
+  getHalfEdges(edgeClass?: EdgeClasses) {
+    if (edgeClass) return this.halfEdges.filter((e) => e.class === edgeClass);
+    return this.halfEdges;
+  }
+
   getVertices(significance?: Significance) {
     if (significance)
       return [...this.vertices]
@@ -277,13 +282,13 @@ class Dcel {
   }
 
   classifyVertices(): void {
-    this.vertices.forEach((v) => {
+    this.getVertices().forEach((v) => {
       v.isSignificant();
     });
 
     this.getSimpleEdges().forEach((edge) => {
       const [tail, head] = edge.getEndpoints();
-      if (tail.isSignificant() === Significance.S && head.isSignificant() === Significance.S) {
+      if (tail.significance === Significance.S && head.significance === Significance.S) {
         const newPoint = edge.bisect().getHead();
         newPoint.significance = Significance.I;
       }
@@ -292,28 +297,23 @@ class Dcel {
 
   classify(): void {
     this.classifyVertices();
-
-    this.getVertices().forEach((v) => {
-      v.edges.forEach((e) => e.classify());
-    });
+    this.halfEdges.forEach((e) => e.classify());
   }
 
   edgesToStaircases() {
-    for (let idx in this.halfEdges) {
-      const edge = this.halfEdges[idx];
-      if (edge.class === EdgeClasses.AD) {
-        console.log(edge);
-        // TODO: remove when other staircase implemented
-        const stepPoints = new Staircase(edge).points.slice(1, -1);
-        let edgeToSplit: HalfEdge = edge;
-        for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
-      }
-    }
+    const ADs = this.getHalfEdges(EdgeClasses.AD).filter(
+      (edge) => edge.getSignificantVertex() === edge.getTail()
+    );
+    ADs.forEach((edge) => {
+      const stepPoints = new Staircase(edge).points.slice(1, -1);
+      let edgeToSplit: HalfEdge = edge;
+      for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
+    });
   }
 
   constrainAngles(): void {
     this.classify();
-    // this.edgesToStaircases();
+    this.edgesToStaircases();
   }
 
   simplify(): Dcel {

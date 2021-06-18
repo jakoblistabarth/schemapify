@@ -288,11 +288,17 @@ describe("classifyEdges() in a classification where all edges are classified and
       fs.readFileSync(path.resolve("assets/data/shapes/edge-cases.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
+    dcel.preProcess();
+    dcel.classify();
+    const edgesWithoutAssignedAngles = dcel.halfEdges.filter(
+      (edge) => edge.assignedAngle === undefined
+    );
     const edgesWithoutClassification = dcel.halfEdges.filter((edge) => edge.class === undefined);
     const edgesWithDivergingClasses = dcel.halfEdges.filter(
       (edge) => edge.class !== edge.twin.class
     );
 
+    expect(edgesWithoutAssignedAngles.length).toBe(0);
     expect(edgesWithDivergingClasses.length).toBe(0);
     expect(edgesWithoutClassification.length).toBe(0);
   });
@@ -302,11 +308,17 @@ describe("classifyEdges() in a classification where all edges are classified and
       fs.readFileSync(path.resolve("assets/data/geodata/ne_110m_admin_0_countries.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
+    dcel.preProcess();
+    dcel.classify();
+    const edgesWithoutAssignedAngles = dcel.halfEdges.filter(
+      (edge) => edge.assignedAngle === undefined
+    );
     const edgesWithoutClassification = dcel.halfEdges.filter((edge) => edge.class === undefined);
     const edgesWithDivergingClasses = dcel.halfEdges.filter(
       (edge) => edge.class !== edge.twin.class
     );
 
+    expect(edgesWithoutAssignedAngles.length).toBe(0);
     expect(edgesWithDivergingClasses.length).toBe(0);
     expect(edgesWithoutClassification.length).toBe(0);
   });

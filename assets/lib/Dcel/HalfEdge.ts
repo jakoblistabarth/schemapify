@@ -33,9 +33,9 @@ class HalfEdge {
     this.face = null;
     this.prev = null;
     this.next = null;
-    this.assignedAngle = null;
-    this.isAligning = null;
-    this.class = undefined;
+    this.assignedAngle;
+    this.isAligning;
+    this.class;
   }
 
   getTail(): Vertex {
@@ -48,6 +48,11 @@ class HalfEdge {
 
   getEndpoints(): Array<Vertex> {
     return [this.getTail(), this.getHead()];
+  }
+
+  getSignificantVertex(): Vertex | undefined {
+    const endPoints = this.getEndpoints();
+    return endPoints.find((v) => v.significance === Significance.S);
   }
 
   getCycle(forwards: boolean = true): Array<HalfEdge> {
@@ -242,15 +247,12 @@ class HalfEdge {
   classify(): EdgeClasses {
     this.getTail().assignAngles();
 
-    if (this.class) return;
-    if (
-      this.getTail().significance === Significance.I &&
-      this.getHead().significance === Significance.S
-    )
-      return;
+    if (this.class) return; // do not overwrite classification
+    if (this.getHead().significance === Significance.S) return; // do not classify a HalfEdge which has a significant head
 
     const sector = this.getAssociatedSector()[0];
-    const edges = this.getTail()
+    const significantVertex = this.getSignificantVertex() || this.getTail();
+    const edges = significantVertex
       .getEdgesInSector(sector)
       .filter((edge) => !edge.isAligned() && !edge.isDeviating());
 
