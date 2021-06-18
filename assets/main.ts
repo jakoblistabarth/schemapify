@@ -1,7 +1,8 @@
-import Dcel from "./lib/Dcel/Dcel.js";
-import config from "./schematization.config.js";
-import { getMapFrom } from "./lib/Ui/mapOutput.js";
-import { drawC } from "./lib/Ui/cOutput.js";
+import Dcel from "./lib/Dcel/Dcel";
+import config from "./schematization.config";
+import { getMapFrom } from "./lib/Ui/mapOutput";
+import { drawC } from "./lib/Ui/cOutput";
+import { Significance } from "./lib/Dcel/Vertex";
 
 async function getJSON(path: string) {
   const response = await fetch(path);
@@ -9,6 +10,7 @@ async function getJSON(path: string) {
 }
 
 const tests = [
+  // "assets/data/geodata/ne_110m_admin_0_countries.json",
   // "assets/data/geodata/ne_110m_africa_admin0.json",
   // "assets/data/geodata/AUT_adm1-simple.json",
   // "assets/data/geodata/AUT_adm1.json",

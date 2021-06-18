@@ -2,8 +2,9 @@ import fs from "fs";
 import path from "path";
 import { hint } from "@mapbox/geojsonhint";
 import { getTestFiles } from "./test-setup";
-import Dcel from "../assets/lib/dcel/Dcel";
-import Face from "../assets/lib/dcel/Face";
+import Dcel from "../assets/lib/Dcel/Dcel";
+import Face from "../assets/lib/Dcel/Face";
+import { Significance } from "../assets/lib/Dcel/Vertex";
 
 describe("A Dcel of 2 adjacent squares", function () {
   const json = JSON.parse(
@@ -84,6 +85,33 @@ describe("getBbox()", function () {
     expect(bboxPlgn1).toEqual([0, 0, 2, 2]);
     expect(bboxPlgn2).toEqual([0, 0, 4, 2]);
     expect(bboxPlgn3).toEqual([0, 0, 2, 2]);
+  });
+});
+
+describe("getVertices()", function () {
+  let dcel: Dcel;
+
+  beforeEach(function () {
+    const polygon = JSON.parse(
+      fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
+    );
+    dcel = Dcel.fromGeoJSON(polygon);
+    dcel.preProcess();
+    dcel.classify();
+  });
+
+  it("returns vertices of type insignificant if specified", function () {
+    expect(
+      dcel.getVertices(Significance.I).every((v) => v.significance === Significance.I)
+    ).toBeTruthy();
+  });
+  it("returns vertices of type significant if specified", function () {
+    expect(
+      dcel.getVertices(Significance.S).every((v) => v.significance === Significance.S)
+    ).toBeTruthy();
+  });
+  it("returns all vertices if no type specified", function () {
+    expect(dcel.getVertices().length).toBe([...dcel.vertices].length);
   });
 });
 

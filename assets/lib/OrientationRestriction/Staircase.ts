@@ -78,6 +78,8 @@ class Staircase {
     const d2 = edge.getAngle();
     const d1Opposite = (d1 + Math.PI) % (Math.PI * 2);
 
+    // console.log(edge.getTail().xy(), d1, d2, edge.assignedAngle);
+
     const points = [];
 
     const tail = edge.getTail();

@@ -8,7 +8,6 @@ import HalfEdge from "./HalfEdge";
 export enum Significance {
   S = "significant",
   I = "insignificant",
-  T = "treatedAsSignificant",
 }
 
 class Vertex extends Point {
@@ -120,7 +119,6 @@ class Vertex extends Point {
 
       return this.dcel.config.c.getAngles().indexOf(direction);
     });
-
     anglesToAssign = closestBounds;
 
     closestBounds.forEach((direction, idx) => {
@@ -138,7 +136,9 @@ class Vertex extends Point {
       }
     });
 
-    edges.forEach((edge, idx) => (edge.assignedAngle = anglesToAssign[idx]));
+    edges.forEach((edge, idx) => {
+      if (!edge.assignedAngle) edge.assignedAngle = anglesToAssign[idx];
+    });
 
     return this.edges;
   }

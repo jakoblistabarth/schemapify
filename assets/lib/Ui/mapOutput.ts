@@ -45,9 +45,8 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
         })
         .join("");
       return L.circleMarker(latlng, {
-        radius:
-          props.significance === Significance.S || props.significance === Significance.T ? 4 : 2,
-        fillColor: props.significance === Significance.T ? "grey" : "white",
+        radius: props.significance === Significance.S ? 4 : 2,
+        fillColor: props.significance === Significance.I ? "grey" : "white",
         color: "black",
         weight: 2,
         opacity: 1,
@@ -111,8 +110,8 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
   const edgeLayer = L.geoJSON(dcel.edgesToGeoJSON(), {
     style: function (feature) {
       return {
-        color: "black",
-        weight: 1,
+        color: feature.properties.class ? "black" : "red",
+        weight: feature.properties.class ? 1 : 4,
         dashArray: feature.properties.incidentFaceType === "inner" ? "3,3" : "0",
       };
     },

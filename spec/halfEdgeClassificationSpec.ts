@@ -71,18 +71,19 @@ describe("isDeviating()", function () {
   });
 });
 
-describe("getSignificantEndpoint()", function () {
+describe("getSignificantVertex()", function () {
   let s: TestSetup;
   beforeEach(function () {
     s = createEdgeVertexSetup();
   });
 
   it("returns an significant endpoint if one is specified", function () {
-    expect(s.directions.od53.getSignificantEndpoint()).toEqual(s.o);
+    const significantVertex = s.directions.od53.getSignificantVertex();
+    expect(significantVertex.significance).toEqual(Significance.S);
   });
-  it("returns randomly one of its endpoints if neither of them are significant", function () {
+  it("returns null if none of its endpoints are significant", function () {
     s.o.significance = Significance.I;
-    expect(s.directions.od53.getSignificantEndpoint()).toBeInstanceOf(Vertex);
+    expect(s.directions.od53.getSignificantVertex()).toBeUndefined();
   });
 });
 
@@ -302,13 +303,17 @@ describe("classifyEdges() in a classification where all edges are classified and
       fs.readFileSync(path.resolve("assets/data/shapes/edge-cases.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const edgesWithoutClassification = dcel.halfEdges.filter(
-      (edge) => typeof edge.class === undefined
+    dcel.preProcess();
+    dcel.classify();
+    const edgesWithoutAssignedAngles = dcel.halfEdges.filter(
+      (edge) => edge.assignedAngle === undefined
     );
+    const edgesWithoutClassification = dcel.halfEdges.filter((edge) => edge.class === undefined);
     const edgesWithDivergingClasses = dcel.halfEdges.filter(
       (edge) => edge.class !== edge.twin.class
     );
 
+    expect(edgesWithoutAssignedAngles.length).toBe(0);
     expect(edgesWithDivergingClasses.length).toBe(0);
     expect(edgesWithoutClassification.length).toBe(0);
   });
@@ -318,13 +323,17 @@ describe("classifyEdges() in a classification where all edges are classified and
       fs.readFileSync(path.resolve("assets/data/geodata/ne_110m_admin_0_countries.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const edgesWithoutClassification = dcel.halfEdges.filter(
-      (edge) => typeof edge.class === undefined
+    dcel.preProcess();
+    dcel.classify();
+    const edgesWithoutAssignedAngles = dcel.halfEdges.filter(
+      (edge) => edge.assignedAngle === undefined
     );
+    const edgesWithoutClassification = dcel.halfEdges.filter((edge) => edge.class === undefined);
     const edgesWithDivergingClasses = dcel.halfEdges.filter(
       (edge) => edge.class !== edge.twin.class
     );
 
+    expect(edgesWithoutAssignedAngles.length).toBe(0);
     expect(edgesWithDivergingClasses.length).toBe(0);
     expect(edgesWithoutClassification.length).toBe(0);
   });

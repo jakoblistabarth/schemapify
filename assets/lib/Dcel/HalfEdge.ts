@@ -33,8 +33,9 @@ class HalfEdge {
     this.face = null;
     this.prev = null;
     this.next = null;
-    this.assignedAngle = null;
-    this.isAligning = null;
+    this.assignedAngle;
+    this.isAligning;
+    this.class;
   }
 
   getTail(): Vertex {
@@ -47,6 +48,11 @@ class HalfEdge {
 
   getEndpoints(): Array<Vertex> {
     return [this.getTail(), this.getHead()];
+  }
+
+  getSignificantVertex(): Vertex | undefined {
+    const endPoints = this.getEndpoints();
+    return endPoints.find((v) => v.significance === Significance.S);
   }
 
   getCycle(forwards: boolean = true): Array<HalfEdge> {
@@ -209,17 +215,6 @@ class HalfEdge {
     }, []);
   }
 
-  getSignificantEndpoint(): Vertex {
-    const endpoints = this.getEndpoints();
-    const significantEndpoint =
-      endpoints.find(
-        (vertex) => vertex.significance === Significance.S || vertex.significance === Significance.T
-      ) || endpoints[Math.round(Math.random())];
-    if (significantEndpoint.significance === Significance.I)
-      significantEndpoint.significance = Significance.T;
-    return significantEndpoint;
-  }
-
   isDeviating(): boolean {
     const sectors = this.dcel.config.c.getSectors();
     //TODO: refactor isDeviating(), find better solution for last sector (idx=0) should be 8???
@@ -250,21 +245,18 @@ class HalfEdge {
   }
 
   classify(): EdgeClasses {
-    let classification;
+    this.getTail().assignAngles();
 
-    if (this.twin.class) {
-      classification = this.twin.class;
-      return (this.class = classification);
-    }
-
-    const significantEndpoint = this.getSignificantEndpoint();
-    significantEndpoint.assignAngles();
+    if (this.class) return; // do not overwrite classification
+    if (this.getHead().significance === Significance.S) return; // do not classify a HalfEdge which has a significant head
 
     const sector = this.getAssociatedSector()[0];
-    const edges = significantEndpoint
+    const significantVertex = this.getSignificantVertex() || this.getTail();
+    const edges = significantVertex
       .getEdgesInSector(sector)
       .filter((edge) => !edge.isAligned() && !edge.isDeviating());
 
+    let classification: EdgeClasses;
     if (this.isAligned()) {
       classification = this.isDeviating() ? EdgeClasses.AD : EdgeClasses.AB;
     } else if (this.isDeviating()) {

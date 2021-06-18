@@ -62,7 +62,20 @@ class Dcel {
     return this.faces.find((f) => f.edge === null);
   }
 
-  getSimpleEdges(): Array<HalfEdge> {
+  getHalfEdges(edgeClass?: EdgeClasses) {
+    if (edgeClass) return this.halfEdges.filter((e) => e.class === edgeClass);
+    return this.halfEdges;
+  }
+
+  getVertices(significance?: Significance) {
+    if (significance)
+      return [...this.vertices]
+        .filter(([k, v]) => v.significance === significance)
+        .map(([k, v]) => v);
+    return [...this.vertices].map(([k, v]) => v);
+  }
+
+  getSimpleEdges() {
     // FIXME: confusing for map output: sometimes clockwise/counterclockwise assignment in map output wrong
     let simpleEdges: Array<HalfEdge> = [];
     this.getBoundedFaces().forEach((f) => {
@@ -269,12 +282,13 @@ class Dcel {
   }
 
   classifyVertices(): void {
-    this.vertices.forEach((v) => {
+    this.getVertices().forEach((v) => {
       v.isSignificant();
     });
+
     this.getSimpleEdges().forEach((edge) => {
-      const [head, tail] = edge.getEndpoints();
-      if (head.isSignificant() === Significance.S && tail.isSignificant() === Significance.S) {
+      const [tail, head] = edge.getEndpoints();
+      if (tail.significance === Significance.S && head.significance === Significance.S) {
         const newPoint = edge.bisect().getHead();
         newPoint.significance = Significance.I;
       }
@@ -283,24 +297,18 @@ class Dcel {
 
   classify(): void {
     this.classifyVertices();
-
-    this.getSimpleEdges().forEach((edge) => {
-      edge.getSignificantEndpoint().edges.forEach((edge) => {
-        edge.classify();
-      });
-    });
+    this.halfEdges.forEach((e) => e.classify());
   }
 
-  edgesToStaircases(): void {
-    this.getSimpleEdges()
-      .filter((edge) => edge.class === EdgeClasses.AD) // TODO: remove when all staircases are implemented
-      .forEach((edge) => {
-        const stepPoints = new Staircase(edge).points.slice(1, -1);
-        let edgeToSplit = edge;
-        for (let p of stepPoints) {
-          edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
-        }
-      });
+  edgesToStaircases() {
+    const ADs = this.getHalfEdges(EdgeClasses.AD).filter(
+      (edge) => edge.getSignificantVertex() === edge.getTail()
+    );
+    ADs.forEach((edge) => {
+      const stepPoints = new Staircase(edge).points.slice(1, -1);
+      let edgeToSplit: HalfEdge = edge;
+      for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
+    });
   }
 
   constrainAngles(): void {
@@ -447,6 +455,8 @@ class Dcel {
           length: e.getLength(),
           sector: e.getAssociatedSector(),
           class: e.class,
+          assignedAngle: e.assignedAngle,
+          twinClass: e.twin.class,
           edge: `
               <span class="material-icons">rotate_left</span>
               ${e.uuid.substring(0, 5)} (${e.tail.x}/${e.tail.y})
