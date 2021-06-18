@@ -2,44 +2,57 @@ import fs from "fs";
 import Dcel from "../assets/lib/dcel/Dcel";
 import HalfEdge from "../assets/lib/dcel/HalfEdge";
 import Vertex, { Significance } from "../assets/lib/dcel/Vertex";
+import config from "../assets/schematization.config";
 
 export function getTestFiles(dir: string) {
   const filesInDir = fs.readdirSync(dir);
   return filesInDir.filter((f) => f.substr(-5, f.length) === ".json");
 }
 
+type Directions = {
+  [key: string]: HalfEdge;
+};
+
+export type TestSetup = {
+  directions: Directions;
+  dcel: Dcel;
+  o: Vertex;
+};
+
 export function createEdgeVertexSetup() {
-  const setup: any = {};
-  setup.dcel = new Dcel();
+  const dcel = new Dcel();
+  dcel.config = config;
+  const o = new Vertex(0, 0, dcel);
+  o.significance = Significance.S;
 
-  setup.o = new Vertex(0, 0, setup.dcel);
-  setup.o.significance = Significance.S;
-
-  const destinations = {
-    d0: new Vertex(4, 0, setup.dcel),
-    d14: new Vertex(4, 1, setup.dcel),
-    d37: new Vertex(4, 3, setup.dcel),
-    d53: new Vertex(3, 4, setup.dcel),
-    d76: new Vertex(1, 4, setup.dcel),
-    d90: new Vertex(0, 4, setup.dcel),
-    d104: new Vertex(-1, 4, setup.dcel),
-    d143: new Vertex(-4, 3, setup.dcel),
-    d180: new Vertex(-4, 0, setup.dcel),
-    d217: new Vertex(-4, -3, setup.dcel),
-    d270: new Vertex(0, -4, setup.dcel),
-    d284: new Vertex(1, -4, setup.dcel),
-    d315: new Vertex(4, -4, setup.dcel),
-    d333: new Vertex(4, -2, setup.dcel),
+  const destinations: { [key: string]: Vertex } = {
+    d0: new Vertex(4, 0, dcel),
+    d14: new Vertex(4, 1, dcel),
+    d37: new Vertex(4, 3, dcel),
+    d53: new Vertex(3, 4, dcel),
+    d76: new Vertex(1, 4, dcel),
+    d90: new Vertex(0, 4, dcel),
+    d104: new Vertex(-1, 4, dcel),
+    d143: new Vertex(-4, 3, dcel),
+    d180: new Vertex(-4, 0, dcel),
+    d217: new Vertex(-4, -3, dcel),
+    d270: new Vertex(0, -4, dcel),
+    d284: new Vertex(1, -4, dcel),
+    d315: new Vertex(4, -4, dcel),
+    d333: new Vertex(4, -2, dcel),
   };
 
+  let directions: Directions = {};
+
   Object.entries(destinations).forEach(([key, vertex]) => {
-    const edge = new HalfEdge(setup.o, setup.dcel);
-    edge.twin = new HalfEdge(vertex, setup.dcel);
+    const edge = new HalfEdge(o, dcel);
+    edge.twin = new HalfEdge(vertex, dcel);
     edge.twin.twin = edge;
-    edge.dcel = setup.dcel;
-    edge.twin.dcel = setup.dcel;
-    setup["o" + key] = edge;
+    edge.dcel = dcel;
+    edge.twin.dcel = dcel;
+    directions["o" + key] = edge;
   });
 
+  const setup: TestSetup = { dcel, o, directions };
   return setup;
 }

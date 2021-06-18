@@ -1,46 +1,45 @@
-import { createEdgeVertexSetup } from "./test-setup";
-import { crawlArray } from "../assets/lib/utilities";
-import Sector from "../assets/lib/OrientationRestriction/Sector";
-import C from "../assets/lib/OrientationRestriction/C";
 import { Significance } from "../assets/lib/dcel/Vertex";
+import C from "../assets/lib/OrientationRestriction/C";
+import Sector from "../assets/lib/OrientationRestriction/Sector";
+import { crawlArray } from "../assets/lib/utilities";
+import { config } from "../assets/schematization.config";
+import { createEdgeVertexSetup, TestSetup } from "./test-setup";
 
 describe("isAligned() works properly", function () {
-  let s;
+  let s: TestSetup;
   beforeEach(function () {
     s = createEdgeVertexSetup();
   });
 
   it("for an aligned edge in a rectilinear schematization.", function () {
-    s.dcel.config = { c: new C(2) };
-    expect(s.od0.isAligned()).toBe(true);
-    expect(s.od90.isAligned()).toBe(true);
-    expect(s.od180.isAligned()).toBe(true);
-    expect(s.od270.isAligned()).toBe(true);
+    expect(s.directions.od0.isAligned()).toBe(true);
+    expect(s.directions.od90.isAligned()).toBe(true);
+    expect(s.directions.od180.isAligned()).toBe(true);
+    expect(s.directions.od270.isAligned()).toBe(true);
   });
 
   it("for an aligned edge in an octilinear schematization.", function () {
-    s.dcel.config = { c: new C(4) };
-    expect(s.od0.isAligned()).toBe(true);
-    expect(s.od90.isAligned()).toBe(true);
-    expect(s.od180.isAligned()).toBe(true);
-    expect(s.od270.isAligned()).toBe(true);
+    s.dcel.config = { ...config, c: new C(4) };
+    expect(s.directions.od0.isAligned()).toBe(true);
+    expect(s.directions.od90.isAligned()).toBe(true);
+    expect(s.directions.od180.isAligned()).toBe(true);
+    expect(s.directions.od270.isAligned()).toBe(true);
   });
 
   it("for an unaligned edge in a rectilinear schematization.", function () {
-    s.dcel.config = { c: new C(2) };
-    expect(s.od37.isAligned()).toBe(false);
-    expect(s.od53.isAligned()).toBe(false);
-    expect(s.od76.isAligned()).toBe(false);
-    expect(s.od143.isAligned()).toBe(false);
-    expect(s.od217.isAligned()).toBe(false);
+    expect(s.directions.od37.isAligned()).toBe(false);
+    expect(s.directions.od53.isAligned()).toBe(false);
+    expect(s.directions.od76.isAligned()).toBe(false);
+    expect(s.directions.od143.isAligned()).toBe(false);
+    expect(s.directions.od217.isAligned()).toBe(false);
   });
 
   it("for an unaligned edge in an octilinear schematization.", function () {
-    s.dcel.config = { c: new C(4) };
-    expect(s.od37.isAligned()).toBe(false);
-    expect(s.od53.isAligned()).toBe(false);
-    expect(s.od76.isAligned()).toBe(false);
-    expect(s.od143.isAligned()).toBe(false);
+    s.dcel.config = { ...config, c: new C(4) };
+    expect(s.directions.od37.isAligned()).toBe(false);
+    expect(s.directions.od53.isAligned()).toBe(false);
+    expect(s.directions.od76.isAligned()).toBe(false);
+    expect(s.directions.od143.isAligned()).toBe(false);
   });
 });
 
@@ -55,7 +54,7 @@ describe("getNeighbors() returns the neighboring sectors of the sector", functio
 });
 
 describe("encloses()", function () {
-  let sector;
+  let sector: Sector;
   beforeEach(function () {
     sector = new Sector(new C(2), 0, 0, Math.PI / 2);
   });
@@ -75,110 +74,126 @@ describe("encloses()", function () {
 });
 
 describe("getEdgesInSector()", function () {
-  let s;
+  let s: TestSetup;
   beforeEach(function () {
     s = createEdgeVertexSetup();
   });
 
   it("get correct edges in specified sector", function () {
-    s.o.edges.push(s.od0, s.od90);
+    s.o.edges.push(s.directions.od0, s.directions.od90);
     expect(s.o.getEdgesInSector(new C(2).getSector(0)).length).toBe(2);
   });
 
   it("get correct edges in specified sector", function () {
-    s.o.edges.push(s.od0, s.od90);
+    s.o.edges.push(s.directions.od0, s.directions.od90);
     expect(s.o.getEdgesInSector(new C(4).getSector(0)).length).toBe(1);
   });
 });
 
 describe("isSignficant()", function () {
-  let s;
+  let s: TestSetup;
   beforeEach(function () {
     s = createEdgeVertexSetup();
   });
 
   it("classifies a vertex correctly", function () {
-    s.o.edges.push(s.od0, s.od90);
-    s.dcel.config = { c: new C(2) };
+    s.o.edges.push(s.directions.od0, s.directions.od90);
     expect(s.o.isSignificant()).toBe(Significance.I);
   });
 
   it("classifies a vertex correctly", function () {
-    s.o.edges.push(s.od37, s.od284);
-    s.dcel.config = { c: new C(2) };
+    s.o.edges.push(s.directions.od37, s.directions.od284);
     expect(s.o.isSignificant()).toBe(Significance.S);
   });
 
   it("classifies a vertex correctly", function () {
-    s.o.edges.push(s.od0, s.od180);
-    s.dcel.config = { c: new C(2) };
+    s.o.edges.push(s.directions.od0, s.directions.od180);
     expect(s.o.isSignificant()).toBe(Significance.I);
   });
 
   it("classifies a vertex correctly", function () {
-    s.o.edges.push(s.od0, s.od37);
-    s.dcel.config = { c: new C(2) };
+    s.o.edges.push(s.directions.od0, s.directions.od37);
     expect(s.o.isSignificant()).toBe(Significance.S);
   });
 
   it("classifies a vertex correctly", function () {
-    s.o.edges.push(s.od104, s.od37);
-    s.dcel.config = { c: new C(2) };
+    s.o.edges.push(s.directions.od104, s.directions.od37);
     expect(s.o.isSignificant()).toBe(Significance.S);
   });
 
   it("classifies a vertex with edges in disjoint sectors as not significant.", function () {
-    s.o.edges.push(s.od217, s.od37);
-    s.dcel.config = { c: new C(2) };
+    s.o.edges.push(s.directions.od217, s.directions.od37);
     expect(s.o.isSignificant()).toBe(Significance.I);
   });
 });
 
 describe("the sector of edges incident to a vertex are correctly identified", function () {
-  let s;
+  let s: TestSetup;
   beforeEach(function () {
     s = createEdgeVertexSetup();
   });
 
   it("using getAssociatedSector() for C2", function () {
-    s.dcel.config = { c: new C(2) };
-    expect(s.od0.getAssociatedSector()).toEqual([new C(2).getSector(0), new C(2).getSector(3)]);
-    expect(s.od90.getAssociatedSector()).toEqual([new C(2).getSector(0), new C(2).getSector(1)]);
-    expect(s.od180.getAssociatedSector()).toEqual([new C(2).getSector(1), new C(2).getSector(2)]);
-    expect(s.od270.getAssociatedSector()).toEqual([new C(2).getSector(2), new C(2).getSector(3)]);
+    expect(s.directions.od0.getAssociatedSector()).toEqual([
+      new C(2).getSector(0),
+      new C(2).getSector(3),
+    ]);
+    expect(s.directions.od90.getAssociatedSector()).toEqual([
+      new C(2).getSector(0),
+      new C(2).getSector(1),
+    ]);
+    expect(s.directions.od180.getAssociatedSector()).toEqual([
+      new C(2).getSector(1),
+      new C(2).getSector(2),
+    ]);
+    expect(s.directions.od270.getAssociatedSector()).toEqual([
+      new C(2).getSector(2),
+      new C(2).getSector(3),
+    ]);
   });
 
   it("using getAssociatedSector() for C4", function () {
-    s.dcel.config = { c: new C(4) };
-    expect(s.od0.getAssociatedSector()).toEqual([new C(4).getSector(0), new C(4).getSector(7)]);
-    expect(s.od90.getAssociatedSector()).toEqual([new C(4).getSector(1), new C(4).getSector(2)]);
-    expect(s.od180.getAssociatedSector()).toEqual([new C(4).getSector(3), new C(4).getSector(4)]);
-    expect(s.od270.getAssociatedSector()).toEqual([new C(4).getSector(5), new C(4).getSector(6)]);
+    s.dcel.config = { ...config, c: new C(4) };
+    expect(s.directions.od0.getAssociatedSector()).toEqual([
+      new C(4).getSector(0),
+      new C(4).getSector(7),
+    ]);
+    expect(s.directions.od90.getAssociatedSector()).toEqual([
+      new C(4).getSector(1),
+      new C(4).getSector(2),
+    ]);
+    expect(s.directions.od180.getAssociatedSector()).toEqual([
+      new C(4).getSector(3),
+      new C(4).getSector(4),
+    ]);
+    expect(s.directions.od270.getAssociatedSector()).toEqual([
+      new C(4).getSector(5),
+      new C(4).getSector(6),
+    ]);
   });
 
   it("using getAssociatedDirections() for C2", function () {
-    s.dcel.config = { c: new C(2) };
-    expect(s.od0.getAssociatedDirections()).toEqual([0]);
-    expect(s.od90.getAssociatedDirections()).toEqual([Math.PI * 0.5]);
-    expect(s.od180.getAssociatedDirections()).toEqual([Math.PI]);
-    expect(s.od270.getAssociatedDirections()).toEqual([Math.PI * 1.5]);
-    expect(s.od37.getAssociatedDirections()).toEqual([0, Math.PI * 0.5]);
-    expect(s.od284.getAssociatedDirections()).toEqual([Math.PI * 1.5, Math.PI * 2]);
+    expect(s.directions.od0.getAssociatedDirections()).toEqual([0]);
+    expect(s.directions.od90.getAssociatedDirections()).toEqual([Math.PI * 0.5]);
+    expect(s.directions.od180.getAssociatedDirections()).toEqual([Math.PI]);
+    expect(s.directions.od270.getAssociatedDirections()).toEqual([Math.PI * 1.5]);
+    expect(s.directions.od37.getAssociatedDirections()).toEqual([0, Math.PI * 0.5]);
+    expect(s.directions.od284.getAssociatedDirections()).toEqual([Math.PI * 1.5, Math.PI * 2]);
   });
 
   it("using getAssociatedDirections() for C4", function () {
-    s.dcel.config = { c: new C(4) };
-    expect(s.od0.getAssociatedDirections()).toEqual([0]);
-    expect(s.od90.getAssociatedDirections()).toEqual([Math.PI * 0.5]);
-    expect(s.od180.getAssociatedDirections()).toEqual([Math.PI]);
-    expect(s.od270.getAssociatedDirections()).toEqual([Math.PI * 1.5]);
-    expect(s.od37.getAssociatedDirections()).toEqual([0, Math.PI * 0.25]);
-    expect(s.od284.getAssociatedDirections()).toEqual([Math.PI * 1.5, Math.PI * 1.75]);
+    s.dcel.config = { ...config, c: new C(4) };
+    expect(s.directions.od0.getAssociatedDirections()).toEqual([0]);
+    expect(s.directions.od90.getAssociatedDirections()).toEqual([Math.PI * 0.5]);
+    expect(s.directions.od180.getAssociatedDirections()).toEqual([Math.PI]);
+    expect(s.directions.od270.getAssociatedDirections()).toEqual([Math.PI * 1.5]);
+    expect(s.directions.od37.getAssociatedDirections()).toEqual([0, Math.PI * 0.25]);
+    expect(s.directions.od284.getAssociatedDirections()).toEqual([Math.PI * 1.5, Math.PI * 1.75]);
   });
 });
 
 describe("crawlArray()", function () {
-  let arr;
+  let arr: (string | number)[] = [];
   beforeEach(function () {
     arr = ["first", "second", 2, 3, 4, 5, "secondlast", "last"];
   });
