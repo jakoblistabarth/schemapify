@@ -9,7 +9,8 @@
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "typeRoots": ["../node_modules/@types", "../assets/@types"]
   },
   "include": [".././assets/**/*"]
 }
