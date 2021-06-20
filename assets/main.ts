@@ -2,7 +2,6 @@ import Dcel from "./lib/Dcel/Dcel";
 import config from "./schematization.config";
 import { getMapFrom } from "./lib/Ui/mapOutput";
 import { drawC } from "./lib/Ui/cOutput";
-import { Significance } from "./lib/Dcel/Vertex";
 
 async function getJSON(path: string) {
   const response = await fetch(path);
@@ -34,7 +33,7 @@ const tests = [
   // "assets/data/shapes/3plgn.json",
   // "assets/data/shapes/3plgn-complex.json",
   "assets/data/shapes/aligned-deviating.json",
-  "assets/data/shapes/edge-cases.json",
+  // "assets/data/shapes/edge-cases.json",
 ];
 
 function calculateMapGrid(mapGridID: string) {

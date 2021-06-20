@@ -107,11 +107,11 @@ class Vertex extends Point {
     return this.edges.filter((edge) => sector.encloses(edge.getAngle()));
   }
 
-  assignAngles(): Array<HalfEdge> {
+  assignDirections(): Array<HalfEdge> {
     const edges = this.sortEdges(false);
-    let anglesToAssign: number[] = [];
+    let directionsToAssign: number[] = [];
     const closestBounds = edges.map((edge) => {
-      let direction;
+      let direction: number;
 
       const [lower, upper] = edge.getAssociatedSector()[0].getBounds();
       direction = edge.getAngle() - lower <= upper - edge.getAngle() ? lower : upper;
@@ -119,25 +119,25 @@ class Vertex extends Point {
 
       return this.dcel.config.c.getAngles().indexOf(direction);
     });
-    anglesToAssign = closestBounds;
+    directionsToAssign = closestBounds;
 
     closestBounds.forEach((direction, idx) => {
-      if (getOccurrence(anglesToAssign, direction) == 1) {
-        anglesToAssign[idx] = direction;
+      if (getOccurrence(directionsToAssign, direction) == 1) {
+        directionsToAssign[idx] = direction;
         return;
       }
 
       const nextDirection = crawlArray(this.dcel.config.c.getAngles(), direction, +1);
       const prevDirection = crawlArray(this.dcel.config.c.getAngles(), direction, -1);
-      if (getOccurrence(anglesToAssign, nextDirection) > 0) {
-        anglesToAssign[idx] = prevDirection;
+      if (getOccurrence(directionsToAssign, nextDirection) > 0) {
+        directionsToAssign[idx] = prevDirection;
       } else {
-        anglesToAssign[(idx + 1) % closestBounds.length] = nextDirection;
+        directionsToAssign[(idx + 1) % closestBounds.length] = nextDirection;
       }
     });
 
     edges.forEach((edge, idx) => {
-      if (!edge.assignedAngle) edge.assignedAngle = anglesToAssign[idx];
+      if (!edge.assignedDirection) edge.assignedDirection = directionsToAssign[idx];
     });
 
     return this.edges;

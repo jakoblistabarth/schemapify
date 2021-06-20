@@ -172,23 +172,23 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
     ]);
   });
 
-  it("using getAssociatedDirections() for C2", function () {
-    expect(s.directions.od0.getAssociatedDirections()).toEqual([0]);
-    expect(s.directions.od90.getAssociatedDirections()).toEqual([Math.PI * 0.5]);
-    expect(s.directions.od180.getAssociatedDirections()).toEqual([Math.PI]);
-    expect(s.directions.od270.getAssociatedDirections()).toEqual([Math.PI * 1.5]);
-    expect(s.directions.od37.getAssociatedDirections()).toEqual([0, Math.PI * 0.5]);
-    expect(s.directions.od284.getAssociatedDirections()).toEqual([Math.PI * 1.5, Math.PI * 2]);
+  it("using getAssociatedAngles() for C2", function () {
+    expect(s.directions.od0.getAssociatedAngles()).toEqual([0]);
+    expect(s.directions.od90.getAssociatedAngles()).toEqual([Math.PI * 0.5]);
+    expect(s.directions.od180.getAssociatedAngles()).toEqual([Math.PI]);
+    expect(s.directions.od270.getAssociatedAngles()).toEqual([Math.PI * 1.5]);
+    expect(s.directions.od37.getAssociatedAngles()).toEqual([0, Math.PI * 0.5]);
+    expect(s.directions.od284.getAssociatedAngles()).toEqual([Math.PI * 1.5, Math.PI * 2]);
   });
 
-  it("using getAssociatedDirections() for C4", function () {
+  it("using getAssociatedAngles() for C4", function () {
     s.dcel.config = { ...config, c: new C(4) };
-    expect(s.directions.od0.getAssociatedDirections()).toEqual([0]);
-    expect(s.directions.od90.getAssociatedDirections()).toEqual([Math.PI * 0.5]);
-    expect(s.directions.od180.getAssociatedDirections()).toEqual([Math.PI]);
-    expect(s.directions.od270.getAssociatedDirections()).toEqual([Math.PI * 1.5]);
-    expect(s.directions.od37.getAssociatedDirections()).toEqual([0, Math.PI * 0.25]);
-    expect(s.directions.od284.getAssociatedDirections()).toEqual([Math.PI * 1.5, Math.PI * 1.75]);
+    expect(s.directions.od0.getAssociatedAngles()).toEqual([0]);
+    expect(s.directions.od90.getAssociatedAngles()).toEqual([Math.PI * 0.5]);
+    expect(s.directions.od180.getAssociatedAngles()).toEqual([Math.PI]);
+    expect(s.directions.od270.getAssociatedAngles()).toEqual([Math.PI * 1.5]);
+    expect(s.directions.od37.getAssociatedAngles()).toEqual([0, Math.PI * 0.25]);
+    expect(s.directions.od284.getAssociatedAngles()).toEqual([Math.PI * 1.5, Math.PI * 1.75]);
   });
 });
 

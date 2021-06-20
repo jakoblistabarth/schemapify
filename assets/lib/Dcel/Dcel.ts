@@ -62,9 +62,22 @@ class Dcel {
     return this.faces.find((f) => f.edge === null);
   }
 
-  getHalfEdges(edgeClass?: EdgeClasses) {
-    if (edgeClass) return this.halfEdges.filter((e) => e.class === edgeClass);
-    return this.halfEdges;
+  getHalfEdges(edgeClass?: EdgeClasses, simple = false) {
+    // FIXME: confusing for map output: sometimes clockwise/counterclockwise assignment in map output wrong
+    let edges = this.halfEdges;
+    if (simple) {
+      let simpleEdges: Array<HalfEdge> = [];
+      this.getBoundedFaces().forEach((f) => {
+        f.getEdges().forEach((halfEdge) => {
+          const idx = simpleEdges.indexOf(halfEdge.twin);
+          if (idx < 0) simpleEdges.push(halfEdge);
+        });
+      });
+      edges = simpleEdges;
+    }
+
+    if (edgeClass) return edges.filter((e) => e.class === edgeClass);
+    return edges;
   }
 
   getVertices(significance?: Significance) {
@@ -73,18 +86,6 @@ class Dcel {
         .filter(([k, v]) => v.significance === significance)
         .map(([k, v]) => v);
     return [...this.vertices].map(([k, v]) => v);
-  }
-
-  getSimpleEdges() {
-    // FIXME: confusing for map output: sometimes clockwise/counterclockwise assignment in map output wrong
-    let simpleEdges: Array<HalfEdge> = [];
-    this.getBoundedFaces().forEach((f) => {
-      f.getEdges().forEach((halfEdge) => {
-        const idx = simpleEdges.indexOf(halfEdge.twin);
-        if (idx < 0) simpleEdges.push(halfEdge);
-      });
-    });
-    return simpleEdges;
   }
 
   findVertex(x: number, y: number): Vertex {
@@ -286,7 +287,7 @@ class Dcel {
       v.isSignificant();
     });
 
-    this.getSimpleEdges().forEach((edge) => {
+    this.getHalfEdges(undefined, true).forEach((edge) => {
       const [tail, head] = edge.getEndpoints();
       if (tail.significance === Significance.S && head.significance === Significance.S) {
         const newPoint = edge.bisect().getHead();
@@ -306,6 +307,14 @@ class Dcel {
     );
     ADs.forEach((edge) => {
       const stepPoints = new Staircase(edge).points.slice(1, -1);
+      let edgeToSplit: HalfEdge = edge;
+      for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
+    });
+
+    const UBs = this.getHalfEdges(EdgeClasses.UB, true);
+
+    UBs.forEach((edge) => {
+      const stepPoints = new Staircase(edge).getStaircasePoints().slice(1, -1);
       let edgeToSplit: HalfEdge = edge;
       for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
     });
@@ -437,7 +446,7 @@ class Dcel {
   }
 
   edgesToGeoJSON(): geojson.GeoJSON {
-    const edgeFeatures = this.getSimpleEdges().map((e): geojson.Feature => {
+    const edgeFeatures = this.getHalfEdges(undefined, true).map((e): geojson.Feature => {
       const a = e.tail;
       const b = e.twin.tail;
 
@@ -455,7 +464,7 @@ class Dcel {
           length: e.getLength(),
           sector: e.getAssociatedSector(),
           class: e.class,
-          assignedAngle: e.assignedAngle,
+          assignedDirection: e.assignedDirection,
           twinClass: e.twin.class,
           edge: `
               <span class="material-icons">rotate_left</span>

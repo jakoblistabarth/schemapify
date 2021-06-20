@@ -4,6 +4,7 @@ import Point from "../Geometry/Point";
 import Dcel from "./Dcel";
 import Face from "./Face";
 import Sector from "../OrientationRestriction/Sector";
+import { getUnitVector } from "../utilities";
 
 export enum EdgeClasses {
   AB = "alignedBasic",
@@ -21,7 +22,7 @@ class HalfEdge {
   face: Face;
   prev: HalfEdge;
   next: HalfEdge;
-  assignedAngle: number;
+  assignedDirection: number;
   isAligning: boolean;
   class: EdgeClasses;
 
@@ -33,7 +34,6 @@ class HalfEdge {
     this.face = null;
     this.prev = null;
     this.next = null;
-    this.assignedAngle;
     this.isAligning;
     this.class;
   }
@@ -182,7 +182,7 @@ class HalfEdge {
     }
   }
 
-  getAssociatedDirections(): number[] {
+  getAssociatedAngles(): number[] {
     const sectors = this.dcel.config.c.getSectors();
     const angle = this.getAngle();
     let directions: number[] = [];
@@ -199,9 +199,18 @@ class HalfEdge {
     return directions;
   }
 
+  getAssignedAngle(): number {
+    const sectors = this.dcel.config.c.getSectors();
+    return Math.PI * 2 * (this.assignedDirection / sectors.length);
+  }
+
+  getAssignedDirection(): number {
+    return this.assignedDirection;
+  }
+
   getAssociatedSector(): Array<Sector> {
     const sectors = this.dcel.config.c.getSectors();
-    const direction = this.getAssociatedDirections();
+    const direction = this.getAssociatedAngles();
     return sectors.reduce((acc, sector) => {
       if (
         (direction[0] === sector.lower && direction[1] === sector.upper) ||
@@ -216,23 +225,21 @@ class HalfEdge {
   }
 
   isDeviating(): boolean {
-    const sectors = this.dcel.config.c.getSectors();
-    //TODO: refactor isDeviating(), find better solution for last sector (idx=0) should be 8???
-    let assignedAngle = (this.assignedAngle * Math.PI * 2) / sectors.length;
-
+    // an angle needs to be already set for this halfedge, TODO: Error handling?
     if (this.isAligned()) {
-      return this.getAssociatedDirections()[0] !== assignedAngle;
+      return this.getAssociatedAngles()[0] !== this.getAssignedAngle();
     } else {
+      let assignedAngle = this.getAssignedAngle();
       const sector = this.getAssociatedSector()[0];
-      if (sector.idx === sectors.length - 1) {
-        assignedAngle = assignedAngle === 0 ? Math.PI * 2 : assignedAngle;
-      }
+      //TODO: refactor find better solution for last sector (idx=0)
+      if (sector.idx === this.dcel.config.c.getSectors().length - 1 && assignedAngle === 0)
+        assignedAngle = Math.PI * 2;
       return !sector.encloses(assignedAngle);
     }
   }
 
   isAligned(): boolean {
-    const isAligned = this.getAssociatedDirections().length === 1;
+    const isAligned = this.getAssociatedAngles().length === 1;
     return (this.isAligning = isAligned);
   }
 
@@ -245,7 +252,7 @@ class HalfEdge {
   }
 
   classify(): EdgeClasses {
-    this.getTail().assignAngles();
+    this.getTail().assignDirections();
 
     if (this.class) return; // do not overwrite classification
     if (this.getHead().significance === Significance.S) return; // do not classify a HalfEdge which has a significant head
@@ -269,6 +276,27 @@ class HalfEdge {
 
     this.class = classification;
     return (this.twin.class = classification);
+  }
+
+  getStepLengths(se: number): number[] {
+    const d1 = this.getAssignedAngle();
+    const d2 = this.getAssociatedAngles().find((angle) => angle !== d1);
+    const d1u = getUnitVector(d1);
+    const d2u = getUnitVector(d2);
+
+    // create vector of edge
+    const [tail, head] = this.getEndpoints();
+    const v = [head.x - tail.x, head.y - tail.y];
+    const vse = v.map((point) => point / se);
+
+    // solve linear equation for l1 and l2 with cramer's rule for 2x2 systems
+    const det = d1u[0] * d2u[1] - d1u[1] * d2u[0];
+    const detX = vse[0] * d2u[1] - vse[1] * d2u[0];
+    const l1 = detX / det;
+    const detY = d1u[0] * vse[1] - d1u[1] * vse[0];
+    const l2 = detY / det;
+
+    return [l1, l2];
   }
 }
 

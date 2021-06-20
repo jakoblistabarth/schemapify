@@ -6,8 +6,8 @@ import Staircase from "../assets/lib/OrientationRestriction/Staircase";
 import Point from "../assets/lib/Geometry/Point";
 import config from "../assets/schematization.config";
 
-describe("The Staircase class", function () {
-  it("returns a Staircase region for an unaligned basic halfEdge", function () {
+describe("The staircase class", function () {
+  it("returns a staircase region for an unaligned basic halfedge", function () {
     const dcel = new Dcel();
     dcel.config = config;
 
@@ -28,7 +28,7 @@ describe("The Staircase class", function () {
     ]);
   });
 
-  it("returns a Staircase region for an unaligned basic halfEdge", function () {
+  it("returns a staircase region for an unaligned basic halfedge", function () {
     const dcel = new Dcel();
     dcel.config = config;
 
@@ -50,7 +50,7 @@ describe("The Staircase class", function () {
     ]);
   });
 
-  it("returns a Staircase region for an unaligned basic halfEdge", function () {
+  it("returns a staircase region for an unaligned basic halfedge", function () {
     const dcel = new Dcel();
     dcel.config = config;
 
@@ -72,8 +72,8 @@ describe("The Staircase class", function () {
   });
 });
 
-describe("buildStaircaseAD", function () {
-  it("returns a Staircase for an unaligned deviating halfEdge with 7 Vertices", function () {
+describe("Build staircase for an edge of class AD", function () {
+  it("returns a staircase for an unaligned deviating halfedge containing 7 Points", function () {
     const dcel = new Dcel();
     dcel.config = { ...config, c: new C(4) };
 
@@ -84,11 +84,32 @@ describe("buildStaircaseAD", function () {
     edge.twin = twin;
     twin.twin = edge;
     edge.class = EdgeClasses.AD;
-    edge.assignedAngle = 0;
+    edge.assignedDirection = 0;
     edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
     expect(staircase.points.length).toBe(7);
     expect(staircase.region.length).toBeLessThanOrEqual(staircase.points.length);
+  });
+});
+
+describe("Build staircase for an edge of class UB", function () {
+  it("returns a staircase for an unaligned deviating halfedge containing a minimum of 7 Points", function () {
+    const dcel = new Dcel();
+    dcel.config = { ...config, c: new C(2) };
+
+    const o = new Vertex(1, 1, dcel);
+    const d = new Vertex(7, 5, dcel);
+    const edge = dcel.makeHalfEdge(o, d);
+    const twin = dcel.makeHalfEdge(d, o);
+    edge.twin = twin;
+    twin.twin = edge;
+    edge.class = EdgeClasses.UB;
+    edge.assignedDirection = 0;
+    edge.dcel = dcel;
+
+    const staircase = new Staircase(edge);
+    const points = staircase.getStairCasePointsUB();
+    expect(points.length).toBeGreaterThanOrEqual(5);
   });
 });
