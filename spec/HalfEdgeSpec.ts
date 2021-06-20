@@ -155,8 +155,7 @@ describe("bisect() on geodata results in a Dcel", function () {
           cycles.push(f.getEdges(false));
         });
 
-        // @ts-ignore // FIXME: ".nothing" feels wrong here
-        expect(cycles).nothing();
+        expect(cycles.length).toBeGreaterThanOrEqual(1);
       }
     );
   });
@@ -181,8 +180,7 @@ describe("bisect() on simple shapes results in a Dcel", function () {
           cycles.push(f.getEdges(false));
         });
 
-        // @ts-ignore // FIXME: ".nothing" feels wrong here
-        expect(cycles).nothing();
+        expect(cycles.length).toBeGreaterThanOrEqual(1);
       }
     );
   });

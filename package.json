@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jasmine-ts -P config/tsconfig-cjs.json",
-    "type-check": "tsc -p config/tsconfig-base.json -w --noEmit",
+    "type-check": "tsc -w --noEmit",
     "dev": "nodemon",
     "build": "esbuild --bundle assets/main.ts --sourcemap --outfile=dist/esm-bundle/main.bundle.js",
     "start": "browser-sync --config config/bs-config.js"
