@@ -1,4 +1,3 @@
-import { Significance } from "../assets/lib/dcel/Vertex";
 import C from "../assets/lib/OrientationRestriction/C";
 import Sector from "../assets/lib/OrientationRestriction/Sector";
 import { crawlArray } from "../assets/lib/utilities";
@@ -98,32 +97,32 @@ describe("isSignficant()", function () {
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.directions.od0, s.directions.od90);
-    expect(s.o.isSignificant()).toBe(Significance.I);
+    expect(s.o.isSignificant()).toBeFalse();
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.directions.od37, s.directions.od284);
-    expect(s.o.isSignificant()).toBe(Significance.S);
+    expect(s.o.isSignificant()).toBeTrue();
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.directions.od0, s.directions.od180);
-    expect(s.o.isSignificant()).toBe(Significance.I);
+    expect(s.o.isSignificant()).toBeFalse();
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.directions.od0, s.directions.od37);
-    expect(s.o.isSignificant()).toBe(Significance.S);
+    expect(s.o.isSignificant()).toBeTrue();
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.directions.od104, s.directions.od37);
-    expect(s.o.isSignificant()).toBe(Significance.S);
+    expect(s.o.isSignificant()).toBeTrue();
   });
 
   it("classifies a vertex with edges in disjoint sectors as not significant.", function () {
     s.o.edges.push(s.directions.od217, s.directions.od37);
-    expect(s.o.isSignificant()).toBe(Significance.I);
+    expect(s.o.isSignificant()).toBeFalse();
   });
 });
 

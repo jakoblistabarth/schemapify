@@ -15,7 +15,7 @@ const tests = [
   // "assets/data/geodata/AUT_adm1.json",
   // "assets/data/geodata/central-austria.json",
   // "assets/data/shapes/triangle.json",
-  "assets/data/shapes/triangle-unaligned.json",
+  // "assets/data/shapes/triangle-unaligned.json",
   // "assets/data/shapes/enclave.json",
   // "assets/data/shapes/enclave2.json",
   // "assets/data/shapes/triangle-hole.json",
@@ -33,7 +33,7 @@ const tests = [
   // "assets/data/shapes/3plgn.json",
   // "assets/data/shapes/3plgn-complex.json",
   // "assets/data/shapes/aligned-deviating.json",
-  // "assets/data/shapes/edge-cases.json",
+  "assets/data/shapes/edge-cases.json",
 ];
 
 function calculateMapGrid(mapGridID: string) {

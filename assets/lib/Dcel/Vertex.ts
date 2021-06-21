@@ -5,23 +5,18 @@ import { crawlArray, getOccurrence } from "../utilities";
 import Dcel from "./Dcel";
 import HalfEdge from "./HalfEdge";
 
-export enum Significance {
-  S = "significant",
-  I = "insignificant",
-}
-
 class Vertex extends Point {
   dcel: Dcel;
   uuid: string;
   edges: Array<HalfEdge>;
-  significance: Significance;
+  significant: boolean;
 
   constructor(x: number, y: number, dcel: Dcel) {
     super(x, y);
     this.dcel = dcel;
     this.uuid = uuid();
     this.edges = [];
-    this.significance = null;
+    this.significant = undefined;
   }
 
   static getKey(x: number, y: number): string {
@@ -72,13 +67,13 @@ class Vertex extends Point {
     return this.edges.every((edge) => edge.isAligned());
   }
 
-  isSignificant(): Significance {
+  isSignificant(): boolean {
     // QUESTION: are vertices with only aligned edges never significant?
     // TODO: move to another class? to not mix dcel and schematization?
 
     // classify as insignificant if all edges are already aligned
     if (this.allEdgesAligned()) {
-      return (this.significance = Significance.I);
+      return (this.significant = false);
     }
 
     // classify as significant if one sector occurs multiple times
@@ -90,7 +85,7 @@ class Vertex extends Point {
     }, []);
 
     if (occupiedSectors.length !== uniqueSectors.length) {
-      return (this.significance = Significance.S);
+      return (this.significant = true);
     }
 
     // classify as significant if neighbor sectors are not empty
@@ -100,7 +95,7 @@ class Vertex extends Point {
         this.getEdgesInSector(prevSector).length > 0 || this.getEdgesInSector(nextSector).length > 0
       );
     });
-    return (this.significance = isSignificant ? Significance.S : Significance.I);
+    return (this.significant = isSignificant);
   }
 
   getEdgesInSector(sector: Sector): Array<HalfEdge> {

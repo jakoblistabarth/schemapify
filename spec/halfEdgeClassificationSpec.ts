@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
 import Dcel from "../assets/lib/dcel/Dcel";
-import Vertex, { Significance } from "../assets/lib/dcel/Vertex";
 import C from "../assets/lib/OrientationRestriction/C";
 import { config } from "../assets/schematization.config";
 
@@ -77,10 +76,10 @@ describe("getSignificantVertex()", function () {
 
   it("returns an significant endpoint if one is specified", function () {
     const significantVertex = s.directions.od53.getSignificantVertex();
-    expect(significantVertex.significance).toEqual(Significance.S);
+    expect(significantVertex.significant).toBeTrue();
   });
   it("returns null if none of its endpoints are significant", function () {
-    s.o.significance = Significance.I;
+    s.o.significant = false;
     expect(s.directions.od53.getSignificantVertex()).toBeUndefined();
   });
 });

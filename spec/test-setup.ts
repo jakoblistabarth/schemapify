@@ -1,7 +1,7 @@
 import fs from "fs";
 import Dcel from "../assets/lib/dcel/Dcel";
 import HalfEdge from "../assets/lib/dcel/HalfEdge";
-import Vertex, { Significance } from "../assets/lib/dcel/Vertex";
+import Vertex from "../assets/lib/dcel/Vertex";
 import config from "../assets/schematization.config";
 
 export function getTestFiles(dir: string) {
@@ -23,7 +23,7 @@ export function createEdgeVertexSetup() {
   const dcel = new Dcel();
   dcel.config = config;
   const o = new Vertex(0, 0, dcel);
-  o.significance = Significance.S;
+  o.significant = true;
 
   const destinations: { [key: string]: Vertex } = {
     d0: new Vertex(4, 0, dcel),

@@ -4,7 +4,6 @@ import { hint } from "@mapbox/geojsonhint";
 import { getTestFiles } from "./test-setup";
 import Dcel from "../assets/lib/Dcel/Dcel";
 import Face from "../assets/lib/Dcel/Face";
-import { Significance } from "../assets/lib/Dcel/Vertex";
 
 describe("A Dcel of 2 adjacent squares", function () {
   const json = JSON.parse(
@@ -101,14 +100,10 @@ describe("getVertices()", function () {
   });
 
   it("returns vertices of type insignificant if specified", function () {
-    expect(
-      dcel.getVertices(Significance.I).every((v) => v.significance === Significance.I)
-    ).toBeTruthy();
+    expect(dcel.getVertices(false).every((v) => !v.significant)).toBeTruthy();
   });
   it("returns vertices of type significant if specified", function () {
-    expect(
-      dcel.getVertices(Significance.S).every((v) => v.significance === Significance.S)
-    ).toBeTruthy();
+    expect(dcel.getVertices(true).every((v) => v.significant)).toBeTruthy();
   });
   it("returns all vertices if no type specified", function () {
     expect(dcel.getVertices().length).toBe([...dcel.vertices].length);

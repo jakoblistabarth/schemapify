@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import Vertex, { Significance } from "./Vertex";
+import Vertex from "./Vertex";
 import Point from "../Geometry/Point";
 import Dcel from "./Dcel";
 import Face from "./Face";
@@ -52,7 +52,7 @@ class HalfEdge {
 
   getSignificantVertex(): Vertex | undefined {
     const endPoints = this.getEndpoints();
-    return endPoints.find((v) => v.significance === Significance.S);
+    return endPoints.find((v) => v.significant);
   }
 
   getCycle(forwards: boolean = true): Array<HalfEdge> {
@@ -270,7 +270,7 @@ class HalfEdge {
     this.getTail().assignDirections();
 
     if (this.class) return; // do not overwrite classification
-    if (this.getHead().significance === Significance.S) return; // do not classify a HalfEdge which has a significant head
+    if (this.getHead().significant) return; // do not classify a HalfEdge which has a significant head
 
     const sector = this.getAssociatedSector()[0];
     const significantVertex = this.getSignificantVertex() || this.getTail();

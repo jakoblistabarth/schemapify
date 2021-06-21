@@ -1,5 +1,5 @@
 import config, { Config } from "../../schematization.config";
-import Vertex, { Significance } from "./Vertex";
+import Vertex from "./Vertex";
 import Point from "../Geometry/Point";
 import HalfEdge, { EdgeClasses } from "./HalfEdge";
 import Face from "./Face";
@@ -85,10 +85,10 @@ class Dcel {
     return simpleEdges;
   }
 
-  getVertices(significance?: Significance) {
-    if (significance)
+  getVertices(significant?: boolean) {
+    if (significant)
       return [...this.vertices]
-        .filter(([k, v]) => v.significance === significance)
+        .filter(([k, v]) => v.significant === significant)
         .map(([k, v]) => v);
     return [...this.vertices].map(([k, v]) => v);
   }
@@ -292,7 +292,7 @@ class Dcel {
   preProcess(): void {
     this.config = config;
     this.setEpsilon(this.config.lambda);
-    // this.splitEdges();
+    this.splitEdges();
   }
 
   classifyVertices(): void {
@@ -302,9 +302,9 @@ class Dcel {
 
     this.getHalfEdges(undefined, true).forEach((edge) => {
       const [tail, head] = edge.getEndpoints();
-      if (tail.significance === Significance.S && head.significance === Significance.S) {
+      if (tail.significant && head.significant) {
         const newPoint = edge.bisect().getHead();
-        newPoint.significance = Significance.I;
+        newPoint.significant = false;
       }
     });
   }
@@ -441,7 +441,7 @@ class Dcel {
         },
         properties: {
           uuid: v.uuid,
-          significance: v.significance,
+          significant: v.significant,
           edges: v.edges,
         },
       };

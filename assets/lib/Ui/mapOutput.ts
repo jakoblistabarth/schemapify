@@ -1,6 +1,5 @@
 import Dcel from "../Dcel/Dcel.js";
 import * as L from "leaflet/";
-import { Significance } from "../Dcel/Vertex.js";
 import Sector from "../OrientationRestriction/Sector.js";
 import HalfEdge from "../Dcel/HalfEdge.js";
 
@@ -46,8 +45,8 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
         })
         .join("");
       return L.circleMarker(latlng, {
-        radius: props.significance === Significance.S ? 4 : 2,
-        fillColor: props.significance === Significance.I ? "grey" : "white",
+        radius: props.significant ? 4 : 2,
+        fillColor: !props.significant ? "grey" : "white",
         color: "black",
         weight: 2,
         opacity: 1,
@@ -55,7 +54,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
       }).bindTooltip(`
           <span class="material-icons">radio_button_checked</span> ${props.uuid.substring(0, 5)}
           (${v[0]}/${v[1]})<br>
-          significance: ${props.significance}<br>
+          significant: ${props.significant}<br>
           <table>
             ${edges}
           </table>
