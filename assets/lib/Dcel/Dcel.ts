@@ -227,8 +227,10 @@ class Dcel {
   }
 
   // as seen @ https://github.com/Turfjs/turf/blob/master/packages/turf-bbox/index.ts
-  // takes a dcel
-  // returns its Boundingbox as [minX, minY, maxX, maxY]
+  /**
+   *
+   * @returns the Boundingbox of the dcel as [minX, minY, maxX, maxY]
+   */
   getBbox() {
     const points = [...this.vertices].map(([k, p]) => [p.x, p.y]);
     const bbox = [Infinity, Infinity, -Infinity, -Infinity];
@@ -249,24 +251,30 @@ class Dcel {
     return bbox;
   }
 
-  // takes a dcel
-  // returns its diameter
+  /**
+   *
+   * @returns the diameter of the dcel (the diameter of its bounding box)
+   */
   getDiameter(): number {
     const bbox = this.getBbox();
     const [a, c] = [new Point(bbox[0], bbox[1]), new Point(bbox[2], bbox[3])];
-
-    const diagonal = a.distanceToPoint(c);
-    return diagonal;
+    return a.distanceToPoint(c);
   }
 
-  // get epsilon
-  // – the threshold for max edge length
-  // takes the factor lambda
-  // returns the treshold as float
+  /**
+   *
+   * @param lambda
+   * @returns epsilon, a threshold for the maximum edge length in a dcel
+   */
   setEpsilon(lambda: number): number {
     return (this.config.epsilon = this.getDiameter() * lambda);
   }
 
+  /**
+   *
+   * @param threshold
+   * @returns a subdivided dcel, with edges smaller than the threshold
+   */
   splitEdges(threshold = this.config.epsilon): Dcel {
     this.getBoundedFaces().forEach((f) => {
       f.getEdges().forEach((e) => {

@@ -4,12 +4,12 @@ import Cirregular from "./Cirregular.js";
 class Sector {
   c: C | Cirregular;
   idx: number;
-  lower: number; //TODO: radians?
+  lower: number;
   upper: number;
 
   constructor(c: C | Cirregular, idx: number, lower: number, upper: number) {
     this.c = c;
-    this.idx = idx; // horizontal line by default
+    this.idx = idx;
     this.lower = lower;
     this.upper = upper;
   }

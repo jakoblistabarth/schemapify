@@ -1,5 +1,8 @@
 import Sector from "./Sector.js";
 
+/**
+ * @property angles, an array of angles in radians, at least 4
+ */
 class Cirregular {
   angles: number[];
 

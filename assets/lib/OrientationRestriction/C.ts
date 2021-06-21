@@ -1,13 +1,18 @@
 import Sector from "./Sector";
 
+/**
+ * @property beta, the shift of the C of set, by default a horizontal line (0)
+ * @property orientations, the umber of orientation, at least 2
+ * @property angles, an array of angles in radians
+ */
 class C {
   beta: number;
   orientations: number;
   angles: number[];
 
   constructor(orientations: number, beta: number = 0) {
-    this.beta = beta; // horizontal line by default
-    this.orientations = orientations; // n umber of orientations, //TODO: at least 2
+    this.beta = beta;
+    this.orientations = orientations; //TODO: at least 2
     this.angles = this.getAngles();
   }
 
