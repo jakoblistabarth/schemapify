@@ -164,11 +164,12 @@ describe("classify() returns a result which can be turned into a valid geojson",
   });
 });
 
-xdescribe("schematize() returns a result which can be turned into a valid geojson", function () {
+describe("schematize() returns a result which can be turned into a valid geojson", function () {
   const dir = "assets/data/geodata";
   const testFiles = getTestFiles(dir);
 
-  testFiles.forEach((file) => {
+  testFiles.slice(3, 4).forEach((file) => {
+    //TODO: test other geodata as well?
     it("for the geodata input " + file, function () {
       const inputJson = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
       const dcel = Dcel.fromGeoJSON(inputJson);
@@ -183,7 +184,7 @@ xdescribe("schematize() returns a result which can be turned into a valid geojso
   });
 });
 
-xdescribe("schematize() returns a result which can be turned into a valid geojson", function () {
+describe("schematize() returns a result which can be turned into a valid geojson", function () {
   const dir = "assets/data/shapes";
   const testFiles = getTestFiles(dir);
 
