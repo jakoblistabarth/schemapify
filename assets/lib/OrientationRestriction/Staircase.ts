@@ -69,8 +69,8 @@ class Staircase {
         return this.getStairCasePointsE();
       case EdgeClasses.AD:
         return this.getStairCasePointsAD();
-      case EdgeClasses.AB:
-        return; // TODO: implement other cases
+      case EdgeClasses.UD:
+        return this.getStairCasePointsUD(); // TODO: implement other cases
     }
   }
 
@@ -142,6 +142,12 @@ class Staircase {
       }
     }
 
+    return points;
+  }
+
+  getStairCasePointsUD(se: number = 2): Point[] {
+    const points: Point[] = [];
+    // TODOD: implement staircases for UD
     return points;
   }
 }

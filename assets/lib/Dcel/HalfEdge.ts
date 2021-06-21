@@ -94,6 +94,12 @@ class HalfEdge {
     if (this.face.outerRing) this.face.outerRing.removeInnerEdge(this);
   }
 
+  /**
+   *
+   * @credits adapted from https://www2.cs.sfu.ca/~binay/813.2011/DCEL.pdf
+   * @param newPoint Point which should be added between the halfedge's tail and head, default: the edge's midpoint
+   * @returns the new halfedge which leads from the original edge's tail to the newly created vertex
+   */
   bisect(newPoint: Point = this.getMidpoint()): HalfEdge {
     const e = this;
     const et = e.twin;
@@ -126,11 +132,18 @@ class HalfEdge {
       // if f2 is not the unbounded face and f1 is not a hole
       f2.edge = et_;
     }
+
     if (f2.innerEdges) {
       f2.innerEdges.forEach((e) => {
         e.face.replaceOuterRingEdge(et, et_);
       });
     }
+
+    if (f2.outerRing) {
+      // if f2 is a hole
+      f1.replaceInnerEdge(et, et_);
+    }
+
     et.remove();
 
     const e_ = this.dcel.makeHalfEdge(e.tail, N);
@@ -152,17 +165,19 @@ class HalfEdge {
     et__.twin = e__;
     e__.twin = et__;
 
-    f1.edge = e_;
+    if (f1.edge !== null && !f2.outerRing) f1.edge = e_; //FIXME: better to use undefined? if e is an clockwise-running edge incident to the unbounded face
 
-    if (f1.outerRing) {
-      //if f1 is a hole
-      f2.replaceInnerEdge(e, e_);
-    }
     if (f1.innerEdges) {
       f1.innerEdges.forEach((e) => {
         e.face.replaceOuterRingEdge(e, e_);
       });
     }
+
+    if (f1.outerRing) {
+      // if f1 is a hole
+      f2.replaceInnerEdge(e, e_);
+    }
+
     e.remove();
 
     return e_;

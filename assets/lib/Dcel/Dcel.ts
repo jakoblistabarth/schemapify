@@ -336,15 +336,12 @@ class Dcel {
       ),
     };
 
-    console.log(edgesPerType);
-    this.replaceWithStaircases(edgesPerType.E.slice(1, 2));
-    // Object.values(edgesPerType).forEach((edges) => this.replaceWithStaircases(edges));
+    Object.values(edgesPerType).forEach((edges) => this.replaceWithStaircases(edges));
   }
 
   replaceWithStaircases(edges: HalfEdge[]) {
     edges.forEach((edge) => {
       const stepPoints = new Staircase(edge).getStaircasePoints().slice(1, -1);
-      console.log(edge.uuid, stepPoints);
       let edgeToSplit = edge;
       for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
     });
