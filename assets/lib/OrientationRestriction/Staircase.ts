@@ -65,6 +65,8 @@ class Staircase {
     switch (this.edge.class) {
       case EdgeClasses.UB:
         return this.getStairCasePointsUB();
+      case EdgeClasses.E:
+        return this.getStairCasePointsE();
       case EdgeClasses.AD:
         return this.getStairCasePointsAD();
       case EdgeClasses.AB:
@@ -106,6 +108,30 @@ class Staircase {
     for (let idx = 0; idx < se; idx++) {
       const o = points[idx * 2];
       if (idx % 2 === 0) {
+        const p1 = o.getNewPoint(l1, d1);
+        const p2 = p1.getNewPoint(l2, d2);
+        points.push(p1, p2);
+      } else {
+        const p1 = o.getNewPoint(l2, d2);
+        const p2 = p1.getNewPoint(l1, d1);
+        points.push(p1, p2);
+      }
+    }
+
+    return points;
+  }
+
+  getStairCasePointsE(se: number = 4): Point[] {
+    const edge = this.edge;
+
+    const d1 = edge.getAssignedAngle();
+    const d2 = edge.getAssociatedAngles().find((angle) => angle !== d1);
+    const [l1, l2] = edge.getStepLengths(se);
+
+    const points: Point[] = [edge.getTail()];
+    for (let idx = 0; idx < se; idx++) {
+      const o = points[idx * 2];
+      if (idx < se / 2) {
         const p1 = o.getNewPoint(l1, d1);
         const p2 = p1.getNewPoint(l2, d2);
         points.push(p1, p2);

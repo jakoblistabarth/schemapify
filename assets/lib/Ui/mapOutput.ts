@@ -40,6 +40,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
                   .map((s: Sector) => s.idx)
                   .join(",")}</td>
                 <td>${edge.class}</td>
+                <td>AssignedDirection: ${edge.assignedDirection}
               </tr>
             `;
         })

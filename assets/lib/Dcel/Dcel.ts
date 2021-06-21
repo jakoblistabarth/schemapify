@@ -62,22 +62,27 @@ class Dcel {
     return this.faces.find((f) => f.edge === null);
   }
 
-  getHalfEdges(edgeClass?: EdgeClasses, simple = false): HalfEdge[] {
-    // FIXME: confusing for map output: sometimes clockwise/counterclockwise assignment in map output wrong
-    let edges = this.halfEdges;
-    if (simple) {
-      let simpleEdges: Array<HalfEdge> = [];
-      this.getBoundedFaces().forEach((f) => {
-        f.getEdges().forEach((halfEdge) => {
-          const idx = simpleEdges.indexOf(halfEdge.twin);
-          if (idx < 0) simpleEdges.push(halfEdge);
-        });
-      });
-      edges = simpleEdges;
-    }
-
-    if (edgeClass) return edges.filter((e) => e.class === edgeClass);
+  /**
+   *
+   * @param edgeClass if set, only the halfEdges of this class will be returned
+   * @param simple if true, for every pair of halfEdges only one will be returned, default = false
+   * @param significantTail if true, for a pair of halfEdges which do have a significant vertex, the one where the significant vertex is the tail will be returned, default = false
+   * @returns a (sub)set of halfEdges
+   */
+  getHalfEdges(edgeClass?: EdgeClasses, simple = false, fromSignificant = false): HalfEdge[] {
+    let edges = edgeClass ? this.halfEdges.filter((e) => e.class === edgeClass) : this.halfEdges;
+    edges = simple ? this.getSimpleEdges(edges) : edges;
     return edges;
+  }
+
+  getSimpleEdges(edges: HalfEdge[]) {
+    // FIXME: confusing for map output: sometimes clockwise/counterclockwise assignment in map output wrong
+    let simpleEdges: Array<HalfEdge> = [];
+    edges.forEach((halfEdge) => {
+      const idx = simpleEdges.indexOf(halfEdge.twin);
+      if (idx < 0) simpleEdges.push(halfEdge);
+    });
+    return simpleEdges;
   }
 
   getVertices(significance?: Significance) {
@@ -287,7 +292,7 @@ class Dcel {
   preProcess(): void {
     this.config = config;
     this.setEpsilon(this.config.lambda);
-    this.splitEdges();
+    // this.splitEdges();
   }
 
   classifyVertices(): void {
@@ -311,21 +316,36 @@ class Dcel {
 
   edgesToStaircases() {
     const edgesPerType = {
-      UB: this.getHalfEdges(EdgeClasses.UB, true),
+      UB: this.getHalfEdges(EdgeClasses.UB, true).map((edge) =>
+        !edge.getSignificantVertex() || edge.getSignificantVertex() === edge.getTail()
+          ? edge
+          : edge.twin
+      ),
       AD: this.getHalfEdges(EdgeClasses.AD).filter(
         (edge) => edge.getSignificantVertex() === edge.getTail()
       ),
-      // UD: this.getHalfEdges(EdgeClasses.UD, true),
-      // E: this.getHalfEdges(EdgeClasses.E, true),
+      E: this.getHalfEdges(EdgeClasses.E, true).map((edge) =>
+        !edge.getSignificantVertex() || edge.getSignificantVertex() === edge.getTail()
+          ? edge
+          : edge.twin
+      ),
+      UD: this.getHalfEdges(EdgeClasses.UD, true).map((edge) =>
+        !edge.getSignificantVertex() || edge.getSignificantVertex() === edge.getTail()
+          ? edge
+          : edge.twin
+      ),
     };
 
-    Object.values(edgesPerType).forEach((edges) => this.replaceWithStaircases(edges));
+    console.log(edgesPerType);
+    this.replaceWithStaircases(edgesPerType.E.slice(1, 2));
+    // Object.values(edgesPerType).forEach((edges) => this.replaceWithStaircases(edges));
   }
 
   replaceWithStaircases(edges: HalfEdge[]) {
     edges.forEach((edge) => {
       const stepPoints = new Staircase(edge).getStaircasePoints().slice(1, -1);
-      let edgeToSplit: HalfEdge = edge;
+      console.log(edge.uuid, stepPoints);
+      let edgeToSplit = edge;
       for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
     });
   }
@@ -482,14 +502,18 @@ class Dcel {
               <span class="material-icons">arrow_forward</span>
               (${e.twin.tail.x}/${e.twin.tail.y})
               <span class="material-icons">highlight_alt</span> ${e.face?.uuid.substring(0, 5)}
-              ${e.class}`,
+              ${e.class}
+              ${e.assignedDirection}
+              `,
           twin: `
               <span class="material-icons">rotate_right</span>
               ${e.twin.uuid.substring(0, 5)} (${e.twin.tail.x}/${e.twin.tail.y})
               <span class="material-icons">arrow_back</span>
               (${e.tail.x}/${e.tail.y})
               <span class="material-icons">highlight_alt</span> ${e.twin.face?.uuid.substring(0, 5)}
-              ${e.twin.class}`,
+              ${e.twin.class}
+              ${e.twin.assignedDirection}
+              `,
         },
       };
     });
