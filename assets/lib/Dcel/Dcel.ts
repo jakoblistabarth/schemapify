@@ -62,7 +62,7 @@ class Dcel {
     return this.faces.find((f) => f.edge === null);
   }
 
-  getHalfEdges(edgeClass?: EdgeClasses, simple = false) {
+  getHalfEdges(edgeClass?: EdgeClasses, simple = false): HalfEdge[] {
     // FIXME: confusing for map output: sometimes clockwise/counterclockwise assignment in map output wrong
     let edges = this.halfEdges;
     if (simple) {
@@ -302,18 +302,20 @@ class Dcel {
   }
 
   edgesToStaircases() {
-    const ADs = this.getHalfEdges(EdgeClasses.AD).filter(
-      (edge) => edge.getSignificantVertex() === edge.getTail()
-    );
-    ADs.forEach((edge) => {
-      const stepPoints = new Staircase(edge).points.slice(1, -1);
-      let edgeToSplit: HalfEdge = edge;
-      for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
-    });
+    const edgesPerType = {
+      UB: this.getHalfEdges(EdgeClasses.UB, true),
+      AD: this.getHalfEdges(EdgeClasses.AD).filter(
+        (edge) => edge.getSignificantVertex() === edge.getTail()
+      ),
+      // UD: this.getHalfEdges(EdgeClasses.UD, true),
+      // E: this.getHalfEdges(EdgeClasses.E, true),
+    };
 
-    const UBs = this.getHalfEdges(EdgeClasses.UB, true);
+    Object.values(edgesPerType).forEach((edges) => this.replaceWithStaircases(edges));
+  }
 
-    UBs.forEach((edge) => {
+  replaceWithStaircases(edges: HalfEdge[]) {
+    edges.forEach((edge) => {
       const stepPoints = new Staircase(edge).getStaircasePoints().slice(1, -1);
       let edgeToSplit: HalfEdge = edge;
       for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
