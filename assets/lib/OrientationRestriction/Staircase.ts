@@ -2,7 +2,6 @@ import HalfEdge, { EdgeClasses } from "../Dcel/HalfEdge";
 import Point from "../Geometry/Point";
 import Line from "../Geometry/Line";
 import ConvexHullGrahamScan from "graham_scan";
-
 class Staircase {
   edge: HalfEdge;
   region: Array<Point>;
@@ -41,7 +40,7 @@ class Staircase {
       // TODO: like UB and E but accommodate for the appendex area
       return;
     } else if (edgeClass === EdgeClasses.AD) {
-      this.points = this.getStaircasePoints(this.edge);
+      this.points = this.getStaircasePoints();
       const convexHull = new ConvexHullGrahamScan();
       this.points.forEach((p) => convexHull.addPoint(p.x, p.y));
       return convexHull.getHull().map((p) => new Point(p.x, p.y));
@@ -62,26 +61,26 @@ class Staircase {
     return stepNumbers;
   }
 
-  getStaircasePoints(edge: HalfEdge) {
-    switch (edge.class) {
+  getStaircasePoints() {
+    switch (this.edge.class) {
+      case EdgeClasses.UB:
+        return this.getStairCasePointsUB();
       case EdgeClasses.AD:
-        return this.getStairCasePointsAD(edge);
+        return this.getStairCasePointsAD();
       case EdgeClasses.AB:
         return; // TODO: implement other cases
     }
   }
 
-  getStairCasePointsAD(edge: HalfEdge) {
+  getStairCasePointsAD() {
+    const edge = this.edge;
     const epsilon = 0.1;
     const deltaE = edge.getLength() * epsilon;
-    const d1 = this.edge.dcel.config.c.getAngles()[edge.assignedAngle];
+    const d1 = edge.getAssignedAngle();
     const d2 = edge.getAngle();
     const d1Opposite = (d1 + Math.PI) % (Math.PI * 2);
 
-    // console.log(edge.getTail().xy(), d1, d2, edge.assignedAngle);
-
-    const points = [];
-
+    const points: Point[] = [];
     const tail = edge.getTail();
     const head = edge.getHead();
 
@@ -92,6 +91,30 @@ class Staircase {
     points[4] = points[3].getNewPoint((edge.getLength() * (1 - epsilon)) / 2, d2);
     points[5] = points[4].getNewPoint(deltaE, d1);
     points[6] = head;
+
+    return points;
+  }
+
+  getStairCasePointsUB(se: number = 2): Point[] {
+    const edge = this.edge;
+
+    const d1 = edge.getAssignedAngle();
+    const d2 = edge.getAssociatedAngles().find((angle) => angle !== d1);
+    const [l1, l2] = edge.getStepLengths(se);
+
+    const points: Point[] = [edge.getTail()];
+    for (let idx = 0; idx < se; idx++) {
+      const o = points[idx * 2];
+      if (idx % 2 === 0) {
+        const p1 = o.getNewPoint(l1, d1);
+        const p2 = p1.getNewPoint(l2, d2);
+        points.push(p1, p2);
+      } else {
+        const p1 = o.getNewPoint(l2, d2);
+        const p2 = p1.getNewPoint(l1, d1);
+        points.push(p1, p2);
+      }
+    }
 
     return points;
   }

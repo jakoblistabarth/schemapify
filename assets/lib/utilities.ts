@@ -21,3 +21,13 @@ export const groupBy = (key: string) => (array: any[]) =>
     objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
     return objectsByKeyValue;
   }, {});
+
+/**
+ *
+ * @param angle in radians
+ * @returns a unit vector
+ */
+export function getUnitVector(angle: number): number[] {
+  angle = angle > Math.PI ? angle - Math.PI * 2 : angle;
+  return [Math.cos(angle), Math.sin(angle)];
+}
