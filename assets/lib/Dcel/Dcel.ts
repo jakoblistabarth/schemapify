@@ -13,13 +13,15 @@ class Dcel {
   faces: Array<Face>;
   featureProperties: geojson.GeoJsonProperties;
   config: Config;
+  original: Dcel;
 
   constructor() {
     this.vertices = new Map();
     this.halfEdges = [];
     this.faces = [];
     this.featureProperties = {};
-    this.config;
+    this.config = undefined;
+    this.original = undefined;
   }
 
   makeVertex(x: number, y: number): Vertex {
@@ -349,6 +351,7 @@ class Dcel {
 
   constrainAngles(): void {
     this.classify();
+    this.original = copyInstance(this);
     this.edgesToStaircases();
   }
 
@@ -470,6 +473,29 @@ class Dcel {
     });
 
     return createGeoJSON(faceFeatures);
+  }
+
+  staircasesToGeoJSON(): geojson.GeoJSON {
+    const staircaseFeatures = this.original
+      .getHalfEdges(undefined, true)
+      .slice(0, 50)
+      .map((edge): geojson.Feature => {
+        console.log(edge.class);
+        const staircase: Staircase = new Staircase(edge);
+        const coordinates: number[][] = staircase.region.map((p) => [p.x, p.y]);
+        return {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [coordinates],
+          },
+          properties: {
+            edge: edge.uuid,
+            edgeClass: edge.class,
+          },
+        };
+      });
+    return createGeoJSON(staircaseFeatures);
   }
 
   edgesToGeoJSON(): geojson.GeoJSON {

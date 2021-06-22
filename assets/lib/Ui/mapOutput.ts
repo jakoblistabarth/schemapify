@@ -182,7 +182,52 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
+  const staircaseLayer = L.geoJSON(dcel.staircasesToGeoJSON(), {
+    style: function (feature) {
+      return {
+        color: "lightgrey",
+        weight: 1,
+        fillOpacity: 0.2,
+      };
+    },
+    onEachFeature: function (feature, layer) {
+      layer.on({
+        mouseover: function (e) {
+          var feature = e.target;
+          feature.setStyle({
+            weight: 2,
+            fillOpacity: 0.5,
+          });
+        },
+        mouseout: function (e) {
+          e.target.bringToBack();
+          staircaseLayer.resetStyle(e.target);
+        },
+      });
+
+      const properties = Object.entries(feature.properties)
+        .map((elem) => {
+          return `
+            <tr>
+              <td>${elem[0]}</td>
+              <td><strong>${elem[1]}</strong></td>
+            </tr>
+          `;
+        })
+        .join("");
+
+      layer.bindTooltip(
+        `
+          <table>
+            ${properties}
+          </table>
+        `
+      );
+    },
+  });
+
   faceLayer.addTo(DCELMap);
+  staircaseLayer.addTo(DCELMap);
   edgeLayer.addTo(DCELMap);
   vertexLayer.addTo(DCELMap);
   DCELMap.fitBounds(vertexLayer.getBounds());
@@ -193,11 +238,13 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
       faceLayer.remove();
       vertexLayer.remove();
       edgeLayer.remove();
+      staircaseLayer.remove();
       facesLabel.classList.remove("active");
       polygonsLabel.classList.add("active");
     } else {
       polygonLayer.remove();
       faceLayer.addTo(DCELMap);
+      staircaseLayer.addTo(DCELMap);
       edgeLayer.addTo(DCELMap);
       vertexLayer.addTo(DCELMap);
       facesLabel.classList.add("active");
