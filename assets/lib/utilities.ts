@@ -31,3 +31,7 @@ export function getUnitVector(angle: number): number[] {
   angle = angle > Math.PI ? angle - Math.PI * 2 : angle;
   return [Math.cos(angle), Math.sin(angle)];
 }
+
+export function copyInstance(original: object) {
+  return Object.assign(Object.create(Object.getPrototypeOf(original)), original);
+}

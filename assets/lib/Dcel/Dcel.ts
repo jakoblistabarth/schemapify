@@ -4,7 +4,7 @@ import Point from "../Geometry/Point";
 import HalfEdge, { EdgeClasses } from "./HalfEdge";
 import Face from "./Face";
 import Staircase from "../OrientationRestriction/Staircase";
-import { createGeoJSON, groupBy } from "../utilities";
+import { copyInstance, createGeoJSON, groupBy } from "../utilities";
 import * as geojson from "geojson";
 
 class Dcel {
@@ -382,7 +382,7 @@ class Dcel {
     // copy faces, so that every face has only one FID
     const flattenedFaces = this.getBoundedFaces().reduce((acc, f) => {
       f.FID.forEach((id, idx) => {
-        let newFace = Object.assign(Object.create(Object.getPrototypeOf(f)), f); // clone the object
+        let newFace = copyInstance(f); // clone the object
         newFace.FID = id;
         if (idx > 0) newFace.outerRing = null;
         acc.push(newFace);
