@@ -19,31 +19,29 @@ class Staircase {
 
   getRegion(): Array<Point> {
     const edge = this.edge;
-    const edgeClass = edge.class;
-    if (edgeClass === EdgeClasses.AB) {
-      return [
-        new Point(edge.getTail().x, edge.getTail().y),
-        new Point(edge.getHead().x, edge.getHead().y),
-      ]; // QUESTION: better 4 coordinates to span an area?
-    } else if (edgeClass === EdgeClasses.UB || edgeClass === EdgeClasses.E) {
-      const [lower, upper] = edge.getAssociatedSector()[0].getBounds();
-      const A = new Point(edge.getTail().x, edge.getTail().y);
-      const a = new Line(A, lower);
-      const d = new Line(A, upper);
-      const C = new Point(edge.getHead().x, edge.getHead().y);
-      const b = new Line(C, upper);
-      const c = new Line(C, lower);
-      const B = a.intersectsLine(b);
-      const D = d.intersectsLine(c);
-      return [A, B, C, D];
-    } else if (edgeClass === EdgeClasses.UD) {
-      // TODO: like UB and E but accommodate for the appendex area
-      return;
-    } else if (edgeClass === EdgeClasses.AD) {
-      this.points = this.getStaircasePoints();
-      const convexHull = new ConvexHullGrahamScan();
-      this.points.forEach((p) => convexHull.addPoint(p.x, p.y));
-      return convexHull.getHull().map((p) => new Point(p.x, p.y));
+    switch (this.edge.class) {
+      case EdgeClasses.AB:
+        return [
+          new Point(edge.getTail().x, edge.getTail().y),
+          new Point(edge.getHead().x, edge.getHead().y),
+          new Point(edge.getTail().x, edge.getTail().y),
+        ]; // QUESTION: better 4 coordinates to span an area?
+      case EdgeClasses.UB:
+        return this.getSimpleRegion();
+      case EdgeClasses.E:
+        return this.getSimpleRegion();
+      case EdgeClasses.UD:
+        // TODO: like UB and E but accommodate for the appendex area
+        return [
+          new Point(edge.getTail().x, edge.getTail().y),
+          new Point(edge.getHead().x, edge.getHead().y),
+          new Point(edge.getTail().x, edge.getTail().y),
+        ];
+      case EdgeClasses.AD:
+        this.points = this.getStaircasePoints();
+        const convexHull = new ConvexHullGrahamScan();
+        this.points.forEach((p) => convexHull.addPoint(p.x, p.y));
+        return convexHull.getHull().map((p) => new Point(p.x, p.y));
     }
   }
 
@@ -95,6 +93,20 @@ class Staircase {
     points[6] = head;
 
     return points;
+  }
+
+  getSimpleRegion(): Point[] {
+    const edge = this.edge;
+    const [lower, upper] = edge.getAssociatedSector()[0].getBounds();
+    const A = new Point(edge.getTail().x, edge.getTail().y);
+    const a = new Line(A, lower);
+    const d = new Line(A, upper);
+    const C = new Point(edge.getHead().x, edge.getHead().y);
+    const b = new Line(C, upper);
+    const c = new Line(C, lower);
+    const B = a.intersectsLine(b);
+    const D = d.intersectsLine(c);
+    return [A, B, C, D];
   }
 
   getStairCasePointsUB(se: number = 2): Point[] {
