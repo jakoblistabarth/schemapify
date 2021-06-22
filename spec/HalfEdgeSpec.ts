@@ -242,7 +242,7 @@ describe("bisect()", function () {
     dcel.getBoundedFaces()[0].edge.twin.bisect();
 
     expect(dcel.getFaces().length).toBe(2);
-    expect(dcel.halfEdges.length).toBe(10);
+    expect(dcel.halfEdges.size).toBe(10);
 
     expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(5);
     expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(5);
@@ -256,7 +256,7 @@ describe("bisect()", function () {
     dcel.getBoundedFaces()[0].edge.bisect();
 
     expect(dcel.getFaces().length).toBe(2);
-    expect(dcel.halfEdges.length).toBe(10);
+    expect(dcel.halfEdges.size).toBe(10);
 
     expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(5);
     expect(dcel.getBoundedFaces()[0].edge.twin.getCycle(false).length).toBe(5);
@@ -270,7 +270,7 @@ describe("bisect()", function () {
     dcel.getBoundedFaces()[0].edge.bisect(new Point(1, 1));
 
     expect(dcel.getFaces().length).toBe(2);
-    expect(dcel.halfEdges.length).toBe(10);
+    expect(dcel.halfEdges.size).toBe(10);
 
     expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(5);
     expect(dcel.getBoundedFaces()[0].edge.twin.getCycle(false).length).toBe(5);
@@ -284,7 +284,7 @@ describe("bisect()", function () {
     dcel.getBoundedFaces()[0].getEdges()[1].bisect();
 
     expect(dcel.getFaces().length).toBe(3);
-    expect(dcel.halfEdges.length).toBe(12);
+    expect(dcel.halfEdges.size).toBe(12);
 
     expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
     expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(4);
@@ -302,7 +302,7 @@ describe("bisect()", function () {
     dcel.getBoundedFaces()[0].getEdges()[2].bisect();
 
     expect(dcel.getFaces().length).toBe(3);
-    expect(dcel.halfEdges.length).toBe(12);
+    expect(dcel.halfEdges.size).toBe(12);
 
     expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
     expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(4);
@@ -321,9 +321,9 @@ describe("subdivideToThreshold()", function () {
     const dcel = Dcel.fromGeoJSON(json);
     const edge = dcel.getBoundedFaces()[0].edge;
 
-    const halfEdgesBefore = dcel.halfEdges.length;
+    const halfEdgesBefore = dcel.halfEdges.size;
     edge.subdivideToThreshold(0.5);
-    const halfEdgesAfter = dcel.halfEdges.length;
+    const halfEdgesAfter = dcel.halfEdges.size;
 
     expect(halfEdgesAfter).toBe(halfEdgesBefore - 2 + 8 * 2);
   });
@@ -336,6 +336,6 @@ describe("subdivideToThreshold()", function () {
 
     dcel.splitEdges(0.5);
 
-    expect(dcel.halfEdges.length).toBe(64);
+    expect(dcel.halfEdges.size).toBe(64);
   });
 });

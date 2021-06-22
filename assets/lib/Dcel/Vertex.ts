@@ -23,6 +23,16 @@ class Vertex extends Point {
     return `${x}/${y}`;
   }
 
+  /**
+   *
+   * @param stop defines how many strings of the uuid are returned
+   * @returns the edge's uuid
+   */
+  getUuid(length?: number) {
+    // QUESTION: extending classes instead of declaring this method separately for all 3 dcel entities?
+    return this.uuid.substring(0, length);
+  }
+
   distanceToVertex(p: Point): number {
     return this.distanceToPoint(p);
   }

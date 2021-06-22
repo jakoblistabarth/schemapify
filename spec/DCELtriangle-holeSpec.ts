@@ -25,7 +25,7 @@ describe("A Dcel of a single triangle with one triangular hole", function () {
   });
 
   it("has 12 halfedges", function () {
-    expect(dcel.halfEdges.length).toBe(12);
+    expect(dcel.halfEdges.size).toBe(12);
   });
 
   it("a counterclockwise halfedge of the hole has edges with a pointer to an outer Ring", function () {

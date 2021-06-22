@@ -25,6 +25,6 @@ describe("A Dcel of a single square with one square hole", function () {
   });
 
   it("has 16 halfedges", function () {
-    expect(dcel.halfEdges.length).toBe(16);
+    expect(dcel.halfEdges.size).toBe(16);
   });
 });

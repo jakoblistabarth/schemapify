@@ -34,8 +34,21 @@ class HalfEdge {
     this.face = null;
     this.prev = null;
     this.next = null;
-    this.isAligning;
-    this.class;
+    this.isAligning = undefined;
+    this.class = undefined;
+  }
+
+  static getKey(tail: Vertex, head: Vertex): string {
+    return `${tail.getUuid(10)}/${head.getUuid(10)}`;
+  }
+
+  /**
+   *
+   * @param stop defines how many strings of the uuid are returned
+   * @returns the edge's uuid
+   */
+  getUuid(length?: number) {
+    return this.uuid.substring(0, length);
   }
 
   getTail(): Vertex {

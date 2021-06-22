@@ -302,13 +302,15 @@ describe("classifyEdges() in a classification where all edges are classified and
     const dcel = Dcel.fromGeoJSON(json);
     dcel.preProcess();
     dcel.classify();
-    const edgesWithoutAssignedAngles = dcel.halfEdges.filter(
-      (edge) => edge.assignedDirection === undefined
-    );
-    const edgesWithoutClassification = dcel.halfEdges.filter((edge) => edge.class === undefined);
-    const edgesWithDivergingClasses = dcel.halfEdges.filter(
-      (edge) => edge.class !== edge.twin.class
-    );
+    const edgesWithoutAssignedAngles = dcel
+      .getHalfEdges()
+      .filter((edge) => edge.assignedDirection === undefined);
+    const edgesWithoutClassification = dcel
+      .getHalfEdges()
+      .filter((edge) => edge.class === undefined);
+    const edgesWithDivergingClasses = dcel
+      .getHalfEdges()
+      .filter((edge) => edge.class !== edge.twin.class);
 
     expect(edgesWithoutAssignedAngles.length).toBe(0);
     expect(edgesWithDivergingClasses.length).toBe(0);
@@ -322,13 +324,15 @@ describe("classifyEdges() in a classification where all edges are classified and
     const dcel = Dcel.fromGeoJSON(json);
     dcel.preProcess();
     dcel.classify();
-    const edgesWithoutAssignedAngles = dcel.halfEdges.filter(
-      (edge) => edge.assignedDirection === undefined
-    );
-    const edgesWithoutClassification = dcel.halfEdges.filter((edge) => edge.class === undefined);
-    const edgesWithDivergingClasses = dcel.halfEdges.filter(
-      (edge) => edge.class !== edge.twin.class
-    );
+    const edgesWithoutAssignedAngles = dcel
+      .getHalfEdges()
+      .filter((edge) => edge.assignedDirection === undefined);
+    const edgesWithoutClassification = dcel
+      .getHalfEdges()
+      .filter((edge) => edge.class === undefined);
+    const edgesWithDivergingClasses = dcel
+      .getHalfEdges()
+      .filter((edge) => edge.class !== edge.twin.class);
 
     expect(edgesWithoutAssignedAngles.length).toBe(0);
     expect(edgesWithDivergingClasses.length).toBe(0);

@@ -25,7 +25,7 @@ describe("A Dcel of a single square", function () {
   });
 
   it("has 8 edges", function () {
-    expect(dcel.halfEdges.length).toBe(8);
+    expect(dcel.halfEdges.size).toBe(8);
   });
 
   it("has 4 linked inner edges", function () {

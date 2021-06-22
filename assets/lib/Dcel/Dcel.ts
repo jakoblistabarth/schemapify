@@ -9,17 +9,17 @@ import * as geojson from "geojson";
 
 class Dcel {
   vertices: Map<string, Vertex>;
-  halfEdges: Array<HalfEdge>;
+  halfEdges: Map<string, HalfEdge>;
   faces: Array<Face>;
   featureProperties: geojson.GeoJsonProperties;
   config: Config;
 
   constructor() {
     this.vertices = new Map();
-    this.halfEdges = [];
+    this.halfEdges = new Map();
     this.faces = [];
     this.featureProperties = {};
-    this.config;
+    this.config = undefined;
   }
 
   makeVertex(x: number, y: number): Vertex {
@@ -32,13 +32,11 @@ class Dcel {
   }
 
   makeHalfEdge(tail: Vertex, head: Vertex): HalfEdge {
-    const existingHalfEdge = this.halfEdges.find((edge) => {
-      return tail == edge.tail && edge.twin?.tail == head; // TODO: check why .twin is only not defined in bisect()
-    });
-    if (existingHalfEdge) return existingHalfEdge;
+    const key = HalfEdge.getKey(tail, head);
+    if (this.halfEdges.has(key)) return this.halfEdges.get(key);
 
     const halfEdge = new HalfEdge(tail, this);
-    this.halfEdges.push(halfEdge);
+    this.halfEdges.set(key, halfEdge);
     tail.edges.push(halfEdge);
     tail.edges.sort();
     return halfEdge;
@@ -70,7 +68,8 @@ class Dcel {
    * @returns a (sub)set of halfEdges
    */
   getHalfEdges(edgeClass?: EdgeClasses, simple = false, fromSignificant = false): HalfEdge[] {
-    let edges = edgeClass ? this.halfEdges.filter((e) => e.class === edgeClass) : this.halfEdges;
+    const halfEdges = [...this.halfEdges].map(([k, e]) => e);
+    let edges = edgeClass ? halfEdges.filter((e) => e.class === edgeClass) : halfEdges;
     edges = simple ? this.getSimpleEdges(edges) : edges;
     return edges;
   }
@@ -97,11 +96,9 @@ class Dcel {
     return this.vertices.get(Vertex.getKey(x, y));
   }
 
-  removeHalfEdge(edge: HalfEdge): Array<HalfEdge> {
-    const idx = this.halfEdges.indexOf(edge);
-    if (idx > -1) {
-      this.halfEdges.splice(idx, 1);
-    }
+  removeHalfEdge(edge: HalfEdge): Map<string, HalfEdge> {
+    const key = HalfEdge.getKey(edge.getTail(), edge.getHead());
+    this.halfEdges.delete(key);
     return this.halfEdges;
   }
 
@@ -185,7 +182,7 @@ class Dcel {
           ring = idx > 0 ? ring.reverse() : ring;
           const [firstPoint, secondPoint] = ring;
 
-          const edge = subdivision.halfEdges.find((e) => {
+          const edge = subdivision.getHalfEdges().find((e) => {
             return (
               e.tail.x === firstPoint[0] &&
               e.tail.y === firstPoint[1] &&
@@ -221,8 +218,8 @@ class Dcel {
 
     // create unbounded Face (infinite outerFace) and assign it to edges which do not have a face yet
     const unboundedFace = subdivision.makeFace();
-    while (subdivision.halfEdges.find((edge) => edge.face === null)) {
-      const outerEdge = subdivision.halfEdges.find((edge) => edge.face === null);
+    while (subdivision.getHalfEdges().find((edge) => edge.face === null)) {
+      const outerEdge = subdivision.getHalfEdges().find((edge) => edge.face === null);
       outerEdge.getCycle().forEach((edge) => {
         edge.face = unboundedFace;
       });
@@ -495,19 +492,19 @@ class Dcel {
           twinClass: e.twin.class,
           edge: `
               <span class="material-icons">rotate_left</span>
-              ${e.uuid.substring(0, 5)} (${e.tail.x}/${e.tail.y})
+              ${e.getUuid(5)} (${e.tail.x}/${e.tail.y})
               <span class="material-icons">arrow_forward</span>
               (${e.twin.tail.x}/${e.twin.tail.y})
-              <span class="material-icons">highlight_alt</span> ${e.face?.uuid.substring(0, 5)}
+              <span class="material-icons">highlight_alt</span> ${e.face?.getUuid(5)}
               ${e.class}
               ${e.assignedDirection}
               `,
           twin: `
               <span class="material-icons">rotate_right</span>
-              ${e.twin.uuid.substring(0, 5)} (${e.twin.tail.x}/${e.twin.tail.y})
+              ${e.twin.getUuid(5)} (${e.twin.tail.x}/${e.twin.tail.y})
               <span class="material-icons">arrow_back</span>
               (${e.tail.x}/${e.tail.y})
-              <span class="material-icons">highlight_alt</span> ${e.twin.face?.uuid.substring(0, 5)}
+              <span class="material-icons">highlight_alt</span> ${e.twin.face?.getUuid(5)}
               ${e.twin.class}
               ${e.twin.assignedDirection}
               `,
