@@ -292,7 +292,7 @@ class Dcel {
   preProcess(): void {
     this.config = config;
     this.setEpsilon(this.config.lambda);
-    this.splitEdges();
+    // this.splitEdges();
   }
 
   classifyVertices(): void {
@@ -349,7 +349,7 @@ class Dcel {
 
   constrainAngles(): void {
     this.classify();
-    this.edgesToStaircases();
+    // this.edgesToStaircases();
   }
 
   simplify(): Dcel {

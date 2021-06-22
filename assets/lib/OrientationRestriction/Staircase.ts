@@ -146,6 +146,12 @@ class Staircase {
   }
 
   getStairCasePointsUD(se: number = 2): Point[] {
+    const edge = this.edge;
+
+    const d1 = edge.getAssignedAngle();
+    const d2 = edge.getAssociatedAngles().find((angle) => angle !== d1);
+    const [l1, l2] = edge.getStepLengths(se);
+
     const points: Point[] = [];
     // TODOD: implement staircases for UD
     return points;

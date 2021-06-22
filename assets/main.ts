@@ -33,7 +33,9 @@ const tests = [
   // "assets/data/shapes/3plgn.json",
   // "assets/data/shapes/3plgn-complex.json",
   // "assets/data/shapes/aligned-deviating.json",
-  "assets/data/shapes/edge-cases.json",
+  "assets/data/shapes/unaligned-deviating.json",
+  "assets/data/shapes/unaligned-deviating-2.json",
+  // "assets/data/shapes/edge-cases.json",
 ];
 
 function calculateMapGrid(mapGridID: string) {
