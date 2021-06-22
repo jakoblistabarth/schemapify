@@ -30,4 +30,4 @@ install build dependencies with `npm install`
 
 ## Licence
 
-This software is licensed under …
+This software is licensed under the [MIT License](https://mit-license.org/).
