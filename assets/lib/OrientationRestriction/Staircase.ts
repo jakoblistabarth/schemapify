@@ -45,6 +45,11 @@ class Staircase {
     }
   }
 
+  getStepArea(l1: number, l2: number): number {
+    const enclosingAngle = (Math.PI * 2) / this.edge.dcel.config.c.getDirections().length;
+    return (l1 * l2 * Math.sin(enclosingAngle)) / 2;
+  }
+
   getEdgeDistance() {
     if (this.edge.class === EdgeClasses.AB) {
       return;
@@ -68,10 +73,14 @@ class Staircase {
       case EdgeClasses.AD:
         return this.getStairCasePointsAD();
       case EdgeClasses.UD:
-        return this.getStairCasePointsUD(); // TODO: implement other cases
+        return this.getStairCasePointsUD();
     }
   }
 
+  /**
+   * Returns a staircase for an "aligned deviating" edge.
+   * @returns all points constructing the staircase (including tail and head of the original edge)
+   */
   getStairCasePointsAD() {
     const edge = this.edge;
     const epsilon = 0.1;
@@ -109,12 +118,17 @@ class Staircase {
     return [A, B, C, D];
   }
 
+  /**
+   * Returns a staircase for an "unaligned basic" edge.
+   * @param se number of steps used to construct the staircase, the minimum number of steps is, the functions default value: 2
+   * @returns all points constructing the staircase (including tail and head of the original edge)
+   */
   getStairCasePointsUB(se: number = 2): Point[] {
     const edge = this.edge;
 
     const d1 = edge.getAssignedAngle();
     const d2 = edge.getAssociatedAngles().find((angle) => angle !== d1);
-    const [l1, l2] = edge.getStepLengths(se);
+    const [l1, l2] = edge.getStepLengths(se, d1);
 
     const points: Point[] = [edge.getTail()];
     for (let idx = 0; idx < se; idx++) {
@@ -133,12 +147,17 @@ class Staircase {
     return points;
   }
 
+  /**
+   * Returns a staircase for an "evading" edge.
+   * @param se number of steps used to construct the staircase, the minimum number of steps is, the functions default value: 4
+   * @returns all points constructing the staircase (including tail and head of the original edge)
+   */
   getStairCasePointsE(se: number = 4): Point[] {
     const edge = this.edge;
 
     const d1 = edge.getAssignedAngle();
     const d2 = edge.getAssociatedAngles().find((angle) => angle !== d1);
-    const [l1, l2] = edge.getStepLengths(se);
+    const [l1, l2] = edge.getStepLengths(se, d1);
 
     const points: Point[] = [edge.getTail()];
     for (let idx = 0; idx < se; idx++) {
@@ -157,9 +176,62 @@ class Staircase {
     return points;
   }
 
-  getStairCasePointsUD(se: number = 2): Point[] {
-    const points: Point[] = [];
-    // TODOD: implement staircases for UD
+  /**
+   *
+   * @param originalStaircasePoints Points of the original staircase
+   * @param l1 length of an assigned step
+   * @param l2 length of an associated step
+   * @param d1 angle of the assigned step
+   * @returns
+   */
+  getAppendedAreaPoints(
+    originalStaircasePoints: Point[],
+    l1: number,
+    l2: number,
+    d1: number
+  ): Point[] {
+    const stepArea = this.getStepArea(l1, l2);
+    const height = stepArea / l1; // area of a Parallelogram, A = b*h
+    const a = stepArea / height;
+
+    const p1 = originalStaircasePoints[0].getNewPoint(a, this.edge.getAssignedAngle());
+    const p2 = p1.getNewPoint(l1, d1);
+
+    return [p1, p2];
+  }
+
+  /**
+   * Returns a staircase for an "unaligned deviating" edge.
+   * @param se number of steps used to construct the staircase, the minimum number of steps is, the functions default value: 4
+   * @returns all points constructing the staircase (including tail and head of the original edge)
+   */
+  getStairCasePointsUD(se: number = 4): Point[] {
+    const edge = this.edge;
+
+    // associated direction for this staircase is
+    // the edge's closest associated direction from its assigned angle
+    const [lower, upper] = edge.getAssociatedAngles();
+    const d1 = lower - edge.getAssignedAngle() < edge.getAssignedAngle() - upper ? lower : upper;
+    const d2 = edge.getAssociatedAngles().find((angle) => angle !== d1);
+    const [l1, l2] = edge.getStepLengths(se - 1, d1);
+
+    // like for an evading edge, but 1 associated step less
+    const points: Point[] = [edge.getTail()];
+    for (let idx = 0; idx < se - 1; idx++) {
+      const o = points[idx * 2];
+      if (idx < se / 2 - 1) {
+        const p1 = o.getNewPoint(l1, d1);
+        const p2 = p1.getNewPoint(l2, d2);
+        points.push(p1, p2);
+      } else {
+        const p1 = o.getNewPoint(l2, d2);
+        const p2 = p1.getNewPoint(l1, d1);
+        points.push(p1, p2);
+      }
+    }
+
+    const [p1, p2] = this.getAppendedAreaPoints(points, l1, l2, d1);
+    points.splice(1, 0, p1, p2);
     return points;
   }
 }
