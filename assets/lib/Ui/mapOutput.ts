@@ -53,13 +53,13 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
         fillOpacity: 1,
       }).bindTooltip(`
           <span class="material-icons">radio_button_checked</span>
-          ${props.uuid.substring(0, 5)} // TODO: use getUuid()
+          ${props.uuid.substring(0, 5)}
           (${v[0]}/${v[1]})<br>
           significant: ${props.significant}<br>
           <table>
             ${edges}
           </table>
-        `);
+        `); // TODO: use getUuid()
     },
     onEachFeature: function (feature, layer) {
       layer.on({
@@ -100,12 +100,12 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
             <tr>
                 <td><span class="material-icons">highlight_alt</span> </td>
                 <td>
-                  <strong>${feature.properties.uuid.substring(0, 5)}</strong> // TODO: use getUuid()
+                  <strong>${feature.properties.uuid.substring(0, 5)}</strong>
                 </td>
             </tr>
             ${properties}
           </table>
-        `
+        ` // TODO: use getUuid()
       );
     },
   });
