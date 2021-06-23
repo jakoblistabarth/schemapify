@@ -45,6 +45,12 @@ class Staircase {
     }
   }
 
+  /**
+   * Calculates the area of a step, which is a triangle.
+   * @param l1 length of the assigned edge
+   * @param l2 length of the associated edge
+   * @returns the area a step adds to respectively subtracts from its incident faces
+   */
   getStepArea(l1: number, l2: number): number {
     const enclosingAngle = (Math.PI * 2) / this.edge.dcel.config.c.getDirections().length;
     return (l1 * l2 * Math.sin(enclosingAngle)) / 2;
@@ -211,7 +217,11 @@ class Staircase {
     // associated direction for this staircase is
     // the edge's closest associated direction from its assigned angle
     const [lower, upper] = edge.getAssociatedAngles();
-    const d1 = lower - edge.getAssignedAngle() < edge.getAssignedAngle() - upper ? lower : upper;
+
+    const d1 =
+      Math.abs(lower - edge.getAssignedAngle()) < Math.abs(edge.getAssignedAngle() - upper)
+        ? lower
+        : upper;
     const d2 = edge.getAssociatedAngles().find((angle) => angle !== d1);
     const [l1, l2] = edge.getStepLengths(se - 1, d1);
 

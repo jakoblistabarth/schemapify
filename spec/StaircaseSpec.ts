@@ -160,4 +160,55 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     expect(d.x).toBeCloseTo(d2.x, 10);
     expect(d.y).toBeCloseTo(d2.y, 10);
   });
+
+  it("returns a staircase with a minimum of 9 points", function () {
+    const dcel = new Dcel();
+    dcel.config = { ...config, c: new C(2) };
+
+    const o = new Vertex(0, 0, dcel);
+    const d = new Vertex(2.5, 1, dcel);
+    const edge = dcel.makeHalfEdge(o, d);
+    const twin = dcel.makeHalfEdge(d, o);
+    edge.twin = twin;
+    twin.twin = edge;
+    edge.class = EdgeClasses.UD;
+    edge.assignedDirection = 2;
+    edge.dcel = dcel;
+
+    const staircase = new Staircase(edge);
+    const points = staircase.getStairCasePointsUD();
+    const d2 = points[points.length - 1];
+
+    expect(points.length).toBeGreaterThanOrEqual(9);
+    expect(d.x).toBeCloseTo(d2.x, 10);
+    expect(d.y).toBeCloseTo(d2.y, 10);
+  });
+});
+
+describe("getStepArea() calculates the area of a step (a triangle),", function () {
+  it("returns the correct area of a step for C(2)", function () {
+    const dcel = new Dcel();
+    dcel.config = { ...config, c: new C(2) };
+
+    const o = new Vertex(0, 0, dcel);
+    const d = new Vertex(10, 4, dcel);
+    const edge = dcel.makeHalfEdge(o, d);
+
+    const staircase = new Staircase(edge);
+    const stepArea = staircase.getStepArea(3, 1);
+    expect(stepArea).toBe(1.5);
+  });
+
+  it("returns the correct area of a step for C(4)", function () {
+    const dcel = new Dcel();
+    dcel.config = { ...config, c: new C(4) };
+
+    const o = new Vertex(0, 0, dcel);
+    const d = new Vertex(10, 4, dcel);
+    const edge = dcel.makeHalfEdge(o, d);
+
+    const staircase = new Staircase(edge);
+    const stepArea = staircase.getStepArea(3, 1);
+    expect(stepArea).toBeCloseTo(1.0607, 3);
+  });
 });
