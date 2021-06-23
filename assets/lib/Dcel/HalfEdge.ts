@@ -293,8 +293,8 @@ class HalfEdge {
     return (this.twin.class = classification);
   }
 
-  getStepLengths(se: number): number[] {
-    const d1 = this.getAssignedAngle();
+  getStepLengths(se: number, d1: number): number[] {
+    //TODO: move getStepLenghts() to staircase ??
     const d2 = this.getAssociatedAngles().find((angle) => angle !== d1);
     const d1u = getUnitVector(d1);
     const d2u = getUnitVector(d2);

@@ -20,6 +20,11 @@ class Cirregular {
     return this.getSectors().find((sector) => sector.idx == idx);
   }
 
+  getDirections(): number[] {
+    const n = this.angles.length;
+    return Array.from(Array(n).keys());
+  }
+
   getAngles(): number[] {
     return this.angles;
   }
