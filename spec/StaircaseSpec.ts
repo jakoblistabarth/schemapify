@@ -404,6 +404,22 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     expect(edge.getClosestAssociatedAngle()).toBe(Math.PI);
   });
 
+  it("when edge is in sector 2 and the assigned Direction is 0", function () {
+    const dcel = new Dcel();
+    dcel.config = { ...config, c: new C(2) };
+
+    const o = new Vertex(0, 0, dcel);
+    const d = new Vertex(-10, -4, dcel);
+    const edge = dcel.makeHalfEdge(o, d);
+    const twin = dcel.makeHalfEdge(d, o);
+    edge.twin = twin;
+    twin.twin = edge;
+    edge.class = EdgeClasses.UD;
+    edge.assignedDirection = 0;
+
+    expect(edge.getClosestAssociatedAngle()).toBe(Math.PI * 1.5);
+  });
+
   it("when edge is in sector 3 and the assigned Direction is 2", function () {
     const dcel = new Dcel();
     dcel.config = { ...config, c: new C(2) };

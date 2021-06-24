@@ -126,11 +126,10 @@ class Vertex extends Point {
     });
     directionsToAssign = closestBounds;
 
-    // if (edges.length === 4) console.log(closestBounds);
-
     closestBounds.forEach((direction, idx) => {
       const nextDirection = crawlArray(this.dcel.config.c.getAngles(), direction, +1);
       const prevDirection = crawlArray(this.dcel.config.c.getAngles(), direction, -1);
+      const prev2Direction = crawlArray(this.dcel.config.c.getAngles(), direction, -2);
 
       if (getOccurrence(directionsToAssign, direction) == 1) {
         directionsToAssign[idx] = direction;
@@ -138,13 +137,13 @@ class Vertex extends Point {
       }
 
       if (getOccurrence(directionsToAssign, nextDirection) > 0) {
-        directionsToAssign[idx] = prevDirection;
+        if (getOccurrence(directionsToAssign, prevDirection) > 0)
+          directionsToAssign[idx] = prev2Direction;
+        else directionsToAssign[idx] = prevDirection;
       } else {
         directionsToAssign[(idx + 1) % closestBounds.length] = nextDirection;
       }
     });
-
-    // if (this.edges.length === 4) console.log("after", directionsToAssign);
 
     edges.forEach((edge, idx) => {
       if (!edge.assignedDirection) edge.assignedDirection = directionsToAssign[idx];

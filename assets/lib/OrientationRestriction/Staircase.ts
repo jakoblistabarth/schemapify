@@ -215,6 +215,7 @@ class Staircase {
     const edge = this.edge;
 
     const d1 = edge.getClosestAssociatedAngle();
+
     const d2 = edge.getAssociatedAngles().find((angle) => angle !== d1);
     const [l1, l2] = edge.getStepLengths(se - 1, d1);
 

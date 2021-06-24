@@ -271,7 +271,7 @@ class HalfEdge {
     // set upperbound of last to Math.PI * 2 ?
     const upper = sector.idx === this.dcel.config.c.getSectors().length - 1 ? 0 : sector.upper;
     const lower = sector.lower;
-    const angle = this.getAssignedAngle();
+    const angle = this.getAssignedAngle() === 0 ? Math.PI * 2 : this.getAssignedAngle();
 
     return upper + this.dcel.config.c.getSectorAngle() === angle ? upper : lower;
   }

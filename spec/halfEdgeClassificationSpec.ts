@@ -175,6 +175,23 @@ describe("Given the examples in the paper of buchin et al., directions are assig
   });
 });
 
+describe("assignDirections() on own examples", function () {
+  let s: TestSetup;
+  beforeEach(function () {
+    s = createEdgeVertexSetup();
+  });
+
+  it("with 4 edges (A)", function () {
+    s.o.edges.push(s.directions.od90, s.directions.od143, s.directions.od180, s.directions.od217);
+    expect(s.o.assignDirections().map((edge) => edge.assignedDirection)).toEqual([1, 2, 3, 0]);
+  });
+
+  it("with 4 edges (B)", function () {
+    s.o.edges.push(s.directions.od90, s.directions.od104, s.directions.od180, s.directions.od217);
+    expect(s.o.assignDirections().map((edge) => edge.assignedDirection)).toEqual([0, 1, 2, 3]);
+  });
+});
+
 describe("Given the examples in the paper of buchin et al., classify() works as expected on example", function () {
   let s: TestSetup;
   beforeEach(function () {
