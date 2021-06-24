@@ -16,6 +16,15 @@ class Face {
     this.FID = null; // ID per geoJSON feature
   }
 
+  /**
+   *
+   * @param stop defines how many strings of the uuid are returned
+   * @returns the edge's uuid
+   */
+  getUuid(length?: number) {
+    return this.uuid.substring(0, length);
+  }
+
   getEdges(counterclockwise: boolean = true): Array<HalfEdge> {
     return this.edge.getCycle(counterclockwise);
   }

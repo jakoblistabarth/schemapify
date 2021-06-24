@@ -23,6 +23,16 @@ class Vertex extends Point {
     return `${x}/${y}`;
   }
 
+  /**
+   *
+   * @param stop defines how many strings of the uuid are returned
+   * @returns the edge's uuid
+   */
+  getUuid(length?: number) {
+    // QUESTION: extending classes instead of declaring this method separately for all 3 dcel entities?
+    return this.uuid.substring(0, length);
+  }
+
   distanceToVertex(p: Point): number {
     return this.distanceToPoint(p);
   }
@@ -117,15 +127,19 @@ class Vertex extends Point {
     directionsToAssign = closestBounds;
 
     closestBounds.forEach((direction, idx) => {
+      const nextDirection = crawlArray(this.dcel.config.c.getAngles(), direction, +1);
+      const prevDirection = crawlArray(this.dcel.config.c.getAngles(), direction, -1);
+      const prev2Direction = crawlArray(this.dcel.config.c.getAngles(), direction, -2);
+
       if (getOccurrence(directionsToAssign, direction) == 1) {
         directionsToAssign[idx] = direction;
         return;
       }
 
-      const nextDirection = crawlArray(this.dcel.config.c.getAngles(), direction, +1);
-      const prevDirection = crawlArray(this.dcel.config.c.getAngles(), direction, -1);
       if (getOccurrence(directionsToAssign, nextDirection) > 0) {
-        directionsToAssign[idx] = prevDirection;
+        if (getOccurrence(directionsToAssign, prevDirection) > 0)
+          directionsToAssign[idx] = prev2Direction;
+        else directionsToAssign[idx] = prevDirection;
       } else {
         directionsToAssign[(idx + 1) % closestBounds.length] = nextDirection;
       }

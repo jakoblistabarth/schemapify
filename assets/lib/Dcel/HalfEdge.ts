@@ -34,8 +34,21 @@ class HalfEdge {
     this.face = null;
     this.prev = null;
     this.next = null;
-    this.isAligning;
-    this.class;
+    this.isAligning = undefined;
+    this.class = undefined;
+  }
+
+  static getKey(tail: Vertex, head: Vertex): string {
+    return `${tail.getUuid(10)}/${head.getUuid(10)}`;
+  }
+
+  /**
+   *
+   * @param stop defines how many strings of the uuid are returned
+   * @returns the edge's uuid
+   */
+  getUuid(length?: number) {
+    return this.uuid.substring(0, length);
   }
 
   getTail(): Vertex {
@@ -239,6 +252,30 @@ class HalfEdge {
     }, []);
   }
 
+  /**
+   * Gets the closest associated angle (one bound of its associated sector)
+   * of an unaligned deviating(!) edge in respect to its assigned angle.
+   *
+   * Needed for constructing the staircase of an unaligned deviating edge.
+   *
+   * @returns closest associated angle of an edge in respect to its assigned angle.
+   */
+
+  // TODO: Where does such function live?
+  // within the HalfEdge class or rather within Staircase??
+  getClosestAssociatedAngle(): number {
+    if (this.class !== EdgeClasses.UD) return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges
+    const sector = this.getAssociatedSector()[0];
+
+    // TODO: refactor: find better solution for last sector and it's upper bound
+    // set upperbound of last to Math.PI * 2 ?
+    const upper = sector.idx === this.dcel.config.c.getSectors().length - 1 ? 0 : sector.upper;
+    const lower = sector.lower;
+    const angle = this.getAssignedAngle() === 0 ? Math.PI * 2 : this.getAssignedAngle();
+
+    return upper + this.dcel.config.c.getSectorAngle() === angle ? upper : lower;
+  }
+
   isDeviating(): boolean {
     // an angle needs to be already set for this halfedge, TODO: Error handling?
     if (this.isAligned()) {
@@ -293,8 +330,8 @@ class HalfEdge {
     return (this.twin.class = classification);
   }
 
-  getStepLengths(se: number): number[] {
-    const d1 = this.getAssignedAngle();
+  getStepLengths(se: number, d1: number): number[] {
+    //TODO: move getStepLenghts() to staircase ??
     const d2 = this.getAssociatedAngles().find((angle) => angle !== d1);
     const d1u = getUnitVector(d1);
     const d2u = getUnitVector(d2);

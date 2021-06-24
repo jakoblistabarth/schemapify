@@ -24,7 +24,7 @@ describe("A Dcel of 2 adjacent squares", function () {
   });
 
   it("has 14 edges", function () {
-    expect(dcel.halfEdges.length).toBe(14);
+    expect(dcel.halfEdges.size).toBe(14);
   });
 
   it("has inner faces with the right amount of edges", function () {
@@ -53,7 +53,7 @@ describe("A Dcel of 3 adjacent squares", function () {
   });
 
   it("has 20 edges", function () {
-    expect(dcel.halfEdges.length).toBe(20);
+    expect(dcel.halfEdges.size).toBe(20);
   });
 
   it("has inner faces with the right amount of edges", function () {

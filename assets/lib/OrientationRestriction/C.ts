@@ -25,6 +25,15 @@ class C {
     return angles;
   }
 
+  getSectorAngle(): number {
+    return Math.PI / this.orientations;
+  }
+
+  getDirections(): number[] {
+    const n = this.orientations * 2;
+    return Array.from(Array(n).keys());
+  }
+
   getSectors(): Array<Sector> {
     return this.angles.map((angle, idx) => {
       const upperBound = idx + 1 == this.angles.length ? Math.PI * 2 : this.angles[idx + 1];

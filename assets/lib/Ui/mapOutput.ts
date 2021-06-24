@@ -28,7 +28,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
           const tail = edge.getTail();
           return `
               <tr>
-                <td>${edge.uuid.substring(0, 5)}</td>
+                <td>${edge.getUuid(5)}</td>
                 <td>
                   (${tail.x}/${tail.y})
                   <span class="material-icons">arrow_forward</span>
@@ -52,13 +52,14 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
         opacity: 1,
         fillOpacity: 1,
       }).bindTooltip(`
-          <span class="material-icons">radio_button_checked</span> ${props.uuid.substring(0, 5)}
+          <span class="material-icons">radio_button_checked</span>
+          ${props.uuid.substring(0, 5)}
           (${v[0]}/${v[1]})<br>
           significant: ${props.significant}<br>
           <table>
             ${edges}
           </table>
-        `);
+        `); // TODO: use getUuid()
     },
     onEachFeature: function (feature, layer) {
       layer.on({
@@ -98,11 +99,13 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
           <table>
             <tr>
                 <td><span class="material-icons">highlight_alt</span> </td>
-                <td><strong>${feature.properties.uuid.substring(0, 5)}</strong></td>
+                <td>
+                  <strong>${feature.properties.uuid.substring(0, 5)}</strong>
+                </td>
             </tr>
             ${properties}
           </table>
-        `
+        ` // TODO: use getUuid()
       );
     },
   });
