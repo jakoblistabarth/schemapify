@@ -2,13 +2,16 @@ import Dcel from "./lib/Dcel/Dcel";
 import config from "./schematization.config";
 import { getMapFrom } from "./lib/Ui/mapOutput";
 import { drawC } from "./lib/Ui/cOutput";
+import { drawMapGrid } from "./lib/Ui/mapGrid";
+import { drawNavigator } from "./lib/Ui/schematizeNavigator";
+import { Map } from "leaflet";
 
 async function getJSON(path: string) {
   const response = await fetch(path);
   return response.json();
 }
 
-const tests = [
+const input = [
   // "assets/data/geodata/ne_110m_admin_0_countries.json",
   // "assets/data/geodata/ne_110m_africa_admin0.json",
   // "assets/data/geodata/AUT_adm1-simple.json",
@@ -38,32 +41,8 @@ const tests = [
   "assets/data/shapes/edge-cases.json",
 ];
 
-function calculateMapGrid(mapGridID: string) {
-  const grid = document.getElementById(mapGridID);
-  let templateColumns;
-  if (tests.length === 1) {
-    templateColumns = "1fr";
-  } else if (tests.length > 1 && tests.length <= 5 && tests.length != 3) {
-    templateColumns = "1fr 1fr";
-  } else {
-    templateColumns = "1fr 1fr 1fr";
-  }
-  grid.style.gridTemplateColumns = templateColumns;
-
-  tests.forEach((test) => {
-    const map = document.createElement("div");
-    const name = test.slice(test.lastIndexOf("/") + 1, -5);
-    map.id = name;
-    map.className = "map";
-    grid.appendChild(map);
-  });
-}
-
-calculateMapGrid("map-grid");
-drawC(document.getElementById("c"));
-document.getElementById("c-text").innerText = `C(${config.c.orientations})`;
-
-tests.forEach(async (test) => {
+const tests: { name: string; data: any; map: Map }[] = [];
+input.forEach(async (test, idx) => {
   const name = test.slice(test.lastIndexOf("/") + 1, -5);
   const data = await getJSON(test);
   // TODO: validate() data (within getJSON??) check if of type polygon or multipolygon, check crs and save it for later?
@@ -71,5 +50,11 @@ tests.forEach(async (test) => {
   dcel.schematize();
 
   dcel.log(name);
-  getMapFrom(dcel, name);
+  const dcelMap = getMapFrom(dcel, name);
+  tests[idx] = { name: name, data: data, map: dcelMap };
 });
+
+drawMapGrid(input);
+drawC(document.getElementById("c"));
+document.getElementById("c-text").innerText = `C(${config.c.orientations})`;
+drawNavigator(tests);

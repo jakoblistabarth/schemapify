@@ -6,6 +6,7 @@ import Face from "./Face";
 import Staircase from "../OrientationRestriction/Staircase";
 import { copyInstance, createGeoJSON, groupBy } from "../utilities";
 import * as geojson from "geojson";
+import { STOP } from "../Ui/schematizeNavigator";
 
 class Dcel {
   vertices: Map<string, Vertex>;
@@ -354,10 +355,22 @@ class Dcel {
     return this;
   }
 
-  schematize(): void {
-    this.preProcess();
-    this.constrainAngles();
-    this.simplify();
+  schematize(stop?: string): void {
+    if (!stop) {
+      this.preProcess();
+      this.constrainAngles();
+      this.simplify();
+      return;
+    }
+
+    this.config = config;
+    this.setEpsilon(this.config.lambda);
+    this.splitEdges();
+    if (stop === STOP.SUBDIVIDE) return;
+    this.classify();
+    if (stop === STOP.CLASSIFY) return;
+    this.edgesToStaircases();
+    if (stop === STOP.STAIRCASE) return;
   }
 
   log(name: string, verbose: boolean = false): void {

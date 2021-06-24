@@ -1,6 +1,11 @@
+@import url("variables.css");
+@import url("typography.css");
+@import url("leaflet.css");
+
 body {
   margin: 0;
   font-family: "DM Mono", monospace;
+  font-size: var(--fontsize-base);
 }
 #map-grid {
   height: 100vh;
@@ -11,40 +16,6 @@ body {
 .map {
   height: 100%;
   width: 100%;
-}
-.leaflet-container {
-  font-family: "DM Mono", monospace;
-}
-.leaflet-tooltip {
-  background-color: rgb(10, 10, 10);
-  color: white;
-  border-color: rgb(10, 10, 10);
-  opacity: 1;
-}
-.leaflet-tooltip-left:before {
-  border-left-color: rgb(10, 10, 10);
-}
-.leaflet-tooltip-right:before {
-  border-right-color: rgb(10, 10, 10);
-}
-.leaflet-tooltip table {
-  border-collapse: collapse;
-}
-.leaflet-tooltip table .material-icons {
-  font-size: 1em;
-  top: 0.2em;
-}
-.leaflet-tooltip td {
-  padding: 0 0.5em;
-}
-.leaflet-tooltip tr td:first-child {
-  padding-left: 0;
-}
-
-.material-icons {
-  font-size: 18px;
-  position: relative;
-  top: 4.5px;
 }
 
 nav {
@@ -59,11 +30,31 @@ nav {
 #toolbar {
   background-color: white;
   box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2);
-  font-size: 0.8em;
-  border-radius: 10px;
+  border-radius: var(--border-radius);
   display: flex;
   align-items: center;
   padding: 1em;
+}
+
+#schematize-navigator {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 100;
+  border-radius: var(--border-radius);
+  padding: 1em;
+  background-color: white;
+}
+
+#schematize-navigator li {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+#schematize-navigator li:hover {
+  background-color: lightgrey;
+  border-radius: var(--border-radius);
 }
 
 .divider {
