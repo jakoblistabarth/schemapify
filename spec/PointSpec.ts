@@ -1,4 +1,5 @@
 import Point from "../assets/lib/Geometry/Point";
+import { getPolygonArea } from "../assets/lib/utilities";
 
 describe("distanceToPoint()", function () {
   it("returns the correct distance between 2 vertices", function () {
@@ -39,5 +40,17 @@ describe("isInPolygon()", function () {
     expect(a.isInPolygon(A)).toBeTrue();
     expect(a.isInPolygon(A)).toBeTrue();
     expect(c.isInPolygon(B)).toBeTrue();
+  });
+});
+
+describe("getPolygonArea()", function () {
+  it("returns correct area for a given set of 4 Points (a square)", function () {
+    const points = [new Point(0, 0), new Point(0, 1), new Point(1, 1), new Point(1, 0)];
+    expect(getPolygonArea(points)).toBe(1);
+  });
+
+  it("returns correct area for a given set of 3 Points (a triangle)", function () {
+    const points = [new Point(0, 0), new Point(0, 1), new Point(1, 1)];
+    expect(getPolygonArea(points)).toBe(0.5);
   });
 });

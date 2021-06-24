@@ -1,4 +1,5 @@
 import * as geojson from "geojson";
+import Point from "./Geometry/Point";
 
 export function crawlArray(array: any[], index: number, n: number) {
   return (((index + n) % array.length) + array.length) % array.length;
@@ -34,4 +35,25 @@ export function getUnitVector(angle: number): number[] {
 
 export function copyInstance(original: object) {
   return Object.assign(Object.create(Object.getPrototypeOf(original)), original);
+}
+
+/**
+ * Calculates the area of the irregular polyon defined by a set of points.
+ * @param points an array of Points, which has to be sorted (either clockwise or counter-clockwise)
+ * @returns the Area of the polygon
+ */
+export function getPolygonArea(points: Point[]): number {
+  let total = 0;
+
+  for (let i = 0; i < points.length; i++) {
+    const addX = points[i].x;
+    const addY = points[i == points.length - 1 ? 0 : i + 1].y;
+    const subX = points[i == points.length - 1 ? 0 : i + 1].x;
+    const subY = points[i].y;
+
+    total += addX * addY * 0.5;
+    total -= subX * subY * 0.5;
+  }
+
+  return Math.abs(total);
 }

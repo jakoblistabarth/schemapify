@@ -252,6 +252,30 @@ class HalfEdge {
     }, []);
   }
 
+  /**
+   * Gets the closest associated angle (one bound of its associated sector)
+   * of an unaligned deviating(!) edge in respect to its assigned angle.
+   *
+   * Needed for constructing the staircase of an unaligned deviating edge.
+   *
+   * @returns closest associated angle of an edge in respect to its assigned angle.
+   */
+
+  // TODO: Where does such function live?
+  // within the HalfEdge class or rather within Staircase??
+  getClosestAssociatedAngle(): number {
+    if (this.class !== EdgeClasses.UD) return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges
+    const sector = this.getAssociatedSector()[0];
+
+    // TODO: refactor: find better solution for last sector and it's upper bound
+    // set upperbound of last to Math.PI * 2 ?
+    const upper = sector.idx === this.dcel.config.c.getSectors().length - 1 ? 0 : sector.upper;
+    const lower = sector.lower;
+    const angle = this.getAssignedAngle();
+
+    return upper + this.dcel.config.c.getSectorAngle() === angle ? upper : lower;
+  }
+
   isDeviating(): boolean {
     // an angle needs to be already set for this halfedge, TODO: Error handling?
     if (this.isAligned()) {

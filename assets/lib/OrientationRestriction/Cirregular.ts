@@ -28,6 +28,11 @@ class Cirregular {
   getAngles(): number[] {
     return this.angles;
   }
+
+  getSectorAngle() {
+    // TODO: for irregular Cs only meaningful with index as argument?
+    return 0;
+  }
 }
 
 export default Cirregular;

@@ -197,7 +197,7 @@ class Staircase {
     d1: number
   ): Point[] {
     const stepArea = this.getStepArea(l1, l2);
-    const height = stepArea / l1; // area of a Parallelogram, A = b*h
+    const height = (stepArea * 2) / l2; // get the height of a parallelogram, using A/b = h
     const a = stepArea / height;
 
     const p1 = originalStaircasePoints[0].getNewPoint(a, this.edge.getAssignedAngle());
@@ -214,14 +214,7 @@ class Staircase {
   getStairCasePointsUD(se: number = 4): Point[] {
     const edge = this.edge;
 
-    // associated direction for this staircase is
-    // the edge's closest associated direction from its assigned angle
-    const [lower, upper] = edge.getAssociatedAngles();
-
-    const d1 =
-      Math.abs(lower - edge.getAssignedAngle()) < Math.abs(edge.getAssignedAngle() - upper)
-        ? lower
-        : upper;
+    const d1 = edge.getClosestAssociatedAngle();
     const d2 = edge.getAssociatedAngles().find((angle) => angle !== d1);
     const [l1, l2] = edge.getStepLengths(se - 1, d1);
 
@@ -242,6 +235,7 @@ class Staircase {
 
     const [p1, p2] = this.getAppendedAreaPoints(points, l1, l2, d1);
     points.splice(1, 0, p1, p2);
+
     return points;
   }
 }

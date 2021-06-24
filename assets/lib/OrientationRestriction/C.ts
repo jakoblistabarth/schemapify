@@ -25,6 +25,10 @@ class C {
     return angles;
   }
 
+  getSectorAngle(): number {
+    return Math.PI / this.orientations;
+  }
+
   getDirections(): number[] {
     const n = this.orientations * 2;
     return Array.from(Array(n).keys());
