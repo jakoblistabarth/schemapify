@@ -17,26 +17,46 @@ class Staircase {
     this.points;
   }
 
+  /**
+   * Gets the staircase region of an edge, depending on its class.
+   * @returns The region of an edge.
+   */
   getRegion(): Array<Point> {
-    const edge = this.edge;
     switch (this.edge.class) {
       case EdgeClasses.AB:
         return [
-          new Point(edge.getTail().x, edge.getTail().y),
-          new Point(edge.getHead().x, edge.getHead().y),
-          new Point(edge.getTail().x, edge.getTail().y),
+          new Point(this.edge.getTail().x, this.edge.getTail().y),
+          new Point(this.edge.getHead().x, this.edge.getHead().y),
+          new Point(this.edge.getTail().x, this.edge.getTail().y),
         ]; // QUESTION: better 4 coordinates to span an area?
       case EdgeClasses.UB:
         return this.getSimpleRegion();
       case EdgeClasses.E:
         return this.getSimpleRegion();
       case EdgeClasses.UD:
-        // TODO: like UB and E but accommodate for the appendex area
-        return [
-          new Point(edge.getTail().x, edge.getTail().y),
-          new Point(edge.getHead().x, edge.getHead().y),
-          new Point(edge.getTail().x, edge.getTail().y),
-        ];
+        this.points = this.getStaircasePoints();
+
+        const [lower, upper] = this.edge.getAssociatedSector()[0].getBounds();
+        const A = new Point(this.edge.getTail().x, this.edge.getTail().y);
+        const B = this.points[1];
+        const D = new Point(this.edge.getHead().x, this.edge.getHead().y);
+        const b = new Line(B, lower);
+        const c = new Line(D, upper);
+        const d = new Line(D, lower);
+        const e = new Line(A, upper);
+        const C = b.intersectsLine(c);
+        const E = e.intersectsLine(d);
+        let regionPoints = [A, B, C, D, E];
+
+        // We assumed that p lies in the defined region.
+        // However, if this is not the case, we can extend the staircase region
+        // by including the vertices of the appended region;
+        const P = this.points[2];
+        if (P.isInPolygon(regionPoints)) {
+          regionPoints.splice(1, 0, P);
+        }
+
+        return regionPoints;
       case EdgeClasses.AD:
         this.points = this.getStaircasePoints();
         const convexHull = new ConvexHullGrahamScan();
@@ -47,13 +67,14 @@ class Staircase {
 
   /**
    * Calculates the area of a step, which is a triangle.
-   * @param l1 length of the assigned edge
-   * @param l2 length of the associated edge
-   * @returns the area a step adds to respectively subtracts from its incident faces
+   * The area of each step of an edge is either added to or subtracted from its incident faces.
+   * @param assignedEdge The length of the assigned step edge.
+   * @param associatedEdge The length of the associated step edge.
+   * @returns The area of step.
    */
-  getStepArea(l1: number, l2: number): number {
+  getStepArea(assignedEdge: number, associatedEdge: number): number {
     const enclosingAngle = (Math.PI * 2) / this.edge.dcel.config.c.getDirections().length;
-    return (l1 * l2 * Math.sin(enclosingAngle)) / 2;
+    return (assignedEdge * associatedEdge * Math.sin(enclosingAngle)) / 2;
   }
 
   getEdgeDistance() {
@@ -110,6 +131,11 @@ class Staircase {
     return points;
   }
 
+  /**
+   * Gets the Points of the staircase region for unaligned basic and evading edges.
+   * The region is the area bounded by lines oriented according to the associated directions (both at v and w).
+   * @returns a set of Points defining the region
+   */
   getSimpleRegion(): Point[] {
     const edge = this.edge;
     const [lower, upper] = edge.getAssociatedSector()[0].getBounds();
