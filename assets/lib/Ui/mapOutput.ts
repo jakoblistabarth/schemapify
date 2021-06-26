@@ -2,6 +2,7 @@ import Dcel from "../Dcel/Dcel.js";
 import * as L from "leaflet/";
 import Sector from "../OrientationRestriction/Sector.js";
 import HalfEdge from "../Dcel/HalfEdge.js";
+import { createGeoJSON } from "../utilities.js";
 
 export function getMapFrom(dcel: Dcel, name: string): L.Map {
   const DCELMap = L.map(name, {
@@ -185,7 +186,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  const staircaseLayer = L.geoJSON(dcel.staircasesToGeoJSON(), {
+  const staircaseRegionLayer = L.geoJSON(createGeoJSON(dcel.staircaseRegions), {
     style: function (feature) {
       return {
         color: "lightgrey",
@@ -203,8 +204,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
           });
         },
         mouseout: function (e) {
-          e.target.bringToBack();
-          staircaseLayer.resetStyle(e.target);
+          staircaseRegionLayer.resetStyle(e.target);
         },
       });
 
@@ -229,10 +229,6 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  faceLayer.addTo(DCELMap);
-  staircaseLayer.addTo(DCELMap);
-  edgeLayer.addTo(DCELMap);
-  vertexLayer.addTo(DCELMap);
   DCELMap.fitBounds(vertexLayer.getBounds());
 
   function toggleLayer() {
@@ -241,13 +237,13 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
       faceLayer.remove();
       vertexLayer.remove();
       edgeLayer.remove();
-      staircaseLayer.remove();
+      staircaseRegionLayer.remove();
       facesLabel.classList.remove("active");
       polygonsLabel.classList.add("active");
     } else {
       polygonLayer.remove();
       faceLayer.addTo(DCELMap);
-      staircaseLayer.addTo(DCELMap);
+      staircaseRegionLayer.addTo(DCELMap);
       edgeLayer.addTo(DCELMap);
       vertexLayer.addTo(DCELMap);
       facesLabel.classList.add("active");

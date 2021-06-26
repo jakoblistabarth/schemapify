@@ -34,26 +34,32 @@ class Staircase {
       case EdgeClasses.E:
         return this.getSimpleRegion();
       case EdgeClasses.UD:
+        // like UB and E but accommodate for the appendex area
         this.points = this.getStaircasePoints();
 
         const [lower, upper] = this.edge.getAssociatedSector()[0].getBounds();
-        const A = new Point(this.edge.getTail().x, this.edge.getTail().y);
-        const B = this.points[1];
-        const D = new Point(this.edge.getHead().x, this.edge.getHead().y);
-        const b = new Line(B, lower);
-        const c = new Line(D, upper);
-        const d = new Line(D, lower);
-        const e = new Line(A, upper);
+        const smallestAssociatedAngle = this.edge.getClosestAssociatedAngle();
+        const largestAssociatedAngle = this.edge
+          .getAssociatedAngles()
+          .find((angle) => angle != smallestAssociatedAngle);
+        const V = new Point(this.edge.getTail().x, this.edge.getTail().y);
+        const a = new Line(V, this.edge.getAssignedAngle()); // QUESTION: not mentioned in the paper!
+        const e = new Line(V, largestAssociatedAngle);
+        const W = new Point(this.edge.getHead().x, this.edge.getHead().y);
+        const c = new Line(W, lower);
+        const d = new Line(W, upper);
+        const P = this.points[2];
+        const b = new Line(P, smallestAssociatedAngle);
         const C = b.intersectsLine(c);
-        const E = e.intersectsLine(d);
-        let regionPoints = [A, B, C, D, E];
+        const B = a.intersectsLine(b);
+        const D = e.intersectsLine(d);
+        let regionPoints = [V, B, C, W, D];
 
         // We assumed that p lies in the defined region.
         // However, if this is not the case, we can extend the staircase region
         // by including the vertices of the appended region;
-        const P = this.points[2];
-        if (P.isInPolygon(regionPoints)) {
-          regionPoints.splice(1, 0, P);
+        if (!P.isInPolygon(regionPoints)) {
+          regionPoints.splice(2, 0, P);
         }
 
         return regionPoints;
@@ -70,7 +76,7 @@ class Staircase {
    * The area of each step of an edge is either added to or subtracted from its incident faces.
    * @param assignedEdge The length of the assigned step edge.
    * @param associatedEdge The length of the associated step edge.
-   * @returns The area of step.
+   * @returns The area of a step.
    */
   getStepArea(assignedEdge: number, associatedEdge: number): number {
     const enclosingAngle = (Math.PI * 2) / this.edge.dcel.config.c.getDirections().length;
@@ -106,7 +112,7 @@ class Staircase {
 
   /**
    * Returns a staircase for an "aligned deviating" edge.
-   * @returns all points constructing the staircase (including tail and head of the original edge)
+   * @returns All points constructing the staircase (including tail and head of the original edge).
    */
   getStairCasePointsAD() {
     const edge = this.edge;
