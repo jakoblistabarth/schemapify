@@ -1,4 +1,4 @@
-# <img height="35px" style="margin-bottom:-5px" src="schematization.favicon.png" alt="Leaflet" /> Schemapify
+# <img height="35px" style="margin-bottom:-5px" src="schemapify.favicon.svg" alt="Schemapify" /> Schemapify
 
 ## Introduction
 
