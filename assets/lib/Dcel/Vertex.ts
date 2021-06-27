@@ -114,7 +114,8 @@ class Vertex extends Point {
 
   assignDirections(): Array<HalfEdge> {
     const edges = this.sortEdges(false);
-    let directionsToAssign: number[] = [];
+    const angles = this.dcel.config.c.getAngles();
+
     const closestBounds = edges.map((edge) => {
       let direction: number;
 
@@ -122,33 +123,30 @@ class Vertex extends Point {
       direction = edge.getAngle() - lower <= upper - edge.getAngle() ? lower : upper;
       direction = direction == Math.PI * 2 ? 0 : direction;
 
-      return this.dcel.config.c.getAngles().indexOf(direction);
+      return angles.indexOf(direction);
     });
-    directionsToAssign = closestBounds;
 
     closestBounds.forEach((direction, idx) => {
-      const nextDirection = crawlArray(this.dcel.config.c.getAngles(), direction, +1);
-      const prevDirection = crawlArray(this.dcel.config.c.getAngles(), direction, -1);
-      const prev2Direction = crawlArray(this.dcel.config.c.getAngles(), direction, -2);
+      const nextDirection = crawlArray(angles, direction, +1);
+      const prevDirection = crawlArray(angles, direction, -1);
 
-      if (getOccurrence(directionsToAssign, direction) == 1) {
-        directionsToAssign[idx] = direction;
-        return;
-      }
+      if (getOccurrence(closestBounds, direction) == 1) return;
 
-      if (getOccurrence(directionsToAssign, nextDirection) > 0) {
-        if (getOccurrence(directionsToAssign, prevDirection) > 0)
-          directionsToAssign[idx] = prev2Direction;
-        else directionsToAssign[idx] = prevDirection;
+      if (
+        getOccurrence(closestBounds, nextDirection) > 0 &&
+        getOccurrence(closestBounds, prevDirection) < 1
+      ) {
+        closestBounds[idx] = prevDirection;
       } else {
-        directionsToAssign[(idx + 1) % closestBounds.length] = nextDirection;
+        closestBounds.forEach((d, i) => {
+          closestBounds[i] = i != idx && d === direction ? (d + 1) % angles.length : d;
+        });
       }
     });
 
-    edges.forEach((edge, idx) => {
-      if (!edge.assignedDirection) edge.assignedDirection = directionsToAssign[idx];
-    });
+    edges.forEach((edge, idx) => (edge.assignedDirection = closestBounds[idx]));
 
+    // TODO: Should this method return the calculated directions instead of the edges?
     return this.edges;
   }
 }

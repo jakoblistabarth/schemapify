@@ -119,9 +119,9 @@ describe("assignDirections() on own examples", function () {
     expect(s.o.assignDirections().map((edge) => edge.assignedDirection)).toEqual([1, 2, 3, 0]);
   });
 
-  fit("with 4 edges (D) in C(3)", function () {
+  it("with 4 edges (D) in C(3)", function () {
     s.o.edges.push(s.directions.od153, s.directions.od166, s.directions.od180, s.directions.od243);
     s.dcel.config = { ...config, c: new C(3) };
-    expect(s.o.assignDirections().map((edge) => edge.assignedDirection)).toEqual([3, 4, 5, 0]);
+    expect(s.o.assignDirections().map((edge) => edge.assignedDirection)).toEqual([2, 3, 4, 5]);
   });
 });
