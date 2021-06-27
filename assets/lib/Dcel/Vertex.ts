@@ -112,7 +112,7 @@ class Vertex extends Point {
     return this.edges.filter((edge) => sector.encloses(edge.getAngle()));
   }
 
-  assignDirections(): Array<HalfEdge> {
+  assignDirections(): number[] {
     const edges = this.sortEdges(false);
     const angles = this.dcel.config.c.getAngles();
 
@@ -146,8 +146,7 @@ class Vertex extends Point {
 
     edges.forEach((edge, idx) => (edge.assignedDirection = closestBounds[idx]));
 
-    // TODO: Should this method return the calculated directions instead of the edges?
-    return this.edges;
+    return closestBounds;
   }
 }
 
