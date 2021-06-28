@@ -55,6 +55,20 @@ class Staircase {
         const D = e.intersectsLine(d);
         let regionPoints = [V, B, C, W, D];
 
+        // console.log(
+        //   this.edge.getTail(),
+        //   this.edge.class,
+        //   "assigned:",
+        //   this.edge.assignedDirection,
+        //   "smallest:",
+        //   smallestAssociatedAngle,
+        //   "lower:",
+        //   lower,
+        //   "upper:",
+        //   upper
+        // );
+        // console.log(regionPoints);
+
         // We assumed that p lies in the defined region.
         // However, if this is not the case, we can extend the staircase region
         // by including the vertices of the appended region;

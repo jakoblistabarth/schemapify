@@ -2,6 +2,8 @@ import Dcel from "./lib/Dcel/Dcel";
 import config from "./schematization.config";
 import { getMapFrom } from "./lib/Ui/mapOutput";
 import { drawC } from "./lib/Ui/cOutput";
+import { drawMapGrid } from "./lib/Ui/mapGrid";
+import { drawDataSelect } from "./lib/Ui/selectData";
 
 async function getJSON(path: string) {
   const response = await fetch(path);
@@ -9,11 +11,6 @@ async function getJSON(path: string) {
 }
 
 const tests = [
-  // "assets/data/geodata/ne_110m_admin_0_countries.json",
-  // "assets/data/geodata/ne_110m_africa_admin0.json",
-  // "assets/data/geodata/AUT_adm1-simple.json",
-  // "assets/data/geodata/AUT_adm1.json",
-  // "assets/data/geodata/central-austria.json",
   // "assets/data/shapes/triangle.json",
   // "assets/data/shapes/triangle-unaligned.json",
   // "assets/data/shapes/enclave.json",
@@ -32,34 +29,21 @@ const tests = [
   // "assets/data/shapes/2plgn-islands-holes.json",
   // "assets/data/shapes/3plgn.json",
   // "assets/data/shapes/3plgn-complex.json",
-  // "assets/data/shapes/aligned-deviating.json",
+  "assets/data/shapes/aligned-deviating.json",
   // "assets/data/shapes/unaligned-deviating.json",
-  // "assets/data/shapes/unaligned-deviating-2.json",
+  "assets/data/shapes/unaligned-deviating-2.json",
   "assets/data/shapes/edge-cases.json",
+  // "assets/data/geodata/ne_110m_admin_0_countries.json",
+  // "assets/data/geodata/ne_110m_africa_admin0.json",
+  // "assets/data/geodata/AUT_adm1-simple.json",
+  // "assets/data/geodata/AUT_adm1.json",
+  // "assets/data/geodata/central-austria.json",
 ];
 
-function calculateMapGrid(mapGridID: string) {
-  const grid = document.getElementById(mapGridID);
-  let templateColumns;
-  if (tests.length === 1) {
-    templateColumns = "1fr";
-  } else if (tests.length > 1 && tests.length <= 5 && tests.length != 3) {
-    templateColumns = "1fr 1fr";
-  } else {
-    templateColumns = "1fr 1fr 1fr";
-  }
-  grid.style.gridTemplateColumns = templateColumns;
+const select = drawDataSelect(tests);
+console.log(select);
 
-  tests.forEach((test) => {
-    const map = document.createElement("div");
-    const name = test.slice(test.lastIndexOf("/") + 1, -5);
-    map.id = name;
-    map.className = "map";
-    grid.appendChild(map);
-  });
-}
-
-calculateMapGrid("map-grid");
+drawMapGrid("map-grid", tests);
 drawC(document.getElementById("c"));
 document.getElementById("c-text").innerText = `C(${config.c.orientations})`;
 

@@ -126,6 +126,7 @@ class Vertex extends Point {
       return angles.indexOf(direction);
     });
 
+    // console.log("before", closestBounds);
     closestBounds.forEach((direction, idx) => {
       const nextDirection = crawlArray(angles, direction, +1);
       const prevDirection = crawlArray(angles, direction, -1);
@@ -144,6 +145,7 @@ class Vertex extends Point {
       }
     });
 
+    // console.log("after", closestBounds);
     edges.forEach((edge, idx) => (edge.assignedDirection = closestBounds[idx]));
 
     return closestBounds;

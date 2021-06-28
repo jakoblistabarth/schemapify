@@ -490,7 +490,6 @@ class Dcel {
 
   staircasesToGeoJSON(): geojson.GeoJSON {
     const staircaseFeatures = this.getHalfEdges(undefined, true).map((edge): geojson.Feature => {
-      console.log(edge.class);
       const staircase: Staircase = new Staircase(edge);
       const coordinates: number[][] = staircase.region.map((p) => [p.x, p.y]);
       return {

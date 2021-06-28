@@ -48,9 +48,9 @@ body {
 }
 
 nav {
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
   position: absolute;
+  width: 100%;
+  margin-top: var(--spacer);
   display: flex;
   justify-content: center;
   z-index: 500;
