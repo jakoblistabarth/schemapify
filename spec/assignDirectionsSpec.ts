@@ -119,9 +119,19 @@ describe("assignDirections() on own examples", function () {
     expect(s.o.assignDirections()).toEqual([1, 2, 3, 0]);
   });
 
-  it("with 4 edges (D) in C(3)", function () {
+  it("with 4 edges (E) in C(3)", function () {
     s.o.edges.push(s.directions.od153, s.directions.od166, s.directions.od180, s.directions.od243);
     s.dcel.config = { ...config, c: new C(3) };
     expect(s.o.assignDirections()).toEqual([2, 3, 4, 5]);
+  });
+
+  it("with 4 edges (F) in C(2)", function () {
+    s.o.edges.push(s.directions.od0, s.directions.od14, s.directions.od333);
+    expect(s.o.assignDirections()).toEqual([0, 1, 3]);
+  });
+
+  it("with 4 edges (G) in C(2)", function () {
+    s.o.edges.push(s.directions.od14, s.directions.od104, s.directions.od243, s.directions.od333);
+    expect(s.o.assignDirections()).toEqual([0, 1, 2, 3]);
   });
 });
