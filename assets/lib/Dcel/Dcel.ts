@@ -13,7 +13,7 @@ class Dcel {
   faces: Array<Face>;
   featureProperties: geojson.GeoJsonProperties;
   config: Config;
-  original: Dcel;
+  staircaseRegions: geojson.Feature[];
 
   constructor() {
     this.vertices = new Map();
@@ -21,7 +21,7 @@ class Dcel {
     this.faces = [];
     this.featureProperties = {};
     this.config = undefined;
-    this.original = undefined;
+    this.staircaseRegions = [];
   }
 
   makeVertex(x: number, y: number): Vertex {
@@ -336,19 +336,35 @@ class Dcel {
     };
 
     Object.values(edgesPerType).forEach((edges) => this.replaceWithStaircases(edges));
+    this.getHalfEdges().forEach((edge) => (edge.class = EdgeClasses.AB));
   }
 
   replaceWithStaircases(edges: HalfEdge[]) {
     edges.forEach((edge) => {
-      const stepPoints = new Staircase(edge).getStaircasePoints().slice(1, -1);
+      const staircase = new Staircase(edge);
+      const stepPoints = staircase.getStaircasePoints().slice(1, -1);
+      const regionPoints = staircase.region;
+
+      regionPoints.push(staircase.region[0]); // add first Point again as last Point of polygon coordinates for geoJSON feature
+      const staircaseFeature: geojson.Feature = {
+        type: "Feature",
+        properties: {
+          edgeclass: edge.class,
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [regionPoints.map((p) => [p.x, p.y])],
+        },
+      };
+      this.staircaseRegions.push(staircaseFeature);
+
       let edgeToSplit = edge;
-      for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Vertex(p.x, p.y, this)).next;
+      for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Point(p.x, p.y)).next;
     });
   }
 
   constrainAngles(): void {
     this.classify();
-    this.original = copyInstance(this);
     this.edgesToStaircases();
   }
 
@@ -473,25 +489,22 @@ class Dcel {
   }
 
   staircasesToGeoJSON(): geojson.GeoJSON {
-    const staircaseFeatures = this.original
-      .getHalfEdges(undefined, true)
-      .slice(0, 50)
-      .map((edge): geojson.Feature => {
-        console.log(edge.class);
-        const staircase: Staircase = new Staircase(edge);
-        const coordinates: number[][] = staircase.region.map((p) => [p.x, p.y]);
-        return {
-          type: "Feature",
-          geometry: {
-            type: "Polygon",
-            coordinates: [coordinates],
-          },
-          properties: {
-            edge: edge.uuid,
-            edgeClass: edge.class,
-          },
-        };
-      });
+    const staircaseFeatures = this.getHalfEdges(undefined, true).map((edge): geojson.Feature => {
+      console.log(edge.class);
+      const staircase: Staircase = new Staircase(edge);
+      const coordinates: number[][] = staircase.region.map((p) => [p.x, p.y]);
+      return {
+        type: "Feature",
+        geometry: {
+          type: "Polygon",
+          coordinates: [coordinates],
+        },
+        properties: {
+          edge: edge.uuid,
+          edgeClass: edge.class,
+        },
+      };
+    });
     return createGeoJSON(staircaseFeatures);
   }
 
