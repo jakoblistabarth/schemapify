@@ -8,18 +8,21 @@
     <link rel="shortcut icon" type="image/svg+xml" href="/schemapify.favicon.svg" />
     <link rel="shortcut icon" type="image/png" href="/schemapify.favicon.png" />
     <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="assets/main.css" />
   </head>
   <body>
     <nav>
-      <div id="toolbar">
-        <div>
-          <div id="c"></div>
+      <div id="map-layout">
+        <div id="c-info">
+          <div id="c-vis"></div>
           <div id="c-text"></div>
         </div>
-
-        <div>
+        <div class="divider"></div>
+        <div id="switch">
           <span id="faces-label" class="slider-label">faces</span>
           <label class="switch">
             <input id="layer-toggle" type="checkbox" />
@@ -27,10 +30,15 @@
           </label>
           <span id="polygons-label" class="slider-label">polygons</span>
         </div>
+      </div>
 
-        <div id="select-data"></div>
+      <div id="select-data"></div>
+
+      <div id="schematize-navigator">
+        <h2>algorithm steps</h2>
       </div>
     </nav>
+
     <div id="map-grid"></div>
     <!-- <script src="node_modules/shpjs/dist/shp.min.js"></script> -->
     <script src="dist/esm-bundle/main.bundle.js" type="module"></script>

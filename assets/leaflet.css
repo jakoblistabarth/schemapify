@@ -1,0 +1,25 @@
+.leaflet-container {
+  font-family: "DM Mono", monospace;
+}
+.leaflet-tooltip {
+  background-color: rgb(10, 10, 10);
+  color: white;
+  border-color: rgb(10, 10, 10);
+  opacity: 1;
+}
+.leaflet-tooltip-left:before {
+  border-left-color: rgb(10, 10, 10);
+}
+.leaflet-tooltip-right:before {
+  border-right-color: rgb(10, 10, 10);
+}
+.leaflet-tooltip table {
+  border-collapse: collapse;
+}
+
+.leaflet-tooltip td {
+  padding: 0 0.5em;
+}
+.leaflet-tooltip tr td:first-child {
+  padding-left: 0;
+}

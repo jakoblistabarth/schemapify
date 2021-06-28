@@ -1,6 +1,11 @@
+@import url("variables.css");
+@import url("typography.css");
+@import url("leaflet.css");
+
 body {
   margin: 0;
   font-family: "DM Mono", monospace;
+  font-size: var(--fontsize-base);
 }
 #map-grid {
   height: 100vh;
@@ -12,71 +17,56 @@ body {
   height: 100%;
   width: 100%;
 }
-.leaflet-container {
-  font-family: "DM Mono", monospace;
-}
-.leaflet-tooltip {
-  background-color: rgb(10, 10, 10);
-  color: white;
-  border-color: rgb(10, 10, 10);
-  opacity: 1;
-}
-.leaflet-tooltip-left:before {
-  border-left-color: rgb(10, 10, 10);
-}
-.leaflet-tooltip-right:before {
-  border-right-color: rgb(10, 10, 10);
-}
-.leaflet-tooltip table {
-  border-collapse: collapse;
-}
-.leaflet-tooltip table .material-icons {
-  font-size: 1em;
-  top: 0.2em;
-}
-.leaflet-tooltip td {
-  padding: 0 0.5em;
-}
-.leaflet-tooltip tr td:first-child {
-  padding-left: 0;
-}
-
-.material-icons {
-  font-size: 18px;
-  position: relative;
-  top: 4.5px;
-}
 
 nav {
   position: absolute;
-  width: 100%;
-  margin-top: var(--spacer);
+  top: var(--spacer);
+  left: var(--spacer);
+  right: var(--spacer);
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   z-index: 500;
+  align-items: flex-start;
 }
 
-#toolbar {
-  background-color: white;
+nav > div {
+  border-radius: var(--border-radius);
   box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2);
-  font-size: 0.8em;
-  border-radius: 10px;
+  background-color: white;
+  padding: var(--spacer);
+}
+
+#map-layout {
   display: flex;
   align-items: center;
-  padding: 1em;
+}
+
+#c-vis {
+  margin-right: 1em;
+}
+
+#c-info {
+  display: flex;
+  align-items: center;
+}
+
+#schematize-navigator li {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+#schematize-navigator li:hover {
+  background-color: lightgrey;
+  border-radius: var(--border-radius);
 }
 
 .divider {
+  position: relative;
   width: 1px;
-  height: 100%;
+  height: 1em;
   border-left: 1px solid grey;
   margin: 0 1em;
-}
-
-#c {
-  display: flex;
-  height: 20px;
-  margin-right: 0.5em;
 }
 
 .slider-label {

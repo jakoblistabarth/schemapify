@@ -4,6 +4,7 @@ import { getMapFrom } from "./lib/Ui/mapOutput";
 import { drawC } from "./lib/Ui/cOutput";
 import { drawMapGrid } from "./lib/Ui/mapGrid";
 import { drawDataSelect } from "./lib/Ui/selectData";
+import { drawNavigator } from "./lib/Ui/schematizeNavigator";
 
 async function getJSON(path: string) {
   const response = await fetch(path);
@@ -29,22 +30,21 @@ const tests = [
   // "assets/data/shapes/2plgn-islands-holes.json",
   // "assets/data/shapes/3plgn.json",
   // "assets/data/shapes/3plgn-complex.json",
-  "assets/data/shapes/aligned-deviating.json",
+  // "assets/data/shapes/aligned-deviating.json",
   // "assets/data/shapes/unaligned-deviating.json",
-  "assets/data/shapes/unaligned-deviating-2.json",
+  // "assets/data/shapes/unaligned-deviating-2.json",
   "assets/data/shapes/edge-cases.json",
   // "assets/data/geodata/ne_110m_admin_0_countries.json",
   // "assets/data/geodata/ne_110m_africa_admin0.json",
-  // "assets/data/geodata/AUT_adm1-simple.json",
+  "assets/data/geodata/AUT_adm1-simple.json",
   // "assets/data/geodata/AUT_adm1.json",
   // "assets/data/geodata/central-austria.json",
 ];
 
 const select = drawDataSelect(tests);
-console.log(select);
 
 drawMapGrid("map-grid", tests);
-drawC(document.getElementById("c"));
+drawC(document.getElementById("c-vis"));
 document.getElementById("c-text").innerText = `C(${config.c.orientations})`;
 
 tests.forEach(async (test) => {
@@ -53,7 +53,8 @@ tests.forEach(async (test) => {
   // TODO: validate() data (within getJSON??) check if of type polygon or multipolygon, check crs and save it for later?
   const dcel = Dcel.fromGeoJSON(data);
   dcel.schematize();
-
-  dcel.log(name);
   getMapFrom(dcel, name);
+  dcel.log(name);
 });
+
+drawNavigator(tests);

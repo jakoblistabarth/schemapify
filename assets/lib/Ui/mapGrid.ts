@@ -1,18 +1,18 @@
-export function drawMapGrid(mapGridID: string, mapData: string[]) {
-  const grid = document.getElementById(mapGridID);
+export function drawMapGrid(gridContainerID: string, files: string[]): void {
+  const grid = document.getElementById(gridContainerID);
   let templateColumns;
-  if (mapData.length === 1) {
+  if (files.length === 1) {
     templateColumns = "1fr";
-  } else if (mapData.length > 1 && mapData.length <= 5 && mapData.length != 3) {
+  } else if (files.length > 1 && files.length <= 5 && files.length != 3) {
     templateColumns = "1fr 1fr";
   } else {
     templateColumns = "1fr 1fr 1fr";
   }
   grid.style.gridTemplateColumns = templateColumns;
 
-  mapData.forEach((test) => {
+  files.forEach((file) => {
     const map = document.createElement("div");
-    const name = test.slice(test.lastIndexOf("/") + 1, -5);
+    const name = file.slice(file.lastIndexOf("/") + 1, -5);
     map.id = name;
     map.className = "map";
     grid.appendChild(map);
