@@ -14,7 +14,11 @@ class Dcel {
   faces: Array<Face>;
   featureProperties: geojson.GeoJsonProperties;
   config: Config;
-  staircaseRegions: geojson.Feature[];
+  staircaseRegions: {
+    edgeUuid: string;
+    edgeClass: EdgeClasses;
+    coordinates: Point[];
+  }[];
 
   constructor() {
     this.vertices = new Map();
@@ -283,7 +287,7 @@ class Dcel {
   splitEdges(threshold = this.config.epsilon): Dcel {
     this.getBoundedFaces().forEach((f) => {
       f.getEdges().forEach((e) => {
-        // e.subdivideToThreshold(threshold); //TODO: uncomment this again, only for midterms demo
+        e.subdivideToThreshold(threshold);
       });
     });
     return this;
@@ -344,20 +348,12 @@ class Dcel {
     edges.forEach((edge) => {
       const staircase = new Staircase(edge);
       const stepPoints = staircase.getStaircasePoints().slice(1, -1);
-      const regionPoints = staircase.region;
 
-      regionPoints.push(staircase.region[0]); // add first Point again as last Point of polygon coordinates for geoJSON feature
-      const staircaseFeature: geojson.Feature = {
-        type: "Feature",
-        properties: {
-          edgeclass: edge.class,
-        },
-        geometry: {
-          type: "Polygon",
-          coordinates: [regionPoints.map((p) => [p.x, p.y])],
-        },
-      };
-      this.staircaseRegions.push(staircaseFeature);
+      this.staircaseRegions.push({
+        coordinates: staircase.region,
+        edgeUuid: edge.uuid,
+        edgeClass: edge.class,
+      });
 
       let edgeToSplit = edge;
       for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Point(p.x, p.y)).next;
@@ -564,6 +560,25 @@ class Dcel {
     });
 
     return createGeoJSON(edgeFeatures);
+  }
+
+  staircaseRegionsToGeoJSON(): geojson.GeoJSON {
+    const regionFeatures = this.staircaseRegions.map((region): geojson.Feature => {
+      const regionPoints = region.coordinates;
+      regionPoints.push(regionPoints[0]); // add first Point to close geoJSON polygon
+      return {
+        type: "Feature",
+        properties: {
+          uuid: region.edgeUuid,
+          class: region.edgeClass,
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [regionPoints.map((p) => [p.x, p.y])],
+        },
+      };
+    });
+    return createGeoJSON(regionFeatures);
   }
 }
 

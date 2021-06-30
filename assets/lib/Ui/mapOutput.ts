@@ -191,7 +191,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  const staircaseRegionLayer = L.geoJSON(createGeoJSON(dcel.staircaseRegions), {
+  const staircaseRegionLayer = L.geoJSON(dcel.staircaseRegionsToGeoJSON(), {
     style: function (feature) {
       return {
         color: "lightgrey",
