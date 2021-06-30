@@ -134,4 +134,9 @@ describe("assignDirections() on own examples", function () {
     s.o.edges.push(s.directions.od14, s.directions.od104, s.directions.od243, s.directions.od333);
     expect(s.o.assignDirections()).toEqual([0, 1, 2, 3]);
   });
+
+  it("with 3 edges (H) in C(2)", function () {
+    s.o.edges.push(s.directions.od14, s.directions.od243, s.directions.od284);
+    expect(s.o.assignDirections()).toEqual([0, 2, 3]);
+  });
 });
