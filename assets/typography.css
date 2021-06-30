@@ -1,3 +1,8 @@
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fontsize-base);
+}
+
 .material-icons,
 .material-icons-outlined {
   font-size: 1.5em;
@@ -5,9 +10,18 @@
   top: 0.25em;
 }
 
+h1,
 h2 {
+  font-family: var(--font-display);
   margin-top: 0;
-  font-size: 1em;
+}
+
+h1 {
+  font-weight: bold;
+}
+
+h2 {
+  font-weight: normal;
 }
 
 ul.plain {

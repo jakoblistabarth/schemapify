@@ -8,7 +8,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
   const DCELMap = L.map(name, {
     zoomControl: false,
   });
-  DCELMap.attributionControl.addAttribution(name);
+  DCELMap.attributionControl.addAttribution(`${name} (${dcel.halfEdges.size / 2} edges)`);
 
   function highlightDCELFeature(e: L.LeafletMouseEvent) {
     var feature = e.target;
@@ -67,6 +67,11 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
         mouseover: highlightDCELFeature,
         mouseout: function (e) {
           vertexLayer.resetStyle(e.target);
+        },
+        click: function () {
+          console.log(
+            feature.properties.edges.map((e: HalfEdge) => (e.getAngle() * 180) / Math.PI)
+          );
         },
       });
     },

@@ -1,5 +1,17 @@
-export function drawMapGrid(gridContainerID: string, files: string[]): void {
-  const grid = document.getElementById(gridContainerID);
+import Dcel from "../Dcel/Dcel";
+import { getJSON } from "../utilities";
+import { getMapFrom } from "./mapOutput";
+
+export function drawMapGrid(files: string[]): void {
+  const gridID = "map-grid";
+  let grid = document.getElementById(gridID);
+  if (grid) grid.innerHTML = "";
+  else {
+    grid = document.createElement("div");
+    grid.setAttribute("id", gridID);
+    document.body.appendChild(grid);
+  }
+
   let templateColumns;
   if (files.length === 1) {
     templateColumns = "1fr";
@@ -16,5 +28,18 @@ export function drawMapGrid(gridContainerID: string, files: string[]): void {
     map.id = name;
     map.className = "map";
     grid.appendChild(map);
+  });
+}
+
+export function draw(inputData: string[]) {
+  drawMapGrid(inputData);
+  inputData.forEach(async (test) => {
+    const name = test.slice(test.lastIndexOf("/") + 1, -5);
+    const data = await getJSON("assets/data/" + test);
+    // TODO: validate() data (within getJSON??) check if of type polygon or multipolygon, check crs and save it for later?
+    const dcel = Dcel.fromGeoJSON(data);
+    dcel.schematize();
+    getMapFrom(dcel, name);
+    // dcel.log(name);
   });
 }

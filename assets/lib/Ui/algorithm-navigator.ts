@@ -1,21 +1,20 @@
-import Dcel from "../Dcel/Dcel";
-import { getMapFrom } from "./mapOutput";
-import * as L from "leaflet/";
-
 export enum STOP {
+  LOAD = "load Data",
   SUBDIVIDE = "subdivide",
   CLASSIFY = "classify",
   STAIRCASE = "staircase",
+  SIMPLIFY = "simplify",
 }
 
-export function drawNavigator(maps: { name: string; data: any; map: L.Map }[]) {
-  const navigator = document.getElementById("schematize-navigator");
+export function drawNavigator() {
+  const navigator = document.getElementById("algorithm-navigator");
 
   const ul = navigator.appendChild(document.createElement("ul"));
   ul.className = "plain";
 
   Object.values(STOP).forEach((stop) => {
     const li = document.createElement("li");
+    if (stop === STOP.SUBDIVIDE || stop === STOP.SIMPLIFY) li.className = "muted";
     const icon = document.createElement("span");
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     const span = document.createElement("span");
@@ -51,14 +50,6 @@ export function drawNavigator(maps: { name: string; data: any; map: L.Map }[]) {
   ul.childNodes.forEach((li) => {
     li.addEventListener("click", function () {
       const stop = this.getAttribute("data-function");
-      maps.forEach((map) => {
-        map.map.remove(); // clean current Leaflet Map
-
-        const dcel = Dcel.fromGeoJSON(map.data); // create new dcel
-        dcel.schematize(stop);
-        dcel.log(map.name);
-        getMapFrom(dcel, map.name);
-      });
     });
   });
 }

@@ -6,7 +6,7 @@ import Face from "./Face";
 import Staircase from "../OrientationRestriction/Staircase";
 import { copyInstance, createGeoJSON, groupBy } from "../utilities";
 import * as geojson from "geojson";
-import { STOP } from "../Ui/schematizeNavigator";
+import { STOP } from "../Ui/algorithm-navigator";
 
 class Dcel {
   vertices: Map<string, Vertex>;
@@ -283,7 +283,7 @@ class Dcel {
   splitEdges(threshold = this.config.epsilon): Dcel {
     this.getBoundedFaces().forEach((f) => {
       f.getEdges().forEach((e) => {
-        e.subdivideToThreshold(threshold);
+        // e.subdivideToThreshold(threshold); //TODO: uncomment this again, only for midterms demo
       });
     });
     return this;
