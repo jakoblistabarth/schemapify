@@ -2,7 +2,8 @@ import config from "../../schematization.config.js";
 import Point from "../Geometry/Point.js";
 import Line from "../Geometry/Line.js";
 
-export function drawC(svgContainer: HTMLElement) {
+export function drawC() {
+  const svgContainer = document.getElementById("c-vis");
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.id = "C";
   const sideLength = 20;
@@ -22,6 +23,10 @@ export function drawC(svgContainer: HTMLElement) {
     lineNode.setAttribute("stroke", "black");
     svg.appendChild(lineNode);
   });
+
+  const cText = document.getElementById("c-text");
+  const c = config.c.orientations;
+  cText.innerText = `C(${c})`;
 
   return svg;
 }

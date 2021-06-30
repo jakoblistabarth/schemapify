@@ -4,20 +4,32 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Schemapify</title>
+    <title>Schemapify [BETA]</title>
     <link rel="shortcut icon" type="image/svg+xml" href="/schemapify.favicon.svg" />
     <link rel="shortcut icon" type="image/png" href="/schemapify.favicon.png" />
-    <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <!-- TODO: replace with bundled css -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;500&family=DM+Sans:wght@400;700&family=Inter&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="assets/main.css" />
   </head>
   <body>
-    <nav>
-      <div id="toolbar">
-        <div id="c"></div>
+    <nav id="map-layout" class="floating">
+      <div id="c-info">
+        <div id="c-vis"></div>
         <div id="c-text"></div>
-        <div class="divider"></div>
-        <span id="faces-label" class="slider-label">faces</span>
+      </div>
+      <div class="divider"></div>
+      <div id="switch">
+        <span id="faces-label" class="slider-label">DCEL</span>
         <label class="switch">
           <input id="layer-toggle" type="checkbox" />
           <span class="slider"></span>
@@ -25,7 +37,18 @@
         <span id="polygons-label" class="slider-label">polygons</span>
       </div>
     </nav>
-    <div id="map-grid"></div>
+
+    <div id="logo">
+      <img src="schemapify.favicon.svg" alt="" />
+      <h1>Schemapify</h1>
+    </div>
+
+    <nav id="algorithm-navigator" class="floating">
+      <h2>algorithm steps</h2>
+    </nav>
+
+    <nav id="select-data"></nav>
+
     <!-- <script src="node_modules/shpjs/dist/shp.min.js"></script> -->
     <script src="dist/esm-bundle/main.bundle.js" type="module"></script>
   </body>

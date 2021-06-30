@@ -1,6 +1,11 @@
 import * as geojson from "geojson";
 import Point from "./Geometry/Point";
 
+export async function getJSON(path: string) {
+  const response = await fetch(path);
+  return response.json();
+}
+
 export function crawlArray(array: any[], index: number, n: number) {
   return (((index + n) % array.length) + array.length) % array.length;
 }

@@ -6,6 +6,7 @@ import Face from "./Face";
 import Staircase from "../OrientationRestriction/Staircase";
 import { copyInstance, createGeoJSON, groupBy } from "../utilities";
 import * as geojson from "geojson";
+import { STOP } from "../Ui/algorithm-navigator";
 
 class Dcel {
   vertices: Map<string, Vertex>;
@@ -282,7 +283,7 @@ class Dcel {
   splitEdges(threshold = this.config.epsilon): Dcel {
     this.getBoundedFaces().forEach((f) => {
       f.getEdges().forEach((e) => {
-        e.subdivideToThreshold(threshold);
+        // e.subdivideToThreshold(threshold); //TODO: uncomment this again, only for midterms demo
       });
     });
     return this;
@@ -373,10 +374,22 @@ class Dcel {
     return this;
   }
 
-  schematize(): void {
-    this.preProcess();
-    this.constrainAngles();
-    this.simplify();
+  schematize(stop?: string): void {
+    if (!stop) {
+      this.preProcess();
+      this.constrainAngles();
+      this.simplify();
+      return;
+    }
+
+    this.config = config;
+    this.setEpsilon(this.config.lambda);
+    this.splitEdges();
+    if (stop === STOP.SUBDIVIDE) return;
+    this.classify();
+    if (stop === STOP.CLASSIFY) return;
+    this.edgesToStaircases();
+    if (stop === STOP.STAIRCASE) return;
   }
 
   log(name: string, verbose: boolean = false): void {
@@ -490,7 +503,6 @@ class Dcel {
 
   staircasesToGeoJSON(): geojson.GeoJSON {
     const staircaseFeatures = this.getHalfEdges(undefined, true).map((edge): geojson.Feature => {
-      console.log(edge.class);
       const staircase: Staircase = new Staircase(edge);
       const coordinates: number[][] = staircase.region.map((p) => [p.x, p.y]);
       return {

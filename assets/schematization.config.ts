@@ -15,7 +15,7 @@ export interface Config {
 export const config = {
   lambda: 0.05,
   k: 100, // TODO: set meaningful value
-  c: new C(2),
+  c: new C(4), //TODO: change this to C(2) again, only for midterms demo
   // c: new Cirregular([Math.PI * 0.25, Math.PI * 1, Math.PI * (5 / 3)]),
 };
 
