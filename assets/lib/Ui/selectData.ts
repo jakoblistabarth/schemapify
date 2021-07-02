@@ -57,5 +57,5 @@ export const tests: string[] = [
   "shapes/triangle-unaligned.json",
   // "shapes/triangle.json",
   "shapes/unaligned-deviating-2.json",
-  "shapes/unaligned-deviating.json",
+  // "shapes/unaligned-deviating.json",
 ];

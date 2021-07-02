@@ -11,7 +11,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
   DCELMap.attributionControl.addAttribution(`${name} (${dcel.halfEdges.size / 2} edges)`);
 
   function highlightDCELFeature(e: L.LeafletMouseEvent) {
-    var feature = e.target;
+    const feature = e.target;
     feature.setStyle({
       weight: 3,
       fillColor: "black",
@@ -157,7 +157,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     onEachFeature: function (feature, layer) {
       layer.on({
         mouseover: function (e) {
-          var feature = e.target;
+          const feature = e.target;
           feature.setStyle({
             weight: 4,
             fillOpacity: 0.5,
@@ -193,8 +193,10 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
 
   const staircaseRegionLayer = L.geoJSON(dcel.staircaseRegionsToGeoJSON(), {
     style: function (feature) {
+      console.log(feature.properties);
+
       return {
-        color: "lightgrey",
+        color: feature.properties.interfering ? "red" : "blue",
         weight: 1,
         fillOpacity: 0.2,
       };
@@ -202,7 +204,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     onEachFeature: function (feature, layer) {
       layer.on({
         mouseover: function (e) {
-          var feature = e.target;
+          const feature = e.target;
           feature.setStyle({
             weight: 2,
             fillOpacity: 0.5,

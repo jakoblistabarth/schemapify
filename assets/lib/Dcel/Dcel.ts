@@ -15,9 +15,9 @@ class Dcel {
   featureProperties: geojson.GeoJsonProperties;
   config: Config;
   staircaseRegions: {
-    edgeUuid: string;
-    edgeClass: EdgeClasses;
+    edge: HalfEdge;
     coordinates: Point[];
+    interfering: boolean;
   }[];
 
   constructor() {
@@ -341,7 +341,31 @@ class Dcel {
     };
 
     Object.values(edgesPerType).forEach((edges) => this.replaceWithStaircases(edges));
+    this.getStepNumber();
     this.getHalfEdges().forEach((edge) => (edge.class = EdgeClasses.AB));
+  }
+
+  getStepNumber() {
+    // Check if any point of a region is within another region
+    for (const region of this.staircaseRegions) {
+      const currentRegionIdx = this.staircaseRegions.indexOf(region);
+      const regionsToCheck = Array.from(this.staircaseRegions);
+      regionsToCheck.splice(currentRegionIdx, 1);
+      region.coordinates.forEach((point) => {
+        regionsToCheck.forEach((regionToCheck) => {
+          if (
+            region.edge.getTail() !== regionToCheck.edge.getTail() &&
+            region.edge.getTail() !== regionToCheck.edge.getHead() &&
+            region.edge.getHead() !== regionToCheck.edge.getHead() &&
+            region.edge.getHead() !== regionToCheck.edge.getTail() &&
+            point.isInPolygon(regionToCheck.coordinates)
+          ) {
+            return (region.interfering = true);
+          }
+        });
+        point.isInPolygon(region.coordinates);
+      });
+    }
   }
 
   replaceWithStaircases(edges: HalfEdge[]) {
@@ -351,8 +375,8 @@ class Dcel {
 
       this.staircaseRegions.push({
         coordinates: staircase.region,
-        edgeUuid: edge.uuid,
-        edgeClass: edge.class,
+        edge: edge,
+        interfering: false,
       });
 
       let edgeToSplit = edge;
@@ -569,8 +593,9 @@ class Dcel {
       return {
         type: "Feature",
         properties: {
-          uuid: region.edgeUuid,
-          class: region.edgeClass,
+          uuid: region.edge.uuid,
+          class: region.edge.class,
+          interfering: region.interfering,
         },
         geometry: {
           type: "Polygon",

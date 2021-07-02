@@ -14,7 +14,7 @@ export function drawNavigator() {
 
   Object.values(STOP).forEach((stop) => {
     const li = document.createElement("li");
-    if (stop === STOP.SUBDIVIDE || stop === STOP.SIMPLIFY) li.className = "muted";
+    if (stop === STOP.SIMPLIFY) li.className = "muted";
     const icon = document.createElement("span");
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     const span = document.createElement("span");
