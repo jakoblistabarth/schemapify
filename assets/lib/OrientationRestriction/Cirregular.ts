@@ -3,10 +3,11 @@ import Sector from "./Sector.js";
 /**
  * @property angles, an array of angles in radians, at least 4
  */
-class Cirregular {
+class Cirregular extends C {
   angles: number[];
 
   constructor(orientations: number[]) {
+    super();
     this.angles = orientations; // TODO: at least 4
   }
 
@@ -32,6 +33,10 @@ class Cirregular {
   getSectorAngle() {
     // TODO: for irregular Cs only meaningful with index as argument?
     return 0;
+  }
+
+  getValidDirections(): number[][] {
+    return super.getValidDirections();
   }
 }
 

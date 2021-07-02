@@ -44,6 +44,30 @@ class C {
   getSector(idx: number): Sector {
     return this.getSectors().find((sector) => sector.idx == idx);
   }
+
+  getValidDirections(numberOfEdges: number): number[][] {
+    const buildCombinations = function (
+      combination: number[],
+      directions: number[],
+      edges: number
+    ) {
+      if (!edges) return combination;
+
+      const firstElements = directions.slice(0, directions.length - edges + 1);
+
+      return firstElements
+        .reduce((output, el) => {
+          const start = directions.indexOf(el);
+          output.push(
+            buildCombinations([...combination, el], directions.slice(start + 1), edges - 1)
+          );
+          return output;
+        }, [])
+        .flat(edges > 1 ? 1 : 0);
+    };
+
+    return buildCombinations([], [...Array(this.angles.length).keys()], numberOfEdges);
+  }
 }
 
 export default C;

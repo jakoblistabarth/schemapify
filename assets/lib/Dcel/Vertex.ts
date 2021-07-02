@@ -114,41 +114,33 @@ class Vertex extends Point {
 
   assignDirections(): number[] {
     const edges = this.sortEdges(false);
-    const angles = this.dcel.config.c.getAngles();
+    const sectors = this.dcel.config.c.getSectors();
 
-    const closestBounds = edges.map((edge) => {
-      let direction: number;
+    function getDeviation(edges: HalfEdge[], directions: number[]): number {
+      return edges.reduce((deviation, edge, index) => {
+        return deviation + edge.getDeviation(sectors[directions[index]]);
+      }, 0);
+    }
 
-      const [lower, upper] = edge.getAssociatedSector()[0].getBounds();
-      direction = edge.getAngle() - lower <= upper - edge.getAngle() ? lower : upper;
-      direction = direction == Math.PI * 2 ? 0 : direction;
+    const validDirections = this.dcel.config.c.getValidDirections(edges.length);
 
-      return angles.indexOf(direction);
-    });
+    let minmalDeviation = Infinity;
+    let solution: number[] = [];
 
-    // console.log("before", closestBounds);
-    closestBounds.forEach((direction, idx) => {
-      const nextDirection = crawlArray(angles, direction, +1);
-      const prevDirection = crawlArray(angles, direction, -1);
+    validDirections.forEach((directions) => {
+      for (let index = 0; index < directions.length; index++) {
+        const deviation = getDeviation(edges, directions);
 
-      if (getOccurrence(closestBounds, direction) == 1) return;
-
-      if (
-        getOccurrence(closestBounds, nextDirection) > 0 &&
-        getOccurrence(closestBounds, prevDirection) < 1
-      ) {
-        closestBounds[idx] = prevDirection;
-      } else {
-        closestBounds.forEach((d, i) => {
-          closestBounds[i] = i != idx && d === direction ? (d + 1) % angles.length : d;
-        });
+        if (deviation < minmalDeviation) {
+          minmalDeviation = deviation;
+          solution = [...directions];
+        }
+        directions.unshift(directions.pop());
       }
     });
 
-    // console.log("after", closestBounds);
-    edges.forEach((edge, idx) => (edge.assignedDirection = closestBounds[idx]));
-
-    return closestBounds;
+    edges.forEach((edge, idx) => (edge.assignedDirection = solution[idx]));
+    return solution;
   }
 }
 

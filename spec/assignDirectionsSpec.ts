@@ -101,7 +101,7 @@ describe("assignDirections() on own examples", function () {
 
   it("with 4 edges (A) in C(2)", function () {
     s.o.edges.push(s.directions.od90, s.directions.od143, s.directions.od180, s.directions.od217);
-    expect(s.o.assignDirections()).toEqual([1, 2, 3, 0]);
+    expect(s.o.assignDirections()).toEqual([0, 1, 2, 3]);
   });
 
   it("with 4 edges (B) in C(2)", function () {
@@ -111,18 +111,18 @@ describe("assignDirections() on own examples", function () {
 
   it("with 4 edges (C) in C(2)", function () {
     s.o.edges.push(s.directions.od90, s.directions.od153, s.directions.od180, s.directions.od243);
-    expect(s.o.assignDirections()).toEqual([1, 2, 3, 0]);
+    expect(s.o.assignDirections()).toEqual([0, 1, 2, 3]);
   });
 
   it("with 4 edges (D) in C(2)", function () {
     s.o.edges.push(s.directions.od153, s.directions.od166, s.directions.od180, s.directions.od243);
-    expect(s.o.assignDirections()).toEqual([1, 2, 3, 0]);
+    expect(s.o.assignDirections()).toEqual([0, 1, 2, 3]);
   });
 
   it("with 4 edges (E) in C(3)", function () {
     s.o.edges.push(s.directions.od153, s.directions.od166, s.directions.od180, s.directions.od243);
     s.dcel.config = { ...config, c: new C(3) };
-    expect(s.o.assignDirections()).toEqual([2, 3, 4, 5]);
+    expect(s.o.assignDirections()).toEqual([1, 2, 3, 4]);
   });
 
   it("with 4 edges (F) in C(2)", function () {

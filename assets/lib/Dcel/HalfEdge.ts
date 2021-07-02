@@ -290,6 +290,11 @@ class HalfEdge {
     }
   }
 
+  getDeviation(sector: Sector): number {
+    const diff = Math.abs(this.getAngle() - sector.lower);
+    return diff > Math.PI ? Math.abs(diff - Math.PI * 2) : diff;
+  }
+
   isAligned(): boolean {
     const isAligned = this.getAssociatedAngles().length === 1;
     return (this.isAligning = isAligned);
