@@ -325,7 +325,7 @@ class Dcel {
           ? edge
           : edge.twin
       ),
-      AD: this.getHalfEdges(EdgeClasses.AD).filter(
+      AD: this.getHalfEdges(EdgeClasses.AD, true).filter(
         (edge) => edge.getSignificantVertex() === edge.getTail()
       ),
       E: this.getHalfEdges(EdgeClasses.E, true).map((edge) =>
