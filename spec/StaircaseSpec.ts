@@ -88,9 +88,10 @@ describe("Build staircase for a HalfEdge of class AD", function () {
     edge.assignedDirection = 0;
     edge.dcel = dcel;
 
-    const staircase = new Staircase(edge);
-    expect(staircase.points.length).toBe(7);
-    expect(staircase.region.length).toBeLessThanOrEqual(staircase.points.length);
+    edge.staircase = new Staircase(edge);
+    edge.staircase.points = edge.staircase.getStaircasePoints();
+    expect(edge.staircase.points.length).toBe(7);
+    expect(edge.staircase.region.length).toBeLessThanOrEqual(edge.staircase.points.length);
   });
 });
 
@@ -132,6 +133,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
+    staircase.getRegion();
     const points = staircase.getStairCasePointsUD();
     const d2 = points[points.length - 1];
 
@@ -299,6 +301,8 @@ describe("getStepArea(),", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
 
     const staircase = new Staircase(edge);
     const stepArea = staircase.getStepArea(3, 1);
@@ -312,6 +316,8 @@ describe("getStepArea(),", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
 
     const staircase = new Staircase(edge);
     const stepArea = staircase.getStepArea(3, 1);
