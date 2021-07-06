@@ -191,12 +191,11 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  const staircaseRegionLayer = L.geoJSON(dcel.staircaseRegionsToGeoJSON(), {
+  const staircaseRegionLayer = L.geoJSON(dcel.snapShots[0].layers[0], {
+    // TODO: implement better structure for snapshots
     style: function (feature) {
-      console.log(feature.properties);
-
       return {
-        color: feature.properties.interfering ? "red" : "blue",
+        color: feature.properties.interferesWith.length > 0 ? "red" : "blue",
         weight: 1,
         fillOpacity: 0.2,
       };
