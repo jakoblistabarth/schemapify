@@ -1,6 +1,6 @@
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
-import C from "../assets/lib/OrientationRestriction/C";
 import { config } from "../assets/schematization.config";
+import CRegular from "../assets/lib/OrientationRestriction/CRegular";
 
 describe("Given the examples in the paper of buchin et al., directions are assigned, correctly on example", function () {
   let s: TestSetup;
@@ -45,49 +45,49 @@ describe("Given the examples in the paper of buchin et al., directions are assig
 
   it("h", function () {
     s.o.edges.push(s.directions.od53, s.directions.od217);
-    s.dcel.config = { ...config, c: new C(4) };
+    s.dcel.config = { ...config, c: new CRegular(4) };
 
     expect(s.o.assignDirections()).toEqual([1, 5]);
   });
 
   it("i", function () {
     s.o.edges.push(s.directions.od53, s.directions.od180, s.directions.od270);
-    s.dcel.config = { ...config, c: new C(4) };
+    s.dcel.config = { ...config, c: new CRegular(4) };
 
     expect(s.o.assignDirections()).toEqual([1, 4, 6]);
   });
 
   it("j", function () {
     s.o.edges.push(s.directions.od37, s.directions.od90, s.directions.od143);
-    s.dcel.config = { ...config, c: new C(4) };
+    s.dcel.config = { ...config, c: new CRegular(4) };
 
     expect(s.o.assignDirections()).toEqual([1, 2, 3]);
   });
 
   it("k", function () {
     s.o.edges.push(s.directions.od37, s.directions.od76);
-    s.dcel.config = { ...config, c: new C(4) };
+    s.dcel.config = { ...config, c: new CRegular(4) };
 
     expect(s.o.assignDirections()).toEqual([1, 2]);
   });
 
   it("l", function () {
     s.o.edges.push(s.directions.od37, s.directions.od53, s.directions.od76);
-    s.dcel.config = { ...config, c: new C(4) };
+    s.dcel.config = { ...config, c: new CRegular(4) };
 
     expect(s.o.assignDirections()).toEqual([0, 1, 2]);
   });
 
   it("m", function () {
     s.o.edges.push(s.directions.od0, s.directions.od14, s.directions.od53, s.directions.od76);
-    s.dcel.config = { ...config, c: new C(4) };
+    s.dcel.config = { ...config, c: new CRegular(4) };
 
     expect(s.o.assignDirections()).toEqual([7, 0, 1, 2]);
   });
 
   it("n", function () {
     s.o.edges.push(s.directions.od315, s.directions.od333, s.directions.od53, s.directions.od76);
-    s.dcel.config = { ...config, c: new C(4) };
+    s.dcel.config = { ...config, c: new CRegular(4) };
 
     expect(s.o.assignDirections()).toEqual([1, 2, 7, 0]);
   });
@@ -121,7 +121,7 @@ describe("assignDirections() on own examples", function () {
 
   it("with 4 edges (E) in C(3)", function () {
     s.o.edges.push(s.directions.od153, s.directions.od166, s.directions.od180, s.directions.od243);
-    s.dcel.config = { ...config, c: new C(3) };
+    s.dcel.config = { ...config, c: new CRegular(3) };
     expect(s.o.assignDirections()).toEqual([1, 2, 3, 4]);
   });
 

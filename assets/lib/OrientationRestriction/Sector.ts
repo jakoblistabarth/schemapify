@@ -1,13 +1,12 @@
-import C from "./C.js";
-import Cirregular from "./Cirregular.js";
+import C from "./C";
 
 class Sector {
-  c: C | Cirregular;
+  c: C;
   idx: number;
   lower: number;
   upper: number;
 
-  constructor(c: C | Cirregular, idx: number, lower: number, upper: number) {
+  constructor(c: C, idx: number, lower: number, upper: number) {
     this.c = c;
     this.idx = idx;
     this.lower = lower;
