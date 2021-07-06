@@ -29,6 +29,12 @@ class Dcel {
     this.staircaseRegions = [];
   }
 
+  /**
+   * Creates a new Vertex and adds it to the DCEL.
+   * @param x x coordinate of the new {@link Vertex}.
+   * @param y y coordinate of the new {@link Vertex}.
+   * @returns The created {@link Vertex}.
+   */
   makeVertex(x: number, y: number): Vertex {
     const key = Vertex.getKey(x, y);
     if (this.vertices.has(key)) return this.vertices.get(key);
@@ -38,6 +44,12 @@ class Dcel {
     return vertex;
   }
 
+  /**
+   * Creates a new HalfEdge and adds it to the DCEL.
+   * @param tail tail {@link Vertex} of the new {@link HalfEdge}.
+   * @param head head {@link Vertex} of the new {@link HalfEdge}.
+   * @returns The created HalfEdge.
+   */
   makeHalfEdge(tail: Vertex, head: Vertex): HalfEdge {
     const key = HalfEdge.getKey(tail, head);
     if (this.halfEdges.has(key)) return this.halfEdges.get(key);
@@ -49,30 +61,46 @@ class Dcel {
     return halfEdge;
   }
 
+  /**
+   * Creates a new Face and adds it to the DCEL.
+   * @returns The created {@link Face}.
+   */
   makeFace(): Face {
     const face = new Face();
     this.faces.push(face);
     return face;
   }
 
+  /**
+   * Gets all Faces of the DCEL.
+   * @returns An array of {@link Face}s.
+   */
   getFaces(): Array<Face> {
     return this.faces;
   }
 
+  /**
+   * Returns only the bounded Faces of the DCEL (the unbounded outer Face is not returned).
+   * @returns An array of {@link Face}s.
+   */
   getBoundedFaces(): Array<Face> {
     return this.faces.filter((f) => f.edge !== null);
   }
 
+  /**
+   * Returns the unbounded Face of the DCEL.
+   * @returns The unbounded {@link Face}.
+   */
   getUnboundedFace(): Face {
     return this.faces.find((f) => f.edge === null);
   }
 
   /**
-   *
-   * @param edgeClass if set, only the halfEdges of this class will be returned
-   * @param simple if true, for every pair of halfEdges only one will be returned, default = false
-   * @param significantTail if true, for a pair of halfEdges which do have a significant vertex, the one where the significant vertex is the tail will be returned, default = false
-   * @returns a (sub)set of halfEdges
+   * Returns Halfedges of the DCEL.
+   * @param edgeClass If set, only the {@link HalfEdge}s of this class will be returned.
+   * @param simple If true, for every pair of {@link HalfEdge}s only one will be returned. false by default.
+   * @param significantTail If true, for a pair of {@link HalfEdge}s which do have a significant {@link Vertex}, the one where the significant {@link Vertex} is the tail will be returned, default = false
+   * @returns A (sub)set of {@link HalfEdge}s.
    */
   getHalfEdges(edgeClass?: EdgeClasses, simple = false, fromSignificant = false): HalfEdge[] {
     const halfEdges = [...this.halfEdges].map(([k, e]) => e);
@@ -109,6 +137,11 @@ class Dcel {
     return this.halfEdges;
   }
 
+  /**
+   * Creates a Doubly Connected Edge List (DCEL) data structure from a geoJSON.
+   * @param geoJSON a valid geojson with features of type 'Polygon' or 'Multipolyon'
+   * @returns
+   */
   static fromGeoJSON(geoJSON: geojson.FeatureCollection): Dcel {
     const subdivision = new Dcel();
 
@@ -235,10 +268,10 @@ class Dcel {
     return subdivision;
   }
 
-  // as seen @ https://github.com/Turfjs/turf/blob/master/packages/turf-bbox/index.ts
   /**
-   *
-   * @returns the Boundingbox of the dcel as [minX, minY, maxX, maxY]
+   * Gets an array of Points making up the bounding box of the DCEL.
+   * As seen from [turf.js](https://github.com/Turfjs/turf/blob/master/packages/turf-bbox/index.ts).
+   * @returns The bounding box of the {@link Dcel} as [minX, minY, maxX, maxY].
    */
   getBbox() {
     const points = [...this.vertices].map(([k, p]) => [p.x, p.y]);
@@ -261,8 +294,8 @@ class Dcel {
   }
 
   /**
-   *
-   * @returns the diameter of the dcel (the diameter of its bounding box)
+   * Calculates the diameter of the DCEL (as the diameter of its bounding box).
+   * @returns The diameter of the {@link Dcel}.
    */
   getDiameter(): number {
     const bbox = this.getBbox();
@@ -271,18 +304,18 @@ class Dcel {
   }
 
   /**
-   *
-   * @param lambda
-   * @returns epsilon, a threshold for the maximum edge length in a dcel
+   * Sets ε, a constant threshold for the maximum edge length within a DCEL, in the DCEL's config object.
+   * @param lambda A constant factor.
+   * @returns Epsilon. The maximum length of a {@link HalfEdge}.
    */
   setEpsilon(lambda: number): number {
     return (this.config.epsilon = this.getDiameter() * lambda);
   }
 
   /**
-   *
+   * Subdivide all edges of an DCEL so that no edges are longer than the defined threshold.
    * @param threshold
-   * @returns a subdivided dcel, with edges smaller than the threshold
+   * @returns A subdivided {@link Dcel}.
    */
   splitEdges(threshold = this.config.epsilon): Dcel {
     this.getBoundedFaces().forEach((f) => {
@@ -299,6 +332,10 @@ class Dcel {
     this.splitEdges();
   }
 
+  /**
+   * Classifies all Vertices in the DCEL, adds new Vertices on an HalfEdge which has two significant Vertices.
+   * By doing so it is guaranteed that every HalfEdge has at most one significant Vertex.
+   */
   classifyVertices(): void {
     this.getVertices().forEach((v) => {
       v.isSignificant();

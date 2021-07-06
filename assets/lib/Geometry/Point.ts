@@ -28,8 +28,14 @@ class Point {
     return new Point(this.x + distance * dx, this.y + distance * dy);
   }
 
-  // as seen @ https://algorithmtutor.com/Computational-Geometry/Check-if-a-point-is-inside-a-polygon/
-  // Works only on convex Polygons!!
+  /**
+   * Checks whether the {@link Point} lies within the specified polygon.
+   * This algorithm works only on convex polygons.
+   * This poses no problem as all {@link staircase} regions are by definition convex polygons.
+   * as seen @ [algorithmtutor.com](https://algorithmtutor.com/Computational-Geometry/Check-if-a-point-is-inside-a-polygon/)
+   * @param polygon An array of Points.
+   * @returns A boolean indicating, whether the Point is within the specified polygon.
+   */
   isInPolygon(polygon: Point[]) {
     const A: number[] = [];
     const B: number[] = [];

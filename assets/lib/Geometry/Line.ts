@@ -21,8 +21,13 @@ class Line {
     return [A, B, C];
   }
 
-  // as seen @ https://www.topcoder.com/thrive/articles/Geometry%20Concepts%20part%202:%20%20Line%20Intersection%20and%20its%20Applications
-  intersectsLine(line: Line): Point {
+  /**
+   * Gets the intersectionpoint of 2 Lines.
+   * As seen @ [topcoder.com](https://www.topcoder.com/thrive/articles/Geometry%20Concepts%20part%202:%20%20Line%20Intersection%20and%20its%20Applications)
+   * @param line The other {@link Line} to intersect with.
+   * @returns The {@link Point} of intersection, or nothing if Lines are parallel.
+   */
+  intersectsLine(line: Line): Point | undefined {
     const [A1, B1, C1] = this.getABC();
     const [A2, B2, C2] = line.getABC();
     const det = A1 * B2 - A2 * B1;
