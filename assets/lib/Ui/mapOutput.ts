@@ -1,8 +1,6 @@
-import Dcel from "../Dcel/Dcel.js";
 import * as L from "leaflet/";
-import Sector from "../OrientationRestriction/Sector.js";
-import HalfEdge from "../Dcel/HalfEdge.js";
-import { createGeoJSON } from "../utilities.js";
+import Dcel from "../Dcel/Dcel";
+import HalfEdge from "../Dcel/HalfEdge";
 
 export function getMapFrom(dcel: Dcel, name: string): L.Map {
   const DCELMap = L.map(name, {
@@ -19,6 +17,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     });
   }
 
+  // FIXME: Output for "Sectors:" is incomplete
   const vertexLayer = L.geoJSON(dcel.verticesToGeoJSON(), {
     pointToLayer: function (feature, latlng) {
       const props = feature.properties;
@@ -36,8 +35,8 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
                   (${head.x}/${head.y})
                 </td>
                 <td>Sectors: ${edge
-                  .getAssociatedSector()
-                  .map((s: Sector) => s.idx)
+                  .getAssociatedAngles()
+                  .map((a) => (a / Math.PI) * 2)
                   .join(",")}</td>
                 <td>${edge.class}</td>
                 <td>AssignedDirection: ${edge.assignedDirection}

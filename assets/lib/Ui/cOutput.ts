@@ -1,6 +1,6 @@
-import config from "../../schematization.config.js";
-import Point from "../Geometry/Point.js";
-import Line from "../Geometry/Line.js";
+import config from "../../schematization.config";
+import Point from "../Geometry/Point";
+import Line from "../Geometry/Line";
 
 export function drawC() {
   const svgContainer = document.getElementById("c-vis");

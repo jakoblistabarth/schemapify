@@ -13,5 +13,5 @@
     "typeRoots": ["./node_modules/@types", "./assets/@types"]
     // "strict": true //TODO turn strict mode one
   },
-  "include": ["./assets/**/*"]
+  "include": ["./assets/**/*", "./spec/**/*"]
 }

@@ -430,8 +430,6 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 2;
 
-    expect(edge.getClosestAssociatedAngle()).toBe(
-      ((Math.PI * 2) / edge.dcel.config.c.getDirections().length) * 3
-    );
+    expect(edge.getClosestAssociatedAngle()).toBe(Math.PI * 1.5);
   });
 });

@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import HalfEdge from "./HalfEdge.js";
+import HalfEdge from "./HalfEdge";
 
 class Face {
   uuid: string;

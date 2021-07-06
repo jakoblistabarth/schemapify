@@ -31,6 +31,8 @@ class Sector {
 
   encloses(angle: number): boolean {
     const [lowerBound, upperBound] = this.getBounds();
+    if (angle === 0 && upperBound === Math.PI * 2) return true;
+    if (angle === Math.PI * 2 && lowerBound === 0) return true;
     return angle >= lowerBound && angle <= upperBound;
   }
 }

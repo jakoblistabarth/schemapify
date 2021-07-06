@@ -37,7 +37,7 @@ class Staircase {
         // like UB and E but accommodate for the appendex area
         this.points = this.getStaircasePoints();
 
-        const [lower, upper] = this.edge.getAssociatedSector()[0].getBounds();
+        const [lower, upper] = this.edge.getAssociatedSector().getBounds();
         const smallestAssociatedAngle = this.edge.getClosestAssociatedAngle();
         const largestAssociatedAngle = this.edge
           .getAssociatedAngles()
@@ -146,7 +146,7 @@ class Staircase {
    */
   getSimpleRegion(): Point[] {
     const edge = this.edge;
-    const [lower, upper] = edge.getAssociatedSector()[0].getBounds();
+    const [lower, upper] = edge.getAssociatedSector().getBounds();
     const A = new Point(edge.getTail().x, edge.getTail().y);
     const a = new Line(A, lower);
     const d = new Line(A, upper);

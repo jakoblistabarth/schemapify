@@ -23,7 +23,6 @@ class HalfEdge {
   prev: HalfEdge;
   next: HalfEdge;
   assignedDirection: number;
-  isAligning: boolean;
   class: EdgeClasses;
 
   constructor(tail: Vertex, dcel: Dcel) {
@@ -34,7 +33,6 @@ class HalfEdge {
     this.face = null;
     this.prev = null;
     this.next = null;
-    this.isAligning = undefined;
     this.class = undefined;
   }
 
@@ -214,6 +212,7 @@ class HalfEdge {
     const sectors = this.dcel.config.c.getSectors();
     const angle = this.getAngle();
     let directions: number[] = [];
+    // FIXME: Return array with same elements for edges lying on sector boundaries to be consistent with getAssociatedSector
     sectors.some(function (sector) {
       if (angle === sector.lower) {
         return directions.push(sector.lower);
@@ -236,20 +235,10 @@ class HalfEdge {
     return this.assignedDirection;
   }
 
-  getAssociatedSector(): Array<Sector> {
+  getAssociatedSector(): Sector {
     const sectors = this.dcel.config.c.getSectors();
-    const direction = this.getAssociatedAngles();
-    return sectors.reduce((acc, sector) => {
-      if (
-        (direction[0] === sector.lower && direction[1] === sector.upper) ||
-        +direction === sector.lower ||
-        +direction === sector.upper ||
-        +direction === sector.upper - Math.PI * 2
-      ) {
-        acc.push(sector);
-      }
-      return acc;
-    }, []);
+    return sectors.find((s) => s.encloses(this.getAngle()));
+    // FIXME: Handle edges lying on sector boundaries consistent with getAssociatedSector
   }
 
   /**
@@ -264,13 +253,9 @@ class HalfEdge {
   // TODO: Where does such function live?
   // within the HalfEdge class or rather within Staircase??
   getClosestAssociatedAngle(): number {
-    if (this.class !== EdgeClasses.UD) return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges
-    const sector = this.getAssociatedSector()[0];
-
-    // TODO: refactor: find better solution for last sector and it's upper bound
-    // set upperbound of last to Math.PI * 2 ?
-    const upper = sector.idx === this.dcel.config.c.getSectors().length - 1 ? 0 : sector.upper;
-    const lower = sector.lower;
+    if (this.class !== EdgeClasses.UD) return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges - I don't know if this should be checked inside the function as the result should be valid for all classes?
+    const sector = this.getAssociatedSector();
+    const [lower, upper] = sector.getBounds();
     const angle = this.getAssignedAngle() === 0 ? Math.PI * 2 : this.getAssignedAngle();
 
     return upper + this.dcel.config.c.getSectorAngle() === angle ? upper : lower;
@@ -282,11 +267,8 @@ class HalfEdge {
       return this.getAssociatedAngles()[0] !== this.getAssignedAngle();
     } else {
       let assignedAngle = this.getAssignedAngle();
-      const sector = this.getAssociatedSector()[0];
-      //TODO: refactor find better solution for last sector (idx=0)
-      if (sector.idx === this.dcel.config.c.getSectors().length - 1 && assignedAngle === 0)
-        assignedAngle = Math.PI * 2;
-      return !sector.encloses(assignedAngle);
+      const sector = this.getAssociatedSector();
+      return !sector.encloses(assignedAngle); // FIXME: How should we handle edges lying on sector boundaries? Should not such edges be treated as "isAligned"?
     }
   }
 
@@ -296,8 +278,7 @@ class HalfEdge {
   }
 
   isAligned(): boolean {
-    const isAligned = this.getAssociatedAngles().length === 1;
-    return (this.isAligning = isAligned);
+    return this.getAssociatedAngles().length === 1;
   }
 
   distanceToEdge(edge: HalfEdge): number {
@@ -314,7 +295,7 @@ class HalfEdge {
     if (this.class) return; // do not overwrite classification
     if (this.getHead().significant) return; // do not classify a HalfEdge which has a significant head
 
-    const sector = this.getAssociatedSector()[0];
+    const sector = this.getAssociatedSector();
     const significantVertex = this.getSignificantVertex() || this.getTail();
     const edges = significantVertex
       .getEdgesInSector(sector)
