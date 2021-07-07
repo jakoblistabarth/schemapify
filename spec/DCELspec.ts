@@ -168,8 +168,8 @@ describe("schematize() returns a result which can be turned into a valid geojson
   const dir = "assets/data/geodata";
   const testFiles = getTestFiles(dir);
 
-  testFiles.slice(3, 4).forEach((file) => {
-    //TODO: test other geodata as well?
+  testFiles.forEach((file) => {
+    if (file === "ne_110m_admin_0_countries.json" || file === "AUT_adm1.json") return; //TODO: test other geodata as well?
     it("for the geodata input " + file, function () {
       const inputJson = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
       const dcel = Dcel.fromGeoJSON(inputJson);
