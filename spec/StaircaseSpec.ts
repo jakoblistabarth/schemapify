@@ -81,9 +81,8 @@ describe("Build staircase for a HalfEdge of class AD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 10, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.AD;
     edge.assignedDirection = 0;
     edge.dcel = dcel;
@@ -104,9 +103,8 @@ describe("Build staircase for a HalfEdge of class UB", function () {
     const o = new Vertex(1, 1, dcel);
     const d = new Vertex(7, 5, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UB;
     edge.assignedDirection = 0;
     edge.dcel = dcel;
@@ -125,9 +123,8 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(7, 5, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 3;
     edge.dcel = dcel;
@@ -149,9 +146,8 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 2;
     edge.dcel = dcel;
@@ -175,9 +171,8 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(30, 12, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 3;
     edge.dcel = dcel;
@@ -201,9 +196,8 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-7, 5, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 3;
     edge.dcel = dcel;
@@ -227,9 +221,8 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-7, 5, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 0;
     edge.dcel = dcel;
@@ -253,9 +246,8 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-7, -5, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 0;
     edge.dcel = dcel;
@@ -276,9 +268,8 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(2.5, 1, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 2;
     edge.dcel = dcel;
@@ -333,9 +324,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 3;
 
@@ -349,9 +339,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 2;
 
@@ -367,9 +356,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 0;
 
@@ -385,9 +373,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 3;
 
@@ -401,9 +388,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, -4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 1;
 
@@ -417,9 +403,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, -4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 0;
 
@@ -433,9 +418,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, -4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 2;
 
