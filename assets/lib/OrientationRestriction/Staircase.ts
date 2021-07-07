@@ -57,28 +57,16 @@ class Staircase {
         const a = new Line(V, edge.getAssignedAngle()); // QUESTION: not mentioned in the paper!
         const e = new Line(V, largestAssociatedAngle);
         const W = new Point(edge.getHead().x, edge.getHead().y);
-        const c = new Line(W, lower);
-        const d = new Line(W, upper);
+        const cAngle = largestAssociatedAngle === upper ? upper : lower; // QUESTION: is there a way to do this more elegantly, without specifying c and d explicitly?
+        const dAngle = cAngle === upper ? lower : upper;
+        const c = new Line(W, cAngle);
+        const d = new Line(W, dAngle);
         const P = this.points[2];
         const b = new Line(P, smallestAssociatedAngle);
         const C = b.intersectsLine(c);
         const B = a.intersectsLine(b);
         const D = e.intersectsLine(d);
         let regionPoints = [V, B, C, W, D];
-
-        // console.log(
-        //   edge.getTail(),
-        //   edge.class,
-        //   "assigned:",
-        //   edge.assignedDirection,
-        //   "smallest:",
-        //   smallestAssociatedAngle,
-        //   "lower:",
-        //   lower,
-        //   "upper:",
-        //   upper
-        // );
-        // console.log(regionPoints);
 
         // We assumed that p lies in the defined region.
         // However, if this is not the case, we can extend the staircase region
