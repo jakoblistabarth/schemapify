@@ -1,8 +1,7 @@
 import Dcel from "../Dcel/Dcel.js";
 import * as L from "leaflet/";
 import Sector from "../OrientationRestriction/Sector.js";
-import HalfEdge from "../Dcel/HalfEdge.js";
-import { createGeoJSON } from "../utilities.js";
+import HalfEdge, { EdgeClasses } from "../Dcel/HalfEdge.js";
 
 export function getMapFrom(dcel: Dcel, name: string): L.Map {
   const DCELMap = L.map(name, {

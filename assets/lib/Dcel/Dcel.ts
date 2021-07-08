@@ -10,7 +10,7 @@ import * as geojson from "geojson";
 type Snapshot = {
   idx: number;
   name: string;
-  layers: geojson.GeoJSON[];
+  layers: geojson.FeatureCollection[];
 };
 
 class Dcel {
@@ -340,93 +340,146 @@ class Dcel {
         edge = edge.twin;
       edge.staircase = new Staircase(edge);
     });
-    this.getEdgeDistances();
-    // this.getStepNumber(); TODO: implement
+
+    // calculate edgedistance and stepnumber for deviating edges first
+    const staircasesOfDeviatingEdges = this.getStaircases().filter(
+      (staircase) =>
+        staircase.edge.class === EdgeClasses.AD || staircase.edge.class === EdgeClasses.UD
+    );
+    this.getEdgeDistances(staircasesOfDeviatingEdges);
+    this.getSe(
+      staircasesOfDeviatingEdges.filter((staircase) => staircase.interferesWith.length > 0)
+    );
+
+    // calculate edgedistance and stepnumber for remaining edges
+    const staircasesOther = this.getStaircases().filter(
+      (staircase) =>
+        staircase.edge.class !== EdgeClasses.AD && staircase.edge.class !== EdgeClasses.UD
+    );
+    this.getEdgeDistances(staircasesOther);
+    this.getSe(staircasesOther.filter((staircase) => staircase.interferesWith.length > 0));
 
     // TODO: make snapshot of staircases and edges, generic function?
     this.snapShots.push({ idx: 0, name: "staircases", layers: [this.staircaseRegionsToGeoJSON()] });
 
+    // create the actual staircase in the DCEL
     this.replaceWithStaircases();
   }
 
-  getEdgeDistances() {
-    // check if any point of a region is within another region
-    for (const staircase of this.getStaircases()) {
-      const currentStaircaseIdx = this.getStaircases().indexOf(staircase);
-      const staircasesToCompareWith = Array.from(this.getStaircases());
-      staircasesToCompareWith.splice(currentStaircaseIdx, 1);
-      staircase.region.forEach((point) => {
-        staircasesToCompareWith.forEach((staircaseToCompareWith) => {
-          let e = staircase.edge;
-          let e_ = staircaseToCompareWith.edge;
-          if (!point.isInPolygon(staircaseToCompareWith.region)) return;
-          if (
-            e.getTail() !== e_.getTail() &&
-            e.getTail() !== e_.getHead() &&
-            e.getHead() !== e_.getHead() &&
-            e.getHead() !== e_.getTail()
-          ) {
-            // If the compared regions' edges do not have a vertex in common,
-            // de is is simply the minimal distance between the edges.
-            const de = e.distanceToEdge(e_);
-            staircase.setEdgeDistance(de);
-            return staircase.interferesWith.push(e_);
-          } else {
-            // If e and e' share a vertex v, they interfere only if the edges reside in the same sector with respect to v.
-            const v = e.getEndpoints().find((endpoint) => e_.getEndpoints().indexOf(endpoint) >= 0); // get common vertex
-            e = e.getTail() !== v ? e.twin : e;
-            e_ = e_.getTail() !== v ? e_.twin : e_;
-            if (!e.getAssociatedSector().some((sector) => sector.encloses(e_.getAngle()))) return;
-            staircase.interferesWith.push(e_);
+  getEdgeDistances(staircases: Staircase[]) {
+    // TODO: make sure the edgedistance cannot be too small? for topology error ("Must Be Larger Than Cluster tolerance"), when minimum distance between points to small
+    // see: https://pro.arcgis.com/en/pro-app/latest/help/editing/geodatabase-topology-rules-for-polygon-features.htm
 
-            // However, if e and e' do share a vertex, then we must again look at the classification
-            let de = undefined;
-            switch (e.class) {
-              case EdgeClasses.UB: {
-                // If e' is aligned, then we ignore a fraction of (1 − ε)/2 of e'
-                // If e' is unaligned, then we ignore a fraction of e' equal to the length of the first step.
-                // In other words, we ignore a fraction of 1/(se' − 1) [of e'].
-                if (e_.class === EdgeClasses.AD) {
-                  const offset = (1 - e.dcel.config.staircaseEpsilon) / 2;
-                  const vertexOffset = e.getOffsetVertex(e_, offset);
-                  de = vertexOffset.distanceToEdge(e);
-                } else {
-                  const se = 10; // FIXME: calculate first for stepnumbers??
-                  const offset = 1 / (se - 1);
-                  const vertexOffset = e.getOffsetVertex(e_, offset);
-                  de = vertexOffset.distanceToEdge(e);
-                }
-                break;
-              }
-              case EdgeClasses.E: {
-                // If e' is an evading edge, we ignore the first half of e (but not of e').
-                // If e' is a deviating edge, we treat it as if e were an unaligned basic edge.
-                if (e_.class === EdgeClasses.E) {
-                  const vertexOffset = e.getOffsetVertex(e, (e.getLength() * 1) / 2);
-                  de = vertexOffset.distanceToEdge(e_);
-                } else {
-                  // AD or UD
-                  return; // TODO: (1/(se' − 1))??? needs to be done first
-                }
-                break;
-              }
-              case EdgeClasses.AD: {
+    // check if any point of a region is within another region
+    for (const staircase of staircases) {
+      const currentStaircaseIdx = staircases.indexOf(staircase);
+      const staircasesToCompareWith = Array.from(staircases);
+      staircasesToCompareWith.splice(currentStaircaseIdx, 1);
+      staircasesToCompareWith.forEach((staircaseToCompareWith) => {
+        if (staircase.region.every((point) => !point.isInPolygon(staircaseToCompareWith.region)))
+          return;
+        let e = staircase.edge;
+        let e_ = staircaseToCompareWith.edge;
+        if (
+          e.getTail() !== e_.getTail() &&
+          e.getTail() !== e_.getHead() &&
+          e.getHead() !== e_.getHead() &&
+          e.getHead() !== e_.getTail()
+        ) {
+          // "If the compared regions' edges do not have a vertex in common,
+          // de is is simply the minimal distance between the edges."
+          const de = e.distanceToEdge(e_);
+          staircase.setEdgeDistance(de);
+          return staircase.interferesWith.push(e_);
+        } else {
+          // "If e and e' share a vertex v, they interfere only if the edges reside in the same sector with respect to v."
+          const v = e.getEndpoints().find((endpoint) => e_.getEndpoints().indexOf(endpoint) >= 0); // get common vertex
+          e = e.getTail() !== v ? e.twin : e;
+          e_ = e_.getTail() !== v ? e_.twin : e_;
+          if (!e.getAssociatedSector().some((sector) => sector.encloses(e_.getAngle()))) return;
+          staircase.interferesWith.push(e_);
+
+          // "However, if e and e' do share a vertex, then we must again look at the classification."
+          let de = undefined;
+          switch (e.class) {
+            case EdgeClasses.UB: {
+              // "If e' is aligned, then we ignore a fraction of (1 − ε)/2 of e'."
+              // "If e' is unaligned, then we ignore a fraction of e' equal to the length of the first step."
+              // "In other words, we ignore a fraction of 1/(se' − 1) [of e']."
+              if (e_.class === EdgeClasses.AD) {
                 const offset = (1 - e.dcel.config.staircaseEpsilon) / 2;
-                const vertexOffset = e.getOffsetVertex(e, offset);
-                de = vertexOffset.distanceToEdge(e_);
-                break;
+                const vertexOffset = e.getOffsetVertex(e_, offset);
+                de = vertexOffset.distanceToEdge(e);
+              } else {
+                const offset = 1 / (e_.staircase.se - 1);
+                const vertexOffset = e.getOffsetVertex(e_, offset);
+                de = vertexOffset.distanceToEdge(e);
               }
-              case EdgeClasses.UD: {
-                const vertexOffset = e.getOffsetVertex(e, (e.getLength() * 1) / 3);
-                de = vertexOffset.distanceToEdge(e_);
-                break;
-              }
+              break;
             }
-            staircase.setEdgeDistance(de);
+            case EdgeClasses.E: {
+              // "If e' is an evading edge, we ignore the first half of e (but not of e')."
+              // "If e' is a deviating edge, we treat it as if e were an unaligned basic edge."
+              if (e_.class === EdgeClasses.E) {
+                const vertexOffset = e.getOffsetVertex(e, (e.getLength() * 1) / 2);
+                de = vertexOffset.distanceToEdge(e_);
+              } else {
+                // AD or UD
+                const offset = 1 / (e_.staircase.se - 1);
+                const vertexOffset = e.getOffsetVertex(e_, offset);
+                de = vertexOffset.distanceToEdge(e);
+              }
+              break;
+            }
+            case EdgeClasses.AD: {
+              const offset = (1 - e.dcel.config.staircaseEpsilon) / 2;
+              const vertexOffset = e.getOffsetVertex(e, offset);
+              de = vertexOffset.distanceToEdge(e_);
+              break;
+            }
+            case EdgeClasses.UD: {
+              const vertexOffset = e.getOffsetVertex(e, (e.getLength() * 1) / 3);
+              de = vertexOffset.distanceToEdge(e_);
+              break;
+            }
           }
-        });
-        point.isInPolygon(staircase.region);
+          staircase.setEdgeDistance(de);
+        }
       });
+    }
+  }
+
+  getSe(staircases: Staircase[]) {
+    for (const staircase of staircases) {
+      const edge = staircase.edge;
+      switch (edge.class) {
+        case EdgeClasses.AD: {
+          // "… we use δe = min{de/2,Δe}, where Δe = 0.1||e|| as defined for the staircase regions."
+          if (staircase.de / 2 < staircase.deltaE) staircase.deltaE = staircase.de / 2;
+          break;
+        }
+        case EdgeClasses.UD: {
+          const maxVertices = staircase.points
+            .slice(1, 2)
+            .map((point) => new Vertex(point.x, point.y, null));
+          const d1 = Math.min(...maxVertices.map((vertex) => vertex.distanceToEdge(edge)));
+          let se = Math.ceil((2 * d1 * edge.getLength()) / staircase.de + 1);
+          se = se % 2 === 0 ? se + 2 : se + 1; // TODO: check if this is correct? (p. 18)
+          staircase.se = Math.max(4, se);
+          break;
+        }
+        default: {
+          // console.log("de", staircase.de);
+          // "Let 𝛼1 denote the absolute angle between vector w−v and the assigned direction of e.
+          // Similarly, 𝛼2 denotes the absolute angle between vector w − v and the other associated direction of e."
+          const alpha1 = edge.getAngle() - edge.getAssociatedAngles()[0];
+          const alpha2 = edge.getAssociatedAngles()[1] - edge.getAngle();
+          const lmax =
+            ((Math.pow(Math.tan(alpha1), -1) + Math.pow(Math.tan(alpha2), -1)) * staircase.de) / 2;
+          let se = Math.ceil(edge.getLength() / lmax);
+          staircase.se = se % 2 === 0 ? se + 2 : se + 1; // TODO: check if this is correct? (p. 18)
+        }
+      }
     }
   }
 
@@ -434,7 +487,7 @@ class Dcel {
     this.getHalfEdges()
       .filter((edge) => edge.staircase !== undefined)
       .forEach((edge) => {
-        const stepPoints = edge.staircase.getStaircasePoints().slice(1, -1);
+        const stepPoints = edge.staircase.getStaircasePoints().slice(1, -1); // FIXME: use staircase.points here instead of method?
         let edgeToSplit = edge;
         for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Point(p.x, p.y)).next;
       });
@@ -527,7 +580,7 @@ class Dcel {
     return createGeoJSON(features);
   }
 
-  verticesToGeoJSON(): geojson.GeoJSON {
+  verticesToGeoJSON(): geojson.FeatureCollection {
     const vertexFeatures = [...this.vertices].map(([k, v]): geojson.Feature => {
       return {
         type: "Feature",
@@ -546,7 +599,7 @@ class Dcel {
     return createGeoJSON(vertexFeatures);
   }
 
-  facesToGeoJSON(): geojson.GeoJSON {
+  facesToGeoJSON(): geojson.FeatureCollection {
     const faceFeatures = this.getBoundedFaces().map((f): geojson.Feature => {
       const halfEdges = f.getEdges();
       const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
@@ -568,7 +621,7 @@ class Dcel {
     return createGeoJSON(faceFeatures);
   }
 
-  staircasesToGeoJSON(): geojson.GeoJSON {
+  staircasesToGeoJSON(): geojson.FeatureCollection {
     const staircaseFeatures = this.getHalfEdges(undefined, true).map((edge): geojson.Feature => {
       const staircase: Staircase = new Staircase(edge);
       const coordinates: number[][] = staircase.region.map((p) => [p.x, p.y]);
@@ -587,7 +640,7 @@ class Dcel {
     return createGeoJSON(staircaseFeatures);
   }
 
-  edgesToGeoJSON(): geojson.GeoJSON {
+  edgesToGeoJSON(): geojson.FeatureCollection {
     const edgeFeatures = this.getHalfEdges(undefined, true).map((e): geojson.Feature => {
       const a = e.tail;
       const b = e.twin.tail;
@@ -633,10 +686,11 @@ class Dcel {
     return createGeoJSON(edgeFeatures);
   }
 
-  staircaseRegionsToGeoJSON(): geojson.GeoJSON {
+  staircaseRegionsToGeoJSON(): geojson.FeatureCollection {
     const regionFeatures = this.getStaircases().map((staircase): geojson.Feature => {
       const regionPoints = staircase.region;
       regionPoints.push(regionPoints[0]); // add first Point to close geoJSON polygon
+
       return {
         type: "Feature",
         properties: {

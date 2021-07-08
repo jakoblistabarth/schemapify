@@ -5,18 +5,20 @@ import ConvexHullGrahamScan from "graham_scan";
 
 class Staircase {
   edge: HalfEdge;
+  deltaE: number;
+  points: Array<Point>;
   region: Array<Point>;
   de: number;
-  stepNumber: number;
-  points: Array<Point>;
+  se: number;
   interferesWith: HalfEdge[];
 
   constructor(edge: HalfEdge) {
     this.edge = edge;
+    this.deltaE = edge.class === EdgeClasses.AD ? edge.getLength() * 0.1 : undefined;
+    this.points = undefined;
     this.region = this.getRegion();
     this.de = undefined;
-    this.stepNumber = undefined;
-    this.points = undefined;
+    this.se = undefined;
     this.interferesWith = [];
   }
 
@@ -99,13 +101,13 @@ class Staircase {
   getStaircasePoints() {
     switch (this.edge.class) {
       case EdgeClasses.UB:
-        return this.getStairCasePointsUB();
+        return this.getStaircasePointsUB();
       case EdgeClasses.E:
-        return this.getStairCasePointsE();
+        return this.getStaircasePointsE();
       case EdgeClasses.AD:
-        return this.getStairCasePointsAD();
+        return this.getStaircasePointsAD();
       case EdgeClasses.UD:
-        return this.getStairCasePointsUD();
+        return this.getStaircasePointsUD();
     }
   }
 
@@ -113,10 +115,9 @@ class Staircase {
    * Returns a staircase for an "aligned deviating" edge.
    * @returns All points constructing the staircase (including tail and head of the original edge).
    */
-  getStairCasePointsAD() {
+  getStaircasePointsAD() {
     const edge = this.edge;
     const epsilon = this.edge.dcel.config.staircaseEpsilon;
-    const deltaE = edge.getLength() * epsilon;
     const d1 = edge.getAssignedAngle();
     const d2 = edge.getAngle();
     const d1Opposite = (d1 + Math.PI) % (Math.PI * 2);
@@ -126,11 +127,11 @@ class Staircase {
     const head = edge.getHead();
 
     points[0] = tail;
-    points[1] = tail.getNewPoint(deltaE, d1);
+    points[1] = tail.getNewPoint(this.deltaE, d1);
     points[2] = points[1].getNewPoint((edge.getLength() * (1 - epsilon)) / 2, d2);
-    points[3] = points[2].getNewPoint(deltaE * 2, d1Opposite);
+    points[3] = points[2].getNewPoint(this.deltaE * 2, d1Opposite);
     points[4] = points[3].getNewPoint((edge.getLength() * (1 - epsilon)) / 2, d2);
-    points[5] = points[4].getNewPoint(deltaE, d1);
+    points[5] = points[4].getNewPoint(this.deltaE, d1);
     points[6] = head;
 
     return points;
@@ -160,7 +161,8 @@ class Staircase {
    * @param se number of steps used to construct the staircase, the minimum number of steps is, the functions default value: 2
    * @returns all points constructing the staircase (including tail and head of the original edge)
    */
-  getStairCasePointsUB(se: number = 2): Point[] {
+  getStaircasePointsUB(): Point[] {
+    const se = this.se || 2;
     const edge = this.edge;
 
     const d1 = edge.getAssignedAngle();
@@ -189,7 +191,8 @@ class Staircase {
    * @param se number of steps used to construct the staircase, the minimum number of steps is, the functions default value: 4
    * @returns all points constructing the staircase (including tail and head of the original edge)
    */
-  getStairCasePointsE(se: number = 4): Point[] {
+  getStaircasePointsE(): Point[] {
+    const se = this.se || 4;
     const edge = this.edge;
 
     const d1 = edge.getAssignedAngle();
@@ -242,7 +245,8 @@ class Staircase {
    * @param se number of steps used to construct the staircase, the minimum number of steps is, the functions default value: 4
    * @returns all points constructing the staircase (including tail and head of the original edge)
    */
-  getStairCasePointsUD(se: number = 4): Point[] {
+  getStaircasePointsUD(): Point[] {
+    const se = this.se || 4;
     const edge = this.edge;
 
     const d1 = edge.getClosestAssociatedAngle();
@@ -277,7 +281,7 @@ class Staircase {
    * @returns The edge distance.
    */
   setEdgeDistance(edgeDistance: number) {
-    if (edgeDistance < this.de) this.de = edgeDistance;
+    if (this.de === undefined || edgeDistance < this.de) this.de = edgeDistance;
     return edgeDistance;
   }
 }
