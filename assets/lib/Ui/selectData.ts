@@ -34,8 +34,8 @@ export function drawDataSelect(inputFiles: string[]) {
 export const tests: string[] = [
   "geodata/AUT_adm1-simple.json",
   "geodata/AUT_adm1.json",
-  // "geodata/ne_110m_admin_0_countries.json",
-  "geodata/ne_110m_africa_admin0.json",
+  "geodata/ne_50m_europe_mapunits-s20.json",
+  "geodata/ne_50m_africa_admin0-s20.json",
   // "shapes/2plgn-adjacent.json",
   // "shapes/2plgn-islands-hole.json",
   // "shapes/2plgn-islands-holes.json",

@@ -2,33 +2,46 @@ import HalfEdge, { EdgeClasses } from "../Dcel/HalfEdge";
 import Point from "../Geometry/Point";
 import Line from "../Geometry/Line";
 import ConvexHullGrahamScan from "graham_scan";
+
 class Staircase {
   edge: HalfEdge;
+  deltaE: number;
+  points: Array<Point>;
   region: Array<Point>;
   de: number;
-  stepNumbers: number;
-  points: Array<Point>;
+  se: number;
+  interferesWith: HalfEdge[];
 
   constructor(edge: HalfEdge) {
     this.edge = edge;
+    this.deltaE = edge.class === EdgeClasses.AD ? edge.getLength() * 0.1 : undefined;
+    this.points = undefined;
     this.region = this.getRegion();
-    this.de; // TODO: move this to HalfEdge? not really related to edge
-    this.stepNumbers;
-    this.points;
+    this.de = undefined;
+    this.se = undefined;
+    this.interferesWith = [];
   }
 
   /**
    * Gets the staircase region of an edge, depending on its class.
+   * If the edge has an significant Vertex, it has to be the tail of the edge.
+   * If that's not the case its twin is used for calculating the staircase region.
    * @returns The region of an edge.
    */
   getRegion(): Array<Point> {
-    switch (this.edge.class) {
+    const edge =
+      !this.edge.getSignificantVertex() || this.edge.getSignificantVertex() === this.edge.getTail()
+        ? this.edge
+        : this.edge.twin;
+
+    switch (edge.class) {
       case EdgeClasses.AB:
         return [
-          new Point(this.edge.getTail().x, this.edge.getTail().y),
-          new Point(this.edge.getHead().x, this.edge.getHead().y),
-          new Point(this.edge.getTail().x, this.edge.getTail().y),
-        ]; // QUESTION: better 4 coordinates to span an area?
+          new Point(edge.getTail().x, edge.getTail().y),
+          new Point(edge.getHead().x, edge.getHead().y),
+          new Point(edge.getHead().x, edge.getHead().y),
+          new Point(edge.getTail().x, edge.getTail().y),
+        ];
       case EdgeClasses.UB:
         return this.getSimpleRegion();
       case EdgeClasses.E:
@@ -37,15 +50,15 @@ class Staircase {
         // like UB and E but accommodate for the appendex area
         this.points = this.getStaircasePoints();
 
-        const [lower, upper] = this.edge.getAssociatedSector()[0].getBounds();
-        const smallestAssociatedAngle = this.edge.getClosestAssociatedAngle();
-        const largestAssociatedAngle = this.edge
+        const [lower, upper] = edge.getAssociatedSector()[0].getBounds();
+        const smallestAssociatedAngle = edge.getClosestAssociatedAngle();
+        const largestAssociatedAngle = edge
           .getAssociatedAngles()
           .find((angle) => angle != smallestAssociatedAngle);
-        const V = new Point(this.edge.getTail().x, this.edge.getTail().y);
-        const a = new Line(V, this.edge.getAssignedAngle()); // QUESTION: not mentioned in the paper!
+        const V = new Point(edge.getTail().x, edge.getTail().y);
+        const a = new Line(V, edge.getAssignedAngle()); // QUESTION: not mentioned in the paper!
         const e = new Line(V, largestAssociatedAngle);
-        const W = new Point(this.edge.getHead().x, this.edge.getHead().y);
+        const W = new Point(edge.getHead().x, edge.getHead().y);
         const cAngle = largestAssociatedAngle === upper ? upper : lower; // QUESTION: is there a way to do this more elegantly, without specifying c and d explicitly?
         const dAngle = cAngle === upper ? lower : upper;
         const c = new Line(W, cAngle);
@@ -85,30 +98,16 @@ class Staircase {
     return (assignedEdge * associatedEdge * Math.sin(enclosingAngle)) / 2;
   }
 
-  getEdgeDistance() {
-    if (this.edge.class === EdgeClasses.AB) {
-      return;
-    }
-    // TODO: implement other cases
-  }
-
-  getStepNumbers() {
-    const staircaseRegion = this.getRegion();
-
-    let stepNumbers;
-    return stepNumbers;
-  }
-
   getStaircasePoints() {
     switch (this.edge.class) {
       case EdgeClasses.UB:
-        return this.getStairCasePointsUB();
+        return this.getStaircasePointsUB();
       case EdgeClasses.E:
-        return this.getStairCasePointsE();
+        return this.getStaircasePointsE();
       case EdgeClasses.AD:
-        return this.getStairCasePointsAD();
+        return this.getStaircasePointsAD();
       case EdgeClasses.UD:
-        return this.getStairCasePointsUD();
+        return this.getStaircasePointsUD();
     }
   }
 
@@ -116,10 +115,9 @@ class Staircase {
    * Returns a staircase for an "aligned deviating" edge.
    * @returns All points constructing the staircase (including tail and head of the original edge).
    */
-  getStairCasePointsAD() {
+  getStaircasePointsAD() {
     const edge = this.edge;
-    const epsilon = 0.1;
-    const deltaE = edge.getLength() * epsilon;
+    const epsilon = this.edge.dcel.config.staircaseEpsilon;
     const d1 = edge.getAssignedAngle();
     const d2 = edge.getAngle();
     const d1Opposite = (d1 + Math.PI) % (Math.PI * 2);
@@ -129,11 +127,11 @@ class Staircase {
     const head = edge.getHead();
 
     points[0] = tail;
-    points[1] = tail.getNewPoint(deltaE, d1);
+    points[1] = tail.getNewPoint(this.deltaE, d1);
     points[2] = points[1].getNewPoint((edge.getLength() * (1 - epsilon)) / 2, d2);
-    points[3] = points[2].getNewPoint(deltaE * 2, d1Opposite);
+    points[3] = points[2].getNewPoint(this.deltaE * 2, d1Opposite);
     points[4] = points[3].getNewPoint((edge.getLength() * (1 - epsilon)) / 2, d2);
-    points[5] = points[4].getNewPoint(deltaE, d1);
+    points[5] = points[4].getNewPoint(this.deltaE, d1);
     points[6] = head;
 
     return points;
@@ -163,7 +161,8 @@ class Staircase {
    * @param se number of steps used to construct the staircase, the minimum number of steps is, the functions default value: 2
    * @returns all points constructing the staircase (including tail and head of the original edge)
    */
-  getStairCasePointsUB(se: number = 2): Point[] {
+  getStaircasePointsUB(): Point[] {
+    const se = this.se || 2;
     const edge = this.edge;
 
     const d1 = edge.getAssignedAngle();
@@ -192,7 +191,8 @@ class Staircase {
    * @param se number of steps used to construct the staircase, the minimum number of steps is, the functions default value: 4
    * @returns all points constructing the staircase (including tail and head of the original edge)
    */
-  getStairCasePointsE(se: number = 4): Point[] {
+  getStaircasePointsE(): Point[] {
+    const se = this.se || 4;
     const edge = this.edge;
 
     const d1 = edge.getAssignedAngle();
@@ -245,7 +245,8 @@ class Staircase {
    * @param se number of steps used to construct the staircase, the minimum number of steps is, the functions default value: 4
    * @returns all points constructing the staircase (including tail and head of the original edge)
    */
-  getStairCasePointsUD(se: number = 4): Point[] {
+  getStaircasePointsUD(): Point[] {
+    const se = this.se || 4;
     const edge = this.edge;
 
     const d1 = edge.getClosestAssociatedAngle();
@@ -272,6 +273,16 @@ class Staircase {
     points.splice(1, 0, p1, p2);
 
     return points;
+  }
+
+  /**
+   * Sets the edgeDistance of the Staircase, if it is smaller than an possibly already calculated distance.
+   * @param edgeDistance Minimum distance between edges.
+   * @returns The edge distance.
+   */
+  setEdgeDistance(edgeDistance: number) {
+    if (this.de === undefined || edgeDistance < this.de) this.de = edgeDistance;
+    return edgeDistance;
   }
 }
 

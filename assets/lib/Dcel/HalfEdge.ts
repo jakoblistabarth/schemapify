@@ -5,6 +5,7 @@ import Dcel from "./Dcel";
 import Face from "./Face";
 import Sector from "../OrientationRestriction/Sector";
 import { getUnitVector } from "../utilities";
+import Staircase from "../OrientationRestriction/Staircase";
 
 export enum EdgeClasses {
   AB = "alignedBasic",
@@ -25,6 +26,7 @@ class HalfEdge {
   assignedDirection: number;
   isAligning: boolean;
   class: EdgeClasses;
+  staircase: Staircase;
 
   constructor(tail: Vertex, dcel: Dcel) {
     this.uuid = uuid();
@@ -36,6 +38,7 @@ class HalfEdge {
     this.next = null;
     this.isAligning = undefined;
     this.class = undefined;
+    this.staircase = undefined; // TODO: move isAligning, class and staircase to more specific (i.e. "cHalfEdge") class?
   }
 
   static getKey(tail: Vertex, head: Vertex): string {
@@ -354,6 +357,17 @@ class HalfEdge {
     const l2 = detY / det;
 
     return [l1, l2];
+  }
+
+  /**
+   * Gets the modified tail Vertex, which is used for calculating the edgeDistance between HalfEdges sharing one Vertex.
+   * @param offsetEdge The edge of which a part should be ignored.
+   * @param offset The distance the offset Vertex should be moved in respect to its (original) tail Vertex.
+   * @returns The Vertex on the edge of which a part should be ignored and from where the edge is considered for calculating the edgeDistance.
+   */
+  getOffsetVertex(offsetEdge: HalfEdge, offset: number) {
+    const pointOffset = offsetEdge.getTail().getNewPoint(offset, offsetEdge.getAngle());
+    return new Vertex(pointOffset.x, pointOffset.y, undefined);
   }
 }
 

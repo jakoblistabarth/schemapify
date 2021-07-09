@@ -81,16 +81,16 @@ describe("Build staircase for a HalfEdge of class AD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 10, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.AD;
     edge.assignedDirection = 0;
     edge.dcel = dcel;
 
-    const staircase = new Staircase(edge);
-    expect(staircase.points.length).toBe(7);
-    expect(staircase.region.length).toBeLessThanOrEqual(staircase.points.length);
+    edge.staircase = new Staircase(edge);
+    edge.staircase.points = edge.staircase.getStaircasePoints();
+    expect(edge.staircase.points.length).toBe(7);
+    expect(edge.staircase.region.length).toBeLessThanOrEqual(edge.staircase.points.length);
   });
 });
 
@@ -103,15 +103,14 @@ describe("Build staircase for a HalfEdge of class UB", function () {
     const o = new Vertex(1, 1, dcel);
     const d = new Vertex(7, 5, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UB;
     edge.assignedDirection = 0;
     edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
-    const points = staircase.getStairCasePointsUB();
+    const points = staircase.getStaircasePointsUB();
     expect(points.length).toBeGreaterThanOrEqual(5);
   });
 });
@@ -124,18 +123,16 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(7, 5, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 3;
     edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
-    const points = staircase.getStairCasePointsUD();
-    const d2 = points[points.length - 1];
+    const d2 = staircase.points[staircase.points.length - 1];
 
-    expect(points.length).toBeGreaterThanOrEqual(9);
+    expect(staircase.points.length).toBeGreaterThanOrEqual(9);
     expect(d.x).toBeCloseTo(d2.x, 10);
     expect(d.y).toBeCloseTo(d2.y, 10);
   });
@@ -147,19 +144,17 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 2;
     edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
-    const points = staircase.getStairCasePointsUD();
 
-    const appendedArea = getPolygonArea(points.slice(0, 4));
-    const secondLastStep = getPolygonArea(points.slice(-5, -2));
-    const lastStep = getPolygonArea(points.slice(-3));
+    const appendedArea = getPolygonArea(staircase.points.slice(0, 4));
+    const secondLastStep = getPolygonArea(staircase.points.slice(-5, -2));
+    const lastStep = getPolygonArea(staircase.points.slice(-3));
 
     expect(appendedArea).toBeCloseTo(secondLastStep, 10);
     expect(appendedArea).toBeCloseTo(lastStep, 10);
@@ -173,19 +168,17 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(30, 12, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 3;
     edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
-    const points = staircase.getStairCasePointsUD();
 
-    const appendedArea = getPolygonArea(points.slice(0, 4));
-    const secondLastStep = getPolygonArea(points.slice(-5, -2));
-    const lastStep = getPolygonArea(points.slice(-3));
+    const appendedArea = getPolygonArea(staircase.points.slice(0, 4));
+    const secondLastStep = getPolygonArea(staircase.points.slice(-5, -2));
+    const lastStep = getPolygonArea(staircase.points.slice(-3));
 
     expect(appendedArea).toBeCloseTo(secondLastStep, 10);
     expect(appendedArea).toBeCloseTo(lastStep, 10);
@@ -199,19 +192,17 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-7, 5, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 3;
     edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
-    const points = staircase.getStairCasePointsUD();
 
-    const appendedArea = getPolygonArea(points.slice(0, 4));
-    const secondLastStep = getPolygonArea(points.slice(-5, -2));
-    const lastStep = getPolygonArea(points.slice(-3));
+    const appendedArea = getPolygonArea(staircase.points.slice(0, 4));
+    const secondLastStep = getPolygonArea(staircase.points.slice(-5, -2));
+    const lastStep = getPolygonArea(staircase.points.slice(-3));
 
     expect(appendedArea).toBeCloseTo(secondLastStep, 10);
     expect(appendedArea).toBeCloseTo(lastStep, 10);
@@ -225,19 +216,17 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-7, 5, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 0;
     edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
-    const points = staircase.getStairCasePointsUD();
 
-    const appendedArea = getPolygonArea(points.slice(0, 4));
-    const secondLastStep = getPolygonArea(points.slice(-5, -2));
-    const lastStep = getPolygonArea(points.slice(-3));
+    const appendedArea = getPolygonArea(staircase.points.slice(0, 4));
+    const secondLastStep = getPolygonArea(staircase.points.slice(-5, -2));
+    const lastStep = getPolygonArea(staircase.points.slice(-3));
 
     expect(appendedArea).toBeCloseTo(secondLastStep, 10);
     expect(appendedArea).toBeCloseTo(lastStep, 10);
@@ -251,18 +240,16 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-7, -5, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 0;
     edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
-    const points = staircase.getStairCasePointsUD();
-    const d2 = points[points.length - 1];
+    const d2 = staircase.points[staircase.points.length - 1];
 
-    expect(points.length).toBeGreaterThanOrEqual(9);
+    expect(staircase.points.length).toBeGreaterThanOrEqual(9);
     expect(d.x).toBeCloseTo(d2.x, 10);
     expect(d.y).toBeCloseTo(d2.y, 10);
   });
@@ -274,18 +261,16 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(2.5, 1, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 2;
     edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
-    const points = staircase.getStairCasePointsUD();
-    const d2 = points[points.length - 1];
+    const d2 = staircase.points[staircase.points.length - 1];
 
-    expect(points.length).toBeGreaterThanOrEqual(9);
+    expect(staircase.points.length).toBeGreaterThanOrEqual(9);
     expect(d.x).toBeCloseTo(d2.x, 10);
     expect(d.y).toBeCloseTo(d2.y, 10);
   });
@@ -299,6 +284,8 @@ describe("getStepArea(),", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
 
     const staircase = new Staircase(edge);
     const stepArea = staircase.getStepArea(3, 1);
@@ -312,6 +299,8 @@ describe("getStepArea(),", function () {
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
 
     const staircase = new Staircase(edge);
     const stepArea = staircase.getStepArea(3, 1);
@@ -327,9 +316,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 3;
 
@@ -343,9 +331,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 2;
 
@@ -361,9 +348,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 0;
 
@@ -379,9 +365,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, 4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 3;
 
@@ -395,9 +380,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, -4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 1;
 
@@ -411,9 +395,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, -4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 0;
 
@@ -427,9 +410,8 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, -4, dcel);
     const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
-    edge.twin = twin;
-    twin.twin = edge;
+    edge.twin = dcel.makeHalfEdge(d, o);
+    edge.twin.twin = edge;
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 2;
 
