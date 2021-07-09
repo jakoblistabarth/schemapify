@@ -1,13 +1,12 @@
 import fs from "fs";
 import path from "path";
 import Dcel from "../src/lib/dcel/Dcel";
-import { config } from "../src/schematization.config";
 import HalfEdge from "../src/lib/dcel/HalfEdge";
 import Vertex from "../src/lib/dcel/Vertex";
 import Point from "../src/lib/geometry/Point";
-import C from "../src/lib/orientation-restriction/C";
-import { getTestFiles } from "./test-setup";
-import { createEdgeVertexSetup, TestSetup } from "./test-setup";
+import { config } from "../src/schematization.config";
+import CRegular from "../src/lib/orientation-restriction/CRegular";
+import { createEdgeVertexSetup, TestSetup, getTestFiles } from "./test-setup";
 
 describe("getLength()", function () {
   it("returns the correct length for a single halfEdge", function () {
@@ -120,16 +119,16 @@ describe("getAssignedDirection()", function () {
   });
 
   it("returns the correct angle", function () {
-    s.dcel.config = { ...config, c: new C(2) };
+    s.dcel.config = { ...config, c: new CRegular(2) };
     s.directions.od53.assignedDirection = 1;
     s.directions.od104.assignedDirection = 2;
     s.directions.od217.assignedDirection = 3;
     s.directions.od315.assignedDirection = 0;
 
-    expect(s.directions.od53.getAssignedAngle()).toBe(s.dcel.config.c.getAngles()[1]);
-    expect(s.directions.od104.getAssignedAngle()).toBe(s.dcel.config.c.getAngles()[2]);
-    expect(s.directions.od217.getAssignedAngle()).toBe(s.dcel.config.c.getAngles()[3]);
-    expect(s.directions.od315.getAssignedAngle()).toBe(s.dcel.config.c.getAngles()[0]);
+    expect(s.directions.od53.getAssignedAngle()).toBe(s.dcel.config.c.angles[1]);
+    expect(s.directions.od104.getAssignedAngle()).toBe(s.dcel.config.c.angles[2]);
+    expect(s.directions.od217.getAssignedAngle()).toBe(s.dcel.config.c.angles[3]);
+    expect(s.directions.od315.getAssignedAngle()).toBe(s.dcel.config.c.angles[0]);
   });
 });
 

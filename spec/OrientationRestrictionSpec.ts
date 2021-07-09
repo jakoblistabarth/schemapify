@@ -1,4 +1,4 @@
-import C from "../src/lib/orientation-restriction/C";
+import CRegular from "../src/lib/orientation-restriction/CRegular";
 import Sector from "../src/lib/orientation-restriction/Sector";
 import { crawlArray } from "../src/lib/utilities";
 import { config } from "../src/schematization.config";
@@ -18,7 +18,7 @@ describe("isAligned() works properly", function () {
   });
 
   it("for an aligned edge in an octilinear schematization.", function () {
-    s.dcel.config = { ...config, c: new C(4) };
+    s.dcel.config = { ...config, c: new CRegular(4) };
     expect(s.directions.od0.isAligned()).toBe(true);
     expect(s.directions.od90.isAligned()).toBe(true);
     expect(s.directions.od180.isAligned()).toBe(true);
@@ -34,7 +34,7 @@ describe("isAligned() works properly", function () {
   });
 
   it("for an unaligned edge in an octilinear schematization.", function () {
-    s.dcel.config = { ...config, c: new C(4) };
+    s.dcel.config = { ...config, c: new CRegular(4) };
     expect(s.directions.od37.isAligned()).toBe(false);
     expect(s.directions.od53.isAligned()).toBe(false);
     expect(s.directions.od76.isAligned()).toBe(false);
@@ -44,7 +44,7 @@ describe("isAligned() works properly", function () {
 
 describe("getNeighbors() returns the neighboring sectors of the sector", function () {
   it("for the 'last' sector.", function () {
-    const neighbors = new C(2)
+    const neighbors = new CRegular(2)
       .getSector(0)
       .getNeighbors()
       .map((neighbor) => neighbor.idx);
@@ -55,20 +55,20 @@ describe("getNeighbors() returns the neighboring sectors of the sector", functio
 describe("encloses()", function () {
   let sector: Sector;
   beforeEach(function () {
-    sector = new Sector(new C(2), 0, 0, Math.PI / 2);
+    sector = new Sector(new CRegular(2), 0, 0, Math.PI * 0.5);
   });
 
   it("returns true sector bounds", function () {
     expect(sector.encloses(0)).toBe(true);
-    expect(sector.encloses(Math.PI / 2)).toBe(true);
+    expect(sector.encloses(Math.PI * 0.5)).toBe(true);
   });
 
   it("returns true enclosed values", function () {
-    expect(sector.encloses(Math.PI / 4)).toBe(true);
+    expect(sector.encloses(Math.PI * 0.25)).toBe(true);
   });
 
   it("returns false for values outside of sector", function () {
-    expect(sector.encloses(Math.PI / 2 + 0.01)).toBe(false);
+    expect(sector.encloses(Math.PI * 0.5 + 0.01)).toBe(false);
   });
 });
 
@@ -80,12 +80,12 @@ describe("getEdgesInSector()", function () {
 
   it("get correct edges in specified sector", function () {
     s.o.edges.push(s.directions.od0, s.directions.od90);
-    expect(s.o.getEdgesInSector(new C(2).getSector(0)).length).toBe(2);
+    expect(s.o.getEdgesInSector(new CRegular(2).getSector(0)).length).toBe(2);
   });
 
   it("get correct edges in specified sector", function () {
     s.o.edges.push(s.directions.od0, s.directions.od90);
-    expect(s.o.getEdgesInSector(new C(4).getSector(0)).length).toBe(1);
+    expect(s.o.getEdgesInSector(new CRegular(4).getSector(0)).length).toBe(1);
   });
 });
 
@@ -134,40 +134,40 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
 
   it("using getAssociatedSector() for C2", function () {
     expect(s.directions.od0.getAssociatedSector()).toEqual([
-      new C(2).getSector(0),
-      new C(2).getSector(3),
+      new CRegular(2).getSector(0),
+      new CRegular(2).getSector(3),
     ]);
     expect(s.directions.od90.getAssociatedSector()).toEqual([
-      new C(2).getSector(0),
-      new C(2).getSector(1),
+      new CRegular(2).getSector(0),
+      new CRegular(2).getSector(1),
     ]);
     expect(s.directions.od180.getAssociatedSector()).toEqual([
-      new C(2).getSector(1),
-      new C(2).getSector(2),
+      new CRegular(2).getSector(1),
+      new CRegular(2).getSector(2),
     ]);
     expect(s.directions.od270.getAssociatedSector()).toEqual([
-      new C(2).getSector(2),
-      new C(2).getSector(3),
+      new CRegular(2).getSector(2),
+      new CRegular(2).getSector(3),
     ]);
   });
 
   it("using getAssociatedSector() for C4", function () {
-    s.dcel.config = { ...config, c: new C(4) };
+    s.dcel.config = { ...config, c: new CRegular(4) };
     expect(s.directions.od0.getAssociatedSector()).toEqual([
-      new C(4).getSector(0),
-      new C(4).getSector(7),
+      new CRegular(4).getSector(0),
+      new CRegular(4).getSector(7),
     ]);
     expect(s.directions.od90.getAssociatedSector()).toEqual([
-      new C(4).getSector(1),
-      new C(4).getSector(2),
+      new CRegular(4).getSector(1),
+      new CRegular(4).getSector(2),
     ]);
     expect(s.directions.od180.getAssociatedSector()).toEqual([
-      new C(4).getSector(3),
-      new C(4).getSector(4),
+      new CRegular(4).getSector(3),
+      new CRegular(4).getSector(4),
     ]);
     expect(s.directions.od270.getAssociatedSector()).toEqual([
-      new C(4).getSector(5),
-      new C(4).getSector(6),
+      new CRegular(4).getSector(5),
+      new CRegular(4).getSector(6),
     ]);
   });
 
@@ -181,7 +181,7 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
   });
 
   it("using getAssociatedAngles() for C4", function () {
-    s.dcel.config = { ...config, c: new C(4) };
+    s.dcel.config = { ...config, c: new CRegular(4) };
     expect(s.directions.od0.getAssociatedAngles()).toEqual([0]);
     expect(s.directions.od90.getAssociatedAngles()).toEqual([Math.PI * 0.5]);
     expect(s.directions.od180.getAssociatedAngles()).toEqual([Math.PI]);

@@ -12,7 +12,7 @@ export function drawC() {
   svg.setAttribute("width", sideLength.toString());
   svg.setAttribute("height", sideLength.toString());
   svgContainer.appendChild(svg);
-  config.c.getAngles().forEach((angle) => {
+  config.c.angles.forEach((angle) => {
     const line = new Line(new Point(o, o), angle);
     const head = line.getPointOnLine(sideLength / 2);
     const lineNode = document.createElementNS("http://www.w3.org/2000/svg", "line");

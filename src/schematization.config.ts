@@ -1,5 +1,6 @@
 import C from "./lib/orientation-restriction/C";
-import Cirregular from "./lib/orientation-restriction/Cirregular";
+import CRegular from "./lib/orientation-restriction/CRegular";
+import CIrregular from "./lib/orientation-restriction/CIrregular";
 
 /**
  * @property lambda. A constant factor of the DCEL's diameter (0.05 suggested by buchin et al.).
@@ -13,15 +14,15 @@ export interface Config {
   lambda: number;
   epsilon?: number;
   k: number;
-  c: C | Cirregular;
+  c: C;
   staircaseEpsilon: number;
 }
 
 export const config = {
   lambda: 0.05,
   k: 100, // TODO: set meaningful value
-  c: new C(2),
-  // c: new Cirregular([Math.PI * 0.25, Math.PI * 1, Math.PI * (5 / 3)]),
+  c: new CRegular(2),
+  // c: new CIrregular([Math.PI * 0.25, Math.PI * 1, Math.PI * (5 / 3)]),
   staircaseEpsilon: 0.1,
 };
 

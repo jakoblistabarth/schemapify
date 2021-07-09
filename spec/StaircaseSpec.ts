@@ -1,5 +1,5 @@
 import Dcel from "../src/lib/Dcel/Dcel";
-import C from "../src/lib/orientation-restriction/C";
+import CRegular from "../src/lib/orientation-restriction/CRegular";
 import { EdgeClasses } from "../src/lib/Dcel/HalfEdge";
 import Vertex from "../src/lib/Dcel/Vertex";
 import Staircase from "../src/lib/orientation-restriction/Staircase";
@@ -76,7 +76,7 @@ describe("The staircase class", function () {
 describe("Build staircase for a HalfEdge of class AD", function () {
   it("returns a staircase containing 7 Points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(4) };
+    dcel.config = { ...config, c: new CRegular(4) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 10, dcel);
@@ -98,7 +98,7 @@ describe("Build staircase for a HalfEdge of class AD", function () {
 describe("Build staircase for a HalfEdge of class UB", function () {
   it("returns a staircase containing a minimum of 5 Points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(1, 1, dcel);
     const d = new Vertex(7, 5, dcel);
@@ -118,7 +118,7 @@ describe("Build staircase for a HalfEdge of class UB", function () {
 describe("Build staircase for a HalfEdge of class UD", function () {
   it("returns a staircase with a minimum of 9 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(7, 5, dcel);
@@ -139,7 +139,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
   it("returns a staircase where the area spanned between the first 4 points equals the area of the second last and the last 3 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
@@ -163,7 +163,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
   it("returns a staircase where the area spanned between the first 4 points equals the area of the second last and the last 3 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(30, 12, dcel);
@@ -187,7 +187,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
   it("returns a staircase where the area spanned between the first 4 points equals the area of the second last and the last 3 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-7, 5, dcel);
@@ -211,7 +211,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
   it("returns a staircase where the area spanned between the first 4 points equals the area of the second last and the last 3 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-7, 5, dcel);
@@ -235,7 +235,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
   it("returns a staircase with a minimum of 9 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-7, -5, dcel);
@@ -256,7 +256,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
   it("returns a staircase with a minimum of 9 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(2.5, 1, dcel);
@@ -279,7 +279,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 describe("getStepArea(),", function () {
   it("returns the correct area a step adds/subtracts in C(2) ", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
@@ -294,7 +294,7 @@ describe("getStepArea(),", function () {
 
   it("returns the correct area a step adds/subtracts in C(4)", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(4) };
+    dcel.config = { ...config, c: new CRegular(4) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
@@ -308,10 +308,10 @@ describe("getStepArea(),", function () {
   });
 });
 
-describe("getClosestAssociatedAngle() returns closest associated Angle for an edge", function () {
+describe("getClosestAssociatedAngle() returns closest associated angle for an edge", function () {
   it("when edge is in sector 0 and the assigned Direction is 3", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
@@ -324,9 +324,9 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     expect(edge.getClosestAssociatedAngle()).toBe(0);
   });
 
-  it("when edge is in sector 0 and the assigned Direction is 2", function () {
+  it("when edge is in sector 0 and the assigned direction is 2", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
@@ -336,14 +336,12 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 2;
 
-    expect(edge.getClosestAssociatedAngle()).toBe(
-      ((Math.PI * 2) / edge.dcel.config.c.getDirections().length) * 1
-    );
+    expect(edge.getClosestAssociatedAngle()).toBe(Math.PI * 0.5);
   });
 
-  it("when edge is in sector 1 and the assigned Direction is 0", function () {
+  it("when edge is in sector 1 and the assigned direction is 0", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, 4, dcel);
@@ -353,14 +351,12 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     edge.class = EdgeClasses.UD;
     edge.assignedDirection = 0;
 
-    expect(edge.getClosestAssociatedAngle()).toBe(
-      ((Math.PI * 2) / edge.dcel.config.c.getDirections().length) * 1
-    );
+    expect(edge.getClosestAssociatedAngle()).toBe(Math.PI * 0.5);
   });
 
-  it("when edge is in sector 1 and the assigned Direction is 3", function () {
+  it("when edge is in sector 1 and the assigned direction is 3", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, 4, dcel);
@@ -373,9 +369,9 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     expect(edge.getClosestAssociatedAngle()).toBe(Math.PI);
   });
 
-  it("when edge is in sector 2 and the assigned Direction is 1", function () {
+  it("when edge is in sector 2 and the assigned direction is 1", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, -4, dcel);
@@ -388,9 +384,9 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     expect(edge.getClosestAssociatedAngle()).toBe(Math.PI);
   });
 
-  it("when edge is in sector 2 and the assigned Direction is 0", function () {
+  it("when edge is in sector 2 and the assigned direction is 0", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, -4, dcel);
@@ -403,9 +399,9 @@ describe("getClosestAssociatedAngle() returns closest associated Angle for an ed
     expect(edge.getClosestAssociatedAngle()).toBe(Math.PI * 1.5);
   });
 
-  it("when edge is in sector 3 and the assigned Direction is 2", function () {
+  it("when edge is in sector 3 and the assigned direction is 2", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new C(2) };
+    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, -4, dcel);

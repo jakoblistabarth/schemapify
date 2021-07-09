@@ -1,13 +1,12 @@
 import C from "./C";
-import Cirregular from "./Cirregular";
 
 class Sector {
-  c: C | Cirregular;
+  c: C;
   idx: number;
   lower: number;
   upper: number;
 
-  constructor(c: C | Cirregular, idx: number, lower: number, upper: number) {
+  constructor(c: C, idx: number, lower: number, upper: number) {
     this.c = c;
     this.idx = idx;
     this.lower = lower;
