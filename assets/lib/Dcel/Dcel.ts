@@ -345,7 +345,7 @@ class Dcel {
     this.getHalfEdges(undefined, true).forEach((edge) => {
       const [tail, head] = edge.getEndpoints();
       if (tail.significant && head.significant) {
-        const newPoint = edge.bisect().getHead();
+        const newPoint = edge.subdivide().getHead();
         newPoint.significant = false;
       }
     });
@@ -525,8 +525,9 @@ class Dcel {
       .filter((edge) => edge.staircase !== undefined)
       .forEach((edge) => {
         const stepPoints = edge.staircase.getStaircasePoints().slice(1, -1); // FIXME: use staircase.points here instead of method?
-        let edgeToSplit = edge;
-        for (let p of stepPoints) edgeToSplit = edgeToSplit.bisect(new Point(p.x, p.y)).next;
+        let edgeToSubdivide = edge;
+        for (let p of stepPoints)
+          edgeToSubdivide = edgeToSubdivide.subdivide(new Point(p.x, p.y)).next;
       });
 
     // assign class AB to all edges of just created staircases
@@ -549,7 +550,7 @@ class Dcel {
     this.simplify();
   }
 
-  log(name: string, verbose: boolean = false): void {
+  toConsole(name: string, verbose: boolean = false): void {
     if (!verbose) console.log("DCEL " + name, this);
     else {
       console.log("🡒 START DCEL:", this);

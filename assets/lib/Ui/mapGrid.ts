@@ -40,6 +40,6 @@ export function draw(inputData: string[]) {
     const dcel = Dcel.fromGeoJSON(data);
     dcel.schematize();
     getMapFrom(dcel, name);
-    dcel.log(name);
+    dcel.toConsole(name);
   });
 }

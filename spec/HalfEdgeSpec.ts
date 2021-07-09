@@ -159,7 +159,7 @@ describe("getCycle()", function () {
   });
 });
 
-describe("bisect() on geodata results in a Dcel", function () {
+describe("subdivide() on geodata results in a Dcel", function () {
   const dir = "assets/data/geodata";
   const testFiles = getTestFiles(dir);
 
@@ -184,7 +184,7 @@ describe("bisect() on geodata results in a Dcel", function () {
   });
 });
 
-describe("bisect() on simple shapes results in a Dcel", function () {
+describe("subdivide() on simple shapes results in a Dcel", function () {
   const dir = "assets/data/shapes";
   const testFiles = getTestFiles(dir);
 
@@ -195,7 +195,7 @@ describe("bisect() on simple shapes results in a Dcel", function () {
       function () {
         const json = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
         const dcel = Dcel.fromGeoJSON(json);
-        dcel.getBoundedFaces().forEach((f) => f.getEdges().forEach((e) => e.bisect()));
+        dcel.getBoundedFaces().forEach((f) => f.getEdges().forEach((e) => e.subdivide()));
 
         const cycles: HalfEdge[][] = [];
         dcel.getBoundedFaces().forEach((f) => {
@@ -209,13 +209,13 @@ describe("bisect() on simple shapes results in a Dcel", function () {
   });
 });
 
-describe("bisect()", function () {
+describe("subdivide()", function () {
   it("on one edge of a triangle results in 4 linked halfEdges", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("assets/data/shapes/triangle.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.getBoundedFaces()[0].getEdges()[0].bisect();
+    dcel.getBoundedFaces()[0].getEdges()[0].subdivide();
 
     expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
     expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(4);
@@ -228,7 +228,7 @@ describe("bisect()", function () {
       fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.getBoundedFaces()[0].getEdges()[0].bisect();
+    dcel.getBoundedFaces()[0].getEdges()[0].subdivide();
 
     expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(5);
     expect(dcel.getBoundedFaces()[0].edge.twin.getCycle(false).length).toBe(5);
@@ -239,7 +239,7 @@ describe("bisect()", function () {
       fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.getBoundedFaces()[0].edge.twin.bisect();
+    dcel.getBoundedFaces()[0].edge.twin.subdivide();
 
     expect(dcel.getFaces().length).toBe(2);
     expect(dcel.halfEdges.size).toBe(10);
@@ -253,7 +253,7 @@ describe("bisect()", function () {
       fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.getBoundedFaces()[0].edge.bisect();
+    dcel.getBoundedFaces()[0].edge.subdivide();
 
     expect(dcel.getFaces().length).toBe(2);
     expect(dcel.halfEdges.size).toBe(10);
@@ -267,7 +267,7 @@ describe("bisect()", function () {
       fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.getBoundedFaces()[0].edge.bisect(new Point(1, 1));
+    dcel.getBoundedFaces()[0].edge.subdivide(new Point(1, 1));
 
     expect(dcel.getFaces().length).toBe(2);
     expect(dcel.halfEdges.size).toBe(10);
@@ -281,7 +281,7 @@ describe("bisect()", function () {
       fs.readFileSync(path.resolve("assets/data/shapes/2triangle-adjacent.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.getBoundedFaces()[0].getEdges()[1].bisect();
+    dcel.getBoundedFaces()[0].getEdges()[1].subdivide();
 
     expect(dcel.getFaces().length).toBe(3);
     expect(dcel.halfEdges.size).toBe(12);
@@ -299,7 +299,7 @@ describe("bisect()", function () {
       fs.readFileSync(path.resolve("assets/data/shapes/2triangle-adjacent.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.getBoundedFaces()[0].getEdges()[2].bisect();
+    dcel.getBoundedFaces()[0].getEdges()[2].subdivide();
 
     expect(dcel.getFaces().length).toBe(3);
     expect(dcel.halfEdges.size).toBe(12);

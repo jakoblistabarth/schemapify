@@ -111,12 +111,12 @@ class HalfEdge {
   }
 
   /**
-   *
-   * @credits adapted from https://www2.cs.sfu.ca/~binay/813.2011/DCEL.pdf
-   * @param newPoint Point which should be added between the halfedge's tail and head, default: the edge's midpoint
-   * @returns the new halfedge which leads from the original edge's tail to the newly created vertex
+   * Subdivides a halfedge by adding a new vertex between a halfedge's tail and head.
+   * @credits adapted from [Doubly Connect Edge List (DCEL)](https://www2.cs.sfu.ca/~binay/813.2011/DCEL.pdf)
+   * @param newPoint {@link Point} which should be added between the {@link HalfEdge}'s tail and head. default: the edge's midpoint
+   * @returns the new {@link HalfEdge} which leads from the original {@link HalfEdge}'s tail to the newly created {@link Vertex}.
    */
-  bisect(newPoint: Point = this.getMidpoint()): HalfEdge {
+  subdivide(newPoint: Point = this.getMidpoint()): HalfEdge {
     const e = this;
     const et = e.twin;
     const f1 = e.face;
@@ -207,7 +207,7 @@ class HalfEdge {
       if (currentHalfEdge.getLength() < threshold) {
         currentHalfEdge = currentHalfEdge.next;
       } else {
-        const newHalfEdge: HalfEdge = currentHalfEdge.bisect();
+        const newHalfEdge: HalfEdge = currentHalfEdge.subdivide();
         currentHalfEdge = newHalfEdge;
       }
     }
