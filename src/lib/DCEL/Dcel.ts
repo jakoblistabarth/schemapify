@@ -13,6 +13,10 @@ type Snapshot = {
   layers: geojson.FeatureCollection[];
 };
 
+// type metaData = {
+//   crs: {}
+// }
+
 class Dcel {
   vertices: Map<string, Vertex>;
   halfEdges: Map<string, HalfEdge>;

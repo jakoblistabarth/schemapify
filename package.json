@@ -29,6 +29,7 @@
     "@types/jasmine": "^3.7.7",
     "@types/node": "^15.12.2",
     "browser-sync": "^2.26.14",
+    "buffer": "^6.0.3",
     "esbuild": "^0.11.9",
     "graham_scan": "^1.0.4",
     "jasmine": "^3.7.0",
@@ -42,6 +43,7 @@
   "devDependencies": {
     "@types/graham_scan": "^1.0.28",
     "@types/leaflet": "^1.7.2",
+    "@types/shpjs": "^3.4.1",
     "@types/uuid": "^8.3.0",
     "pre-commit": "^1.2.2",
     "typescript": "^4.3.2"

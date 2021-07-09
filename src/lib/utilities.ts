@@ -1,9 +1,20 @@
 import * as geojson from "geojson";
+import shp from "shpjs";
 import Point from "./geometry/Point";
 
 export async function getJSON(path: string) {
   const response = await fetch(path);
   return response.json();
+}
+
+export async function getShp(path: string) {
+  shp(path).then(function (geojson) {
+    return geojson;
+  });
+}
+
+export function loadData(path: string) {
+  return getJSON(path);
 }
 
 export function crawlArray(array: any[], index: number, n: number) {
