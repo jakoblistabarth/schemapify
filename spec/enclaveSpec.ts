@@ -1,14 +1,12 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "../assets/lib/dcel/Dcel";
+import Dcel from "../src/lib/dcel/Dcel";
 
 describe("A Dcel of an simplified enclave model", function () {
   let dcel: Dcel;
 
   beforeEach(function () {
-    const polygon = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/enclave.json"), "utf8")
-    );
+    const polygon = JSON.parse(fs.readFileSync(path.resolve("data/shapes/enclave.json"), "utf8"));
     dcel = Dcel.fromGeoJSON(polygon);
   });
 
@@ -30,9 +28,7 @@ describe("A Dcel of an simplified enclave model (reversed order)", function () {
   let dcel: Dcel;
 
   beforeEach(function () {
-    const polygon = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/enclave2.json"), "utf8")
-    );
+    const polygon = JSON.parse(fs.readFileSync(path.resolve("data/shapes/enclave2.json"), "utf8"));
     dcel = Dcel.fromGeoJSON(polygon);
   });
 

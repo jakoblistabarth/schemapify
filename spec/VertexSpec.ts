@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
-import Vertex from "../assets/lib/dcel/Vertex";
-import HalfEdge from "../assets/lib/dcel/Halfedge";
-import Dcel from "../assets/lib/dcel/Dcel";
+import Vertex from "../src/lib/dcel/Vertex";
+import HalfEdge from "../src/lib/dcel/Halfedge";
+import Dcel from "../src/lib/dcel/Dcel";
 import { getTestFiles } from "./test-setup";
 
 describe("distanceToVertex()", function () {
@@ -67,7 +67,7 @@ describe("sortEdges()", function () {
   });
 
   it("sorts outgoing edges of all vertices in clockwise order", function () {
-    const dir = "assets/data/shapes";
+    const dir = "data/shapes";
     const testFiles = getTestFiles(dir);
 
     testFiles.forEach((file) => {

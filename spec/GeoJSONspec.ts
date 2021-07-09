@@ -4,7 +4,7 @@ import { getTestFiles } from "./test-setup";
 import { hint } from "@mapbox/geojsonhint";
 
 describe("validate geoJSON file (simple shape)", function () {
-  const dir = "assets/data/shapes";
+  const dir = "data/shapes";
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
@@ -18,7 +18,7 @@ describe("validate geoJSON file (simple shape)", function () {
 });
 
 describe("validate geoJSON file (geodata)", function () {
-  const dir = "assets/data/geodata";
+  const dir = "data/geodata";
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {

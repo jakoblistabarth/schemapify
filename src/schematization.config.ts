@@ -1,5 +1,5 @@
-import C from "./lib/OrientationRestriction/C";
-import Cirregular from "./lib/OrientationRestriction/Cirregular";
+import C from "./lib/orientation-restriction/C";
+import Cirregular from "./lib/orientation-restriction/Cirregular";
 
 /**
  * @property lambda. A constant factor of the DCEL's diameter (0.05 suggested by buchin et al.).

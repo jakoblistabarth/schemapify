@@ -1,6 +1,6 @@
-import HalfEdge, { EdgeClasses } from "../Dcel/HalfEdge";
-import Point from "../Geometry/Point";
-import Line from "../Geometry/Line";
+import HalfEdge, { EdgeClasses } from "../DCEL/HalfEdge";
+import Point from "../geometry/Point";
+import Line from "../geometry/Line";
 import ConvexHullGrahamScan from "graham_scan";
 
 class Staircase {

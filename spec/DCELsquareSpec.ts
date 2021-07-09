@@ -1,14 +1,12 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "../assets/lib/dcel/Dcel";
+import Dcel from "../src/lib/dcel/Dcel";
 
 describe("A Dcel of a single square", function () {
   let dcel: Dcel;
 
   beforeEach(function () {
-    const polygon = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
-    );
+    const polygon = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     dcel = Dcel.fromGeoJSON(polygon);
   });
 

@@ -1,9 +1,9 @@
 import fs from "fs";
 import path from "path";
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
-import Dcel from "../assets/lib/dcel/Dcel";
-import C from "../assets/lib/OrientationRestriction/C";
-import { config } from "../assets/schematization.config";
+import Dcel from "../src/lib/dcel/Dcel";
+import C from "../src/lib/orientation-restriction/C";
+import { config } from "../src/schematization.config";
 
 describe("isDeviating()", function () {
   let s: TestSetup;
@@ -205,9 +205,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
 describe("classifyEdges() in a classification where all edges are classified and a halfedge and its twin share the same class", function () {
   it("on simple test data", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/edge-cases.json"), "utf8")
-    );
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/edge-cases.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
     dcel.preProcess();
     dcel.classify();
@@ -228,7 +226,7 @@ describe("classifyEdges() in a classification where all edges are classified and
 
   it("on geo data", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/geodata/ne_50m_africa_admin0-s20.json"), "utf8")
+      fs.readFileSync(path.resolve("data/geodata/ne_50m_africa_admin0-s20.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.preProcess();

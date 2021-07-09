@@ -1,9 +1,9 @@
 import config, { Config } from "../../schematization.config";
 import Vertex from "./Vertex";
-import Point from "../Geometry/Point";
+import Point from "../geometry/Point";
 import HalfEdge, { EdgeClasses } from "./HalfEdge";
 import Face from "./Face";
-import Staircase from "../OrientationRestriction/Staircase";
+import Staircase from "../orientation-restriction/Staircase";
 import { copyInstance, createGeoJSON, groupBy } from "../utilities";
 import * as geojson from "geojson";
 

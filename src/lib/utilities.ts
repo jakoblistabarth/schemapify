@@ -1,5 +1,5 @@
 import * as geojson from "geojson";
-import Point from "./Geometry/Point";
+import Point from "./geometry/Point";
 
 export async function getJSON(path: string) {
   const response = await fetch(path);

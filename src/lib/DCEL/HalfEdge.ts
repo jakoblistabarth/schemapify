@@ -1,11 +1,11 @@
 import { v4 as uuid } from "uuid";
 import Vertex from "./Vertex";
-import Point from "../Geometry/Point";
+import Point from "../geometry/Point";
 import Dcel from "./Dcel";
 import Face from "./Face";
-import Sector from "../OrientationRestriction/Sector";
+import Sector from "../orientation-restriction/Sector";
 import { getUnitVector } from "../utilities";
-import Staircase from "../OrientationRestriction/Staircase";
+import Staircase from "../orientation-restriction/Staircase";
 
 export enum EdgeClasses {
   AB = "alignedBasic",

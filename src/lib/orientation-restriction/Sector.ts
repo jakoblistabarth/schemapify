@@ -1,5 +1,5 @@
-import C from "./C.js";
-import Cirregular from "./Cirregular.js";
+import C from "./C";
+import Cirregular from "./Cirregular";
 
 class Sector {
   c: C | Cirregular;

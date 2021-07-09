@@ -1,6 +1,6 @@
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
-import C from "../assets/lib/OrientationRestriction/C";
-import { config } from "../assets/schematization.config";
+import C from "../src/lib/orientation-restriction/C";
+import { config } from "../src/schematization.config";
 
 describe("Given the examples in the paper of buchin et al., directions are assigned, correctly on example", function () {
   let s: TestSetup;

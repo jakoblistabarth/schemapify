@@ -1,11 +1,11 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "../assets/lib/dcel/Dcel";
-import { config } from "../assets/schematization.config";
-import HalfEdge from "../assets/lib/dcel/HalfEdge";
-import Vertex from "../assets/lib/dcel/Vertex";
-import Point from "../assets/lib/Geometry/Point";
-import C from "../assets/lib/OrientationRestriction/C";
+import Dcel from "../src/lib/dcel/Dcel";
+import { config } from "../src/schematization.config";
+import HalfEdge from "../src/lib/dcel/HalfEdge";
+import Vertex from "../src/lib/dcel/Vertex";
+import Point from "../src/lib/geometry/Point";
+import C from "../src/lib/orientation-restriction/C";
 import { getTestFiles } from "./test-setup";
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
 
@@ -21,9 +21,7 @@ describe("getLength()", function () {
   });
 
   it("returns the correct length for all sides of a square", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
-    );
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
 
     dcel
@@ -35,9 +33,7 @@ describe("getLength()", function () {
   });
 
   it("returns the correct length for the sides of a triangle", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/triangle.json"), "utf8")
-    );
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/triangle.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
 
     const lengths = dcel
@@ -139,9 +135,7 @@ describe("getAssignedDirection()", function () {
 
 describe("getCycle()", function () {
   it("returns the correct number of edges for square", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
-    );
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
 
     expect(dcel.getBoundedFaces()[0].edge.getCycle().length).toBe(4);
@@ -149,9 +143,7 @@ describe("getCycle()", function () {
   });
 
   it("returns the correct number of edges for a triangle", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/triangle.json"), "utf8")
-    );
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/triangle.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
 
     expect(dcel.getBoundedFaces()[0].edge.getCycle().length).toBe(3);
@@ -160,7 +152,7 @@ describe("getCycle()", function () {
 });
 
 describe("subdivide() on geodata results in a Dcel", function () {
-  const dir = "assets/data/geodata";
+  const dir = "data/geodata";
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
@@ -185,7 +177,7 @@ describe("subdivide() on geodata results in a Dcel", function () {
 });
 
 describe("subdivide() on simple shapes results in a Dcel", function () {
-  const dir = "assets/data/shapes";
+  const dir = "data/shapes";
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
@@ -211,9 +203,7 @@ describe("subdivide() on simple shapes results in a Dcel", function () {
 
 describe("subdivide()", function () {
   it("on one edge of a triangle results in 4 linked halfEdges", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/triangle.json"), "utf8")
-    );
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/triangle.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].getEdges()[0].subdivide();
 
@@ -224,9 +214,7 @@ describe("subdivide()", function () {
   });
 
   it("on one edge of a square results in 5 linked outer halfEdges", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
-    );
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].getEdges()[0].subdivide();
 
@@ -235,9 +223,7 @@ describe("subdivide()", function () {
   });
 
   it("on one outer edge of a square results in 5 linked inner halfEdges", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
-    );
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].edge.twin.subdivide();
 
@@ -249,9 +235,7 @@ describe("subdivide()", function () {
   });
 
   it("on one inneredge of a square results in 5 linked outer halfEdges", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
-    );
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].edge.subdivide();
 
@@ -263,9 +247,7 @@ describe("subdivide()", function () {
   });
 
   it("on a square with a specified point, which is not on the origina edge, restults in a correct dcel", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
-    );
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].edge.subdivide(new Point(1, 1));
 
@@ -278,7 +260,7 @@ describe("subdivide()", function () {
 
   it("on the 1st outer edge of the first of 2 adjacent triangles results in 4 and 3 linked inner and 5 linked outer halfEdges", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/2triangle-adjacent.json"), "utf8")
+      fs.readFileSync(path.resolve("data/shapes/2triangle-adjacent.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].getEdges()[1].subdivide();
@@ -296,7 +278,7 @@ describe("subdivide()", function () {
 
   it("on the 2nd outer edge of the first of 2 adjacent triangles results in 4 and 3 linked inner and 5 linked outer halfEdges", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/2triangle-adjacent.json"), "utf8")
+      fs.readFileSync(path.resolve("data/shapes/2triangle-adjacent.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].getEdges()[2].subdivide();
@@ -315,9 +297,7 @@ describe("subdivide()", function () {
 
 describe("subdivideToThreshold()", function () {
   it("on one egde of a square with side length 2 into 8 edges (epsilon: .5)", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
-    );
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
     const edge = dcel.getBoundedFaces()[0].edge;
 
@@ -329,9 +309,7 @@ describe("subdivideToThreshold()", function () {
   });
 
   it("turns an square with sides of length 2 into a dcel with 64 edges (epsilon: .5)", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/square.json"), "utf8")
-    );
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
 
     dcel.splitEdges(0.5);

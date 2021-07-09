@@ -1,4 +1,5 @@
-import Sector from "./Sector.js";
+import C from "./C";
+import Sector from "./Sector";
 
 /**
  * @property angles, an array of angles in radians, at least 4

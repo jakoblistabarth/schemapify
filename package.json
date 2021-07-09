@@ -8,7 +8,7 @@
     "test": "jasmine-ts -P config/tsconfig-cjs.json",
     "type-check": "tsc -w --noEmit",
     "dev": "nodemon",
-    "build": "esbuild --bundle assets/main.ts --sourcemap --outfile=dist/esm-bundle/main.bundle.js",
+    "build": "esbuild --bundle src/main.ts --sourcemap --outfile=dist/esm-bundle/main.bundle.js",
     "start": "browser-sync --config config/bs-config.js"
   },
   "nodemonConfig": {

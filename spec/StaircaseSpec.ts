@@ -1,11 +1,11 @@
-import Dcel from "../assets/lib/Dcel/Dcel";
-import C from "../assets/lib/OrientationRestriction/C";
-import { EdgeClasses } from "../assets/lib/Dcel/HalfEdge";
-import Vertex from "../assets/lib/Dcel/Vertex";
-import Staircase from "../assets/lib/OrientationRestriction/Staircase";
-import Point from "../assets/lib/Geometry/Point";
-import config from "../assets/schematization.config";
-import { getPolygonArea } from "../assets/lib/utilities";
+import Dcel from "../src/lib/Dcel/Dcel";
+import C from "../src/lib/orientation-restriction/C";
+import { EdgeClasses } from "../src/lib/Dcel/HalfEdge";
+import Vertex from "../src/lib/Dcel/Vertex";
+import Staircase from "../src/lib/orientation-restriction/Staircase";
+import Point from "../src/lib/geometry/Point";
+import config from "../src/schematization.config";
+import { getPolygonArea } from "../src/lib/utilities";
 
 describe("The staircase class", function () {
   it("returns a staircase region for a HalfEdge of class UB", function () {

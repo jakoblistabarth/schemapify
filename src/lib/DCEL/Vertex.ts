@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
-import Sector from "../OrientationRestriction/Sector";
-import Point from "../Geometry/Point";
+import Sector from "../orientation-restriction/Sector";
+import Point from "../geometry/Point";
 import { crawlArray, getOccurrence } from "../utilities";
 import Dcel from "./Dcel";
 import HalfEdge from "./HalfEdge";

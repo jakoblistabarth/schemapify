@@ -1,8 +1,8 @@
 import fs from "fs";
-import Dcel from "../assets/lib/dcel/Dcel";
-import HalfEdge from "../assets/lib/dcel/HalfEdge";
-import Vertex from "../assets/lib/dcel/Vertex";
-import config from "../assets/schematization.config";
+import Dcel from "../src/lib/dcel/Dcel";
+import HalfEdge from "../src/lib/dcel/HalfEdge";
+import Vertex from "../src/lib/dcel/Vertex";
+import config from "../src/schematization.config";
 
 export function getTestFiles(dir: string) {
   const filesInDir = fs.readdirSync(dir);

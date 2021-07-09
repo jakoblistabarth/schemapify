@@ -1,13 +1,13 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "../assets/lib/dcel/Dcel";
-import Face from "../assets/lib/dcel/Face";
+import Dcel from "../src/lib/dcel/Dcel";
+import Face from "../src/lib/dcel/Face";
 
 describe("replaceOuterRingEdge()", function () {
   let innerRing: Face;
   beforeEach(function () {
     const polygon = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/shapes/square-hole.json"), "utf8")
+      fs.readFileSync(path.resolve("data/shapes/square-hole.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(polygon);
     innerRing = dcel.getBoundedFaces()[1];

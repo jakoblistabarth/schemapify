@@ -1,5 +1,5 @@
-import Point from "../assets/lib/Geometry/Point";
-import { getPolygonArea } from "../assets/lib/utilities";
+import Point from "../src/lib/geometry/Point";
+import { getPolygonArea } from "../src/lib/utilities";
 
 describe("distanceToPoint()", function () {
   it("returns the correct distance between 2 vertices", function () {

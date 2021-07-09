@@ -1,7 +1,7 @@
-import C from "../assets/lib/OrientationRestriction/C";
-import Sector from "../assets/lib/OrientationRestriction/Sector";
-import { crawlArray } from "../assets/lib/utilities";
-import { config } from "../assets/schematization.config";
+import C from "../src/lib/orientation-restriction/C";
+import Sector from "../src/lib/orientation-restriction/Sector";
+import { crawlArray } from "../src/lib/utilities";
+import { config } from "../src/schematization.config";
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
 
 describe("isAligned() works properly", function () {
