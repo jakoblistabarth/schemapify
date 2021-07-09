@@ -6,14 +6,21 @@ import Face from "./Face";
 import Staircase from "../orientation-restriction/Staircase";
 import { copyInstance, createGeoJSON, groupBy } from "../utilities";
 import * as geojson from "geojson";
+import HalfEdgeC from "../DCELC/HalfEdgeC";
 
-type Snapshot = {
+export type Snapshot = {
   idx: number;
   name: string;
   layers: geojson.FeatureCollection[];
 };
 
-class Dcel {
+export interface DcelInterface {
+  makeVertex(x: number, y: number): Vertex;
+  makeHalfEdge(tail: Vertex, head: Vertex): HalfEdge | HalfEdgeC;
+  makeFace(): Face;
+}
+
+class Dcel implements DcelInterface {
   vertices: Map<string, Vertex>;
   halfEdges: Map<string, HalfEdge>;
   faces: Array<Face>;
