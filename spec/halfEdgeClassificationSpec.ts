@@ -228,7 +228,7 @@ describe("classifyEdges() in a classification where all edges are classified and
 
   it("on geo data", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("assets/data/geodata/ne_110m_admin_0_countries.json"), "utf8")
+      fs.readFileSync(path.resolve("assets/data/geodata/ne_50m_africa_admin0-s20.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.preProcess();
