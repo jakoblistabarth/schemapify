@@ -6,6 +6,7 @@ import Face from "./Face";
 import Sector from "../c-oriented-schematization/Sector";
 import { getUnitVector } from "../utilities";
 import Staircase from "../c-oriented-schematization/Staircase";
+import Configuration from "../c-oriented-schematization/Configuration";
 
 export enum OrientationClasses {
   AB = "alignedBasic",
@@ -33,6 +34,7 @@ class HalfEdge {
   isAligning: boolean;
   class: OrientationClasses;
   staircase: Staircase;
+  configuration: Configuration;
 
   constructor(tail: Vertex, dcel: Dcel) {
     this.uuid = uuid();
@@ -45,6 +47,7 @@ class HalfEdge {
     this.isAligning = undefined;
     this.class = undefined;
     this.staircase = undefined; // TODO: move isAligning, class and staircase to more specific (i.e. "cHalfEdge") class?
+    this.configuration = undefined;
   }
 
   static getKey(tail: Vertex, head: Vertex): string {
