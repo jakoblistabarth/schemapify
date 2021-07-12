@@ -15,6 +15,12 @@ export enum OrientationClasses {
   UD = "unalignedDeviating",
 }
 
+export enum InflectionType {
+  C = "convex",
+  R = "reflex",
+  B = "both",
+}
+
 class HalfEdge {
   uuid: string;
   dcel: Dcel;
@@ -376,6 +382,15 @@ class HalfEdge {
   getOffsetVertex(offsetEdge: HalfEdge, offset: number) {
     const pointOffset = offsetEdge.getTail().getNewPoint(offset, offsetEdge.getAngle());
     return new Vertex(pointOffset.x, pointOffset.y, undefined);
+  }
+
+  getInflectionType() {
+    const tailAngle = this.getTail().getExteriorAngle(this.face);
+    const headAngle = this.getHead().getExteriorAngle(this.face);
+
+    if (tailAngle > 0 && headAngle > 0) return InflectionType.C;
+    else if (tailAngle < 0 && headAngle < 0) return InflectionType.R;
+    else return InflectionType.B;
   }
 }
 

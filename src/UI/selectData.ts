@@ -49,6 +49,7 @@ export const tests: string[] = [
   "shapes/edge-cases.json",
   // "shapes/enclave.json",
   // "shapes/enclave2.json",
+  "shapes/inflection-test.json",
   // "shapes/square-hole-island-hole.json",
   // "shapes/square-hole-island.json",
   // "shapes/square-hole.json",
@@ -59,4 +60,5 @@ export const tests: string[] = [
   // "shapes/triangle.json",
   "shapes/unaligned-deviating-2.json",
   // "shapes/unaligned-deviating.json",
+  "shapes/v-shape.json",
 ];
