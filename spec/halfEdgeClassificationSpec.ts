@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
 import Dcel from "../src/lib/dcel/Dcel";
-import CRegular from "../src/lib/orientation-restriction/CRegular";
+import CRegular from "../src/lib/c-oriented-schematization/CRegular";
 import { config } from "../src/schematization.config";
 
 describe("isDeviating()", function () {

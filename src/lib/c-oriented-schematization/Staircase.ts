@@ -1,4 +1,4 @@
-import HalfEdge, { EdgeClasses } from "../DCEL/HalfEdge";
+import HalfEdge, { OrientationClasses } from "../DCEL/HalfEdge";
 import Point from "../geometry/Point";
 import Line from "../geometry/Line";
 import ConvexHullGrahamScan from "graham_scan";
@@ -14,7 +14,7 @@ class Staircase {
 
   constructor(edge: HalfEdge) {
     this.edge = edge;
-    this.deltaE = edge.class === EdgeClasses.AD ? edge.getLength() * 0.1 : undefined;
+    this.deltaE = edge.class === OrientationClasses.AD ? edge.getLength() * 0.1 : undefined;
     this.points = undefined;
     this.region = this.getRegion();
     this.de = undefined;
@@ -35,18 +35,18 @@ class Staircase {
         : this.edge.twin;
 
     switch (edge.class) {
-      case EdgeClasses.AB:
+      case OrientationClasses.AB:
         return [
           new Point(edge.getTail().x, edge.getTail().y),
           new Point(edge.getHead().x, edge.getHead().y),
           new Point(edge.getHead().x, edge.getHead().y),
           new Point(edge.getTail().x, edge.getTail().y),
         ];
-      case EdgeClasses.UB:
+      case OrientationClasses.UB:
         return this.getSimpleRegion();
-      case EdgeClasses.E:
+      case OrientationClasses.E:
         return this.getSimpleRegion();
-      case EdgeClasses.UD:
+      case OrientationClasses.UD:
         // like UB and E but accommodate for the appendex area
         this.points = this.getStaircasePoints();
 
@@ -78,7 +78,7 @@ class Staircase {
         }
 
         return regionPoints;
-      case EdgeClasses.AD:
+      case OrientationClasses.AD:
         this.points = this.getStaircasePoints();
         const convexHull = new ConvexHullGrahamScan();
         this.points.forEach((p) => convexHull.addPoint(p.x, p.y));
@@ -100,13 +100,13 @@ class Staircase {
 
   getStaircasePoints() {
     switch (this.edge.class) {
-      case EdgeClasses.UB:
+      case OrientationClasses.UB:
         return this.getStaircasePointsUB();
-      case EdgeClasses.E:
+      case OrientationClasses.E:
         return this.getStaircasePointsE();
-      case EdgeClasses.AD:
+      case OrientationClasses.AD:
         return this.getStaircasePointsAD();
-      case EdgeClasses.UD:
+      case OrientationClasses.UD:
         return this.getStaircasePointsUD();
     }
   }

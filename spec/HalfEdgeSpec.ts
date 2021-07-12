@@ -5,7 +5,7 @@ import HalfEdge from "../src/lib/dcel/HalfEdge";
 import Vertex from "../src/lib/dcel/Vertex";
 import Point from "../src/lib/geometry/Point";
 import { config } from "../src/schematization.config";
-import CRegular from "../src/lib/orientation-restriction/CRegular";
+import CRegular from "../src/lib/c-oriented-schematization/CRegular";
 import { createEdgeVertexSetup, TestSetup, getTestFiles } from "./test-setup";
 
 describe("getLength()", function () {

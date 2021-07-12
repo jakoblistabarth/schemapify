@@ -1,5 +1,5 @@
-import CRegular from "../src/lib/orientation-restriction/CRegular";
-import Sector from "../src/lib/orientation-restriction/Sector";
+import CRegular from "../src/lib/c-oriented-schematization/CRegular";
+import Sector from "../src/lib/c-oriented-schematization/Sector";
 import { crawlArray } from "../src/lib/utilities";
 import { config } from "../src/schematization.config";
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";

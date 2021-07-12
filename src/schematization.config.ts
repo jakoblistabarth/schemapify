@@ -1,6 +1,6 @@
-import C from "./lib/orientation-restriction/C";
-import CRegular from "./lib/orientation-restriction/CRegular";
-import CIrregular from "./lib/orientation-restriction/CIrregular";
+import C from "./lib/c-oriented-schematization/C";
+import CRegular from "./lib/c-oriented-schematization/CRegular";
+import CIrregular from "./lib/c-oriented-schematization/CIrregular";
 
 /**
  * @property lambda. A constant factor of the DCEL's diameter (0.05 suggested by buchin et al.).

@@ -3,11 +3,11 @@ import Vertex from "./Vertex";
 import Point from "../geometry/Point";
 import Dcel from "./Dcel";
 import Face from "./Face";
-import Sector from "../orientation-restriction/Sector";
+import Sector from "../c-oriented-schematization/Sector";
 import { getUnitVector } from "../utilities";
-import Staircase from "../orientation-restriction/Staircase";
+import Staircase from "../c-oriented-schematization/Staircase";
 
-export enum EdgeClasses {
+export enum OrientationClasses {
   AB = "alignedBasic",
   UB = "unalignedBasic",
   E = "evading",
@@ -25,14 +25,14 @@ class HalfEdge {
   next: HalfEdge;
   assignedDirection: number;
   isAligning: boolean;
-  class: EdgeClasses;
+  class: OrientationClasses;
   staircase: Staircase;
 
   constructor(tail: Vertex, dcel: Dcel) {
     this.uuid = uuid();
     this.dcel = dcel;
     this.tail = tail;
-    this.twin = null;
+    this.twin = null; // TODO: make this as well undefined?
     this.face = null;
     this.prev = null;
     this.next = null;
@@ -267,7 +267,7 @@ class HalfEdge {
   // TODO: Where does such function live?
   // within the HalfEdge class or rather within Staircase??
   getClosestAssociatedAngle(): number {
-    if (this.class !== EdgeClasses.UD) return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges
+    if (this.class !== OrientationClasses.UD) return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges
     const sector = this.getAssociatedSector()[0];
 
     // TODO: refactor: find better solution for last sector and it's upper bound
@@ -311,7 +311,7 @@ class HalfEdge {
     return Math.min(...distances);
   }
 
-  classify(): EdgeClasses {
+  classify(): OrientationClasses {
     this.getTail().assignDirections();
 
     if (this.class) return; // do not overwrite classification
@@ -323,15 +323,15 @@ class HalfEdge {
       .getEdgesInSector(sector)
       .filter((edge) => !edge.isAligned() && !edge.isDeviating());
 
-    let classification: EdgeClasses;
+    let classification: OrientationClasses;
     if (this.isAligned()) {
-      classification = this.isDeviating() ? EdgeClasses.AD : EdgeClasses.AB;
+      classification = this.isDeviating() ? OrientationClasses.AD : OrientationClasses.AB;
     } else if (this.isDeviating()) {
-      classification = EdgeClasses.UD;
+      classification = OrientationClasses.UD;
     } else if (edges.length == 2) {
-      classification = EdgeClasses.E;
+      classification = OrientationClasses.E;
     } else {
-      classification = EdgeClasses.UB;
+      classification = OrientationClasses.UB;
     }
 
     this.class = classification;

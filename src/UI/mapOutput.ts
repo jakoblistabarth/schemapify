@@ -1,6 +1,6 @@
 import Dcel from "../lib/DCEL/Dcel";
 import * as L from "leaflet/";
-import Sector from "../lib/orientation-restriction/Sector";
+import Sector from "../lib/c-oriented-schematization/Sector";
 import HalfEdge from "../lib/DCEL/HalfEdge";
 
 export function getMapFrom(dcel: Dcel, name: string): L.Map {

@@ -1,9 +1,9 @@
 import config, { Config } from "../../schematization.config";
 import Vertex from "./Vertex";
 import Point from "../geometry/Point";
-import HalfEdge, { EdgeClasses } from "./HalfEdge";
+import HalfEdge, { OrientationClasses } from "./HalfEdge";
 import Face from "./Face";
-import Staircase from "../orientation-restriction/Staircase";
+import Staircase from "../c-oriented-schematization/Staircase";
 import { copyInstance, createGeoJSON, groupBy } from "../utilities";
 import * as geojson from "geojson";
 
@@ -103,7 +103,11 @@ class Dcel {
    * @param significantTail If true, for a pair of {@link HalfEdge}s which do have a significant {@link Vertex}, the one where the significant {@link Vertex} is the tail will be returned, default = false
    * @returns A (sub)set of {@link HalfEdge}s.
    */
-  getHalfEdges(edgeClass?: EdgeClasses, simple = false, fromSignificant = false): HalfEdge[] {
+  getHalfEdges(
+    edgeClass?: OrientationClasses,
+    simple = false,
+    fromSignificant = false
+  ): HalfEdge[] {
     const halfEdges = [...this.halfEdges].map(([k, e]) => e);
     let edges = edgeClass ? halfEdges.filter((e) => e.class === edgeClass) : halfEdges;
     edges = simple ? this.getSimpleEdges(edges) : edges;
@@ -369,7 +373,7 @@ class Dcel {
   edgesToStaircases() {
     // create staircase for every pair of edges
     this.getHalfEdges(undefined, true).forEach((edge) => {
-      if (edge.class === EdgeClasses.AB) return;
+      if (edge.class === OrientationClasses.AB) return;
       if (
         edge.getSignificantVertex() !== undefined &&
         edge.getSignificantVertex() !== edge.getTail()
@@ -381,7 +385,8 @@ class Dcel {
     // calculate edgedistance and stepnumber for deviating edges first
     const staircasesOfDeviatingEdges = this.getStaircases().filter(
       (staircase) =>
-        staircase.edge.class === EdgeClasses.AD || staircase.edge.class === EdgeClasses.UD
+        staircase.edge.class === OrientationClasses.AD ||
+        staircase.edge.class === OrientationClasses.UD
     );
     this.getEdgeDistances(staircasesOfDeviatingEdges);
     this.getSe(
@@ -391,7 +396,8 @@ class Dcel {
     // calculate edgedistance and stepnumber for remaining edges
     const staircasesOther = this.getStaircases().filter(
       (staircase) =>
-        staircase.edge.class !== EdgeClasses.AD && staircase.edge.class !== EdgeClasses.UD
+        staircase.edge.class !== OrientationClasses.AD &&
+        staircase.edge.class !== OrientationClasses.UD
     );
     this.getEdgeDistances(staircasesOther);
     this.getSe(staircasesOther.filter((staircase) => staircase.interferesWith.length > 0));
@@ -439,11 +445,11 @@ class Dcel {
           // "However, if e and e' do share a vertex, then we must again look at the classification."
           let de = undefined;
           switch (e.class) {
-            case EdgeClasses.UB: {
+            case OrientationClasses.UB: {
               // "If e' is aligned, then we ignore a fraction of (1 − ε)/2 of e'."
               // "If e' is unaligned, then we ignore a fraction of e' equal to the length of the first step."
               // "In other words, we ignore a fraction of 1/(se' − 1) [of e']."
-              if (e_.class === EdgeClasses.AD) {
+              if (e_.class === OrientationClasses.AD) {
                 const offset = (1 - e.dcel.config.staircaseEpsilon) / 2;
                 const vertexOffset = e.getOffsetVertex(e_, offset);
                 de = vertexOffset.distanceToEdge(e);
@@ -454,10 +460,10 @@ class Dcel {
               }
               break;
             }
-            case EdgeClasses.E: {
+            case OrientationClasses.E: {
               // "If e' is an evading edge, we ignore the first half of e (but not of e')."
               // "If e' is a deviating edge, we treat it as if e were an unaligned basic edge."
-              if (e_.class === EdgeClasses.E) {
+              if (e_.class === OrientationClasses.E) {
                 const vertexOffset = e.getOffsetVertex(e, (e.getLength() * 1) / 2);
                 de = vertexOffset.distanceToEdge(e_);
               } else {
@@ -468,13 +474,13 @@ class Dcel {
               }
               break;
             }
-            case EdgeClasses.AD: {
+            case OrientationClasses.AD: {
               const offset = (1 - e.dcel.config.staircaseEpsilon) / 2;
               const vertexOffset = e.getOffsetVertex(e, offset);
               de = vertexOffset.distanceToEdge(e_);
               break;
             }
-            case EdgeClasses.UD: {
+            case OrientationClasses.UD: {
               const vertexOffset = e.getOffsetVertex(e, (e.getLength() * 1) / 3);
               de = vertexOffset.distanceToEdge(e_);
               break;
@@ -490,12 +496,12 @@ class Dcel {
     for (const staircase of staircases) {
       const edge = staircase.edge;
       switch (edge.class) {
-        case EdgeClasses.AD: {
+        case OrientationClasses.AD: {
           // "… we use δe = min{de/2,Δe}, where Δe = 0.1||e|| as defined for the staircase regions."
           if (staircase.de / 2 < staircase.deltaE) staircase.deltaE = staircase.de / 2;
           break;
         }
-        case EdgeClasses.UD: {
+        case OrientationClasses.UD: {
           const maxVertices = staircase.points
             .slice(1, 2)
             .map((point) => new Vertex(point.x, point.y, null));
@@ -531,7 +537,7 @@ class Dcel {
       });
 
     // assign class AB to all edges of just created staircases
-    this.getHalfEdges().forEach((edge) => (edge.class = EdgeClasses.AB));
+    this.getHalfEdges().forEach((edge) => (edge.class = OrientationClasses.AB));
   }
 
   constrainAngles(): void {
