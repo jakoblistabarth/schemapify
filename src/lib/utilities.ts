@@ -29,7 +29,7 @@ export const groupBy = (key: string) => (array: any[]) =>
   }, {});
 
 /**
- *
+ * Turns an angle into a unit vector? // TODO: check if that's correct.
  * @param angle in radians
  * @returns a unit vector
  */

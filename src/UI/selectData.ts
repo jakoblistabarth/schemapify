@@ -45,6 +45,7 @@ export const tests: string[] = [
   "shapes/3plgn-complex.json",
   // "shapes/3plgn.json",
   "shapes/aligned-deviating.json",
+  "shapes/dart.json",
   "shapes/edge-cases.json",
   // "shapes/enclave.json",
   // "shapes/enclave2.json",

@@ -2,6 +2,7 @@ import { v4 as uuid } from "uuid";
 import Sector from "../c-oriented-schematization/Sector";
 import Point from "../geometry/Point";
 import Dcel from "./Dcel";
+import Face from "./Face";
 import HalfEdge from "./HalfEdge";
 
 class Vertex extends Point {
@@ -140,6 +141,36 @@ class Vertex extends Point {
 
     edges.forEach((edge, idx) => (edge.assignedDirection = solution[idx]));
     return solution;
+  }
+
+  /**
+   * Returns the exterior angle of a DCEL's Vertex.
+   * If the {@link Vertex} is convex the exterior angle is positive, if it is reflex, the angle is negative.
+   * @param face A {@link Face} the angle is exterior to.
+   * @returns An angle in radians.
+   */
+  getExteriorAngle(face: Face): number {
+    return Math.PI - this.getInteriorAngle(face);
+  }
+
+  /**
+   * Returns the interior angle of a DCEL's Vertex.
+   * It is always positive.
+   * @param face A {@link Face} the angle is interior to.
+   * @returns An angle in radians.
+   */
+  getInteriorAngle(face: Face): number {
+    const outgoing = this.edges.find((edges) => edges.face === face);
+    const incoming = outgoing.prev;
+    const vIncoming = incoming.getVector();
+    const vOutgoing = outgoing.getVector();
+    return (
+      Math.PI -
+      Math.atan2(
+        vIncoming[0] * vOutgoing[1] - vOutgoing[0] * vIncoming[1],
+        vIncoming[0] * vOutgoing[0] + vIncoming[1] * vOutgoing[1]
+      )
+    );
   }
 }
 

@@ -84,8 +84,17 @@ class HalfEdge {
     return halfEdges;
   }
 
+  getVector(): number[] {
+    const [tail, head] = this.getEndpoints();
+    return [head.x - tail.x, head.y - tail.y];
+  }
+
+  /**
+   * Gets the angle of an HalfEdge in respect to the unit circle.
+   * @returns The angle in radians.
+   */
   getAngle(): number {
-    const vector = [this.twin.tail.x - this.tail.x, this.twin.tail.y - this.tail.y];
+    const vector = this.getVector();
     const angle = Math.atan2(vector[1], vector[0]);
     return angle < 0 ? angle + 2 * Math.PI : angle;
   }
@@ -345,8 +354,7 @@ class HalfEdge {
     const d2u = getUnitVector(d2);
 
     // create vector of edge
-    const [tail, head] = this.getEndpoints();
-    const v = [head.x - tail.x, head.y - tail.y];
+    const v = this.getVector();
     const vse = v.map((point) => point / se);
 
     // solve linear equation for l1 and l2 with cramer's rule for 2x2 systems
