@@ -1,7 +1,7 @@
 import Line from "../src/lib/geometry/Line";
 import Point from "../src/lib/geometry/Point";
 
-describe("getPointOnLine", function () {
+describe("getPointOnLine()", function () {
   it("returns a 2 point on a vertical line", function () {
     const a = new Line(new Point(0, 2), Math.PI * 0.5);
     expect(a.getPointOnLine(1).xy()).toEqual([0, 3]);

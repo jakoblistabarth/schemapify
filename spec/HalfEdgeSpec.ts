@@ -7,6 +7,7 @@ import Point from "../src/lib/geometry/Point";
 import { config } from "../src/schematization.config";
 import CRegular from "../src/lib/c-oriented-schematization/CRegular";
 import { createEdgeVertexSetup, TestSetup, getTestFiles } from "./test-setup";
+import Line from "../src/lib/geometry/Line";
 
 describe("getLength()", function () {
   it("returns the correct length for a single halfEdge", function () {
@@ -314,5 +315,49 @@ describe("subdivideToThreshold()", function () {
     dcel.splitEdges(0.5);
 
     expect(dcel.halfEdges.size).toBe(64);
+  });
+});
+
+describe("intersectsLine()", function () {
+  it("returns the intersection point if the halfedge intersects with a line", function () {
+    const halfEdge = new HalfEdge(new Vertex(0, 0, undefined), undefined);
+    halfEdge.twin = new HalfEdge(new Vertex(2, 2, undefined), undefined);
+    const line = new Line(new Point(1, 1), 0);
+
+    expect(halfEdge.intersectsLine(line).x).toBeCloseTo(1);
+    expect(halfEdge.intersectsLine(line).y).toBeCloseTo(1);
+  });
+
+  it("returns the intersection point if the halfedge intersects with a line", function () {
+    const halfEdge = new HalfEdge(new Vertex(2, 0, undefined), undefined);
+    halfEdge.twin = new HalfEdge(new Vertex(0, 2, undefined), undefined);
+    const line = new Line(new Point(2, 1), 0);
+
+    expect(halfEdge.intersectsLine(line).x).toBeCloseTo(1);
+    expect(halfEdge.intersectsLine(line).y).toBeCloseTo(1);
+  });
+
+  it("returns undefined if the halfedge and the line are parallel and do not share a vertex", function () {
+    const halfEdge = new HalfEdge(new Vertex(0, 0, undefined), undefined);
+    halfEdge.twin = new HalfEdge(new Vertex(2, 0, undefined), undefined);
+    const line = new Line(new Point(0, 4), 0);
+
+    expect(halfEdge.intersectsLine(line)).toBeUndefined();
+  });
+
+  it("returns ? if the halfedge is in line with the line", function () {
+    const halfEdge = new HalfEdge(new Vertex(0, 0, undefined), undefined);
+    halfEdge.twin = new HalfEdge(new Vertex(2, 0, undefined), undefined);
+    const line = new Line(new Point(-2, 0), 0);
+
+    expect(halfEdge.intersectsLine(line)).toBeUndefined();
+  });
+
+  it("returns undefined if the halfedge does not intersect with a line", function () {
+    const halfEdge = new HalfEdge(new Vertex(0, 0, undefined), undefined);
+    halfEdge.twin = new HalfEdge(new Vertex(2, 2, undefined), undefined);
+    const line = new Line(new Point(0, 3), 0);
+
+    expect(halfEdge.intersectsLine(line)).toBeUndefined();
   });
 });

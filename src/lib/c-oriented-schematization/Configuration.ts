@@ -1,5 +1,7 @@
 import HalfEdge from "../DCEL/HalfEdge";
+import Vertex from "../DCEL/Vertex";
 import Line from "../geometry/Line";
+import Point from "../geometry/Point";
 
 export const enum OuterEdge {
   PREV = "prev",
@@ -29,6 +31,36 @@ class Configuration {
 
   getTracks(): Line[] {
     return [this.getTrack(OuterEdge.PREV), this.getTrack(OuterEdge.NEXT)];
+  }
+
+  /**
+   * Gets the point which is a possible contraction point when doing an edge move.
+   * @param outerEdge The edge which should be used as track for the edge move.
+   * @returns A {@link Point}, posing a configuration's contraction point.
+   */
+  getContractionPoint(outerEdge: OuterEdge): Point {
+    let track: Line;
+    let vertex: Vertex;
+    let edge: HalfEdge;
+    if (outerEdge === OuterEdge.PREV) {
+      track = this.getTrack(outerEdge);
+      vertex = this.getOuterEdge(OuterEdge.NEXT).getHead();
+      edge = this.getOuterEdge(OuterEdge.NEXT);
+    } else {
+      track = this.getTrack(outerEdge);
+      vertex = this.getOuterEdge(OuterEdge.PREV).getTail();
+      edge = this.getOuterEdge(OuterEdge.PREV);
+    }
+
+    return (
+      edge.intersectsLine(track) ||
+      track.intersectsLine(new Line(vertex, this.innerEdge.getAngle()))
+    );
+  }
+
+  // negative for negative contraction areas, positive for positive ones?
+  getContractionAreas(): number[] {
+    return [10, -10];
   }
 }
 

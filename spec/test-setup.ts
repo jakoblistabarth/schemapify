@@ -1,7 +1,9 @@
 import fs from "fs";
-import Dcel from "../src/lib/dcel/Dcel";
-import HalfEdge from "../src/lib/dcel/HalfEdge";
+import Point from "../src/lib/geometry/Point";
 import Vertex from "../src/lib/dcel/Vertex";
+import HalfEdge from "../src/lib/dcel/HalfEdge";
+import Face from "../src/lib/DCEL/Face";
+import Dcel from "../src/lib/dcel/Dcel";
 import config from "../src/schematization.config";
 
 export function getTestFiles(dir: string) {
@@ -58,4 +60,45 @@ export function createEdgeVertexSetup() {
 
   const setup: TestSetup = { dcel, o, directions };
   return setup;
+}
+
+export type ConfigurationSetup = {
+  vertices: Vertex[];
+  edges: HalfEdge[];
+  innerEdge: HalfEdge;
+};
+
+export function createConfigurationSetup(
+  pointA: Point,
+  pointB: Point,
+  pointC: Point,
+  pointD: Point
+): ConfigurationSetup {
+  const points = [pointA, pointB, pointC, pointD];
+  const vertices = points.map((point) => new Vertex(point.x, point.y, undefined));
+
+  const edges = vertices.slice(0, 3).map((vertex, idx) => {
+    const edge = new HalfEdge(vertex, undefined);
+    edge.twin = new HalfEdge(vertices[idx + 1], undefined);
+    edge.twin.face = new Face();
+    return edge;
+  });
+
+  edges.forEach((edge, idx) => {
+    if (idx !== 0) edge.prev = edges[idx - 1];
+    if (idx < edges.length - 1) edge.next = edges[idx + 1];
+  });
+
+  vertices.forEach((vertex, idx) => {
+    if (idx === 0) vertices[idx].edges.push(edges[idx]);
+    else if (idx === vertices.length - 1) vertices[idx].edges.push(edges[idx - 1]);
+    else vertices[idx].edges.push(edges[idx], edges[idx - 1]);
+  });
+
+  const configuration: ConfigurationSetup = {
+    vertices: vertices,
+    edges: edges,
+    innerEdge: edges[1],
+  };
+  return configuration;
 }

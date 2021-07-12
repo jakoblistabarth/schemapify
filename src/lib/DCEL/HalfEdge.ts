@@ -7,6 +7,7 @@ import Sector from "../c-oriented-schematization/Sector";
 import { getUnitVector } from "../utilities";
 import Staircase from "../c-oriented-schematization/Staircase";
 import Configuration from "../c-oriented-schematization/Configuration";
+import Line from "../geometry/Line";
 
 export enum OrientationClasses {
   AB = "alignedBasic",
@@ -96,6 +97,14 @@ class HalfEdge {
   getVector(): number[] {
     const [tail, head] = this.getEndpoints();
     return [head.x - tail.x, head.y - tail.y];
+  }
+
+  /**
+   * Returns a infinite Line going through the HalfEde.
+   * @returns A Line with the same orientation as the {@link HalfEdge}.
+   */
+  toLine(): Line {
+    return new Line(this.getTail(), this.getAngle());
   }
 
   /**
@@ -215,6 +224,22 @@ class HalfEdge {
     e.remove();
 
     return e_;
+  }
+
+  /**
+   * Returns the intersection point of the HalfEdge and a line, if exists.
+   * @credits Part that determines whether or not the point is on the line segment, was adapted from this [stack overflow answer](https://stackoverflow.com/a/17590923).
+   * @param line The infinite {@link Line} the {@link HalfEdge} is intersected with.
+   * @returns
+   */
+  intersectsLine(line: Line): Point | undefined {
+    const P = this.toLine().intersectsLine(line);
+    //TODO: check if the fact that intersectsLine returns undefined for parallel line poses a problem for the case that the halfedge is part of the line
+    if (!P) return;
+    const PA = P.distanceToPoint(this.getTail());
+    const PB = P.distanceToPoint(this.getHead());
+    //FIXME: how to deal with floating point precision here and in general?
+    if (parseFloat((PA + PB).toFixed(10)) === parseFloat(this.getLength().toFixed(10))) return P;
   }
 
   subdivideToThreshold(threshold: number): void {
