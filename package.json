@@ -23,7 +23,7 @@
     "test"
   ],
   "author": "Jakob Listabarth",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@mapbox/geojsonhint": "^3.0.1",
     "@types/jasmine": "^3.7.7",
