@@ -38,7 +38,7 @@ class HalfEdge {
     this.uuid = uuid();
     this.dcel = dcel;
     this.tail = tail;
-    this.twin = null; // TODO: make this as well undefined?
+    this.twin = null; // TODO: consistency – set this to "undefined" or the last properties to "null"?
     this.face = null;
     this.prev = null;
     this.next = null;

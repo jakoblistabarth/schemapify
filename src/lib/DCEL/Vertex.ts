@@ -19,25 +19,41 @@ class Vertex extends Point {
     this.significant = undefined;
   }
 
+  /**
+   * Gets the key of a Vertex, based on its coordinates.
+   * @param x The x coordinate of the {@link Vertex}.
+   * @param y The y coordinate of the {@link Vertex}.
+   * @returns A string, holding the {@link Vertex}'s key.
+   */
   static getKey(x: number, y: number): string {
     return `${x}/${y}`;
   }
 
   /**
-   *
-   * @param stop defines how many strings of the uuid are returned
-   * @returns the edge's uuid
+   * Gets the unique ID of a Vertex.
+   * @param stop Defines how many strings of the uuid are returned.
+   * @returns A string, holding the {@link Vertex}'s unique ID.
    */
   getUuid(length?: number) {
     // QUESTION: extending classes instead of declaring this method separately for all 3 dcel entities?
     return this.uuid.substring(0, length);
   }
 
-  distanceToVertex(p: Point): number {
-    return this.distanceToPoint(p);
+  /**
+   * Gets the distance between the Vertex to another.
+   * @param p The other Vertex.
+   * @returns The distance.
+   */
+  distanceToVertex(vertex: Vertex): number {
+    return this.distanceToPoint(vertex);
   }
 
-  // adapted from https://github.com/scottglz/distance-to-line-segment/blob/master/index.js
+  /**
+   * Gets the (minimum) distance between the Vertex and a HalfEdge.
+   * @credits Adapted from [scottglz](https://github.com/scottglz/distance-to-line-segment/blob/master/index.js)
+   * @param edge An {@link HalfEdge} to which the distance is measured.
+   * @returns The distance.
+   */
   distanceToEdge(edge: HalfEdge): number {
     const [vx, vy] = this.xy();
     const [e1x, e1y] = edge.getTail().xy();
@@ -57,6 +73,11 @@ class Vertex extends Point {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  /**
+   * Sorts the incident HalfEdges of the Vertex, either clockwise or counter-clockwise
+   * @param clockwise If set to true (default), the {@link HalfEdge}s a sorted clockwise, if set to false they are sorted counter-clockwise.
+   * @returns An array containing the sorted {@link HalfEdge}s.
+   */
   sortEdges(clockwise: boolean = true): Array<HalfEdge> {
     this.edges = this.edges.sort((a, b) => {
       if (clockwise) return b.getAngle() - a.getAngle();
@@ -73,10 +94,18 @@ class Vertex extends Point {
     return this.edges;
   }
 
+  /**
+   * Determines whether all incident Edges to the Vertex are aligned (to C).
+   * @returns A Boolean indicating whether or not all {@link HalfEdge}s are aligned.
+   */
   allEdgesAligned(): boolean {
     return this.edges.every((edge) => edge.isAligned());
   }
 
+  /**
+   * Determines the significance of the Vertex..
+   * @returns A Boolean indicating whether or not the {@link Vertex} is significant.
+   */
   isSignificant(): boolean {
     // QUESTION: are vertices with only aligned edges never significant?
     // TODO: move to another class? to not mix dcel and schematization?
@@ -108,10 +137,19 @@ class Vertex extends Point {
     return (this.significant = isSignificant);
   }
 
+  /**
+   * Returns only incident HalfEdges which lie in the specified sector.
+   * @param sector A sector, against which the {@link HalfEdge}s are checked.
+   * @returns An array, containing all {@link HalfEdge}s lying in the sector.
+   */
   getEdgesInSector(sector: Sector): Array<HalfEdge> {
     return this.edges.filter((edge) => sector.encloses(edge.getAngle()));
   }
 
+  /**
+   * Assigns directions to all incident HalfEdges of the Vertex.
+   * @returns An Array, holding the assigned directions starting with the direction of the {@link HalfEge} with the smallest angle on the unit circle.
+   */
   assignDirections(): number[] {
     const edges = this.sortEdges(false);
     const sectors = this.dcel.config.c.getSectors();
@@ -156,6 +194,7 @@ class Vertex extends Point {
   /**
    * Returns the interior angle of a DCEL's Vertex.
    * It is always positive.
+   * @credits Adapted from this [stack overflow answer](https://stackoverflow.com/a/12090743).
    * @param face A {@link Face} the angle is interior to.
    * @returns An angle in radians.
    */
