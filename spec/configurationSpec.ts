@@ -22,13 +22,14 @@ describe("getTrack()", function () {
   });
 });
 
-describe("getContractionPoint() for a configuration returns", function () {
-  it("2 intersection Points", function () {
+describe("getContractionPoint() for a configuration", function () {
+  it("where one intersection Point lies on an edge of the boundary which is not part of the configuration, returns 1 intersection point", function () {
     const configurationSetup = createConfigurationSetup(
       new Point(-4, 4),
       new Point(-2, 0),
       new Point(2, 0),
-      new Point(1, -2)
+      new Point(1, -2),
+      new Point(10, 4)
     );
 
     const innerEdge = configurationSetup.innerEdge;
@@ -38,16 +39,35 @@ describe("getContractionPoint() for a configuration returns", function () {
 
     expect(pPlus.x).toBeCloseTo(-1);
     expect(pPlus.y).toBeCloseTo(-2);
-    expect(pMinus.x).toBeCloseTo(4);
-    expect(pMinus.y).toBeCloseTo(4);
+    expect(pMinus).toBeUndefined();
   });
 
-  it("2 intersection Points", function () {
+  it("where one intersection Point lies on an edge of the boundary which is not part of the configuration, returns 1 intersection point", function () {
+    const configurationSetup = createConfigurationSetup(
+      new Point(-4, 4),
+      new Point(0, 0),
+      new Point(2, 0),
+      new Point(0, -2),
+      new Point(8, 4)
+    );
+
+    const innerEdge = configurationSetup.innerEdge;
+    innerEdge.configuration = new Configuration(innerEdge);
+    const pPlus = innerEdge.configuration.getContractionPoint(OuterEdge.PREV);
+    const pMinus = innerEdge.configuration.getContractionPoint(OuterEdge.NEXT);
+
+    expect(pPlus.x).toBeCloseTo(1);
+    expect(pPlus.y).toBeCloseTo(-1);
+    expect(pMinus).toBeUndefined();
+  });
+
+  it("where one tracks intersects the configuration's first edge, returns 2 intersection Points", function () {
     const configurationSetup = createConfigurationSetup(
       new Point(-2, 2),
       new Point(-2, 0),
       new Point(2, 0),
-      new Point(8, -2)
+      new Point(8, -2),
+      new Point(4, 4)
     );
 
     const innerEdge = configurationSetup.innerEdge;
@@ -61,12 +81,13 @@ describe("getContractionPoint() for a configuration returns", function () {
     expect(pMinus.y).toBeCloseTo(1.33);
   });
 
-  it("2 intersection Points", function () {
+  it("with parallel tracks 2 intersection Points", function () {
     const configurationSetup = createConfigurationSetup(
       new Point(-2, 2),
       new Point(-2, 0),
       new Point(2, 0),
-      new Point(2, -2)
+      new Point(2, -2),
+      new Point(6, 4)
     );
 
     const innerEdge = configurationSetup.innerEdge;
@@ -80,12 +101,13 @@ describe("getContractionPoint() for a configuration returns", function () {
     expect(pMinus.y).toBeCloseTo(2);
   });
 
-  it("2 intersection Points", function () {
+  it("with parallel tracks returns 2 intersection Points", function () {
     const configurationSetup = createConfigurationSetup(
       new Point(0, 2),
       new Point(-2, 0),
       new Point(2, 0),
-      new Point(0, -2)
+      new Point(0, -2),
+      new Point(10, 4)
     );
 
     const innerEdge = configurationSetup.innerEdge;
@@ -96,6 +118,26 @@ describe("getContractionPoint() for a configuration returns", function () {
     expect(pPlus.x).toBeCloseTo(-4);
     expect(pPlus.y).toBeCloseTo(-2);
     expect(pMinus.x).toBeCloseTo(4);
+    expect(pMinus.y).toBeCloseTo(2);
+  });
+
+  it("where the contractionPoints are equivalent to the first and the last Vertex of the Configuration, returns 2 contractionPoints", function () {
+    const configurationSetup = createConfigurationSetup(
+      new Point(-2, 2),
+      new Point(-2, 0),
+      new Point(2, 0),
+      new Point(2, 2),
+      new Point(0, 4)
+    );
+
+    const innerEdge = configurationSetup.innerEdge;
+    innerEdge.configuration = new Configuration(innerEdge);
+    const pPlus = innerEdge.configuration.getContractionPoint(OuterEdge.PREV);
+    const pMinus = innerEdge.configuration.getContractionPoint(OuterEdge.NEXT);
+
+    expect(pPlus.x).toBeCloseTo(-2);
+    expect(pPlus.y).toBeCloseTo(2);
+    expect(pMinus.x).toBeCloseTo(2);
     expect(pMinus.y).toBeCloseTo(2);
   });
 });

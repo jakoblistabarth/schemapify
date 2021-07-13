@@ -8,6 +8,7 @@ import { getUnitVector } from "../utilities";
 import Staircase from "../c-oriented-schematization/Staircase";
 import Configuration from "../c-oriented-schematization/Configuration";
 import Line from "../geometry/Line";
+import LineSegment from "../geometry/LineSegment";
 
 export enum OrientationClasses {
   AB = "alignedBasic",
@@ -81,6 +82,12 @@ class HalfEdge {
     return endPoints.find((v) => v.significant);
   }
 
+  /**
+   * Gets all HalfEgdes incident to the same face as the HalfEdge.
+   * @param forwards A Boolean indicating whether the {@link HalfEdge}s should be returned forward (counterclockwise)
+   * or backwards (clockwise). Default: true.
+   * @returns An array of {@link HalfEdge}s.
+   */
   getCycle(forwards: boolean = true): Array<HalfEdge> {
     let currentEdge: HalfEdge = this;
     const initialEdge: HalfEdge = currentEdge;
@@ -234,12 +241,10 @@ class HalfEdge {
    */
   intersectsLine(line: Line): Point | undefined {
     const P = this.toLine().intersectsLine(line);
-    //TODO: check if the fact that intersectsLine returns undefined for parallel line poses a problem for the case that the halfedge is part of the line
+    //TODO: check if the fact that intersectsLine returns undefined for parallel line
+    // poses a problem for the case that the halfedge is part of the line
     if (!P) return;
-    const PA = P.distanceToPoint(this.getTail());
-    const PB = P.distanceToPoint(this.getHead());
-    //FIXME: how to deal with floating point precision here and in general?
-    if (parseFloat((PA + PB).toFixed(10)) === parseFloat(this.getLength().toFixed(10))) return P;
+    if (P.isOnLineSegment(new LineSegment(this.getTail(), this.getHead()))) return P;
   }
 
   subdivideToThreshold(threshold: number): void {
