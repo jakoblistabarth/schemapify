@@ -17,10 +17,10 @@ class HalfEdge {
   uuid: string;
   dcel: Dcel;
   tail: Vertex;
-  twin: HalfEdge;
+  twin: this;
   face: Face;
-  prev: HalfEdge;
-  next: HalfEdge;
+  prev: this;
+  next: this;
   assignedDirection: number;
   isAligning: boolean;
   class: EdgeClasses;
@@ -52,22 +52,22 @@ class HalfEdge {
     return this.uuid.substring(0, length);
   }
 
-  getTail(): Vertex {
+  getTail(): this["tail"] {
     return this.tail;
   }
 
-  getHead(): Vertex {
+  getHead(): this["twin"]["tail"] {
     return this.twin.getTail();
   }
 
-  getEndpoints(): Array<Vertex> {
+  getEndpoints(): Array<this["tail"] | this["twin"]["tail"]> {
     return [this.getTail(), this.getHead()];
   }
 
-  getCycle(forwards: boolean = true): Array<HalfEdge> {
-    let currentEdge: HalfEdge = this;
-    const initialEdge: HalfEdge = currentEdge;
-    const halfEdges: Array<HalfEdge> = [];
+  getCycle(forwards: boolean = true): this[] {
+    let currentEdge: this = this;
+    const initialEdge: this = currentEdge;
+    const halfEdges: this[] = [];
 
     do {
       halfEdges.push(currentEdge);
@@ -109,7 +109,7 @@ class HalfEdge {
    * @param newPoint {@link Point} which should be added between the {@link HalfEdge}'s tail and head. default: the edge's midpoint
    * @returns the new {@link HalfEdge} which leads from the original {@link HalfEdge}'s tail to the newly created {@link Vertex}.
    */
-  subdivide(newPoint: Point = this.getMidpoint()): HalfEdge {
+  subdivide(newPoint: Point = this.getMidpoint()): this {
     const e = this;
     const et = e.twin;
     const f1 = e.face;

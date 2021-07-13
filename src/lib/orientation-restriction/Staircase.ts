@@ -1,18 +1,19 @@
-import HalfEdge, { EdgeClasses } from "../DCEL/HalfEdge";
-import Point from "../geometry/Point";
-import Line from "../geometry/Line";
 import ConvexHullGrahamScan from "graham_scan";
+import { EdgeClasses } from "../DCEL/HalfEdge";
+import HalfEdgeC from "../DCELC/HalfEdgeC";
+import Line from "../geometry/Line";
+import Point from "../geometry/Point";
 
 class Staircase {
-  edge: HalfEdge;
+  edge: HalfEdgeC;
   deltaE: number;
   points: Array<Point>;
   region: Array<Point>;
   de: number;
   se: number;
-  interferesWith: HalfEdge[];
+  interferesWith: HalfEdgeC[];
 
-  constructor(edge: HalfEdge) {
+  constructor(edge: HalfEdgeC) {
     this.edge = edge;
     this.deltaE = edge.class === EdgeClasses.AD ? edge.getLength() * 0.1 : undefined;
     this.points = undefined;

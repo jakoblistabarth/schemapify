@@ -4,6 +4,7 @@ import HalfEdge, { EdgeClasses } from "../DCEL/HalfEdge";
 import Sector from "../orientation-restriction/Sector";
 import Staircase from "../orientation-restriction/Staircase";
 import { getUnitVector } from "../utilities";
+import Dcel from "../DCEL/Dcel";
 import DcelC from "./DcelC";
 
 class HalfEdgeC extends HalfEdge {
@@ -11,20 +12,13 @@ class HalfEdgeC extends HalfEdge {
   isAligning: boolean;
   class: EdgeClasses;
   staircase: Staircase;
+  tail: VertexC;
 
   constructor(tail: VertexC, dcel: DcelC) {
     super(tail, dcel);
     this.isAligning = undefined;
     this.class = undefined;
     this.staircase = undefined;
-  }
-
-  getTail(): VertexC {
-    return this.tail as VertexC;
-  }
-
-  getHead(): VertexC {
-    return this.twin.getTail() as VertexC;
   }
 
   subdivideToThreshold(threshold: number): void {
@@ -41,7 +35,7 @@ class HalfEdgeC extends HalfEdge {
     }
   }
 
-  getSignificantVertex(): VertexC | undefined {
+  getSignificantVertex(): this["tail"] | undefined {
     const endPoints = this.getEndpoints();
     return endPoints.find((v) => v.significant);
   }

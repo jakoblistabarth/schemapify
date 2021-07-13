@@ -6,7 +6,7 @@ import HalfEdge from "./HalfEdge";
 class Vertex extends Point {
   dcel: Dcel;
   uuid: string;
-  edges: Array<HalfEdge>;
+  edges: HalfEdge[];
 
   constructor(x: number, y: number, dcel: Dcel) {
     super(x, y);
@@ -53,7 +53,7 @@ class Vertex extends Point {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  sortEdges(clockwise: boolean = true): Array<HalfEdge> {
+  sortEdges(clockwise: boolean = true): this["edges"] {
     this.edges = this.edges.sort((a, b) => {
       if (clockwise) return b.getAngle() - a.getAngle();
       else return a.getAngle() - b.getAngle();
@@ -61,7 +61,7 @@ class Vertex extends Point {
     return this.edges;
   }
 
-  removeIncidentEdge(edge: HalfEdge): Array<HalfEdge> {
+  removeIncidentEdge(edge: HalfEdge): HalfEdge[] {
     const idx = this.edges.indexOf(edge);
     if (idx > -1) {
       this.edges.splice(idx, 1);

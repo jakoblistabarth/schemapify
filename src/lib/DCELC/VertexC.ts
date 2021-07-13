@@ -1,8 +1,10 @@
 import Vertex from "../DCEL/Vertex";
+import Sector from "../orientation-restriction/Sector";
 import DcelC from "./DcelC";
 import HalfEdgeC from "./HalfEdgeC";
 
 class VertexC extends Vertex {
+  halfEdgeType = typeof HalfEdgeC;
   edges: HalfEdgeC[];
   significant: boolean;
 
@@ -45,7 +47,7 @@ class VertexC extends Vertex {
     return (this.significant = isSignificant);
   }
 
-  getEdgesInSector(sector: Sector): Array<HalfEdge> {
+  getEdgesInSector(sector: Sector): HalfEdgeC[] {
     return this.edges.filter((edge) => sector.encloses(edge.getAngle()));
   }
 
@@ -53,7 +55,7 @@ class VertexC extends Vertex {
     const edges = this.sortEdges(false);
     const sectors = this.dcel.config.c.getSectors();
 
-    function getDeviation(edges: HalfEdge[], directions: number[]): number {
+    function getDeviation(edges: HalfEdgeC[], directions: number[]): number {
       return edges.reduce((deviation, edge, index) => {
         return deviation + edge.getDeviation(sectors[directions[index]]);
       }, 0);
