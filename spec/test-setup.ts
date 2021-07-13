@@ -81,18 +81,18 @@ export function createConfigurationSetup(
 
   const edges = vertices.map((vertex, idx) => {
     const edge = new HalfEdge(vertex, undefined);
-    edge.twin = new HalfEdge(vertices[crawlArray(vertices, idx, +1)], undefined);
+    edge.twin = new HalfEdge(crawlArray(vertices, idx, +1), undefined);
     edge.twin.face = new Face();
     return edge;
   });
 
   edges.forEach((edge, idx) => {
-    edge.prev = edges[crawlArray(edges, idx, -1)];
-    edge.next = edges[crawlArray(edges, idx, +1)];
+    edge.prev = crawlArray(edges, idx, -1);
+    edge.next = crawlArray(edges, idx, +1);
   });
 
   vertices.forEach((vertex, idx) => {
-    vertex.edges.push(edges[crawlArray(edges, idx, -1)], edges[crawlArray(edges, idx, +1)]);
+    vertex.edges.push(crawlArray(edges, idx, -1), crawlArray(edges, idx, +1));
   });
 
   const configuration: ConfigurationSetup = {

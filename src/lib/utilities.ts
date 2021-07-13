@@ -7,7 +7,7 @@ export async function getJSON(path: string) {
 }
 
 export function crawlArray(array: any[], index: number, n: number) {
-  return (((index + n) % array.length) + array.length) % array.length;
+  return array[(((index + n) % array.length) + array.length) % array.length];
 }
 
 export function getOccurrence(array: any[], value: string | number) {

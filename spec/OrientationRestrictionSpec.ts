@@ -198,18 +198,18 @@ describe("crawlArray()", function () {
   });
 
   it("crawls forward +2", function () {
-    expect(arr[crawlArray(arr, 6, +2)]).toBe("first");
+    expect(crawlArray(arr, 6, +2)).toBe("first");
   });
 
   it("crawls forward +1", function () {
-    expect(arr[crawlArray(arr, 7, +1)]).toBe("first");
+    expect(crawlArray(arr, 7, +1)).toBe("first");
   });
 
   it("crawls backward -1", function () {
-    expect(arr[crawlArray(arr, 0, -1)]).toBe("last");
+    expect(crawlArray(arr, 0, -1)).toBe("last");
   });
 
   it("crawls backward -2", function () {
-    expect(arr[crawlArray(arr, 0, -2)]).toBe("secondlast");
+    expect(crawlArray(arr, 0, -2)).toBe("secondlast");
   });
 });
