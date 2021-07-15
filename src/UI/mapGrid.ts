@@ -39,7 +39,7 @@ export function draw(inputData: string[]) {
     // TODO: validate() data (within getJSON??) check if of type polygon or multipolygon, check crs and save it for later?
     const dcel = Dcel.fromGeoJSON(data);
     dcel.schematize();
-    getMapFrom(dcel, name);
     dcel.toConsole(name);
+    getMapFrom(dcel, name);
   });
 }

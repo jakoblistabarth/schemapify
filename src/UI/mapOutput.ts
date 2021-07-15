@@ -2,6 +2,7 @@ import Dcel from "../lib/DCEL/Dcel";
 import * as L from "leaflet/";
 import Sector from "../lib/c-oriented-schematization/Sector";
 import HalfEdge from "../lib/DCEL/HalfEdge";
+import { STEP } from "./algorithm-navigator";
 
 export function getMapFrom(dcel: Dcel, name: string): L.Map {
   const DCELMap = L.map(name, {
@@ -190,7 +191,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  const staircaseRegionLayer = L.geoJSON(dcel.snapShots[0].layers[0], {
+  const staircaseRegionLayer = L.geoJSON(dcel.snapShots[STEP.STAIRCASE].layers.staircaseRegions, {
     // TODO: implement better structure for snapshots
     style: function (feature) {
       return {

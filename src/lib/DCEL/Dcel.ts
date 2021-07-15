@@ -6,11 +6,26 @@ import Face from "./Face";
 import Staircase from "../c-oriented-schematization/Staircase";
 import { copyInstance, createGeoJSON, groupBy } from "../utilities";
 import * as geojson from "geojson";
+import { STEP } from "../../../src/UI/algorithm-navigator";
 
+/**
+ * Holds the current state of the schematized data as an array of GeoJSON Feature Collections.
+ */
 type Snapshot = {
-  idx: number;
-  name: string;
-  layers: geojson.FeatureCollection[];
+  layers: SnapshotLayers;
+  time?: number;
+};
+
+type SnapshotLayers = {
+  vertices: geojson.FeatureCollection;
+  edges: geojson.FeatureCollection;
+  faces: geojson.FeatureCollection;
+  features: geojson.FeatureCollection;
+  staircaseRegions?: geojson.FeatureCollection;
+};
+
+type SnapShots = {
+  [key: string]: Snapshot;
 };
 
 class Dcel {
@@ -19,7 +34,7 @@ class Dcel {
   faces: Array<Face>;
   featureProperties: geojson.GeoJsonProperties;
   config: Config;
-  snapShots: Snapshot[]; // Object to store geoJSON snapshots in
+  snapShots: SnapShots;
 
   constructor() {
     this.vertices = new Map();
@@ -27,7 +42,7 @@ class Dcel {
     this.faces = [];
     this.featureProperties = {};
     this.config = undefined;
-    this.snapShots = [];
+    this.snapShots = {};
   }
 
   /**
@@ -334,7 +349,9 @@ class Dcel {
   preProcess(): void {
     this.config = config;
     this.setEpsilon(this.config.lambda);
+    this.createSnapshot(STEP.LOAD);
     this.splitEdges();
+    this.createSnapshot(STEP.SUBDIVIDE);
   }
 
   /**
@@ -402,11 +419,26 @@ class Dcel {
     this.getEdgeDistances(staircasesOther);
     this.getSe(staircasesOther.filter((staircase) => staircase.interferesWith.length > 0));
 
-    // TODO: make snapshot of staircases and edges, generic function?
-    this.snapShots.push({ idx: 0, name: "staircases", layers: [this.staircaseRegionsToGeoJSON()] });
+    this.createSnapshot(STEP.STAIRCASE); // TODO: create one before and after? (for the reference of the staircaseRegions)
 
     // create the actual staircase in the DCEL
     this.replaceWithStaircases();
+  }
+
+  createSnapshot(name: STEP): Snapshot {
+    const snapshot: Snapshot = {
+      layers: {
+        vertices: this.verticesToGeoJSON(),
+        edges: this.edgesToGeoJSON(),
+        faces: this.facesToGeoJSON(),
+        features: this.toGeoJSON(),
+      },
+      time: undefined,
+    };
+    if (name === STEP.STAIRCASE)
+      snapshot.layers.staircaseRegions = this.staircaseRegionsToGeoJSON();
+    this.snapShots[name] = snapshot;
+    return snapshot;
   }
 
   getEdgeDistances(staircases: Staircase[]) {
