@@ -3,7 +3,7 @@ import { draw } from "./mapGrid";
 export function drawDataSelect(inputFiles: string[]) {
   const bottomNav = document.getElementById("select-data");
 
-  const show = inputFiles.slice(0, 1);
+  const show = inputFiles.slice(9, 10);
 
   inputFiles.forEach((file) => {
     const filename = file.substring(file.lastIndexOf("/") + 1, file.length - 5);

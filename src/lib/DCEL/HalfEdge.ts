@@ -140,8 +140,8 @@ class HalfEdge {
 
   remove(): void {
     this.tail.removeIncidentEdge(this);
-    this.dcel.removeHalfEdge(this);
     if (this.face.outerRing) this.face.outerRing.removeInnerEdge(this);
+    this.dcel.removeHalfEdge(this);
   }
 
   /**

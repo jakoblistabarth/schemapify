@@ -86,6 +86,63 @@ class Vertex extends Point {
     return this.edges;
   }
 
+  /**
+   * Removes the vertex and replaces the incident HalfEdges with a new one.
+   * Only works on vertices of degree 2 (with a maximum of two incident faces).
+   */
+  remove(): void {
+    if (this.edges.length > 2)
+      throw new Error(
+        "only vertices of degree 2 or less can be removed, otherwise the topology would be corrupted"
+      );
+    if (this.dcel.vertices.size === 3) throw new Error("a dcel must not have less than 3 vertices");
+
+    const ex__ = this.edges[0];
+    const ex_ = ex__.prev;
+
+    const a = ex__.next;
+    const b = a.twin;
+    const c = ex_.prev;
+    const d = c.twin;
+
+    const f1 = ex__.face;
+    const f2 = ex__.twin.face;
+
+    const eTail = c.getHead();
+    const eHead = a.getTail();
+
+    const e = this.dcel.makeHalfEdge(eTail, eHead);
+    e.twin = this.dcel.makeHalfEdge(eHead, eTail);
+    e.twin.twin = e;
+
+    if (f1.edge === ex__ || f1.edge === ex_) f1.edge = e;
+    if (f2.edge === ex__.twin || f2.edge === ex_.twin) f2.edge = e.twin;
+
+    e.face = ex__.face;
+    e.twin.face = ex__.twin.face;
+
+    e.prev = c;
+    c.next = e;
+    e.next = a;
+    a.prev = e;
+
+    e.twin.prev = b;
+    b.next = e.twin;
+    e.twin.next = d;
+    d.prev = e.twin;
+
+    ex_.twin.remove();
+    ex_.remove();
+    ex__.twin.remove();
+    ex__.remove();
+    this.dcel.removeVertex(this);
+  }
+
+  /**
+   * Removes the specified halfedge from the Array of incident Halfedges of the vertex.
+   * @param edge The {@link HalfEdge} to be removed.
+   * @returns An Array containing the remaining incident {@link HalfEdge}s.
+   */
   removeIncidentEdge(edge: HalfEdge): Array<HalfEdge> {
     const idx = this.edges.indexOf(edge);
     if (idx > -1) {

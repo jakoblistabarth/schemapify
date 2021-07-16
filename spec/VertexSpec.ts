@@ -81,3 +81,17 @@ describe("sortEdges()", function () {
     });
   });
 });
+
+describe("remove() on a Vertex", function () {
+  it("return a correct triangular dcel when removing one vertex of a square shape", function () {
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
+    const dcel = Dcel.fromGeoJSON(json);
+
+    const innerFace = dcel.getBoundedFaces()[0];
+    const vertex = dcel.findVertex(0, 0);
+    vertex.remove();
+
+    expect(innerFace.getEdges().length).toBe(3);
+    expect(innerFace.getEdges(false).length).toBe(3);
+  });
+});

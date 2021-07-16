@@ -151,6 +151,12 @@ class Dcel {
     return this.vertices.get(Vertex.getKey(x, y));
   }
 
+  removeVertex(vertex: Vertex): Map<string, Vertex> {
+    const key = Vertex.getKey(vertex.x, vertex.y);
+    this.vertices.delete(key);
+    return this.vertices;
+  }
+
   removeHalfEdge(edge: HalfEdge): Map<string, HalfEdge> {
     const key = HalfEdge.getKey(edge.getTail(), edge.getHead());
     this.halfEdges.delete(key);
@@ -422,7 +428,7 @@ class Dcel {
     this.createSnapshot(STEP.STAIRCASE); // TODO: create one before and after? (for the reference of the staircaseRegions)
 
     // create the actual staircase in the DCEL
-    this.replaceWithStaircases();
+    // this.replaceWithStaircases();
   }
 
   createSnapshot(name: STEP): Snapshot {
