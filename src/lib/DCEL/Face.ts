@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import { getPolygonArea } from "../utilities";
 import HalfEdge from "./HalfEdge";
 
 class Face {
@@ -54,6 +55,15 @@ class Face {
       this.outerRing.edge = edge;
       return this.outerRing.edge;
     }
+  }
+
+  /**
+   * Get the Area of the face.
+   * @returns A number, indicating the size of the {@link Face}.
+   */
+  getArea(): number {
+    const vertices = this.getEdges().map((edge) => edge.getTail());
+    return getPolygonArea(vertices);
   }
 }
 
