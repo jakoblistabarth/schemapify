@@ -1,7 +1,7 @@
 nav {
   position: absolute;
   z-index: var(--above-leaflet);
-  background-color: white;
+  background-color: var(--component-bg);
   padding: var(--spacer);
 }
 
@@ -19,6 +19,10 @@ nav.floating {
 
 #c-vis {
   margin-right: 1em;
+}
+
+#c-vis svg line {
+  stroke: var(--text-color);
 }
 
 #c-info {
@@ -58,7 +62,7 @@ nav.floating {
 }
 
 #select-data label span {
-  background-color: var(--lightgrey);
+  background-color: var(--bg);
   padding: var(--spacer-s);
   display: inline-block;
   margin: var(--spacer-s);
@@ -72,13 +76,17 @@ nav.floating {
 }
 
 #select-data label input:checked + span {
-  background-color: var(--black);
-  color: white;
+  background-color: var(--secondary);
 }
 
 #algorithm-navigator {
   top: var(--spacer);
   right: var(--spacer);
+}
+
+#algorithm-navigator svg * {
+  fill: var(--text-color);
+  stroke: var(--text-color);
 }
 
 #algorithm-navigator li {
@@ -93,7 +101,7 @@ nav.floating {
 }
 
 #algorithm-navigator li:hover {
-  background-color: var(--lightgrey);
+  background-color: var(--secondary);
   border-radius: var(--border-radius);
 }
 
@@ -101,7 +109,7 @@ nav.floating {
   position: relative;
   width: 1px;
   height: 1em;
-  border-left: 1px solid var(--grey);
+  border-left: 1px solid var(--text-color);
   margin: 0 1em;
 }
 
@@ -142,7 +150,7 @@ nav.floating {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--grey);
+  background-color: var(--bg);
   -webkit-transition: 0.4s;
   transition: 0.4s;
 }
@@ -155,13 +163,13 @@ nav.floating {
   height: 14px;
   width: 14px;
   left: 3px;
-  background-color: white;
+  background-color: var(--component-bg);
   -webkit-transition: 0.4s;
   transition: 0.4s;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px var(--grey);
+  box-shadow: 0 0 1px var(--bg);
 }
 
 input:checked + .slider:before {
