@@ -1,5 +1,5 @@
 import Dcel from "../lib/DCEL/Dcel";
-import { loadData } from "../lib/utilities";
+import { getShp, loadData } from "../lib/utilities";
 import { getMapFrom } from "./mapOutput";
 
 export function drawMapGrid(files: string[]): void {
@@ -35,7 +35,7 @@ export function draw(inputData: string[]) {
   drawMapGrid(inputData);
   inputData.forEach(async (path) => {
     const name = path.slice(path.lastIndexOf("/") + 1, -5);
-    const data = await loadData("data/" + path);
+    const data = await loadData(path);
     // TODO: validate() data (within getJSON??) check if of type polygon or multipolygon, check crs and save it for later?
     const dcel = Dcel.fromGeoJSON(data);
     dcel.schematize();

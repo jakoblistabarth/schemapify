@@ -8,7 +8,7 @@
     "test": "jasmine-ts -P config/tsconfig-cjs.json",
     "type-check": "tsc -w --noEmit",
     "dev": "nodemon",
-    "build": "esbuild --bundle src/main.ts --sourcemap --outfile=dist/esm-bundle/main.bundle.js",
+    "build": "esbuild --bundle src/main.ts --sourcemap --define:global=window --inject:src/shim.ts --outfile=dist/esm-bundle/main.bundle.js",
     "start": "browser-sync --config config/bs-config.js"
   },
   "nodemonConfig": {
@@ -36,7 +36,7 @@
     "jasmine-ts": "^0.4.0",
     "leaflet": "^1.7.1",
     "nodemon": "^2.0.7",
-    "shpjs": "^3.6.3",
+    "shpjs": "^4.0.2",
     "ts-node": "^10.0.0",
     "uuid": "^8.3.2"
   },

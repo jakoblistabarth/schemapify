@@ -8,13 +8,15 @@ export async function getJSON(path: string) {
 }
 
 export async function getShp(path: string) {
-  shp(path).then(function (geojson) {
-    return geojson;
-  });
+  return await shp(path);
 }
 
-export function loadData(path: string) {
-  return getJSON(path);
+export async function loadData(path: string) {
+  const suffix = path.split(".").pop();
+
+  if (suffix === "zip") return await getShp(window.location.href + path);
+
+  if (suffix === "json") return await getJSON(path);
 }
 
 export function crawlArray(array: any[], index: number, n: number) {
