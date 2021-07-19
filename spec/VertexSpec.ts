@@ -82,16 +82,61 @@ describe("sortEdges()", function () {
   });
 });
 
-describe("remove() on a Vertex", function () {
-  it("return a correct triangular dcel when removing one vertex of a square shape", function () {
+describe("remove() on a vertex", function () {
+  it("return a correct triangle dcel when removing one vertex of a square shape", function () {
     const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
 
-    const innerFace = dcel.getBoundedFaces()[0];
+    const squareFace = dcel.getBoundedFaces()[0];
     const vertex = dcel.findVertex(0, 0);
     vertex.remove();
 
-    expect(innerFace.getEdges().length).toBe(3);
-    expect(innerFace.getEdges(false).length).toBe(3);
+    expect(squareFace.getEdges().length).toBe(3);
+    expect(squareFace.getEdges(false).length).toBe(3);
   });
+});
+
+describe("remove() on all vertices of a square with a hole", function () {
+  let dcel: Dcel;
+  beforeEach(function () {
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square-hole.json"), "utf8"));
+    dcel = Dcel.fromGeoJSON(json);
+  });
+
+  const outerVertices = [
+    [0, 0],
+    [2, 0],
+    [2, 2],
+    [0, 2],
+  ];
+
+  const innerVertices = [
+    [1.25, 1.25],
+    [1.25, 1.5],
+    [1.5, 1.5],
+    [1.5, 1.25],
+    [1.25, 1.25],
+  ];
+
+  for (const coordinates of outerVertices) {
+    it("return a correct triangular dcel when removing one outer vertex", function () {
+      const outerSquare = dcel.getBoundedFaces()[0];
+      const [x, y] = coordinates;
+      dcel.findVertex(x, y).remove();
+
+      expect(outerSquare.getEdges().length).toBe(3);
+      expect(outerSquare.getEdges(false).length).toBe(3);
+    });
+  }
+
+  for (const coordinates of innerVertices) {
+    it("return a correct triangular dcel when removing one inner vertex", function () {
+      const innerSquare = dcel.getBoundedFaces()[1];
+      const [x, y] = coordinates;
+      dcel.findVertex(x, y).remove();
+
+      expect(innerSquare.getEdges().length).toBe(3);
+      expect(innerSquare.getEdges(false).length).toBe(3);
+    });
+  }
 });

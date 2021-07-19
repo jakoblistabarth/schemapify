@@ -39,6 +39,7 @@ class Face {
   }
 
   replaceInnerEdge(old: HalfEdge, edge: HalfEdge): Array<HalfEdge> {
+    if (this.innerEdges === null) return;
     const idx = this.innerEdges.indexOf(old);
     if (idx === -1) {
       return;

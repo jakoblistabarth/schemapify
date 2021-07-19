@@ -428,7 +428,7 @@ class Dcel {
     this.createSnapshot(STEP.STAIRCASE); // TODO: create one before and after? (for the reference of the staircaseRegions)
 
     // create the actual staircase in the DCEL
-    // this.replaceWithStaircases();
+    this.replaceWithStaircases();
   }
 
   createSnapshot(name: STEP): Snapshot {

@@ -3,7 +3,7 @@ import { draw } from "./mapGrid";
 export function drawDataSelect(inputFiles: string[]) {
   const bottomNav = document.getElementById("select-data");
 
-  const show = inputFiles.slice(9, 10);
+  const show = inputFiles.slice(0, 1);
 
   inputFiles.forEach((file) => {
     const filename = file.substring(file.lastIndexOf("/") + 1, file.length - 5);
@@ -52,7 +52,7 @@ export const tests: string[] = [
   "shapes/inflection-test.json",
   // "shapes/square-hole-island-hole.json",
   // "shapes/square-hole-island.json",
-  // "shapes/square-hole.json",
+  "shapes/square-hole.json",
   // "shapes/square-islands.json",
   "shapes/square.json",
   // "shapes/triangle-hole.json",

@@ -38,8 +38,6 @@ export function draw(inputData: string[]) {
     const data = await getJSON("data/" + test);
     // TODO: validate() data (within getJSON??) check if of type polygon or multipolygon, check crs and save it for later?
     const dcel = Dcel.fromGeoJSON(data);
-    const vertex = dcel.findVertex(0, 0);
-    vertex.remove();
     dcel.schematize();
     dcel.toConsole(name);
     getMapFrom(dcel, name);

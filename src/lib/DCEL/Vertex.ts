@@ -88,7 +88,7 @@ class Vertex extends Point {
 
   /**
    * Removes the vertex and replaces the incident HalfEdges with a new one.
-   * Only works on vertices of degree 2 (with a maximum of two incident faces).
+   * Only works on vertices of degree 2 (with a maximum of two incident {@link HalfEdge}s).
    */
   remove(): void {
     if (this.edges.length > 2)
@@ -117,6 +117,16 @@ class Vertex extends Point {
 
     if (f1.edge === ex__ || f1.edge === ex_) f1.edge = e;
     if (f2.edge === ex__.twin || f2.edge === ex_.twin) f2.edge = e.twin;
+
+    f1.replaceInnerEdge(ex__, e);
+    f1.replaceInnerEdge(ex_, e);
+    f1.replaceInnerEdge(ex__.twin, e.twin);
+    f1.replaceInnerEdge(ex_.twin, e.twin);
+
+    f2.replaceInnerEdge(ex__, e);
+    f2.replaceInnerEdge(ex_, e);
+    f2.replaceInnerEdge(ex__.twin, e.twin);
+    f2.replaceInnerEdge(ex_.twin, e.twin);
 
     e.face = ex__.face;
     e.twin.face = ex__.twin.face;
