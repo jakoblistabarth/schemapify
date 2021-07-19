@@ -1,12 +1,13 @@
-import config, { Config } from "../../schematization.config";
-import Vertex from "./Vertex";
-import Point from "../geometry/Point";
-import HalfEdge, { OrientationClasses } from "./HalfEdge";
-import Face from "./Face";
-import Staircase from "../c-oriented-schematization/Staircase";
-import { copyInstance, createGeoJSON, groupBy } from "../utilities";
 import * as geojson from "geojson";
 import { STEP } from "../../../src/UI/algorithm-navigator";
+import config, { Config } from "../../schematization.config";
+import FaceFaceBoundaries from "../c-oriented-schematization/FaceFaceBoundaries";
+import Staircase from "../c-oriented-schematization/Staircase";
+import Point from "../geometry/Point";
+import { copyInstance, createGeoJSON, groupBy } from "../utilities";
+import Face from "./Face";
+import HalfEdge, { OrientationClasses } from "./HalfEdge";
+import Vertex from "./Vertex";
 
 /**
  * Holds the current state of the schematized data as an array of GeoJSON Feature Collections.
@@ -35,6 +36,7 @@ class Dcel {
   featureProperties: geojson.GeoJsonProperties;
   config: Config;
   snapShots: SnapShots;
+  facefaceBoundaries?: FaceFaceBoundaries;
 
   constructor() {
     this.vertices = new Map();
@@ -43,6 +45,7 @@ class Dcel {
     this.featureProperties = {};
     this.config = undefined;
     this.snapShots = {};
+    this.facefaceBoundaries = undefined;
   }
 
   /**
@@ -584,7 +587,7 @@ class Dcel {
   }
 
   simplify(): Dcel {
-    // TODO: implement edge move
+    this.facefaceBoundaries = new FaceFaceBoundaries(this);
     return this;
   }
 

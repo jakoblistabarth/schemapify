@@ -35,7 +35,7 @@ describe("A Dcel of 2 adjacent squares", function () {
 });
 
 describe("A Dcel of 3 adjacent squares", function () {
-  const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/3plgn.json"), "utf8"));
+  const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/3plgn-adjacent.json"), "utf8"));
   const dcel = Dcel.fromGeoJSON(json);
 
   it("has 1 unbounded face", function () {
@@ -69,7 +69,9 @@ describe("getBbox()", function () {
     const plgn2 = JSON.parse(
       fs.readFileSync(path.resolve("data/shapes/2plgn-adjacent.json"), "utf8")
     );
-    const plgn3 = JSON.parse(fs.readFileSync(path.resolve("data/shapes/3plgn.json"), "utf8"));
+    const plgn3 = JSON.parse(
+      fs.readFileSync(path.resolve("data/shapes/3plgn-adjacent.json"), "utf8")
+    );
 
     let bboxPlgn1 = Dcel.fromGeoJSON(plgn1).getBbox();
     let bboxPlgn2 = Dcel.fromGeoJSON(plgn2).getBbox();
@@ -105,7 +107,9 @@ describe("getVertices()", function () {
 describe("getDiameter()", function () {
   it("returns the correct diameter", function () {
     const plgn1 = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
-    const plgn3 = JSON.parse(fs.readFileSync(path.resolve("data/shapes/3plgn.json"), "utf8"));
+    const plgn3 = JSON.parse(
+      fs.readFileSync(path.resolve("data/shapes/3plgn-adjacent.json"), "utf8")
+    );
 
     expect(Dcel.fromGeoJSON(plgn1).getDiameter()).toBe(Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)));
     expect(Dcel.fromGeoJSON(plgn3).getDiameter()).toBe(Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)));
