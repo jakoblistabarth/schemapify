@@ -4,34 +4,35 @@ import Point from "../geometry/Point";
 import HalfEdge, { EdgeClasses } from "./HalfEdge";
 import Face from "./Face";
 import Staircase from "../orientation-restriction/Staircase";
-import { copyInstance, createGeoJSON, groupBy } from "../utilities";
+import { copyInstance, createGeoJSON, FeatureCollectionPlanar, Crs, groupBy } from "../utilities";
 import * as geojson from "geojson";
 
 type Snapshot = {
   idx: number;
   name: string;
-  layers: geojson.FeatureCollection[];
+  layers: FeatureCollectionPlanar[];
 };
 
-// type metaData = {
-//   crs: {}
-// }
+type MetaData = {
+  crs?: Crs;
+  featureProperties?: geojson.GeoJsonProperties;
+};
 
 class Dcel {
   vertices: Map<string, Vertex>;
   halfEdges: Map<string, HalfEdge>;
   faces: Array<Face>;
-  featureProperties: geojson.GeoJsonProperties;
   config: Config;
+  metaData: MetaData;
   snapShots: Snapshot[]; // Object to store geoJSON snapshots in
 
   constructor() {
     this.vertices = new Map();
     this.halfEdges = new Map();
     this.faces = [];
-    this.featureProperties = {};
     this.config = undefined;
     this.snapShots = [];
+    this.metaData = {};
   }
 
   /**
@@ -147,10 +148,11 @@ class Dcel {
    * @param geoJSON a valid geojson with features of type 'Polygon' or 'Multipolyon'
    * @returns
    */
-  static fromGeoJSON(geoJSON: geojson.FeatureCollection): Dcel {
+  static fromGeoJSON(geoJSON: FeatureCollectionPlanar): Dcel {
     const subdivision = new Dcel();
 
-    subdivision.featureProperties = geoJSON.features.map(
+    if (geoJSON.crs) subdivision.metaData.crs = geoJSON.crs;
+    subdivision.metaData.featureProperties = geoJSON.features.map(
       (feature: geojson.Feature) => feature.properties
     );
 
@@ -588,7 +590,7 @@ class Dcel {
     const features = Object.values(outerRingsByFID).map(
       (feature: Face[], idx: number): geojson.Feature => {
         const featureProperties: geojson.GeoJsonProperties =
-          this.featureProperties[Object.keys(outerRingsByFID)[idx]];
+          this.metaData.featureProperties[Object.keys(outerRingsByFID)[idx]];
         let featureCoordinates: number[][][][] = [];
         let ringIdx = 0;
         feature.forEach((ring: Face) => {
@@ -619,7 +621,7 @@ class Dcel {
       }
     );
 
-    return createGeoJSON(features);
+    return createGeoJSON(features, this.metaData.crs);
   }
 
   verticesToGeoJSON(): geojson.FeatureCollection {
@@ -638,7 +640,7 @@ class Dcel {
       };
     });
 
-    return createGeoJSON(vertexFeatures);
+    return createGeoJSON(vertexFeatures, this.metaData.crs);
   }
 
   facesToGeoJSON(): geojson.FeatureCollection {
@@ -660,7 +662,7 @@ class Dcel {
       };
     });
 
-    return createGeoJSON(faceFeatures);
+    return createGeoJSON(faceFeatures, this.metaData.crs);
   }
 
   staircasesToGeoJSON(): geojson.FeatureCollection {
@@ -679,7 +681,7 @@ class Dcel {
         },
       };
     });
-    return createGeoJSON(staircaseFeatures);
+    return createGeoJSON(staircaseFeatures, this.metaData.crs);
   }
 
   edgesToGeoJSON(): geojson.FeatureCollection {
@@ -725,10 +727,10 @@ class Dcel {
       };
     });
 
-    return createGeoJSON(edgeFeatures);
+    return createGeoJSON(edgeFeatures, this.metaData.crs);
   }
 
-  staircaseRegionsToGeoJSON(): geojson.FeatureCollection {
+  staircaseRegionsToGeoJSON(): FeatureCollectionPlanar {
     const regionFeatures = this.getStaircases().map((staircase): geojson.Feature => {
       const regionPoints = staircase.region;
       regionPoints.push(regionPoints[0]); // add first Point to close geoJSON polygon
@@ -746,7 +748,7 @@ class Dcel {
         },
       };
     });
-    return createGeoJSON(regionFeatures);
+    return createGeoJSON(regionFeatures, this.metaData.crs);
   }
 }
 

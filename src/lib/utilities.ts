@@ -26,9 +26,20 @@ export function crawlArray(array: any[], index: number, n: number) {
 export function getOccurrence(array: any[], value: string | number) {
   return array.filter((v) => v === value).length;
 }
+export interface FeatureCollectionPlanar extends geojson.FeatureCollection {
+  crs: Crs;
+}
 
-export function createGeoJSON(features: geojson.Feature[]): geojson.FeatureCollection {
+export type Crs = {
+  type: string;
+  properties: {
+    name: string;
+  };
+};
+
+export function createGeoJSON(features: geojson.Feature[], crs: Crs): FeatureCollectionPlanar {
   return {
+    crs: crs,
     type: "FeatureCollection",
     features: features,
   };
