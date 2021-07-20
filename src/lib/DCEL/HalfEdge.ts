@@ -83,7 +83,7 @@ class HalfEdge {
   }
 
   /**
-   * Gets all HalfEgdes incident to the same face as the HalfEdge.
+   * Gets all HalfEdges incident to the same face as the HalfEdge.
    * @param forwards A Boolean indicating whether the {@link HalfEdge}s should be returned forward (counterclockwise)
    * or backwards (clockwise). Default: true.
    * @returns An array of {@link HalfEdge}s.
@@ -107,8 +107,8 @@ class HalfEdge {
   }
 
   /**
-   * Returns a infinite Line going through the HalfEde.
-   * @returns A Line with the same orientation as the {@link HalfEdge}.
+   * Returns an infinite Line going through the HalfEdge.
+   * @returns A Line which includes the {@link HalfEdge}.
    */
   toLine(): Line {
     return new Line(this.getTail(), this.getAngle());
@@ -124,10 +124,18 @@ class HalfEdge {
     return angle < 0 ? angle + 2 * Math.PI : angle;
   }
 
+  /**
+   * Gets the length of the Halfedge.
+   * @returns The Length.
+   */
   getLength(): number {
     return this.getTail().distanceToVertex(this.getHead());
   }
 
+  /**
+   * Gets the midpoint of the HalfEdge.
+   * @returns A {@link Point}, indicating the midpoint of the {@link HalfEdge}.
+   */
   getMidpoint(): Point {
     const [x1, y1] = this.getTail().xy();
     const [x2, y2] = this.getHead().xy();
@@ -138,6 +146,9 @@ class HalfEdge {
     return new Point(mx, my);
   }
 
+  /**
+   * Deletes the halfEdge and possible other occurences in the DCEL linkages.
+   */
   remove(): void {
     this.tail.removeIncidentEdge(this);
     if (this.face.outerRing) this.face.outerRing.removeInnerEdge(this);
@@ -247,6 +258,10 @@ class HalfEdge {
     if (P.isOnLineSegment(new LineSegment(this.getTail(), this.getHead()))) return P;
   }
 
+  /**
+   * Subdivides the HalfEdge into smaller Edges, using a threshold.
+   * @param threshold The value determining the maximum length of a subdivision of the original {@link HalfEdge}.
+   */
   subdivideToThreshold(threshold: number): void {
     const initialHalfEdge: HalfEdge = this;
     let currentHalfEdge: HalfEdge = initialHalfEdge;
@@ -261,6 +276,11 @@ class HalfEdge {
     }
   }
 
+  /**
+   * Gets the associated angle of the HalfEdge, which are the defined as the
+   * sector bounds of the sector enclosing the HalfEdge.
+   * @returns An Array of angles in radians. It has length one if the {@link HalfEdge} is aligned.
+   */
   getAssociatedAngles(): number[] {
     const sectors = this.dcel.config.c.getSectors();
     const angle = this.getAngle();
@@ -278,15 +298,27 @@ class HalfEdge {
     return directions;
   }
 
+  /**
+   * Gets the angle of the HalfEdge's assigned direction.
+   * @returns The angle in radians.
+   */
   getAssignedAngle(): number {
     const sectors = this.dcel.config.c.getSectors();
     return Math.PI * 2 * (this.assignedDirection / sectors.length);
   }
 
+  /**
+   * Gets the index of the HalfEdge's assigned direction.
+   * @returns An integer indicating the direction.
+   */
   getAssignedDirection(): number {
     return this.assignedDirection;
   }
 
+  /**
+   * Gets the sector(s) the HalfEdge is enclosed by.
+   * @returns An array of Sectors. It has length 2 if the {@link HalfEdge} is aligned.
+   */
   getAssociatedSector(): Array<Sector> {
     const sectors = this.dcel.config.c.getSectors();
     const direction = this.getAssociatedAngles();
@@ -309,7 +341,7 @@ class HalfEdge {
    *
    * Needed for constructing the staircase of an unaligned deviating edge.
    *
-   * @returns closest associated angle of an edge in respect to its assigned angle.
+   * @returns The closest associated angle of an edge in respect to its assigned angle.
    */
 
   // TODO: Where does such function live?
@@ -327,6 +359,10 @@ class HalfEdge {
     return upper + this.dcel.config.c.getSectorAngle() === angle ? upper : lower;
   }
 
+  /**
+   * Determines whether the HalfEdge's assigned Direction is adjacent to its associated sector.
+   * @returns A boolean, indicating whether or not the {@link HalfEdge} is deviating.
+   */
   isDeviating(): boolean {
     // an angle needs to be already set for this halfedge, TODO: Error handling?
     if (this.isAligned()) {
@@ -346,6 +382,10 @@ class HalfEdge {
     return diff > Math.PI ? Math.abs(diff - Math.PI * 2) : diff;
   }
 
+  /**
+   * Determines whether the HalfEdge is aligned to one of the orientations of C.
+   * @returns A boolean, indicating whether or not the {@link HalfEdge} is aligned.
+   */
   isAligned(): boolean {
     const isAligned = this.getAssociatedAngles().length === 1;
     return (this.isAligning = isAligned);
@@ -417,6 +457,10 @@ class HalfEdge {
     return new Vertex(pointOffset.x, pointOffset.y, undefined);
   }
 
+  /**
+   * Determines the type of the HalfEdge depending on the convexity or reflexivity of its endpoints.
+   * @returns A enum, indicating the inflection Type of the {@link HalfEdge}.
+   */
   getInflectionType() {
     const tailAngle = this.getTail().getExteriorAngle(this.face);
     const headAngle = this.getHead().getExteriorAngle(this.face);
