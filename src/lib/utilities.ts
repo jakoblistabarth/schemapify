@@ -4,18 +4,20 @@ import Point from "./geometry/Point";
 
 export async function getJSON(path: string) {
   const response = await fetch(path);
-  return response.json();
+  const json = response.json();
+  return json;
 }
 
 export async function getShp(path: string) {
-  return await shp(path);
+  const response = await shp(path);
+  console.log(response);
+  return response;
 }
 
 export async function loadData(path: string) {
   const suffix = path.split(".").pop();
 
   if (suffix === "zip") return await getShp(window.location.href + path);
-
   if (suffix === "json") return await getJSON(path);
 }
 

@@ -24,7 +24,7 @@ export function drawMapGrid(files: string[]): void {
 
   files.forEach((file) => {
     const map = document.createElement("div");
-    const name = file.slice(file.lastIndexOf("/") + 1, -5);
+    const name = file.slice(file.lastIndexOf("/") + 1, file.lastIndexOf("."));
     map.id = name;
     map.className = "map";
     grid.appendChild(map);
@@ -34,7 +34,8 @@ export function drawMapGrid(files: string[]): void {
 export function draw(inputData: string[]) {
   drawMapGrid(inputData);
   inputData.forEach(async (path) => {
-    const name = path.slice(path.lastIndexOf("/") + 1, -5);
+    const name = path.slice(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
+
     const data = await loadData(path);
     // TODO: validate() data (within getJSON??) check if of type polygon or multipolygon, check crs and save it for later?
     const dcel = Dcel.fromGeoJSON(data);

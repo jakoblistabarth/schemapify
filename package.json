@@ -36,6 +36,8 @@
     "jasmine-ts": "^0.4.0",
     "leaflet": "^1.7.1",
     "nodemon": "^2.0.7",
+    "proj4": "^2.7.4",
+    "proj4leaflet": "^1.0.2",
     "shpjs": "^4.0.2",
     "ts-node": "^10.0.0",
     "uuid": "^8.3.2"
@@ -43,6 +45,8 @@
   "devDependencies": {
     "@types/graham_scan": "^1.0.28",
     "@types/leaflet": "^1.7.2",
+    "@types/proj4": "^2.5.1",
+    "@types/proj4leaflet": "^1.0.6",
     "@types/shpjs": "^3.4.1",
     "@types/uuid": "^8.3.0",
     "pre-commit": "^1.2.2",

@@ -1,9 +1,11 @@
 import Dcel from "../lib/DCEL/Dcel";
 import * as L from "leaflet/";
+import "proj4leaflet/";
 import Sector from "../lib/orientation-restriction/Sector";
 import HalfEdge from "../lib/DCEL/HalfEdge";
 
 export function getMapFrom(dcel: Dcel, name: string): L.Map {
+  console.log(name);
   const DCELMap = L.map(name, {
     zoomControl: false,
   });
@@ -19,6 +21,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
   }
 
   const vertexLayer = L.geoJSON(dcel.verticesToGeoJSON(), {
+    //FIXME: use L.Proj.geoJSON() here
     pointToLayer: function (feature, latlng) {
       const props = feature.properties;
       const v = feature.geometry.coordinates;

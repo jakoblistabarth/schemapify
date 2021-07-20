@@ -6,7 +6,7 @@ export function drawDataSelect(inputFiles: string[]) {
   const show = inputFiles.slice(0, 1);
 
   inputFiles.forEach((file) => {
-    const filename = file.substring(file.lastIndexOf("/") + 1, file.length - 5);
+    const filename = file.substring(file.lastIndexOf("/") + 1, file.lastIndexOf("."));
     const label = document.createElement("label");
     const checkbox = document.createElement("input");
     const span = document.createElement("span");
@@ -32,19 +32,24 @@ export function drawDataSelect(inputFiles: string[]) {
 }
 
 export const tests: string[] = [
+  "data/geodata/AUT_adm1-epsg-31287.json",
+  "data/geodata/AUT_adm1-epsg-31287.zip",
   "data/geodata/AUT_adm1-simple.json",
   "data/geodata/AUT_adm1.json",
+  "data/geodata/cb_2018_us_state_20m.zip",
   "data/geodata/ne_50m_europe_mapunits-s20.json",
   "data/geodata/ne_50m_africa_admin0-s20.json",
   "data/geodata/ne_50m_admin_0_south-africa_map_units_epsg-54030_s20.zip",
-  // "data/shapes/2plgn-adjacent.json",
+  "data/shapes/2plgn-adjacent.json",
+  "data/shapes/2plgn-adjacent-shp.zip",
   // "data/shapes/2plgn-islands-hole.json",
   // "data/shapes/2plgn-islands-holes.json",
   // "data/shapes/2plgn-islands.json",
   // "data/shapes/2plgn.json",
   // "data/shapes/2triangle-adjacent.json",
-  "data/shapes/3plgn-complex.json",
-  // "data/shapes/3plgn.json",
+  // "data/shapes/3plgn-complex.json",
+  "data/shapes/3plgn.json",
+  "data/shapes/3plgn-shp.zip",
   "data/shapes/aligned-deviating.json",
   "data/shapes/edge-cases.json",
   // "data/shapes/enclave.json",
