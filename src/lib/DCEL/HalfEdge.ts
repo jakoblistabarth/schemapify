@@ -1,14 +1,15 @@
 import { v4 as uuid } from "uuid";
 import Vertex from "./Vertex";
-import Point from "../geometry/Point";
 import Dcel from "./Dcel";
 import Face from "./Face";
 import Sector from "../c-oriented-schematization/Sector";
 import { getUnitVector } from "../utilities";
 import Staircase from "../c-oriented-schematization/Staircase";
 import Configuration from "../c-oriented-schematization/Configuration";
+import Point from "../geometry/Point";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
+import Vector2D from "../geometry/Vector2D";
 
 export enum OrientationClasses {
   AB = "alignedBasic",
@@ -101,9 +102,9 @@ class HalfEdge {
     return halfEdges;
   }
 
-  getVector(): number[] {
+  getVector(): Vector2D {
     const [tail, head] = this.getEndpoints();
-    return [head.x - tail.x, head.y - tail.y];
+    return new Vector2D(head.x - tail.x, head.y - tail.y);
   }
 
   /**
@@ -120,7 +121,7 @@ class HalfEdge {
    */
   getAngle(): number {
     const vector = this.getVector();
-    const angle = Math.atan2(vector[1], vector[0]);
+    const angle = Math.atan2(vector.dy, vector.dx);
     return angle < 0 ? angle + 2 * Math.PI : angle;
   }
 
@@ -434,13 +435,13 @@ class HalfEdge {
 
     // create vector of edge
     const v = this.getVector();
-    const vse = v.map((point) => point / se);
+    const vse = v.multiply(1 / se);
 
     // solve linear equation for l1 and l2 with cramer's rule for 2x2 systems
-    const det = d1u[0] * d2u[1] - d1u[1] * d2u[0];
-    const detX = vse[0] * d2u[1] - vse[1] * d2u[0];
+    const det = d1u.dx * d2u.dy - d1u.dy * d2u.dx;
+    const detX = vse.dx * d2u.dy - vse.dy * d2u.dx;
     const l1 = detX / det;
-    const detY = d1u[0] * vse[1] - d1u[1] * vse[0];
+    const detY = d1u.dx * vse.dy - d1u.dy * vse.dx;
     const l2 = detY / det;
 
     return [l1, l2];

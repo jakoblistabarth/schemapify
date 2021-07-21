@@ -1,12 +1,22 @@
-import HalfEdge from "../DCEL/HalfEdge";
-import Vertex from "../DCEL/Vertex";
+import HalfEdge, { InflectionType } from "../DCEL/HalfEdge";
 import Line from "../geometry/Line";
+import LineSegment from "../geometry/LineSegment";
 import Point from "../geometry/Point";
 
-export const enum OuterEdge {
+export enum OuterEdge {
   PREV = "prev",
   NEXT = "next",
 }
+
+export enum Contraction {
+  POS = "positive",
+  NEG = "negative",
+}
+
+export type ContractionPoints = {
+  [Contraction.POS]?: Point | undefined;
+  [Contraction.NEG]?: Point | undefined;
+};
 
 class Configuration {
   innerEdge: HalfEdge;
@@ -42,25 +52,80 @@ class Configuration {
    * @param outerEdge The edge which should be used as track for the edge move.
    * @returns A {@link Point}, posing a configuration's contraction point.
    */
-  getContractionPoint(outerEdge: OuterEdge): Point {
-    let track: Line;
-    let vertex: Vertex;
-    let edge: HalfEdge;
-    if (outerEdge === OuterEdge.PREV) {
-      track = this.getTrack(outerEdge);
-      vertex = this.getOuterEdge(OuterEdge.NEXT).getHead();
-      edge = this.getOuterEdge(OuterEdge.NEXT);
-    } else {
-      track = this.getTrack(outerEdge);
-      vertex = this.getOuterEdge(OuterEdge.PREV).getTail();
-      edge = this.getOuterEdge(OuterEdge.PREV);
+  getContractionPoints(): ContractionPoints {
+    type PointCandidate = {
+      point: Point;
+      dist: number;
+    };
+
+    const pointCandidates: PointCandidate[] = [];
+    const A = this.innerEdge.prev.getTail().toPoint();
+    const D = this.innerEdge.next.getHead().toPoint();
+    const innerEdgeNormal = this.innerEdge.getVector().getNormal().getUnitVector();
+    console.log(innerEdgeNormal);
+
+    console.log(
+      this.innerEdge.getTail().xy(),
+      this.innerEdge.getHead().xy(),
+      this.innerEdge.getInflectionType()
+    );
+
+    if (this.innerEdge.getInflectionType() === InflectionType.B) {
+      const T = this.getTrack(OuterEdge.PREV).intersectsLine(this.getTrack(OuterEdge.NEXT));
+      if (T) {
+        const distT = T.distanceToPoint(
+          this.innerEdge
+            .toLine()
+            .intersectsLine(new Line(T, this.innerEdge.getAngle() + Math.PI * 0.5))
+        );
+        pointCandidates.push({ point: T, dist: distT });
+      }
     }
 
-    const p2 = edge.intersectsLine(track);
-    const p1 = track.intersectsLine(new Line(vertex, this.innerEdge.getAngle()));
-    // return p2 only if it is on same side of the intersection as the configuration's inner edge
-    if (p2 && track.point.distanceToPoint(p2) < track.point.distanceToPoint(p1)) return p2;
-    if (p1.isValidIntersectionPoint(this)) return p1;
+    pointCandidates.push({ point: A, dist: this.innerEdge.prev.getVector().dot(innerEdgeNormal) });
+    pointCandidates.push({
+      point: D,
+      dist: this.innerEdge.next.twin.getVector().dot(innerEdgeNormal),
+    });
+
+    // find closest contraction point in respect to the configurations inner edge
+    pointCandidates.sort((a, b) => a.dist - b.dist);
+    console.log(pointCandidates);
+    const pos = pointCandidates.filter((candidate) => candidate.dist > 0)[0];
+    const neg = pointCandidates.filter((candidate) => candidate.dist < 0).pop();
+    console.log("pos", pos);
+    console.log("neg", neg);
+
+    //TODO: check whether or not the points are valid (the contraction is feasible, no blocking point exists)
+    const validPoints: ContractionPoints = {};
+    validPoints[Contraction.POS] =
+      pos && this.isValidContractionPoint(pos.point) ? pos.point : undefined;
+    validPoints[Contraction.NEG] =
+      neg && this.isValidContractionPoint(neg.point) ? neg.point : undefined;
+
+    return validPoints;
+  }
+
+  /**
+   * Determines whether or not the Point is a valid contraction point.
+   * @param configuration A {@link Configuration} for which the validity of the {@link Point} is determined.
+   * @returns A Boolean indicating whether or not the {@link Point} is a valid.
+   */
+  isValidContractionPoint(point: Point): boolean {
+    // check whether or not the point is equivalent to the configuration's first and last vertex
+    const startPoint = this.getOuterEdge(OuterEdge.PREV).getTail();
+    const endPoint = this.getOuterEdge(OuterEdge.NEXT).getHead();
+    if (
+      point.xy().every((pos) => startPoint.xy().includes(pos)) ||
+      point.xy().every((pos) => endPoint.xy().includes(pos))
+    )
+      return true;
+
+    // check whether or not the point is on any edge of the face's boundary which is not part of X
+    return this.innerEdge
+      .getCycle()
+      .filter((edge) => !this.getX().includes(edge))
+      .every((edge) => !point.isOnLineSegment(new LineSegment(edge.getTail(), edge.getHead())));
   }
 
   // negative for negative contraction areas, positive for positive ones?

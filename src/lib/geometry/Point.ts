@@ -1,6 +1,3 @@
-import Configuration, { OuterEdge } from "../c-oriented-schematization/Configuration";
-import Dcel from "../DCEL/Dcel";
-import Vertex from "../DCEL/Vertex";
 import LineSegment from "./LineSegment";
 
 class Point {
@@ -71,28 +68,6 @@ class Point {
     const t1 = D.every((d) => d >= 0);
     const t2 = D.every((d) => d <= 0);
     return t1 || t2;
-  }
-
-  /**
-   * Determines whether or not the Point is a valid intersection Point.
-   * @param configuration A {@link Configuration} for which the validity of the {@link Point} is determined.
-   * @returns A Boolean indicating whether or not the {@link Point} is a valid.
-   */
-  isValidIntersectionPoint(configuration: Configuration): boolean {
-    // check whether or not the point is equivalent to the configuration's first and last vertex
-    const startPoint = configuration.getOuterEdge(OuterEdge.PREV).getTail();
-    const endPoint = configuration.getOuterEdge(OuterEdge.NEXT).getHead();
-    if (
-      this.xy().every((pos) => startPoint.xy().includes(pos)) ||
-      this.xy().every((pos) => endPoint.xy().includes(pos))
-    )
-      return true;
-
-    // check whether or not the point is on any edge of the face's boundary which is not part of X
-    return configuration.innerEdge
-      .getCycle()
-      .filter((edge) => !configuration.getX().includes(edge))
-      .every((edge) => !this.isOnLineSegment(new LineSegment(edge.getTail(), edge.getHead())));
   }
 }
 

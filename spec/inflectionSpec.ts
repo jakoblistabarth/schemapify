@@ -1,9 +1,11 @@
 import fs from "fs";
 import path from "path";
+import Point from "../src/lib/geometry/Point";
 import Face from "../src/lib/DCEL/Face";
 import Dcel from "../src/lib/DCEL/Dcel";
 import HalfEdge, { InflectionType } from "../src/lib/DCEL/HalfEdge";
 import Vertex from "../src/lib/DCEL/Vertex";
+import { createConfigurationSetup } from "./test-setup";
 
 describe("getInteriorAngle() and getExteriorAngle()", function () {
   it("return the correct angles for the reflex point for a dart shape", function () {
@@ -110,5 +112,40 @@ describe("getInflectionType()", function () {
       InflectionType.C,
       InflectionType.C,
     ]);
+  });
+});
+
+describe("getInflectionType() on the inner edge of a configuration Setup", function () {
+  it("where the endpoints of the inner edge are both, reflex and convex", function () {
+    const configurationSetup = createConfigurationSetup(
+      new Point(-4, 4),
+      new Point(-2, 0),
+      new Point(2, 0),
+      new Point(1, -2),
+      new Point(8, 5)
+    );
+    expect(configurationSetup.innerEdge.getInflectionType()).toBe(InflectionType.B);
+  });
+
+  it("where the endpoints of the inner edge are both convex", function () {
+    const configurationSetup = createConfigurationSetup(
+      new Point(-4, 4),
+      new Point(-2, 0),
+      new Point(2, 0),
+      new Point(2, 2),
+      new Point(8, 5)
+    );
+    expect(configurationSetup.innerEdge.getInflectionType()).toBe(InflectionType.C);
+  });
+
+  it("where the endpoints of the inner edge are both reflex", function () {
+    const configurationSetup = createConfigurationSetup(
+      new Point(-4, -2),
+      new Point(-2, 0),
+      new Point(2, 0),
+      new Point(4, -2),
+      new Point(0, 6)
+    );
+    expect(configurationSetup.innerEdge.getInflectionType()).toBe(InflectionType.R);
   });
 });

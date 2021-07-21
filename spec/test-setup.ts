@@ -76,23 +76,30 @@ export function createConfigurationSetup(
   pointD: Point,
   pointO: Point
 ): ConfigurationSetup {
+  const dcel = new Dcel();
   const points = [pointA, pointB, pointC, pointD, pointO];
-  const vertices = points.map((point) => new Vertex(point.x, point.y, undefined));
+  const vertices = points.map((point) => new Vertex(point.x, point.y, dcel));
+  const innerFace = new Face();
+  const outerFace = new Face();
 
   const edges = vertices.map((vertex, idx) => {
-    const edge = new HalfEdge(vertex, undefined);
-    edge.twin = new HalfEdge(crawlArray(vertices, idx, +1), undefined);
-    edge.twin.face = new Face();
+    const edge = new HalfEdge(vertex, dcel);
+    edge.twin = new HalfEdge(crawlArray(vertices, idx, +1), dcel);
+    edge.twin.twin = edge;
+    edge.face = outerFace;
+    edge.twin.face = innerFace;
     return edge;
   });
 
   edges.forEach((edge, idx) => {
     edge.prev = crawlArray(edges, idx, -1);
     edge.next = crawlArray(edges, idx, +1);
+    edge.twin.prev = crawlArray(edges, idx, -1).twin;
+    edge.twin.next = crawlArray(edges, idx, +1).twin;
   });
 
   vertices.forEach((vertex, idx) => {
-    vertex.edges.push(crawlArray(edges, idx, -1), crawlArray(edges, idx, +1));
+    vertex.edges.push(edges[idx], edges[idx].prev.twin);
   });
 
   const configuration: ConfigurationSetup = {

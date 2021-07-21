@@ -1,5 +1,6 @@
 import * as geojson from "geojson";
 import Point from "./geometry/Point";
+import Vector2D from "./geometry/Vector2D";
 
 export async function getJSON(path: string) {
   const response = await fetch(path);
@@ -33,9 +34,9 @@ export const groupBy = (key: string) => (array: any[]) =>
  * @param angle in radians
  * @returns a unit vector
  */
-export function getUnitVector(angle: number): number[] {
+export function getUnitVector(angle: number): Vector2D {
   angle = angle > Math.PI ? angle - Math.PI * 2 : angle;
-  return [Math.cos(angle), Math.sin(angle)];
+  return new Vector2D(Math.cos(angle), Math.sin(angle));
 }
 
 export function copyInstance(original: object) {

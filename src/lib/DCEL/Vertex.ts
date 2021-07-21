@@ -41,7 +41,7 @@ class Vertex extends Point {
 
   /**
    * Gets the distance between the Vertex to another.
-   * @param p The other Vertex.
+   * @param p The other {@link Vertex}.
    * @returns The distance.
    */
   distanceToVertex(vertex: Vertex): number {
@@ -273,10 +273,14 @@ class Vertex extends Point {
     return (
       Math.PI -
       Math.atan2(
-        vIncoming[0] * vOutgoing[1] - vOutgoing[0] * vIncoming[1],
-        vIncoming[0] * vOutgoing[0] + vIncoming[1] * vOutgoing[1]
+        vIncoming.dx * vOutgoing.dy - vOutgoing.dx * vIncoming.dy,
+        vIncoming.dx * vOutgoing.dx + vIncoming.dy * vOutgoing.dy
       )
     );
+  }
+
+  toPoint(): Point {
+    return new Point(this.x, this.y);
   }
 }
 
