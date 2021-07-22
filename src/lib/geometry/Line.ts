@@ -35,11 +35,11 @@ class Line {
       //Lines are parallel, no intersection Point
       return;
     } else {
-      let x = (B2 * C1 - B1 * C2) / det; // TODO: understand why negative zero? division of 0 by -1?
+      let x = (B2 * C1 - B1 * C2) / det;
       let y = (A1 * C2 - A2 * C1) / det;
       x = Object.is(x, -0) ? 0 : x;
       y = Object.is(y, -0) ? 0 : y;
-      return new Point(x, y);
+      return new Point(Number(x.toFixed(10)), Number(y.toFixed(10)));
     }
   }
 }

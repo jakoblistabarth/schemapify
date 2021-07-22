@@ -2,6 +2,7 @@ import HalfEdge, { InflectionType } from "../DCEL/HalfEdge";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
 import Point from "../geometry/Point";
+import Vector2D from "../geometry/Vector2D";
 
 export enum OuterEdge {
   PREV = "prev",
@@ -14,19 +15,19 @@ export enum Contraction {
 }
 
 export type ContractionPoints = {
-  [Contraction.POS]?: Point | undefined;
-  [Contraction.NEG]?: Point | undefined;
+  [Contraction.POS]: Point | undefined;
+  [Contraction.NEG]: Point | undefined;
 };
 
 class Configuration {
   innerEdge: HalfEdge;
-  positiveBlockingNumber: number;
-  negativeBlockingNumber: number;
+  positiveBlockingNumber: HalfEdge[];
+  negativeBlockingNumber: HalfEdge[];
 
   constructor(edge: HalfEdge) {
     this.innerEdge = edge; // TODO: not very elegant, similar problem to saving the dcel explicitly to Vertices and HalfEdges.
-    this.positiveBlockingNumber = undefined;
-    this.negativeBlockingNumber = undefined;
+    this.positiveBlockingNumber = [];
+    this.negativeBlockingNumber = [];
   }
 
   getOuterEdge(position: OuterEdge): HalfEdge {
@@ -62,22 +63,14 @@ class Configuration {
     const A = this.innerEdge.prev.getTail().toPoint();
     const D = this.innerEdge.next.getHead().toPoint();
     const innerEdgeNormal = this.innerEdge.getVector().getNormal().getUnitVector();
-    console.log(innerEdgeNormal);
-
-    console.log(
-      this.innerEdge.getTail().xy(),
-      this.innerEdge.getHead().xy(),
-      this.innerEdge.getInflectionType()
-    );
 
     if (this.innerEdge.getInflectionType() === InflectionType.B) {
       const T = this.getTrack(OuterEdge.PREV).intersectsLine(this.getTrack(OuterEdge.NEXT));
       if (T) {
-        const distT = T.distanceToPoint(
-          this.innerEdge
-            .toLine()
-            .intersectsLine(new Line(T, this.innerEdge.getAngle() + Math.PI * 0.5))
-        );
+        const distT = new Vector2D(
+          this.innerEdge.getTail().x - T.x,
+          this.innerEdge.getTail().y - T.y
+        ).dot(innerEdgeNormal);
         pointCandidates.push({ point: T, dist: distT });
       }
     }
@@ -90,19 +83,16 @@ class Configuration {
 
     // find closest contraction point in respect to the configurations inner edge
     pointCandidates.sort((a, b) => a.dist - b.dist);
-    console.log(pointCandidates);
-    const pos = pointCandidates.filter((candidate) => candidate.dist > 0)[0];
+    const pos = pointCandidates.filter((candidate) => candidate.dist >= 0)[0];
     const neg = pointCandidates.filter((candidate) => candidate.dist < 0).pop();
-    console.log("pos", pos);
-    console.log("neg", neg);
 
     //TODO: check whether or not the points are valid (the contraction is feasible, no blocking point exists)
-    const validPoints: ContractionPoints = {};
-    validPoints[Contraction.POS] =
-      pos && this.isValidContractionPoint(pos.point) ? pos.point : undefined;
-    validPoints[Contraction.NEG] =
-      neg && this.isValidContractionPoint(neg.point) ? neg.point : undefined;
-
+    const validPoints: ContractionPoints = {
+      [Contraction.POS]: pos ? pos.point : undefined,
+      [Contraction.NEG]: neg ? neg.point : undefined,
+    };
+    if (pos && this.isValidContractionPoint(pos.point)) console.log("valid pos");
+    if (neg && this.isValidContractionPoint(neg.point)) console.log("valid neg");
     return validPoints;
   }
 

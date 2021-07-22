@@ -72,15 +72,12 @@ describe("getContractionPoint() for a configuration", function () {
     const innerEdge = configurationSetup.innerEdge;
     innerEdge.configuration = new Configuration(innerEdge);
     const points = innerEdge.configuration.getContractionPoints();
-    console.log(points);
 
     expect(points[Contraction.NEG]).toEqual(new Point(-4, 4));
-    expect(points[Contraction.POS].x).toBeCloseTo(1);
-    expect(points[Contraction.POS].y).toBeCloseTo(-1);
+    expect(points[Contraction.POS]).toEqual(new Point(1, -1));
   });
 
-  // FIXME: something's wrong here? the dist for point (-2,1.3333) should be also negative (it's a negative edge-move)
-  xit("where one tracks intersects the configuration's first edge, returns 2 intersection Points", function () {
+  it("where one tracks intersects the configuration's first edge, returns 2 intersection Points", function () {
     const configurationSetup = createConfigurationSetup(
       new Point(-2, 2),
       new Point(-2, 0),
@@ -93,8 +90,23 @@ describe("getContractionPoint() for a configuration", function () {
     const points = innerEdge.configuration.getContractionPoints();
 
     expect(points[Contraction.POS]).toEqual(new Point(8, -2));
-    expect(points[Contraction.NEG].x).toBeCloseTo(-2);
-    expect(points[Contraction.NEG].y).toBeCloseTo(1.33);
+    expect(points[Contraction.NEG]).toEqual(new Point(-2, 1.3333333333));
+  });
+
+  it("where one tracks intersects the configuration's first edge, returns 2 intersection Points", function () {
+    const configurationSetup = createConfigurationSetup(
+      new Point(-8, -2),
+      new Point(-2, 0),
+      new Point(2, 0),
+      new Point(2, 2),
+      new Point(-4, 4)
+    );
+    const innerEdge = configurationSetup.innerEdge;
+    innerEdge.configuration = new Configuration(innerEdge);
+    const points = innerEdge.configuration.getContractionPoints();
+
+    expect(points[Contraction.POS]).toEqual(new Point(-8, -2));
+    expect(points[Contraction.NEG]).toEqual(new Point(2, 1.3333333333));
   });
 
   it("with parallel tracks returns 2 intersection Points", function () {
