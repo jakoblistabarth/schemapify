@@ -46,13 +46,23 @@ describe("isInPolygon()", function () {
 });
 
 describe("getPolygonArea()", function () {
-  it("returns correct area for a given set of 4 Points (a square)", function () {
+  it("returns correct area for a given set of 4 Points (a square).", function () {
     const points = [new Point(0, 0), new Point(0, 1), new Point(1, 1), new Point(1, 0)];
     expect(getPolygonArea(points)).toBe(1);
   });
 
-  it("returns correct area for a given set of 3 Points (a triangle)", function () {
+  it("returns correct area for a given set of 3 Points (a triangle).", function () {
     const points = [new Point(0, 0), new Point(0, 1), new Point(1, 1)];
     expect(getPolygonArea(points)).toBe(0.5);
+  });
+});
+
+describe("equals()", function () {
+  it("returns true if two points reside on the exact same location.", function () {
+    expect(new Point(0, 0).equals(new Point(0, 0))).toBeTrue();
+  });
+
+  it("returns false if two points reside on different locations.", function () {
+    expect(new Point(0, 0).equals(new Point(0, 0.0000000001))).toBeFalse();
   });
 });

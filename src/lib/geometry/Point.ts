@@ -69,6 +69,12 @@ class Point {
     const t2 = D.every((d) => d <= 0);
     return t1 || t2;
   }
+
+  equals(point: Point): boolean {
+    return (
+      Number((this.x - point.x).toFixed(10)) === 0 && Number((this.y - point.y).toFixed(10)) === 0
+    );
+  }
 }
 
 export default Point;

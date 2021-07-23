@@ -3,6 +3,7 @@ import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
 import Point from "../geometry/Point";
 import Vector2D from "../geometry/Vector2D";
+import { crawlArray } from "../utilities";
 
 export enum OuterEdge {
   PREV = "prev",
@@ -15,27 +16,44 @@ export enum Contraction {
 }
 
 export type ContractionPoints = {
-  [Contraction.POS]: Point | undefined;
   [Contraction.NEG]: Point | undefined;
+  [Contraction.POS]: Point | undefined;
 };
 
 class Configuration {
   innerEdge: HalfEdge;
-  positiveBlockingNumber: HalfEdge[];
-  negativeBlockingNumber: HalfEdge[];
+  BlockingNumbers: {
+    [Contraction.NEG]: HalfEdge[];
+    [Contraction.POS]: HalfEdge[];
+  };
 
   constructor(edge: HalfEdge) {
     this.innerEdge = edge; // TODO: not very elegant, similar problem to saving the dcel explicitly to Vertices and HalfEdges.
-    this.positiveBlockingNumber = [];
-    this.negativeBlockingNumber = [];
+    this.BlockingNumbers = {
+      [Contraction.NEG]: [],
+      [Contraction.POS]: [],
+    };
   }
 
   getOuterEdge(position: OuterEdge): HalfEdge {
     return position === OuterEdge.PREV ? this.innerEdge.prev : this.innerEdge.next;
   }
 
+  /**
+   * Gets all 3 edges forming the configuration.
+   * @returns An array of {@link HalfEdge}s.
+   */
   getX(): HalfEdge[] {
     return [this.getOuterEdge(OuterEdge.PREV), this.innerEdge, this.getOuterEdge(OuterEdge.NEXT)];
+  }
+
+  /**
+   * Gets all edges of the polygon's boundary to which the configuration belongs, unless the 3 edges forming the configuration.
+   * Kind of the inverse to getX().
+   * @returns An array of {@link HalfEdge}s.
+   */
+  getX_(): HalfEdge[] {
+    return this.innerEdge.getCycle().filter((edge) => !this.getX().includes(edge));
   }
 
   getTrack(outerEdge: OuterEdge): Line {
@@ -86,41 +104,62 @@ class Configuration {
     const pos = pointCandidates.filter((candidate) => candidate.dist >= 0)[0];
     const neg = pointCandidates.filter((candidate) => candidate.dist < 0).pop();
 
-    //TODO: check whether or not the points are valid (the contraction is feasible, no blocking point exists)
     const validPoints: ContractionPoints = {
       [Contraction.POS]: pos ? pos.point : undefined,
       [Contraction.NEG]: neg ? neg.point : undefined,
     };
-    if (pos && this.isValidContractionPoint(pos.point)) console.log("valid pos");
-    if (neg && this.isValidContractionPoint(neg.point)) console.log("valid neg");
+
     return validPoints;
   }
 
-  /**
-   * Determines whether or not the Point is a valid contraction point.
-   * @param configuration A {@link Configuration} for which the validity of the {@link Point} is determined.
-   * @returns A Boolean indicating whether or not the {@link Point} is a valid.
-   */
-  isValidContractionPoint(point: Point): boolean {
-    // check whether or not the point is equivalent to the configuration's first and last vertex
-    const startPoint = this.getOuterEdge(OuterEdge.PREV).getTail();
-    const endPoint = this.getOuterEdge(OuterEdge.NEXT).getHead();
-    if (
-      point.xy().every((pos) => startPoint.xy().includes(pos)) ||
-      point.xy().every((pos) => endPoint.xy().includes(pos))
-    )
-      return true;
-
-    // check whether or not the point is on any edge of the face's boundary which is not part of X
-    return this.innerEdge
-      .getCycle()
-      .filter((edge) => !this.getX().includes(edge))
-      .every((edge) => !point.isOnLineSegment(new LineSegment(edge.getTail(), edge.getHead())));
+  getContractionArea(contractionPoint: Point): Point[] {
+    const prev = this.getOuterEdge(OuterEdge.PREV);
+    const outerEdgePrevSegment = new LineSegment(prev.getTail(), prev.getHead());
+    const innerEdge_ = new Line(contractionPoint, this.innerEdge.getAngle());
+    if (contractionPoint.isOnLineSegment(outerEdgePrevSegment)) {
+      const head_ = this.getTrack(OuterEdge.NEXT).intersectsLine(innerEdge_);
+      return [
+        contractionPoint,
+        this.innerEdge.getTail().toPoint(),
+        this.innerEdge.getHead().toPoint(),
+        head_,
+      ];
+    } else {
+      const tail_ = this.getTrack(OuterEdge.PREV).intersectsLine(innerEdge_);
+      return [
+        contractionPoint,
+        this.innerEdge.getHead().toPoint(),
+        this.innerEdge.getTail().toPoint(),
+        tail_,
+      ];
+    }
   }
 
-  // negative for negative contraction areas, positive for positive ones?
-  getContractionAreas(): number[] {
-    return [10, -10];
+  setBlockingNumber(contraction: Contraction): HalfEdge[] {
+    const blockingEdges: HalfEdge[] = [];
+
+    const area = this.getContractionArea(this.getContractionPoints()[contraction]);
+
+    const contractionAreaP = area.map(
+      (point, idx) => new LineSegment(point, crawlArray(area, idx, +1))
+    );
+
+    this.getX_().forEach((boundaryEdge) => {
+      // add edges which resides entirely in the contraction area
+      if (boundaryEdge.getEndpoints().every((point) => point.isInPolygon(area))) {
+        blockingEdges.push(boundaryEdge);
+      }
+
+      // add edges which resides partially in the contraction area
+      contractionAreaP.forEach((edge) => {
+        const intersection = boundaryEdge.toLineSegment().intersectsLineSegment(edge);
+        if (intersection && area.every((p) => !p.equals(intersection))) {
+          blockingEdges.push(boundaryEdge);
+        }
+      });
+    });
+
+    return blockingEdges;
   }
 }
 

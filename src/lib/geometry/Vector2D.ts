@@ -20,17 +20,27 @@ class Vector2D {
   }
 
   getUnitVector(): Vector2D {
-    return this.multiply(1 / this.getMagnitude());
+    return this.times(1 / this.getMagnitude());
   }
 
-  multiply(scalar: number): Vector2D {
-    const dx = this.dx * scalar;
-    const dy = this.dy * scalar;
-    return new Vector2D(dx, dy);
+  plus(vector: Vector2D): Vector2D {
+    return new Vector2D(this.dx + vector.dx, this.dy + vector.dy);
+  }
+
+  minus(vector: Vector2D): Vector2D {
+    return new Vector2D(this.dx - vector.dx, this.dy - vector.dy);
+  }
+
+  times(scalar: number): Vector2D {
+    return new Vector2D(this.dx * scalar, this.dy * scalar);
   }
 
   dot(vector: Vector2D): number {
     return this.dx * vector.dx + this.dy * vector.dy;
+  }
+
+  cross(vector: Vector2D): number {
+    return this.dx * vector.dy - this.dy * vector.dx;
   }
 }
 

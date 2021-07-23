@@ -35,11 +35,11 @@ describe("getInvers() returns the correct inverted vector", function () {
   });
 });
 
-describe("multiply() returns the correct vector", function () {
+describe("times() returns the correct vector", function () {
   it("for a simple vector", function () {
-    expect(new Vector2D(2, 0).multiply(2)).toEqual(new Vector2D(4, 0));
-    expect(new Vector2D(3, -1).multiply(2)).toEqual(new Vector2D(6, -2));
-    expect(new Vector2D(3, 5).multiply(-2)).toEqual(new Vector2D(-6, -10));
+    expect(new Vector2D(2, 0).times(2)).toEqual(new Vector2D(4, 0));
+    expect(new Vector2D(3, -1).times(2)).toEqual(new Vector2D(6, -2));
+    expect(new Vector2D(3, 5).times(-2)).toEqual(new Vector2D(-6, -10));
   });
 });
 

@@ -122,7 +122,7 @@ describe("getInflectionType() on the inner edge of a configuration Setup", funct
       new Point(-2, 0),
       new Point(2, 0),
       new Point(1, -2),
-      new Point(8, 5)
+      [new Point(8, 5)]
     );
     expect(configurationSetup.innerEdge.getInflectionType()).toBe(InflectionType.B);
   });
@@ -133,7 +133,7 @@ describe("getInflectionType() on the inner edge of a configuration Setup", funct
       new Point(-2, 0),
       new Point(2, 0),
       new Point(2, 2),
-      new Point(8, 5)
+      [new Point(8, 5)]
     );
     expect(configurationSetup.innerEdge.getInflectionType()).toBe(InflectionType.C);
   });
@@ -144,7 +144,7 @@ describe("getInflectionType() on the inner edge of a configuration Setup", funct
       new Point(-2, 0),
       new Point(2, 0),
       new Point(4, -2),
-      new Point(0, 6)
+      [new Point(0, 6)]
     );
     expect(configurationSetup.innerEdge.getInflectionType()).toBe(InflectionType.R);
   });

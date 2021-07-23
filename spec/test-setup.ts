@@ -74,10 +74,10 @@ export function createConfigurationSetup(
   pointB: Point,
   pointC: Point,
   pointD: Point,
-  pointO: Point
+  otherPoints: Point[]
 ): ConfigurationSetup {
   const dcel = new Dcel();
-  const points = [pointA, pointB, pointC, pointD, pointO];
+  const points = [pointA, pointB, pointC, pointD, ...otherPoints];
   const vertices = points.map((point) => new Vertex(point.x, point.y, dcel));
   const innerFace = new Face();
   const outerFace = new Face();

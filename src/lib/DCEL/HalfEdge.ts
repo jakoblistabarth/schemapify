@@ -400,6 +400,10 @@ class HalfEdge {
     return Math.min(...distances);
   }
 
+  toLineSegment(): LineSegment {
+    return new LineSegment(this.getTail(), this.getHead());
+  }
+
   classify(): OrientationClasses {
     this.getTail().assignDirections();
 
@@ -435,7 +439,7 @@ class HalfEdge {
 
     // create vector of edge
     const v = this.getVector();
-    const vse = v.multiply(1 / se);
+    const vse = v.times(1 / se);
 
     // solve linear equation for l1 and l2 with cramer's rule for 2x2 systems
     const det = d1u.dx * d2u.dy - d1u.dy * d2u.dx;
