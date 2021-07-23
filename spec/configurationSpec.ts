@@ -334,3 +334,21 @@ describe("isFeasible() returns", function () {
     expect(c.isFeasible(Contraction.POS)).toBeFalse();
   });
 });
+
+describe("getContractionArea() returns", function () {
+  it("the Area of an contraction area", function () {
+    const s = createConfigurationSetup(
+      new Point(-4, 4),
+      new Point(-2, 0),
+      new Point(2, 0),
+      new Point(1, -2),
+      [new Point(6, 2)]
+    );
+    const c = new Configuration(s.innerEdge);
+    const areaPos = c.getContractionArea(Contraction.POS);
+    const areaNeg = c.getContractionArea(Contraction.NEG);
+
+    expect(areaPos).toBe(6);
+    expect(areaNeg).toBe(24);
+  });
+});

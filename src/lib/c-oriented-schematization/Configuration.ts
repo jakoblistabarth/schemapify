@@ -3,7 +3,7 @@ import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
 import Point from "../geometry/Point";
 import Vector2D from "../geometry/Vector2D";
-import { crawlArray } from "../utilities";
+import { crawlArray, getPolygonArea } from "../utilities";
 
 export enum OuterEdge {
   PREV = "prev",
@@ -134,6 +134,10 @@ class Configuration {
         tail_,
       ];
     }
+  }
+
+  getContractionArea(contraction: Contraction): number {
+    return getPolygonArea(this.getContractionAreaPoints(contraction));
   }
 
   setBlockingNumber(contraction: Contraction): HalfEdge[] {
