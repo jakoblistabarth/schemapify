@@ -137,7 +137,7 @@ class Configuration {
 
   setBlockingNumber(contraction: Contraction): HalfEdge[] {
     const blockingEdges: HalfEdge[] = [];
-
+    if (!this.getContractionPoints()[contraction]) return blockingEdges;
     const area = this.getContractionArea(this.getContractionPoints()[contraction]);
 
     const contractionAreaP = area.map(
@@ -160,6 +160,11 @@ class Configuration {
     });
 
     return blockingEdges;
+  }
+
+  isFeasible(contraction: Contraction): boolean {
+    if (!this.getContractionPoints()[contraction]) return false;
+    return this.BlockingNumbers[contraction].length === 0 ? true : false;
   }
 }
 

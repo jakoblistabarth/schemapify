@@ -334,3 +334,40 @@ describe("getBlockingNumbers() returns interfering edges", function () {
     expect(configuration.BlockingNumbers[Contraction.POS]).toEqual(s.edges.slice(5, 7));
   });
 });
+
+describe("isFeasible() returns", function () {
+  it("true for a contraction with a contraction point and a blockingnumber of 0, and false if the blocking number is > 0.", function () {
+    const s = createConfigurationSetup(
+      new Point(-4, 4),
+      new Point(-2, 0),
+      new Point(2, 0),
+      new Point(1, -2),
+      [new Point(6, 2)]
+    );
+    const innerEdge = s.innerEdge;
+    const c = new Configuration(innerEdge);
+    c.getContractionPoints();
+    c.BlockingNumbers[Contraction.POS] = c.setBlockingNumber(Contraction.POS);
+    c.BlockingNumbers[Contraction.NEG] = c.setBlockingNumber(Contraction.NEG);
+
+    expect(c.isFeasible(Contraction.POS)).toBeTrue();
+    expect(c.isFeasible(Contraction.NEG)).toBeFalse();
+  });
+
+  it("false for a contraction which has no contraction point of the specified contraction type", function () {
+    const configurationSetup = createConfigurationSetup(
+      new Point(-4, 2),
+      new Point(-2, 0),
+      new Point(2, 0),
+      new Point(2, 2),
+      [new Point(0, 6)]
+    );
+
+    const innerEdge = configurationSetup.innerEdge;
+    const c = new Configuration(innerEdge);
+    c.getContractionPoints();
+    c.BlockingNumbers[Contraction.POS] = c.setBlockingNumber(Contraction.POS);
+
+    expect(c.isFeasible(Contraction.POS)).toBeFalse();
+  });
+});
