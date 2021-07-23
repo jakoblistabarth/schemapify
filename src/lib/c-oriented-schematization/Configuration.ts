@@ -112,7 +112,8 @@ class Configuration {
     return validPoints;
   }
 
-  getContractionArea(contractionPoint: Point): Point[] {
+  getContractionAreaPoints(contraction: Contraction): Point[] {
+    const contractionPoint = this.getContractionPoints()[contraction];
     const prev = this.getOuterEdge(OuterEdge.PREV);
     const outerEdgePrevSegment = new LineSegment(prev.getTail(), prev.getHead());
     const innerEdge_ = new Line(contractionPoint, this.innerEdge.getAngle());
@@ -138,22 +139,22 @@ class Configuration {
   setBlockingNumber(contraction: Contraction): HalfEdge[] {
     const blockingEdges: HalfEdge[] = [];
     if (!this.getContractionPoints()[contraction]) return blockingEdges;
-    const area = this.getContractionArea(this.getContractionPoints()[contraction]);
+    const areaPoints = this.getContractionAreaPoints(contraction);
 
-    const contractionAreaP = area.map(
-      (point, idx) => new LineSegment(point, crawlArray(area, idx, +1))
+    const contractionAreaP = areaPoints.map(
+      (point, idx) => new LineSegment(point, crawlArray(areaPoints, idx, +1))
     );
 
     this.getX_().forEach((boundaryEdge) => {
       // add edges which resides entirely in the contraction area
-      if (boundaryEdge.getEndpoints().every((point) => point.isInPolygon(area))) {
+      if (boundaryEdge.getEndpoints().every((point) => point.isInPolygon(areaPoints))) {
         blockingEdges.push(boundaryEdge);
       }
 
       // add edges which resides partially in the contraction area
       contractionAreaP.forEach((edge) => {
         const intersection = boundaryEdge.toLineSegment().intersectsLineSegment(edge);
-        if (intersection && area.every((p) => !p.equals(intersection))) {
+        if (intersection && areaPoints.every((p) => !p.equals(intersection))) {
           blockingEdges.push(boundaryEdge);
         }
       });
