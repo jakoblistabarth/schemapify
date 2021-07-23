@@ -1,6 +1,7 @@
 import * as geojson from "geojson";
 import { STEP } from "../../../src/UI/algorithm-navigator";
 import config, { Config } from "../../schematization.config";
+import Configuration from "../c-oriented-schematization/Configuration";
 import FaceFaceBoundaries from "../c-oriented-schematization/FaceFaceBoundaries";
 import Staircase from "../c-oriented-schematization/Staircase";
 import Point from "../geometry/Point";
@@ -588,6 +589,7 @@ class Dcel {
 
   simplify(): Dcel {
     this.facefaceBoundaries = new FaceFaceBoundaries(this);
+    this.createConfigurations();
     return this;
   }
 
@@ -790,6 +792,16 @@ class Dcel {
       };
     });
     return createGeoJSON(regionFeatures);
+  }
+
+  /**
+   * Creates Configurations only for edges which endpoints are of degree 3 or less.
+   */
+  createConfigurations() {
+    this.getHalfEdges().forEach((edge) => {
+      if (edge.getEndpoints().every((vertex) => vertex.edges.length <= 3))
+        edge.configuration = new Configuration(edge);
+    });
   }
 }
 
