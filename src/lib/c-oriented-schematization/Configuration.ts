@@ -11,27 +11,27 @@ export enum OuterEdge {
 }
 
 export enum Contraction {
-  POS = "positive",
-  NEG = "negative",
+  P = "positive",
+  N = "negative",
 }
 
 export type ContractionPoints = {
-  [Contraction.NEG]: Point | undefined;
-  [Contraction.POS]: Point | undefined;
+  [Contraction.N]: Point | undefined;
+  [Contraction.P]: Point | undefined;
 };
 
 class Configuration {
   innerEdge: HalfEdge;
   BlockingNumbers: {
-    [Contraction.NEG]: HalfEdge[];
-    [Contraction.POS]: HalfEdge[];
+    [Contraction.N]: HalfEdge[];
+    [Contraction.P]: HalfEdge[];
   };
 
   constructor(edge: HalfEdge) {
     this.innerEdge = edge; // TODO: not very elegant, similar problem to saving the dcel explicitly to Vertices and HalfEdges.
     this.BlockingNumbers = {
-      [Contraction.NEG]: [],
-      [Contraction.POS]: [],
+      [Contraction.N]: [],
+      [Contraction.P]: [],
     };
   }
 
@@ -105,8 +105,8 @@ class Configuration {
     const neg = pointCandidates.filter((candidate) => candidate.dist < 0).pop();
 
     const validPoints: ContractionPoints = {
-      [Contraction.POS]: pos ? pos.point : undefined,
-      [Contraction.NEG]: neg ? neg.point : undefined,
+      [Contraction.P]: pos ? pos.point : undefined,
+      [Contraction.N]: neg ? neg.point : undefined,
     };
 
     return validPoints;
@@ -173,9 +173,9 @@ class Configuration {
   }
 
   isComplementary(contraction: Contraction): boolean {
-    if (contraction === Contraction.NEG)
-      return this.getContractionPoints()[Contraction.POS] !== undefined;
-    else return this.getContractionPoints()[Contraction.NEG] !== undefined;
+    if (contraction === Contraction.N)
+      return this.getContractionPoints()[Contraction.P] !== undefined;
+    else return this.getContractionPoints()[Contraction.N] !== undefined;
   }
 }
 
