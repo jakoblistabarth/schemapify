@@ -171,6 +171,12 @@ class Configuration {
     if (!this.getContractionPoints()[contraction]) return false;
     return this.BlockingNumbers[contraction].length === 0 ? true : false;
   }
+
+  isComplementary(contraction: Contraction): boolean {
+    if (contraction === Contraction.NEG)
+      return this.getContractionPoints()[Contraction.POS] !== undefined;
+    else return this.getContractionPoints()[Contraction.NEG] !== undefined;
+  }
 }
 
 export default Configuration;

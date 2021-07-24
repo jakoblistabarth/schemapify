@@ -274,3 +274,26 @@ describe("getContractionArea() returns", function () {
     expect(areaNeg).toBe(24);
   });
 });
+
+describe("is Complementary() returns", function () {
+  let s1: ConfigurationSetup;
+  let s2: ConfigurationSetup;
+  let c1: Configuration;
+  let c2: Configuration;
+  beforeEach(function () {
+    s1 = configurationCases.negConvex;
+    c1 = new Configuration(s1.innerEdge);
+    s2 = configurationCases.posReflex;
+    c2 = new Configuration(s2.innerEdge);
+  });
+
+  it("true, when the configuration has a contraction point of the complementary contraction type.", function () {
+    expect(c1.isComplementary(Contraction.POS)).toBeTrue();
+    expect(c2.isComplementary(Contraction.NEG)).toBeTrue();
+  });
+
+  it("false, when the configuration has no contraction point of the complementary contraction type.", function () {
+    expect(c1.isComplementary(Contraction.NEG)).toBeFalse();
+    expect(c2.isComplementary(Contraction.POS)).toBeFalse();
+  });
+});
