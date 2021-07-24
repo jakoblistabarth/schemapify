@@ -1,4 +1,5 @@
 import HalfEdge, { InflectionType } from "../DCEL/HalfEdge";
+import Vertex from "../DCEL/Vertex";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
 import Point from "../geometry/Point";
@@ -13,6 +14,12 @@ export enum OuterEdge {
 export enum Contraction {
   P = "positive",
   N = "negative",
+}
+
+export enum Junction {
+  A = "aligned",
+  B = "unalignedDifferentSide",
+  C = "unalignedSameSide",
 }
 
 export type ContractionPoints = {
@@ -176,6 +183,31 @@ class Configuration {
     if (contraction === Contraction.N)
       return this.getContractionPoints()[Contraction.P] !== undefined;
     else return this.getContractionPoints()[Contraction.N] !== undefined;
+  }
+
+  hasJunction(): boolean {
+    return this.innerEdge.getEndpoints().some((p) => p.edges.length > 2);
+  }
+
+  getJunctionType(vertex: Vertex): Junction {
+    let idx = vertex.edges.indexOf(this.innerEdge);
+    idx = idx === -1 ? vertex.edges.indexOf(this.innerEdge.twin) : idx;
+    const edge1 = crawlArray(vertex.edges, idx, +1);
+    const edge2 = crawlArray(vertex.edges, idx, +2);
+
+    if (edge1.getAngle() === edge2.twin.getAngle()) return Junction.A;
+    const normal = this.innerEdge.getVector().getNormal();
+
+    const o1 = edge1.getVector().dot(normal);
+    const o2 = edge2.getVector().dot(normal);
+    if ((o1 > 0 && o2 < 0) || (o1 < 0 && o2 > 0)) return Junction.B;
+    else return Junction.C;
+  }
+
+  doEdgeMove(contraction: Contraction): void {
+    if (this.hasJunction()) return;
+
+    console.log(contraction);
   }
 }
 
