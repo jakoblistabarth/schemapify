@@ -6,8 +6,7 @@ import Configuration, {
   OuterEdge,
 } from "../src/lib/c-oriented-schematization/Configuration";
 import Dcel from "../src/lib/DCEL/Dcel";
-import { ConfigurationSetup, createConfigurationSetup } from "./test-setup";
-import HalfEdge from "src/lib/DCEL/HalfEdge";
+import { configurationCases, ConfigurationSetup, createConfigurationSetup } from "./test-setup";
 
 describe("getTrack()", function () {
   it("return the correct angles for the reflex point for a square shape", function () {
@@ -28,13 +27,7 @@ describe("getTrack()", function () {
 
 describe("getX() for a configuration", function () {
   it("returns 3 edges, forming the configuration.", function () {
-    const s = createConfigurationSetup(
-      new Point(-4, 4),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(1, -2),
-      [new Point(8, 6)]
-    );
+    const s = configurationCases.bothNoBlockingPoint;
 
     s.innerEdge.configuration = new Configuration(s.innerEdge);
     const x = s.innerEdge.configuration.getX();
@@ -45,14 +38,8 @@ describe("getX() for a configuration", function () {
 });
 
 describe("getContractionPoint() for a configuration", function () {
-  it("where one intersection Point lies on an edge of the boundary which is not part of the configuration, returns 1 intersection point", function () {
-    const s = createConfigurationSetup(
-      new Point(-4, 4),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(1, -2),
-      [new Point(8, 6)]
-    );
+  it("where one intersection Point lies on an edge of the boundary which is not part of the configuration, returns 2 intersection point", function () {
+    const s = configurationCases.bothNoBlockingPoint;
 
     s.innerEdge.configuration = new Configuration(s.innerEdge);
     const points = s.innerEdge.configuration.getContractionPoints();
@@ -61,30 +48,8 @@ describe("getContractionPoint() for a configuration", function () {
     expect(points[Contraction.POS]).toEqual(new Point(1, -2));
   });
 
-  it("where the innerEdge is reflex, returns 1 (negative) intersection point", function () {
-    const s = createConfigurationSetup(
-      new Point(-4, 2),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(2, 2),
-      [new Point(0, 6)]
-    );
-
-    s.innerEdge.configuration = new Configuration(s.innerEdge);
-    const points = s.innerEdge.configuration.getContractionPoints();
-
-    expect(points[Contraction.NEG]).toEqual(new Point(2, 2));
-    expect(points[Contraction.POS]).toBeUndefined();
-  });
-
-  it("where the innerEdge is convex, returns 1 (positive) intersection point", function () {
-    const s = createConfigurationSetup(
-      new Point(-4, 0),
-      new Point(-2, 2),
-      new Point(2, 2),
-      new Point(6, 0),
-      [new Point(0, 6)]
-    );
+  it("where the innerEdge is reflex, returns 1 (positive) intersection point", function () {
+    const s = configurationCases.posReflex;
 
     s.innerEdge.configuration = new Configuration(s.innerEdge);
     const points = s.innerEdge.configuration.getContractionPoints();
@@ -93,14 +58,18 @@ describe("getContractionPoint() for a configuration", function () {
     expect(points[Contraction.POS]).toEqual(new Point(-4, 0));
   });
 
-  it("where the negative contraction is not feasible (a point of ∂PX is in the contraction area), still returns 2 intersection point", function () {
-    const s = createConfigurationSetup(
-      new Point(-4, 4),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(1, -2),
-      [new Point(6, 2)]
-    );
+  it("where the innerEdge is convex, returns 1 (negative) intersection point.", function () {
+    const s = configurationCases.negConvex;
+
+    s.innerEdge.configuration = new Configuration(s.innerEdge);
+    const points = s.innerEdge.configuration.getContractionPoints();
+
+    expect(points[Contraction.NEG]).toEqual(new Point(4, 2));
+    expect(points[Contraction.POS]).toBeUndefined();
+  });
+
+  it("where the negative contraction is not feasible (a point of ∂PX is in the contraction area), still returns 2 intersection points.", function () {
+    const s = configurationCases.bothBlockingPointNeg;
 
     s.innerEdge.configuration = new Configuration(s.innerEdge);
     const points = s.innerEdge.configuration.getContractionPoints();
@@ -109,7 +78,7 @@ describe("getContractionPoint() for a configuration", function () {
     expect(points[Contraction.POS]).toEqual(new Point(1, -2));
   });
 
-  it("where one intersection Point lies on an edge of the boundary which is not part of the configuration, returns 1 intersection point", function () {
+  it("where one intersection Point lies on an edge of the boundary which is not part of the configuration, returns 2 intersection points.", function () {
     const s = createConfigurationSetup(
       new Point(-4, 4),
       new Point(0, 0),
@@ -125,7 +94,7 @@ describe("getContractionPoint() for a configuration", function () {
     expect(points[Contraction.POS]).toEqual(new Point(1, -1));
   });
 
-  it("where one tracks intersects the configuration's first edge, returns 2 intersection Points", function () {
+  it(" returns 2 contraction points, when one tracks intersects the configuration's first edge,", function () {
     const s = createConfigurationSetup(
       new Point(-2, 2),
       new Point(-2, 0),
@@ -140,7 +109,7 @@ describe("getContractionPoint() for a configuration", function () {
     expect(points[Contraction.NEG]).toEqual(new Point(-2, 1.3333333333));
   });
 
-  it("where one tracks intersects the configuration's first edge, returns 2 intersection Points", function () {
+  it("returns 2 contraction points, when one track intersects the configuration's second edge.", function () {
     const s = createConfigurationSetup(
       new Point(-8, -2),
       new Point(-2, 0),
@@ -155,14 +124,8 @@ describe("getContractionPoint() for a configuration", function () {
     expect(points[Contraction.NEG]).toEqual(new Point(2, 1.3333333333));
   });
 
-  it("with parallel tracks returns 2 intersection Points", function () {
-    const s = createConfigurationSetup(
-      new Point(-2, 2),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(2, -2),
-      [new Point(6, 4)]
-    );
+  it("returns 2 contraction points, when the edge is of inflection type both and the tracks are parallel.", function () {
+    const s = configurationCases.bothParallelTracks;
     s.innerEdge.configuration = new Configuration(s.innerEdge);
     const points = s.innerEdge.configuration.getContractionPoints();
 
@@ -170,35 +133,24 @@ describe("getContractionPoint() for a configuration", function () {
     expect(points[Contraction.NEG]).toEqual(new Point(-2, 2));
   });
 
-  it("where the contractionPoints are equivalent to the first and the last Vertex of the Configuration, returns 2 contractionPoints", function () {
-    const s = createConfigurationSetup(
-      new Point(-2, 2),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(2, 2),
-      [new Point(0, 4)]
-    );
+  it("where the edge is convex and the tracks are parallel, returns 1 contractionPoint.", function () {
+    const s = configurationCases.negConvexParallelTracks;
 
     s.innerEdge.configuration = new Configuration(s.innerEdge);
     const points = s.innerEdge.configuration.getContractionPoints();
 
     expect(points[Contraction.NEG]).toEqual(new Point(2, 2));
+    expect(points[Contraction.POS]).toBeUndefined();
   });
 });
 
 describe("getContractionAreaPoints() returns the correct contraction area", function () {
   let s: ConfigurationSetup;
   beforeEach(function () {
-    s = createConfigurationSetup(
-      new Point(-4, 4),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(1, -2),
-      [new Point(6, 2)]
-    );
+    s = configurationCases.bothBlockingPointNeg;
   });
 
-  it("given a negative contraction Point", function () {
+  it("given a negative contraction Point.", function () {
     s.innerEdge.configuration = new Configuration(s.innerEdge);
     const area = s.innerEdge.configuration.getContractionAreaPoints(Contraction.NEG);
     expect(area.map((point) => point.xy())).toEqual([
@@ -209,7 +161,7 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
     ]);
   });
 
-  it("given a positive contraction Point", function () {
+  it("given a positive contraction Point.", function () {
     s.innerEdge.configuration = new Configuration(s.innerEdge);
     const area = s.innerEdge.configuration.getContractionAreaPoints(Contraction.POS);
     expect(area.map((point) => point.xy())).toEqual([
@@ -221,15 +173,9 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
   });
 });
 
-describe("getX() and getX_() returns interfering edges", function () {
-  it("for a setup with one interference", function () {
-    const s = createConfigurationSetup(
-      new Point(-4, 4),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(1, -2),
-      [new Point(6, 2)]
-    );
+describe("getX() and getX_() returns the correct number of boundary edges", function () {
+  it("for a setup with one interference.", function () {
+    const s = configurationCases.bothBlockingPointNeg;
     const c = new Configuration(s.innerEdge);
 
     expect(c.getX().length).toBe(3);
@@ -239,13 +185,7 @@ describe("getX() and getX_() returns interfering edges", function () {
 
 describe("getBlockingNumbers() returns interfering edges", function () {
   it("for a setup with one interference (partially residing).", function () {
-    const s = createConfigurationSetup(
-      new Point(-4, 4),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(1, -2),
-      [new Point(6, 2)]
-    );
+    const s = configurationCases.bothBlockingPointNeg;
     const c = new Configuration(s.innerEdge);
     c.BlockingNumbers[Contraction.NEG] = c.setBlockingNumber(Contraction.NEG);
     c.BlockingNumbers[Contraction.POS] = c.setBlockingNumber(Contraction.POS);
@@ -303,13 +243,7 @@ describe("getBlockingNumbers() returns interfering edges", function () {
 
 describe("isFeasible() returns", function () {
   it("true for a contraction with a contraction point and a blockingnumber of 0, and false if the blocking number is > 0.", function () {
-    const s = createConfigurationSetup(
-      new Point(-4, 4),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(1, -2),
-      [new Point(6, 2)]
-    );
+    const s = configurationCases.bothBlockingPointNeg;
 
     const c = new Configuration(s.innerEdge);
     c.BlockingNumbers[Contraction.POS] = c.setBlockingNumber(Contraction.POS);
@@ -320,13 +254,7 @@ describe("isFeasible() returns", function () {
   });
 
   it("false for a contraction which has no contraction point of the specified contraction type", function () {
-    const s = createConfigurationSetup(
-      new Point(-4, 2),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(2, 2),
-      [new Point(0, 6)]
-    );
+    const s = configurationCases.negConvex;
 
     const c = new Configuration(s.innerEdge);
     c.BlockingNumbers[Contraction.POS] = c.setBlockingNumber(Contraction.POS);
@@ -337,13 +265,7 @@ describe("isFeasible() returns", function () {
 
 describe("getContractionArea() returns", function () {
   it("the Area of an contraction area", function () {
-    const s = createConfigurationSetup(
-      new Point(-4, 4),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(1, -2),
-      [new Point(6, 2)]
-    );
+    const s = configurationCases.bothBlockingPointNeg;
     const c = new Configuration(s.innerEdge);
     const areaPos = c.getContractionArea(Contraction.POS);
     const areaNeg = c.getContractionArea(Contraction.NEG);

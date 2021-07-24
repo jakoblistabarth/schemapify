@@ -109,3 +109,48 @@ export function createConfigurationSetup(
   };
   return configuration;
 }
+
+export const configurationCases = {
+  negConvex: createConfigurationSetup(
+    new Point(-4, 2),
+    new Point(-2, 0),
+    new Point(2, 0),
+    new Point(4, 2),
+    [new Point(0, 6)]
+  ),
+  posReflex: createConfigurationSetup(
+    new Point(-4, 0),
+    new Point(-2, 2),
+    new Point(2, 2),
+    new Point(4, 0),
+    [new Point(0, 6)]
+  ),
+  bothNoBlockingPoint: createConfigurationSetup(
+    new Point(-4, 4),
+    new Point(-2, 0),
+    new Point(2, 0),
+    new Point(1, -2),
+    [new Point(8, 6)]
+  ),
+  bothBlockingPointNeg: createConfigurationSetup(
+    new Point(-4, 4),
+    new Point(-2, 0),
+    new Point(2, 0),
+    new Point(1, -2),
+    [new Point(6, 2)]
+  ),
+  negConvexParallelTracks: createConfigurationSetup(
+    new Point(-2, 2),
+    new Point(-2, 0),
+    new Point(2, 0),
+    new Point(2, 2),
+    [new Point(0, 4)]
+  ),
+  bothParallelTracks: createConfigurationSetup(
+    new Point(-2, 2),
+    new Point(-2, 0),
+    new Point(2, 0),
+    new Point(2, -2),
+    [new Point(6, 4)]
+  ),
+};
