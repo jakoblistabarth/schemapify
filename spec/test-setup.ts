@@ -153,4 +153,18 @@ export const configurationCases = {
     new Point(2, -2),
     [new Point(6, 4)]
   ),
+  bothContractionOnFirstEdge: createConfigurationSetup(
+    new Point(-2, 2),
+    new Point(-2, 0),
+    new Point(2, 0),
+    new Point(8, -2),
+    [new Point(4, 4)]
+  ),
+  bothContractionOnThirdEdge: createConfigurationSetup(
+    new Point(-8, -2),
+    new Point(-2, 0),
+    new Point(2, 0),
+    new Point(2, 2),
+    [new Point(-4, 4)]
+  ),
 };

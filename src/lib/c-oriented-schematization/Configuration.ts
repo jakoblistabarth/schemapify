@@ -124,23 +124,26 @@ class Configuration {
     const prev = this.getOuterEdge(OuterEdge.PREV);
     const outerEdgePrevSegment = new LineSegment(prev.getTail(), prev.getHead());
     const innerEdge_ = new Line(contractionPoint, this.innerEdge.getAngle());
+    let contractionPoints;
+
     if (contractionPoint.isOnLineSegment(outerEdgePrevSegment)) {
-      const head_ = this.getTrack(OuterEdge.NEXT).intersectsLine(innerEdge_);
-      return [
+      contractionPoints = [
         contractionPoint,
         this.innerEdge.getTail().toPoint(),
         this.innerEdge.getHead().toPoint(),
-        head_,
       ];
+      if (contractionPoint.equals(prev.getTail()))
+        contractionPoints.push(this.getTrack(OuterEdge.NEXT).intersectsLine(innerEdge_));
     } else {
-      const tail_ = this.getTrack(OuterEdge.PREV).intersectsLine(innerEdge_);
-      return [
+      contractionPoints = [
         contractionPoint,
         this.innerEdge.getHead().toPoint(),
         this.innerEdge.getTail().toPoint(),
-        tail_,
       ];
+      if (contractionPoint.equals(this.getOuterEdge(OuterEdge.NEXT).getHead()))
+        contractionPoints.push(this.getTrack(OuterEdge.PREV).intersectsLine(innerEdge_));
     }
+    return contractionPoints;
   }
 
   getContractionArea(contraction: Contraction): number {

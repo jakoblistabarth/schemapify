@@ -95,13 +95,7 @@ describe("getContractionPoint() for a configuration", function () {
   });
 
   it(" returns 2 contraction points, when one tracks intersects the configuration's first edge,", function () {
-    const s = createConfigurationSetup(
-      new Point(-2, 2),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(8, -2),
-      [new Point(4, 4)]
-    );
+    const s = configurationCases.bothContractionOnFirstEdge;
     s.innerEdge.configuration = new Configuration(s.innerEdge);
     const points = s.innerEdge.configuration.getContractionPoints();
 
@@ -109,14 +103,8 @@ describe("getContractionPoint() for a configuration", function () {
     expect(points[Contraction.N]).toEqual(new Point(-2, 1.3333333333));
   });
 
-  it("returns 2 contraction points, when one track intersects the configuration's second edge.", function () {
-    const s = createConfigurationSetup(
-      new Point(-8, -2),
-      new Point(-2, 0),
-      new Point(2, 0),
-      new Point(2, 2),
-      [new Point(-4, 4)]
-    );
+  it("returns 2 contraction points, when one track intersects the configuration's third edge.", function () {
+    const s = configurationCases.bothContractionOnThirdEdge;
     s.innerEdge.configuration = new Configuration(s.innerEdge);
     const points = s.innerEdge.configuration.getContractionPoints();
 
@@ -150,10 +138,10 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
     s = configurationCases.bothBlockingPointNeg;
   });
 
-  it("given a negative contraction Point.", function () {
+  it("given a negative contraction point.", function () {
     s.innerEdge.configuration = new Configuration(s.innerEdge);
-    const area = s.innerEdge.configuration.getContractionAreaPoints(Contraction.N);
-    expect(area.map((point) => point.xy())).toEqual([
+    const areaPoints = s.innerEdge.configuration.getContractionAreaPoints(Contraction.N);
+    expect(areaPoints.map((p) => p.xy())).toEqual([
       [-4, 4],
       [-2, 0],
       [2, 0],
@@ -161,14 +149,38 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
     ]);
   });
 
-  it("given a positive contraction Point.", function () {
+  it("given a positive contraction point.", function () {
     s.innerEdge.configuration = new Configuration(s.innerEdge);
-    const area = s.innerEdge.configuration.getContractionAreaPoints(Contraction.P);
-    expect(area.map((point) => point.xy())).toEqual([
+    const areaPoints = s.innerEdge.configuration.getContractionAreaPoints(Contraction.P);
+    expect(areaPoints.map((p) => p.xy())).toEqual([
       [1, -2],
       [2, 0],
       [-2, 0],
       [-1, -2],
+    ]);
+  });
+
+  it("given a negative contraction point on the configuration's first edge.", function () {
+    s = configurationCases.bothContractionOnFirstEdge;
+    s.innerEdge.configuration = new Configuration(s.innerEdge);
+    const areaPoints = s.innerEdge.configuration.getContractionAreaPoints(Contraction.N);
+
+    expect(areaPoints.map((p) => p.xy())).toEqual([
+      [-2, 1.3333333333],
+      [-2, 0],
+      [2, 0],
+    ]);
+  });
+
+  it("given a negative contraction point on the configuration's third edge.", function () {
+    s = configurationCases.bothContractionOnThirdEdge;
+    s.innerEdge.configuration = new Configuration(s.innerEdge);
+    const areaPoints = s.innerEdge.configuration.getContractionAreaPoints(Contraction.N);
+
+    expect(areaPoints.map((p) => p.xy())).toEqual([
+      [2, 1.3333333333],
+      [2, 0],
+      [-2, 0],
     ]);
   });
 });
