@@ -29,14 +29,14 @@ export type ContractionPoints = {
 
 class Configuration {
   innerEdge: HalfEdge;
-  BlockingNumbers: {
+  BlockingEdges: {
     [Contraction.N]: HalfEdge[];
     [Contraction.P]: HalfEdge[];
   };
 
   constructor(edge: HalfEdge) {
     this.innerEdge = edge; // TODO: not very elegant, similar problem to saving the dcel explicitly to Vertices and HalfEdges.
-    this.BlockingNumbers = {
+    this.BlockingEdges = {
       [Contraction.N]: [],
       [Contraction.P]: [],
     };
@@ -147,7 +147,7 @@ class Configuration {
     return getPolygonArea(this.getContractionAreaPoints(contraction));
   }
 
-  setBlockingNumber(contraction: Contraction): HalfEdge[] {
+  setBlockingEdges(contraction: Contraction): HalfEdge[] {
     const blockingEdges: HalfEdge[] = [];
     if (!this.getContractionPoints()[contraction]) return blockingEdges;
     const areaPoints = this.getContractionAreaPoints(contraction);
@@ -176,7 +176,7 @@ class Configuration {
 
   isFeasible(contraction: Contraction): boolean {
     if (!this.getContractionPoints()[contraction]) return false;
-    return this.BlockingNumbers[contraction].length === 0 ? true : false;
+    return this.BlockingEdges[contraction].length === 0 ? true : false;
   }
 
   isComplementary(contraction: Contraction): boolean {

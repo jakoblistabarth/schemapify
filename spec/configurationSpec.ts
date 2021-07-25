@@ -183,16 +183,16 @@ describe("getX() and getX_() returns the correct number of boundary edges", func
   });
 });
 
-describe("getBlockingNumbers() returns interfering edges", function () {
+describe("setBlockingEdges() returns interfering edges", function () {
   it("for a setup with one interference (partially residing).", function () {
     const s = configurationCases.bothBlockingPointNeg;
     const c = new Configuration(s.innerEdge);
-    c.BlockingNumbers[Contraction.N] = c.setBlockingNumber(Contraction.N);
-    c.BlockingNumbers[Contraction.P] = c.setBlockingNumber(Contraction.P);
+    c.BlockingEdges[Contraction.N] = c.setBlockingEdges(Contraction.N);
+    c.BlockingEdges[Contraction.P] = c.setBlockingEdges(Contraction.P);
 
-    expect(c.BlockingNumbers[Contraction.N].length).toBe(1);
-    expect(c.BlockingNumbers[Contraction.N]).toEqual(s.edges.slice(-1));
-    expect(c.BlockingNumbers[Contraction.P].length).toBe(0);
+    expect(c.BlockingEdges[Contraction.N].length).toBe(1);
+    expect(c.BlockingEdges[Contraction.N]).toEqual(s.edges.slice(-1));
+    expect(c.BlockingEdges[Contraction.P].length).toBe(0);
   });
 
   it("for a setup with one interference (partially and entirely residing)", function () {
@@ -205,12 +205,12 @@ describe("getBlockingNumbers() returns interfering edges", function () {
     );
 
     const c = new Configuration(s.innerEdge);
-    c.BlockingNumbers[Contraction.N] = c.setBlockingNumber(Contraction.N);
-    c.BlockingNumbers[Contraction.P] = c.setBlockingNumber(Contraction.P);
+    c.BlockingEdges[Contraction.N] = c.setBlockingEdges(Contraction.N);
+    c.BlockingEdges[Contraction.P] = c.setBlockingEdges(Contraction.P);
 
-    expect(c.BlockingNumbers[Contraction.N].length).toBe(3);
-    expect(c.BlockingNumbers[Contraction.N]).toEqual(s.edges.slice(-3));
-    expect(c.BlockingNumbers[Contraction.P].length).toBe(0);
+    expect(c.BlockingEdges[Contraction.N].length).toBe(3);
+    expect(c.BlockingEdges[Contraction.N]).toEqual(s.edges.slice(-3));
+    expect(c.BlockingEdges[Contraction.P].length).toBe(0);
   });
 
   it("for a setup with one interference (partially and entirely residing)", function () {
@@ -231,13 +231,13 @@ describe("getBlockingNumbers() returns interfering edges", function () {
       ]
     );
     const c = new Configuration(s.innerEdge);
-    c.BlockingNumbers[Contraction.N] = c.setBlockingNumber(Contraction.N);
-    c.BlockingNumbers[Contraction.P] = c.setBlockingNumber(Contraction.P);
+    c.BlockingEdges[Contraction.N] = c.setBlockingEdges(Contraction.N);
+    c.BlockingEdges[Contraction.P] = c.setBlockingEdges(Contraction.P);
 
-    expect(c.BlockingNumbers[Contraction.N].length).toBe(3);
-    expect(c.BlockingNumbers[Contraction.N]).toEqual(s.edges.slice(-3));
-    expect(c.BlockingNumbers[Contraction.P].length).toBe(2);
-    expect(c.BlockingNumbers[Contraction.P]).toEqual(s.edges.slice(5, 7));
+    expect(c.BlockingEdges[Contraction.N].length).toBe(3);
+    expect(c.BlockingEdges[Contraction.N]).toEqual(s.edges.slice(-3));
+    expect(c.BlockingEdges[Contraction.P].length).toBe(2);
+    expect(c.BlockingEdges[Contraction.P]).toEqual(s.edges.slice(5, 7));
   });
 });
 
@@ -246,8 +246,8 @@ describe("isFeasible() returns", function () {
     const s = configurationCases.bothBlockingPointNeg;
 
     const c = new Configuration(s.innerEdge);
-    c.BlockingNumbers[Contraction.P] = c.setBlockingNumber(Contraction.P);
-    c.BlockingNumbers[Contraction.N] = c.setBlockingNumber(Contraction.N);
+    c.BlockingEdges[Contraction.P] = c.setBlockingEdges(Contraction.P);
+    c.BlockingEdges[Contraction.N] = c.setBlockingEdges(Contraction.N);
 
     expect(c.isFeasible(Contraction.P)).toBeTrue();
     expect(c.isFeasible(Contraction.N)).toBeFalse();
@@ -257,7 +257,7 @@ describe("isFeasible() returns", function () {
     const s = configurationCases.negConvex;
 
     const c = new Configuration(s.innerEdge);
-    c.BlockingNumbers[Contraction.P] = c.setBlockingNumber(Contraction.P);
+    c.BlockingEdges[Contraction.P] = c.setBlockingEdges(Contraction.P);
 
     expect(c.isFeasible(Contraction.P)).toBeFalse();
   });
