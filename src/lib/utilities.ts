@@ -45,8 +45,9 @@ export function copyInstance(original: object) {
 
 /**
  * Calculates the area of the irregular polyon defined by a set of points.
- * @param points an array of Points, which has to be sorted (either clockwise or counter-clockwise)
- * @returns the Area of the polygon
+ * TODO: add credits!
+ * @param points An array of Points, which has to be sorted (either clockwise or counter-clockwise).
+ * @returns A number indicating the area of the polygon.
  */
 export function getPolygonArea(points: Point[]): number {
   let total = 0;

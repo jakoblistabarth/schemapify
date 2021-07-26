@@ -125,12 +125,8 @@ describe("getContractionPoint() for a configuration", function () {
 });
 
 describe("getContractionAreaPoints() returns the correct contraction area", function () {
-  let s: ConfigurationSetup;
-  beforeEach(function () {
-    s = configurationCases.bothBlockingPointNeg;
-  });
-
   it("given a negative contraction point.", function () {
+    const s = configurationCases.bothBlockingPointNeg;
     const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
     const areaPoints = c[ContractionType.N].getAreaPoints();
     expect(areaPoints.map((p) => p.xy())).toEqual([
@@ -142,6 +138,7 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
   });
 
   it("given a positive contraction point.", function () {
+    const s = configurationCases.bothBlockingPointNeg;
     const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
     const areaPoints = c[ContractionType.P].getAreaPoints();
     expect(areaPoints.map((p) => p.xy())).toEqual([
@@ -153,7 +150,7 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
   });
 
   it("given a negative contraction point on the configuration's first edge.", function () {
-    s = configurationCases.bothContractionOnFirstEdge;
+    const s = configurationCases.bothContractionOnFirstEdge;
     const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
     const areaPoints = c[ContractionType.N].getAreaPoints();
 
@@ -165,7 +162,7 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
   });
 
   it("given a negative contraction point on the configuration's third edge.", function () {
-    s = configurationCases.bothContractionOnThirdEdge;
+    const s = configurationCases.bothContractionOnThirdEdge;
     const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
     const areaPoints = c[ContractionType.N].getAreaPoints();
 
@@ -251,12 +248,26 @@ describe("isFeasible() returns", function () {
 });
 
 describe("getContractionArea() returns", function () {
-  it("the Area of an contraction area", function () {
+  it("the Area of an contraction area.", function () {
     const s = configurationCases.bothBlockingPointNeg;
     const c = new Configuration(s.innerEdge);
 
     expect(c[ContractionType.P].area).toBe(6);
     expect(c[ContractionType.N].area).toBe(24);
+  });
+
+  it("the area of an contraction area for a collinear configuration.", function () {
+    const s = createConfigurationSetup(
+      new Point(-4, 0),
+      new Point(-2, 0),
+      new Point(2, 0),
+      new Point(4, 0),
+      [new Point(4, 4), new Point(-4, 4)]
+    );
+    const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
+
+    expect(c[ContractionType.N].area).toEqual(0);
+    expect(c[ContractionType.P].area).toEqual(0);
   });
 });
 
