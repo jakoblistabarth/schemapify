@@ -156,7 +156,7 @@ describe("classify() returns a result which can be turned into a valid geojson",
   });
 });
 
-describe("schematize() returns a result which can be turned into a valid geojson", function () {
+xdescribe("schematize() returns a result which can be turned into a valid geojson", function () {
   const dir = "data/geodata";
   const testFiles = getTestFiles(dir);
 
@@ -176,7 +176,7 @@ describe("schematize() returns a result which can be turned into a valid geojson
   });
 });
 
-describe("schematize() returns a result which can be turned into a valid geojson", function () {
+xdescribe("schematize() returns a result which can be turned into a valid geojson", function () {
   const dir = "data/shapes";
   const testFiles = getTestFiles(dir);
 

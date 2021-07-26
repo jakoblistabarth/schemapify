@@ -3,7 +3,7 @@ import path from "path";
 import Configuration, { Junction } from "../src/lib/c-oriented-schematization/Configuration";
 import Dcel from "../src/lib/Dcel/Dcel";
 
-describe("createConfigurations()", function () {
+xdescribe("createConfigurations()", function () {
   it("adds configuration to all edges which are possible candidates for edge moves (which endpoints are of degree 3 or less).", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("data/shapes/aligned-deviating.json"), "utf8")
