@@ -48,11 +48,11 @@ class LineSegment {
       // 2. If neither 0 <= (q - p) * r = r * r nor 0 <= (p - q) * s <= s * s
       // then the two lines are collinear but disjoint.
       // No need to implement this expression, as it follows from the expression above.
-      return undefined;
+      return;
     }
 
     // 3. If r x s = 0 and (q - p) x r != 0, then the two lines are parallel and non-intersecting.
-    if (rxs === 0 && q1p1xr !== 0) return undefined;
+    if (rxs === 0 && q1p1xr !== 0) return;
 
     const t = q1.minus(p1).cross(s) / rxs;
     const u = q1.minus(p1).cross(r) / rxs;
@@ -66,7 +66,7 @@ class LineSegment {
     }
 
     // 5. Otherwise, the two line segments are not parallel but do not intersect.
-    return undefined;
+    return;
   }
 }
 

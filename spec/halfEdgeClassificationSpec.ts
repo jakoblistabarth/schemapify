@@ -1,9 +1,10 @@
 import fs from "fs";
 import path from "path";
-import { createEdgeVertexSetup, TestSetup } from "./test-setup";
-import Dcel from "../src/lib/dcel/Dcel";
 import CRegular from "../src/lib/c-oriented-schematization/CRegular";
+import Dcel from "../src/lib/dcel/Dcel";
+import { OrientationClasses } from "../src/lib/DCEL/HalfEdge";
 import { config } from "../src/schematization.config";
+import { createEdgeVertexSetup, TestSetup } from "./test-setup";
 
 describe("isDeviating()", function () {
   let s: TestSetup;
@@ -76,7 +77,7 @@ describe("getSignificantVertex()", function () {
 
   it("returns an significant endpoint if one is specified", function () {
     const significantVertex = s.directions.od53.getSignificantVertex();
-    expect(significantVertex.significant).toBeTrue();
+    expect(significantVertex?.significant).toBeTrue();
   });
   it("returns null if none of its endpoints are significant", function () {
     s.o.significant = false;
@@ -92,114 +93,163 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("a", function () {
     s.o.edges.push(s.directions.od53, s.directions.od217);
-    expect(s.directions.od53.classify()).toBe("unalignedBasic");
-    expect(s.directions.od217.classify()).toBe("unalignedBasic");
+    s.directions.od53.classify();
+    s.directions.od217.classify();
+
+    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od217.class).toBe(OrientationClasses.UB);
   });
 
   it("b", function () {
     s.o.edges.push(s.directions.od53, s.directions.od180, s.directions.od270);
-    expect(s.directions.od53.classify()).toBe("unalignedBasic");
-    expect(s.directions.od180.classify()).toBe("alignedBasic");
-    expect(s.directions.od270.classify()).toBe("alignedBasic");
+    s.directions.od53.classify();
+    s.directions.od180.classify();
+    s.directions.od270.classify();
+
+    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od180.class).toBe(OrientationClasses.AB);
+    expect(s.directions.od270.class).toBe(OrientationClasses.AB);
   });
 
   it("c", function () {
     s.o.edges.push(s.directions.od37, s.directions.od90, s.directions.od104);
-    expect(s.directions.od37.classify()).toBe("unalignedBasic");
-    expect(s.directions.od90.classify()).toBe("alignedBasic");
-    expect(s.directions.od104.classify()).toBe("unalignedBasic");
+    s.directions.od37.classify();
+    s.directions.od90.classify();
+    s.directions.od104.classify();
+
+    expect(s.directions.od37.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od90.class).toBe(OrientationClasses.AB);
+    expect(s.directions.od104.class).toBe(OrientationClasses.UB);
   });
 
   it("d", function () {
     s.o.edges.push(s.directions.od37, s.directions.od53);
-    expect(s.directions.od37.classify()).toBe("evading");
-    expect(s.directions.od53.classify()).toBe("evading");
+    s.directions.od37.classify();
+    s.directions.od53.classify();
+
+    expect(s.directions.od37.class).toBe(OrientationClasses.E);
+    expect(s.directions.od53.class).toBe(OrientationClasses.E);
   });
 
   it("e", function () {
     s.o.edges.push(s.directions.od37, s.directions.od53, s.directions.od76);
-    expect(s.directions.od37.classify()).toBe("evading");
-    expect(s.directions.od53.classify()).toBe("evading");
-    expect(s.directions.od76.classify()).toBe("unalignedDeviating");
+    s.directions.od37.classify();
+    s.directions.od53.classify();
+    s.directions.od76.classify();
+
+    expect(s.directions.od37.class).toBe(OrientationClasses.E);
+    expect(s.directions.od53.class).toBe(OrientationClasses.E);
+    expect(s.directions.od76.class).toBe(OrientationClasses.UD);
   });
 
   it("f", function () {
     s.o.edges.push(s.directions.od0, s.directions.od37, s.directions.od53, s.directions.od76);
-    expect(s.directions.od0.classify()).toBe("alignedDeviating");
-    expect(s.directions.od37.classify()).toBe("evading");
-    expect(s.directions.od53.classify()).toBe("evading");
-    expect(s.directions.od76.classify()).toBe("unalignedDeviating");
+    s.directions.od0.classify();
+    s.directions.od37.classify();
+    s.directions.od53.classify();
+    s.directions.od76.classify();
+
+    expect(s.directions.od0.class).toBe(OrientationClasses.AD);
+    expect(s.directions.od37.class).toBe(OrientationClasses.E);
+    expect(s.directions.od53.class).toBe(OrientationClasses.E);
+    expect(s.directions.od76.class).toBe(OrientationClasses.UD);
   });
 
   it("g", function () {
     s.o.edges.push(s.directions.od315, s.directions.od333, s.directions.od53, s.directions.od76);
-    expect(s.directions.od315.classify()).toBe("evading");
-    expect(s.directions.od333.classify()).toBe("evading");
-    expect(s.directions.od53.classify()).toBe("unalignedBasic");
-    expect(s.directions.od76.classify()).toBe("unalignedDeviating");
+    s.directions.od315.classify();
+    s.directions.od333.classify();
+    s.directions.od53.classify();
+    s.directions.od76.classify();
+
+    expect(s.directions.od315.class).toBe(OrientationClasses.E);
+    expect(s.directions.od333.class).toBe(OrientationClasses.E);
+    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od76.class).toBe(OrientationClasses.UD);
   });
 
   it("h", function () {
     s.o.edges.push(s.directions.od53, s.directions.od217);
     s.dcel.config = { ...config, c: new CRegular(4) };
+    s.directions.od53.classify();
+    s.directions.od217.classify();
 
-    expect(s.directions.od53.classify()).toBe("unalignedBasic");
-    expect(s.directions.od217.classify()).toBe("unalignedBasic");
+    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od217.class).toBe(OrientationClasses.UB);
   });
 
   it("i", function () {
     s.o.edges.push(s.directions.od53, s.directions.od180, s.directions.od270);
     s.dcel.config = { ...config, c: new CRegular(4) };
+    s.directions.od53.classify();
+    s.directions.od180.classify();
+    s.directions.od270.classify();
 
-    expect(s.directions.od53.classify()).toBe("unalignedBasic");
-    expect(s.directions.od180.classify()).toBe("alignedBasic");
-    expect(s.directions.od270.classify()).toBe("alignedBasic");
+    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od180.class).toBe(OrientationClasses.AB);
+    expect(s.directions.od270.class).toBe(OrientationClasses.AB);
   });
 
   it("j", function () {
     s.o.edges.push(s.directions.od53, s.directions.od90, s.directions.od104);
     s.dcel.config = { ...config, c: new CRegular(4) };
+    s.directions.od53.classify();
+    s.directions.od90.classify();
+    s.directions.od104.classify();
 
-    expect(s.directions.od53.classify()).toBe("unalignedBasic");
-    expect(s.directions.od90.classify()).toBe("alignedBasic");
-    expect(s.directions.od104.classify()).toBe("unalignedBasic");
+    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od90.class).toBe(OrientationClasses.AB);
+    expect(s.directions.od104.class).toBe(OrientationClasses.UB);
   });
 
   it("k", function () {
     s.o.edges.push(s.directions.od37, s.directions.od53);
     s.dcel.config = { ...config, c: new CRegular(4) };
+    s.directions.od37.classify();
+    s.directions.od53.classify();
 
-    expect(s.directions.od37.classify()).toBe("unalignedBasic");
-    expect(s.directions.od53.classify()).toBe("unalignedBasic");
+    expect(s.directions.od37.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
   });
 
   it("l", function () {
     s.o.edges.push(s.directions.od37, s.directions.od53, s.directions.od76);
     s.dcel.config = { ...config, c: new CRegular(4) };
+    s.directions.od37.classify();
+    s.directions.od53.classify();
+    s.directions.od76.classify();
 
-    expect(s.directions.od37.classify()).toBe("unalignedBasic");
-    expect(s.directions.od53.classify()).toBe("evading");
-    expect(s.directions.od76.classify()).toBe("evading");
+    expect(s.directions.od37.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od53.class).toBe(OrientationClasses.E);
+    expect(s.directions.od76.class).toBe(OrientationClasses.E);
   });
 
   it("m", function () {
     s.o.edges.push(s.directions.od0, s.directions.od14, s.directions.od53, s.directions.od76);
     s.dcel.config = { ...config, c: new CRegular(4) };
+    s.directions.od0.classify();
+    s.directions.od14.classify();
+    s.directions.od53.classify();
+    s.directions.od76.classify();
 
-    expect(s.directions.od0.classify()).toBe("alignedDeviating");
-    expect(s.directions.od14.classify()).toBe("unalignedBasic");
-    expect(s.directions.od53.classify()).toBe("evading");
-    expect(s.directions.od76.classify()).toBe("evading");
+    expect(s.directions.od0.class).toBe(OrientationClasses.AD);
+    expect(s.directions.od14.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od53.class).toBe(OrientationClasses.E);
+    expect(s.directions.od76.class).toBe(OrientationClasses.E);
   });
 
   it("n", function () {
     s.o.edges.push(s.directions.od315, s.directions.od333, s.directions.od53, s.directions.od76);
     s.dcel.config = { ...config, c: new CRegular(4) };
+    s.directions.od315.classify();
+    s.directions.od333.classify();
+    s.directions.od53.classify();
+    s.directions.od76.classify();
 
-    expect(s.directions.od315.classify()).toBe("alignedBasic");
-    expect(s.directions.od333.classify()).toBe("unalignedBasic");
-    expect(s.directions.od53.classify()).toBe("evading");
-    expect(s.directions.od76.classify()).toBe("evading");
+    expect(s.directions.od315.class).toBe(OrientationClasses.AB);
+    expect(s.directions.od333.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od53.class).toBe(OrientationClasses.E);
+    expect(s.directions.od76.class).toBe(OrientationClasses.E);
   });
 });
 
@@ -217,7 +267,7 @@ describe("classifyEdges() in a classification where all edges are classified and
       .filter((edge) => edge.class === undefined);
     const edgesWithDivergingClasses = dcel
       .getHalfEdges()
-      .filter((edge) => edge.class !== edge.twin.class);
+      .filter((edge) => edge.class !== edge.twin?.class);
 
     expect(edgesWithoutAssignedAngles.length).toBe(0);
     expect(edgesWithDivergingClasses.length).toBe(0);
@@ -239,7 +289,7 @@ describe("classifyEdges() in a classification where all edges are classified and
       .filter((edge) => edge.class === undefined);
     const edgesWithDivergingClasses = dcel
       .getHalfEdges()
-      .filter((edge) => edge.class !== edge.twin.class);
+      .filter((edge) => edge.class !== edge.twin?.class);
 
     expect(edgesWithoutAssignedAngles.length).toBe(0);
     expect(edgesWithDivergingClasses.length).toBe(0);

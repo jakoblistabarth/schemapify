@@ -3,18 +3,34 @@ import { getPolygonArea } from "../utilities";
 import HalfEdge from "./HalfEdge";
 
 class Face {
+  /**
+   * unique ID per face
+   */
   uuid: string;
-  edge: HalfEdge;
-  innerEdges: Array<HalfEdge>;
-  outerRing: Face;
+
+  /**
+   * Pointer to an arbitrary edge of the outer connected component (boundary) of this face.
+   */
+  edge?: HalfEdge;
+
+  /**
+   * An array of edges, one for each inner connected component (holes) of this face.
+   */
+  innerEdges?: HalfEdge[];
+
+  /**
+   * only for holes, pointer to the outerRing it belongs to.
+   */
+  outerRing?: Face;
+
+  /**
+   * ID per geoJSON feature
+   */
   FID: number[];
 
   constructor() {
-    this.uuid = uuid(); // unique ID per face
-    this.edge = null; // pointer to an arbitrary edge of the outer connected component (boundary) of this face
-    this.innerEdges = null; // iterator of edges, one for each inner connected component (holes) of this face
-    this.outerRing = null; // only for holes, pointer to the outerRing it belongs to
-    this.FID = null; // ID per geoJSON feature
+    this.uuid = uuid();
+    this.FID = [];
   }
 
   /**
@@ -26,11 +42,12 @@ class Face {
     return this.uuid.substring(0, length);
   }
 
-  getEdges(counterclockwise: boolean = true): Array<HalfEdge> {
-    return this.edge.getCycle(counterclockwise);
+  getEdges(counterclockwise: boolean = true): HalfEdge[] {
+    return this.edge ? this.edge.getCycle(counterclockwise) : [];
   }
 
-  removeInnerEdge(edge: HalfEdge): Array<HalfEdge> {
+  removeInnerEdge(edge: HalfEdge): HalfEdge[] | undefined {
+    if (!this.innerEdges) return;
     const idx = this.innerEdges.indexOf(edge);
     if (idx > -1) {
       this.innerEdges.splice(idx, 1);
@@ -38,19 +55,19 @@ class Face {
     return this.innerEdges;
   }
 
-  replaceInnerEdge(old: HalfEdge, edge: HalfEdge): Array<HalfEdge> {
-    if (this.innerEdges === null) return;
+  replaceInnerEdge(old: HalfEdge, edge: HalfEdge): HalfEdge[] {
+    if (!this.innerEdges) return [];
     const idx = this.innerEdges.indexOf(old);
     if (idx === -1) {
-      return;
+      return [];
     } else {
       this.innerEdges[idx] = edge;
     }
     return this.innerEdges;
   }
 
-  replaceOuterRingEdge(old: HalfEdge, edge: HalfEdge): HalfEdge {
-    if (this.outerRing.edge != old) {
+  replaceOuterRingEdge(old: HalfEdge, edge: HalfEdge): HalfEdge | undefined {
+    if (!this.outerRing || this.outerRing.edge != old) {
       return;
     } else {
       this.outerRing.edge = edge;
@@ -62,8 +79,10 @@ class Face {
    * Get the Area of the face.
    * @returns A number, indicating the size of the {@link Face}.
    */
-  getArea(): number {
-    const vertices = this.getEdges().map((edge) => edge.getTail());
+  getArea(): number | undefined {
+    const edges = this.getEdges();
+    if (!edges) return;
+    const vertices = edges.map((edge) => edge.tail);
     return getPolygonArea(vertices);
   }
 }

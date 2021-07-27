@@ -21,7 +21,7 @@ class Sector {
     return this.idx;
   }
 
-  getNeighbors(): Array<Sector> {
+  getNeighbors(): Sector[] {
     const sectors = this.c.getSectors();
     const idx = this.getIdx();
     const prev = idx == 0 ? sectors.length - 1 : idx - 1;

@@ -14,8 +14,8 @@ describe("getInteriorAngle() and getExteriorAngle()", function () {
 
     const v = dcel.vertices.get("0/1");
     const dartFace = dcel.getBoundedFaces()[0];
-    const interior = v.getInteriorAngle(dartFace);
-    const exterior = v.getExteriorAngle(dartFace);
+    const interior = v?.getInteriorAngle(dartFace) as number;
+    const exterior = v?.getExteriorAngle(dartFace) as number;
     expect(interior).toBeGreaterThan(0);
     expect(exterior).toBeLessThan(0);
     expect(interior + exterior).toBe(Math.PI);
@@ -27,8 +27,8 @@ describe("getInteriorAngle() and getExteriorAngle()", function () {
 
     const v = dcel.vertices.get("2/2");
     const dartFace = dcel.getBoundedFaces()[0];
-    const interior = v.getInteriorAngle(dartFace);
-    const exterior = v.getExteriorAngle(dartFace);
+    const interior = v?.getInteriorAngle(dartFace) as number;
+    const exterior = v?.getExteriorAngle(dartFace) as number;
     expect(exterior).toBeGreaterThan(0);
     expect(interior).toBeGreaterThan(0);
     expect(interior + exterior).toBe(Math.PI);
@@ -37,23 +37,23 @@ describe("getInteriorAngle() and getExteriorAngle()", function () {
 
 describe("getInflectionType()", function () {
   it("returns the correct inflection type", function () {
-    const A = new Vertex(2, 2, undefined);
-    const B = new Vertex(0, 0, undefined);
-    const C = new Vertex(2, -4, undefined);
-    const D = new Vertex(4, -3, undefined);
-    const E = new Vertex(6, -4, undefined);
-    const F = new Vertex(5, -6, undefined);
+    const A = new Vertex(2, 2, new Dcel());
+    const B = new Vertex(0, 0, new Dcel());
+    const C = new Vertex(2, -4, new Dcel());
+    const D = new Vertex(4, -3, new Dcel());
+    const E = new Vertex(6, -4, new Dcel());
+    const F = new Vertex(5, -6, new Dcel());
 
-    const a = new HalfEdge(A, undefined);
-    a.twin = new HalfEdge(B, undefined);
-    const b = new HalfEdge(B, undefined);
-    b.twin = new HalfEdge(C, undefined);
-    const c = new HalfEdge(C, undefined);
-    c.twin = new HalfEdge(D, undefined);
-    const d = new HalfEdge(D, undefined);
-    d.twin = new HalfEdge(E, undefined);
-    const e = new HalfEdge(E, undefined);
-    e.twin = new HalfEdge(F, undefined);
+    const a = new HalfEdge(A, new Dcel());
+    a.twin = new HalfEdge(B, new Dcel());
+    const b = new HalfEdge(B, new Dcel());
+    b.twin = new HalfEdge(C, new Dcel());
+    const c = new HalfEdge(C, new Dcel());
+    c.twin = new HalfEdge(D, new Dcel());
+    const d = new HalfEdge(D, new Dcel());
+    d.twin = new HalfEdge(E, new Dcel());
+    const e = new HalfEdge(E, new Dcel());
+    e.twin = new HalfEdge(F, new Dcel());
 
     a.next = b;
     b.next = c;

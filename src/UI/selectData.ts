@@ -2,7 +2,7 @@ import { draw } from "./mapGrid";
 
 export function drawDataSelect(inputFiles: string[]) {
   const bottomNav = document.getElementById("select-data");
-
+  if (!bottomNav) return;
   const show = inputFiles.slice(0, 1);
 
   inputFiles.forEach((file) => {
@@ -38,7 +38,7 @@ export const tests: string[] = [
   "geodata/ne_50m_africa_admin0-s20.json",
   // "shapes/2plgn-adjacent.json",
   // "shapes/2plgn-islands-hole.json",
-  // "shapes/2plgn-islands-holes.json",
+  "shapes/2plgn-islands-holes.json",
   // "shapes/2plgn-islands.json",
   // "shapes/2plgn.json",
   // "shapes/2triangle-adjacent.json",
@@ -48,8 +48,8 @@ export const tests: string[] = [
   "shapes/dart.json",
   "shapes/edge-cases.json",
   "shapes/edge-move-test.json",
-  // "shapes/enclave.json",
-  // "shapes/enclave2.json",
+  "shapes/enclave.json",
+  "shapes/enclave2.json",
   "shapes/inflection-test.json",
   // "shapes/square-hole-island-hole.json",
   // "shapes/square-hole-island.json",

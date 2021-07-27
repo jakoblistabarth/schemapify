@@ -4,6 +4,23 @@ import { hint } from "@mapbox/geojsonhint";
 import { getTestFiles } from "./test-setup";
 import Dcel from "../src/lib/dcel/Dcel";
 
+describe("DCELtoGeoJSON creates a valid geoJSON of a square with a hole", function () {
+  it("despite converting it to a multipolygon, the number of outer and inner rings stays the same.", function () {
+    const squareOriginal = JSON.parse(
+      fs.readFileSync(path.resolve("data/shapes/square-hole.json"), "utf8")
+    );
+    const dcel = Dcel.fromGeoJSON(squareOriginal);
+    const squareGenerated = dcel.toGeoJSON();
+
+    const featureNew = squareGenerated.features[0].geometry as GeoJSON.MultiPolygon;
+
+    expect(featureNew.coordinates.length).toBe(1);
+    expect(featureNew.coordinates[0].length).toBe(2);
+    expect(featureNew.coordinates[0][0].length).toBe(5);
+    expect(featureNew.coordinates[0][1].length).toBe(5);
+  });
+});
+
 describe("DCELtoGeoJSON creates a valid geoJSON of simple shapes", function () {
   const dir = "data/shapes";
   const testFiles = getTestFiles(dir);

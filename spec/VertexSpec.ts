@@ -7,10 +7,10 @@ import { getTestFiles } from "./test-setup";
 
 describe("distanceToVertex()", function () {
   it("returns the correct distance between 2 vertices", function () {
-    const a = new Vertex(0, 0, null);
-    const b = new Vertex(4, 0, null);
-    const c = new Vertex(4, 4, null);
-    const d = new Vertex(-4, -4, null);
+    const a = new Vertex(0, 0, new Dcel());
+    const b = new Vertex(4, 0, new Dcel());
+    const c = new Vertex(4, 4, new Dcel());
+    const d = new Vertex(-4, -4, new Dcel());
 
     expect(b.distanceToVertex(a)).toEqual(b.distanceToVertex(a));
     expect(a.distanceToVertex(b)).toEqual(4);
@@ -21,12 +21,12 @@ describe("distanceToVertex()", function () {
 
 describe("distanceToEdge()", function () {
   it("returns the minimum distance between a vertex and an edge", function () {
-    const a = new Vertex(0, 0, null);
-    const v = new Vertex(-1, -2, null);
-    const w = new Vertex(2, 1, null);
+    const a = new Vertex(0, 0, new Dcel());
+    const v = new Vertex(-1, -2, new Dcel());
+    const w = new Vertex(2, 1, new Dcel());
 
-    const edge = new HalfEdge(v, null);
-    edge.twin = new HalfEdge(w, null);
+    const edge = new HalfEdge(v, new Dcel());
+    edge.twin = new HalfEdge(w, new Dcel());
     edge.twin.twin = edge;
 
     expect(a.distanceToEdge(edge)).toEqual(Math.sqrt(0.5));
@@ -38,26 +38,26 @@ describe("sortEdges()", function () {
   // TODO: use before each to test more cases based on the same 4 edges
 
   it("sorts 4 radial edges in clockwise order", function () {
-    const center = new Vertex(0, 0, null);
+    const center = new Vertex(0, 0, new Dcel());
 
-    const headRight = new Vertex(4, 0, null);
-    const edgeRight = new HalfEdge(center, null);
-    edgeRight.twin = new HalfEdge(headRight, null);
+    const headRight = new Vertex(4, 0, new Dcel());
+    const edgeRight = new HalfEdge(center, new Dcel());
+    edgeRight.twin = new HalfEdge(headRight, new Dcel());
     edgeRight.twin.twin = edgeRight;
 
-    const headBottom = new Vertex(0, -1, null);
-    const edgeBottom = new HalfEdge(center, null);
-    edgeBottom.twin = new HalfEdge(headBottom, null);
+    const headBottom = new Vertex(0, -1, new Dcel());
+    const edgeBottom = new HalfEdge(center, new Dcel());
+    edgeBottom.twin = new HalfEdge(headBottom, new Dcel());
     edgeBottom.twin.twin = edgeBottom;
 
-    const headLeft = new Vertex(-20, 0, null);
-    const edgeLeft = new HalfEdge(center, null);
-    edgeLeft.twin = new HalfEdge(headLeft, null);
+    const headLeft = new Vertex(-20, 0, new Dcel());
+    const edgeLeft = new HalfEdge(center, new Dcel());
+    edgeLeft.twin = new HalfEdge(headLeft, new Dcel());
     edgeLeft.twin.twin = edgeLeft;
 
-    const headTop = new Vertex(0, 100, null);
-    const edgeTop = new HalfEdge(center, null);
-    edgeTop.twin = new HalfEdge(headTop, null);
+    const headTop = new Vertex(0, 100, new Dcel());
+    const edgeTop = new HalfEdge(center, new Dcel());
+    edgeTop.twin = new HalfEdge(headTop, new Dcel());
     edgeTop.twin.twin = edgeTop;
 
     center.edges.push(edgeRight, edgeLeft, edgeBottom, edgeTop);
@@ -75,8 +75,8 @@ describe("sortEdges()", function () {
       let dcel = Dcel.fromGeoJSON(json);
 
       dcel.vertices.forEach((vertex) => {
-        const angles = vertex.edges.map((e) => e.getAngle());
-        expect(angles.every((v, i, a) => !i || a[i - 1] >= v)).toEqual(true);
+        const angles = vertex.edges.map((e) => e.getAngle()) as number[];
+        expect(angles.every((v, i, a) => !i || a[i - 1] >= v)).toBeTrue();
       });
     });
   });
@@ -89,7 +89,7 @@ describe("remove() on a vertex", function () {
 
     const squareFace = dcel.getBoundedFaces()[0];
     const vertex = dcel.findVertex(0, 0);
-    vertex.remove();
+    vertex?.remove();
 
     expect(squareFace.getEdges().length).toBe(3);
     expect(squareFace.getEdges(false).length).toBe(3);
@@ -122,7 +122,7 @@ describe("remove() on all vertices of a square with a hole", function () {
     it("return a correct triangular dcel when removing one outer vertex", function () {
       const outerSquare = dcel.getBoundedFaces()[0];
       const [x, y] = coordinates;
-      dcel.findVertex(x, y).remove();
+      dcel.findVertex(x, y)?.remove();
 
       expect(outerSquare.getEdges().length).toBe(3);
       expect(outerSquare.getEdges(false).length).toBe(3);
@@ -133,7 +133,7 @@ describe("remove() on all vertices of a square with a hole", function () {
     it("return a correct triangular dcel when removing one inner vertex", function () {
       const innerSquare = dcel.getBoundedFaces()[1];
       const [x, y] = coordinates;
-      dcel.findVertex(x, y).remove();
+      dcel.findVertex(x, y)?.remove();
 
       expect(innerSquare.getEdges().length).toBe(3);
       expect(innerSquare.getEdges(false).length).toBe(3);

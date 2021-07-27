@@ -8,15 +8,14 @@ import HalfEdge from "./HalfEdge";
 class Vertex extends Point {
   dcel: Dcel;
   uuid: string;
-  edges: Array<HalfEdge>;
-  significant: boolean;
+  edges: HalfEdge[];
+  significant?: boolean;
 
   constructor(x: number, y: number, dcel: Dcel) {
     super(x, y);
     this.dcel = dcel;
     this.uuid = uuid();
     this.edges = [];
-    this.significant = undefined;
   }
 
   /**
@@ -54,10 +53,12 @@ class Vertex extends Point {
    * @param edge An {@link HalfEdge} to which the distance is measured.
    * @returns The distance.
    */
-  distanceToEdge(edge: HalfEdge): number {
+  distanceToEdge(edge: HalfEdge): number | undefined {
+    const head = edge.getHead();
+    if (!head) return;
     const [vx, vy] = this.xy();
-    const [e1x, e1y] = edge.getTail().xy();
-    const [e2x, e2y] = edge.getHead().xy();
+    const [e1x, e1y] = edge.tail.xy();
+    const [e2x, e2y] = head.xy();
     const edx = e2x - e1x;
     const edy = e2y - e1y;
     const lineLengthSquared = edx ** 2 + edy ** 2;
@@ -78,10 +79,12 @@ class Vertex extends Point {
    * @param clockwise If set to true (default), the {@link HalfEdge}s a sorted clockwise, if set to false they are sorted counter-clockwise.
    * @returns An array containing the sorted {@link HalfEdge}s.
    */
-  sortEdges(clockwise: boolean = true): Array<HalfEdge> {
-    this.edges = this.edges.sort((a, b) => {
-      if (clockwise) return b.getAngle() - a.getAngle();
-      else return a.getAngle() - b.getAngle();
+  sortEdges(clockwise: boolean = true): HalfEdge[] {
+    this.edges.sort((a, b) => {
+      const [angleA, angleB] = [a.getAngle(), b.getAngle()];
+      if (typeof angleA !== "number" || typeof angleB !== "number") return 0;
+      if (clockwise) return angleB - angleA;
+      else return angleA - angleB;
     });
     return this.edges;
   }
@@ -91,32 +94,35 @@ class Vertex extends Point {
    * Only works on vertices of degree 2 (with a maximum of two incident {@link HalfEdge}s).
    */
   remove(): void {
-    if (this.edges.length > 2)
+    if (!this.dcel) return;
+    else if (this.edges.length > 2)
       throw new Error(
         "only vertices of degree 2 or less can be removed, otherwise the topology would be corrupted"
       );
-    if (this.dcel.vertices.size === 3) throw new Error("a dcel must not have less than 3 vertices");
+    else if (this.dcel.vertices.size === 3)
+      throw new Error("a dcel must not have less than 3 vertices");
 
     const ex__ = this.edges[0];
     const ex_ = ex__.prev;
 
     const a = ex__.next;
-    const b = a.twin;
-    const c = ex_.prev;
-    const d = c.twin;
+    const b = a?.twin;
+    const c = ex_?.prev;
+    const d = c?.twin;
 
     const f1 = ex__.face;
-    const f2 = ex__.twin.face;
+    const f2 = ex__.twin?.face;
 
-    const eTail = c.getHead();
-    const eHead = a.getTail();
+    const eTail = c?.getHead();
+    const eHead = a?.tail;
 
+    if (!ex__?.twin || !ex_?.twin || !eTail || !eHead || !f1 || !f2 || !a || !b || !c || !d) return;
     const e = this.dcel.makeHalfEdge(eTail, eHead);
     e.twin = this.dcel.makeHalfEdge(eHead, eTail);
     e.twin.twin = e;
 
-    if (f1.edge === ex__ || f1.edge === ex_) f1.edge = e;
-    if (f2.edge === ex__.twin || f2.edge === ex_.twin) f2.edge = e.twin;
+    if (f1?.edge === ex__ || f1.edge === ex_) f1.edge = e;
+    if (f2?.edge === ex__.twin || f2.edge === ex_?.twin) f2.edge = e.twin;
 
     f1.replaceInnerEdge(ex__, e);
     f1.replaceInnerEdge(ex_, e);
@@ -153,7 +159,7 @@ class Vertex extends Point {
    * @param edge The {@link HalfEdge} to be removed.
    * @returns An Array containing the remaining incident {@link HalfEdge}s.
    */
-  removeIncidentEdge(edge: HalfEdge): Array<HalfEdge> {
+  removeIncidentEdge(edge: HalfEdge): HalfEdge[] {
     const idx = this.edges.indexOf(edge);
     if (idx > -1) {
       this.edges.splice(idx, 1);
@@ -174,7 +180,6 @@ class Vertex extends Point {
    * @returns A Boolean indicating whether or not the {@link Vertex} is significant.
    */
   isSignificant(): boolean {
-    // QUESTION: are vertices with only aligned edges never significant?
     // TODO: move to another class? to not mix dcel and schematization?
 
     // classify as insignificant if all edges are already aligned
@@ -185,7 +190,7 @@ class Vertex extends Point {
     // classify as significant if one sector occurs multiple times
     const occupiedSectors = this.edges.map((edge) => edge.getAssociatedSector()).flat();
 
-    const uniqueSectors = occupiedSectors.reduce((acc, sector) => {
+    const uniqueSectors: Sector[] = occupiedSectors.reduce((acc: Sector[], sector: Sector) => {
       if (!acc.find((accSector) => accSector.idx == sector.idx)) acc.push(sector);
       return acc;
     }, []);
@@ -195,7 +200,7 @@ class Vertex extends Point {
     }
 
     // classify as significant if neighbor sectors are not empty
-    const isSignificant = uniqueSectors.every((sector) => {
+    const isSignificant = uniqueSectors.every((sector: Sector) => {
       const [prevSector, nextSector] = sector.getNeighbors();
       return (
         this.getEdgesInSector(prevSector).length > 0 || this.getEdgesInSector(nextSector).length > 0
@@ -209,21 +214,25 @@ class Vertex extends Point {
    * @param sector A sector, against which the {@link HalfEdge}s are checked.
    * @returns An array, containing all {@link HalfEdge}s lying in the sector.
    */
-  getEdgesInSector(sector: Sector): Array<HalfEdge> {
-    return this.edges.filter((edge) => sector.encloses(edge.getAngle()));
+  getEdgesInSector(sector: Sector): HalfEdge[] {
+    return this.edges.filter((edge) => {
+      const angle = edge.getAngle();
+      if (typeof angle === "number") return sector.encloses(angle);
+    });
   }
 
   /**
    * Assigns directions to all incident HalfEdges of the Vertex.
    * @returns An Array, holding the assigned directions starting with the direction of the {@link HalfEge} with the smallest angle on the unit circle.
    */
-  assignDirections(): number[] {
+  assignDirections(): number[] | undefined {
     const edges = this.sortEdges(false);
     const sectors = this.dcel.config.c.getSectors();
 
     function getDeviation(edges: HalfEdge[], directions: number[]): number {
       return edges.reduce((deviation, edge, index) => {
-        return deviation + edge.getDeviation(sectors[directions[index]]);
+        const newDeviation = edge.getDeviation(sectors[directions[index]]);
+        return typeof newDeviation === "number" ? deviation + newDeviation : Infinity;
       }, 0);
     }
 
@@ -240,7 +249,8 @@ class Vertex extends Point {
           minmalDeviation = deviation;
           solution = [...directions];
         }
-        directions.unshift(directions.pop());
+        const lastElement = directions.pop();
+        if (lastElement) directions.unshift(lastElement);
       }
     });
 
@@ -254,8 +264,9 @@ class Vertex extends Point {
    * @param face A {@link Face} the angle is exterior to.
    * @returns An angle in radians.
    */
-  getExteriorAngle(face: Face): number {
-    return Math.PI - this.getInteriorAngle(face);
+  getExteriorAngle(face: Face): number | undefined {
+    const interiorAngle = this.getInteriorAngle(face);
+    if (interiorAngle) return Math.PI - interiorAngle;
   }
 
   /**
@@ -265,18 +276,20 @@ class Vertex extends Point {
    * @param face A {@link Face} the angle is interior to.
    * @returns An angle in radians.
    */
-  getInteriorAngle(face: Face): number {
+  getInteriorAngle(face: Face): number | undefined {
     const outgoing = this.edges.find((edges) => edges.face === face);
+    if (!outgoing?.prev) return;
     const incoming = outgoing.prev;
+    if (!incoming) return;
     const vIncoming = incoming.getVector();
     const vOutgoing = outgoing.getVector();
-    return (
-      Math.PI -
-      Math.atan2(
-        vIncoming.dx * vOutgoing.dy - vOutgoing.dx * vIncoming.dy,
-        vIncoming.dx * vOutgoing.dx + vIncoming.dy * vOutgoing.dy
-      )
-    );
+    return !vIncoming || !vOutgoing
+      ? undefined
+      : Math.PI -
+          Math.atan2(
+            vIncoming.dx * vOutgoing.dy - vOutgoing.dx * vIncoming.dy,
+            vIncoming.dx * vOutgoing.dx + vIncoming.dy * vOutgoing.dy
+          );
   }
 
   toPoint(): Point {

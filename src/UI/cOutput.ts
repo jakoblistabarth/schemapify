@@ -4,6 +4,7 @@ import Line from "../lib/geometry/Line";
 
 export function drawC() {
   const svgContainer = document.getElementById("c-vis");
+  if (!svgContainer) return;
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.id = "C";
   const sideLength = 20;
@@ -25,6 +26,7 @@ export function drawC() {
   });
 
   const cText = document.getElementById("c-text");
+  if (!cText) return;
   const c = config.c.orientations;
   cText.innerText = `C(${c})`;
 

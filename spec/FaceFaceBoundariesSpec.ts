@@ -11,7 +11,7 @@ describe("createFaceFaceBoundaries()", function () {
     const dcel = Dcel.fromGeoJSON(json);
     dcel.facefaceBoundaries = new FaceFaceBoundaries(dcel);
     const ffb = new FaceFaceBoundaries(dcel);
-    const lengths = [...ffb.boundaries].map(([k, e]) => e.length).sort();
+    const lengths = [...ffb.boundaries].map(([k, e]) => e.length).sort((a, b) => a - b);
 
     expect(ffb.boundaries.size).toBe(3);
     expect(lengths).toEqual([1, 3, 3]);
@@ -24,7 +24,7 @@ describe("createFaceFaceBoundaries()", function () {
     const dcel = Dcel.fromGeoJSON(json);
     dcel.facefaceBoundaries = new FaceFaceBoundaries(dcel);
     const ffb = new FaceFaceBoundaries(dcel);
-    const lengths = [...ffb.boundaries].map(([k, e]) => e.length).sort();
+    const lengths = [...ffb.boundaries].map(([k, e]) => e.length).sort((a, b) => a - b);
 
     expect(ffb.boundaries.size).toBe(5);
     expect(lengths).toEqual([1, 1, 2, 3, 3]);

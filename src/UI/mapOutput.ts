@@ -26,7 +26,8 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
       const edges = props.edges
         .map((edge: HalfEdge) => {
           const head = edge.getHead();
-          const tail = edge.getTail();
+          if (!head) return;
+          const tail = edge.tail;
           return `
               <tr>
                 <td>${edge.getUuid(5)}</td>
@@ -70,7 +71,10 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
         },
         click: function () {
           console.log(
-            feature.properties.edges.map((e: HalfEdge) => (e.getAngle() * 180) / Math.PI)
+            feature.properties.edges.map((e: HalfEdge) => {
+              const angle = e.getAngle();
+              return angle ? (angle * 180) / Math.PI : undefined;
+            })
           );
         },
       });
@@ -81,7 +85,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     style: function (feature) {
       return {
         color: "transparent",
-        fillColor: feature.properties.ringType === "inner" ? "transparent" : "black",
+        fillColor: feature?.properties.ringType === "inner" ? "transparent" : "black",
         weight: 1,
       };
     },
@@ -119,9 +123,9 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
   const edgeLayer = L.geoJSON(dcel.edgesToGeoJSON(), {
     style: function (feature) {
       return {
-        color: feature.properties.class ? "black" : "red",
-        weight: feature.properties.class ? 1 : 4,
-        dashArray: feature.properties.incidentFaceType === "inner" ? "3,3" : "0",
+        color: feature?.properties.class ? "black" : "red",
+        weight: feature?.properties.class ? 1 : 4,
+        dashArray: feature?.properties.incidentFaceType === "inner" ? "3,3" : "0",
       };
     },
     onEachFeature: function (feature, layer) {
@@ -195,7 +199,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     // TODO: implement better structure for snapshots
     style: function (feature) {
       return {
-        color: feature.properties.interferesWith.length > 0 ? "red" : "blue",
+        color: feature?.properties.interferesWith.length > 0 ? "red" : "blue",
         weight: 1,
         fillOpacity: 0.2,
       };
@@ -256,9 +260,9 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
       polygonsLabel.classList.remove("active");
     }
   }
-  const toggleBtn: HTMLInputElement = document.querySelector("#layer-toggle");
-  const polygonsLabel = document.querySelector("#polygons-label");
-  const facesLabel = document.querySelector("#faces-label");
+  const toggleBtn = <HTMLInputElement>document.querySelector("#layer-toggle");
+  const polygonsLabel = <HTMLElement>document.querySelector("#polygons-label");
+  const facesLabel = <HTMLElement>document.getElementById("faces-label");
   let showPolygons = toggleBtn.checked ? true : false;
   toggleLayer();
   toggleBtn.addEventListener("click", function () {

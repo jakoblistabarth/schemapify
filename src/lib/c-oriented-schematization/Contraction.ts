@@ -58,31 +58,38 @@ class Contraction {
 
     const pointCandidates: PointCandidate[] = [];
 
-    const innerEdgeNormal = configuration.innerEdge.getVector().getNormal().getUnitVector();
-    const A = configuration.innerEdge.prev.getTail().toPoint();
-    const D = configuration.innerEdge.next.getHead().toPoint();
+    const innerEdgeNormal = configuration.innerEdge.getVector()?.getNormal().getUnitVector();
+    const A = configuration.innerEdge.prev?.tail.toPoint();
+    const D = configuration.innerEdge.next?.getHead()?.toPoint();
+    const [trackPrev, trackNext] = [
+      configuration.getTrack(OuterEdge.PREV),
+      configuration.getTrack(OuterEdge.NEXT),
+    ];
+    if (!innerEdgeNormal || !A || !D || !trackPrev || !trackNext) return;
 
     if (configuration.innerEdge.getInflectionType() === InflectionType.B) {
-      const T = configuration
-        .getTrack(OuterEdge.PREV)
-        .intersectsLine(configuration.getTrack(OuterEdge.NEXT));
+      const T = trackPrev.intersectsLine(trackNext);
       if (T) {
         const distT = new Vector2D(
-          configuration.innerEdge.getTail().x - T.x,
-          configuration.innerEdge.getTail().y - T.y
+          configuration.innerEdge.tail.x - T.x,
+          configuration.innerEdge.tail.y - T.y
         ).dot(innerEdgeNormal);
         pointCandidates.push({ point: T, dist: distT });
       }
     }
 
-    pointCandidates.push({
-      point: A,
-      dist: configuration.innerEdge.prev.getVector().dot(innerEdgeNormal),
-    });
-    pointCandidates.push({
-      point: D,
-      dist: configuration.innerEdge.next.twin.getVector().dot(innerEdgeNormal),
-    });
+    const distA = configuration.innerEdge.prev?.getVector()?.dot(innerEdgeNormal);
+    if (typeof distA === "number")
+      pointCandidates.push({
+        point: A,
+        dist: distA,
+      });
+    const distD = configuration.innerEdge.next?.twin?.getVector()?.dot(innerEdgeNormal);
+    if (typeof distD === "number")
+      pointCandidates.push({
+        point: D,
+        dist: distD,
+      });
 
     // find closest contraction point in respect to the configurations inner edge
     pointCandidates.sort((a, b) => a.dist - b.dist);
@@ -94,20 +101,28 @@ class Contraction {
   getAreaPoints(): Point[] {
     const c = this.configuration;
     const prev = c.getOuterEdge(OuterEdge.PREV);
-    const outerEdgePrevSegment = new LineSegment(prev.getTail(), prev.getHead());
-    const innerEdge_ = new Line(this.point, c.innerEdge.getAngle());
+    const prevHead = prev?.getHead();
+    const next = c.getOuterEdge(OuterEdge.NEXT);
+    const nextHead = next?.getHead();
+    const innerEdgeHead = c.innerEdge.getHead();
+    const innerEdgeAngle = c.innerEdge.getAngle();
+
+    if (!prev || !prevHead || !nextHead || typeof innerEdgeAngle !== "number" || !innerEdgeHead)
+      return [];
+    const outerEdgePrevSegment = new LineSegment(prev.tail, prevHead);
+    const innerEdge_ = new Line(this.point, innerEdgeAngle);
     let areaPoints;
 
     if (this.point.isOnLineSegment(outerEdgePrevSegment)) {
-      areaPoints = [this.point, c.innerEdge.getTail().toPoint(), c.innerEdge.getHead().toPoint()];
-      if (this.point.equals(prev.getTail())) {
-        const point = c.getTrack(OuterEdge.NEXT).intersectsLine(innerEdge_);
+      areaPoints = [this.point, c.innerEdge.tail.toPoint(), innerEdgeHead.toPoint()];
+      if (this.point.equals(prev.tail)) {
+        const point = c.getTrack(OuterEdge.NEXT)?.intersectsLine(innerEdge_);
         point && areaPoints.push(point);
       }
     } else {
-      areaPoints = [this.point, c.innerEdge.getHead().toPoint(), c.innerEdge.getTail().toPoint()];
-      if (this.point.equals(c.getOuterEdge(OuterEdge.NEXT).getHead())) {
-        const point = c.getTrack(OuterEdge.PREV).intersectsLine(innerEdge_);
+      areaPoints = [this.point, innerEdgeHead.toPoint(), c.innerEdge.tail.toPoint()];
+      if (this.point.equals(nextHead)) {
+        const point = c.getTrack(OuterEdge.PREV)?.intersectsLine(innerEdge_);
         point && areaPoints.push(point);
       }
     }
@@ -136,7 +151,7 @@ class Contraction {
 
       // add edges which resides partially in the contraction area
       contractionAreaP.forEach((edge) => {
-        const intersection = boundaryEdge.toLineSegment().intersectsLineSegment(edge);
+        const intersection = boundaryEdge.toLineSegment()?.intersectsLineSegment(edge);
         if (intersection && areaPoints.every((p) => !p.equals(intersection))) {
           blockingEdges.push(boundaryEdge);
         }

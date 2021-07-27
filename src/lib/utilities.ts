@@ -22,13 +22,6 @@ export function createGeoJSON(features: geojson.Feature[]): geojson.FeatureColle
   };
 }
 
-export const groupBy = (key: string) => (array: any[]) =>
-  array.reduce((objectsByKeyValue, obj) => {
-    const value = obj[key];
-    objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
-    return objectsByKeyValue;
-  }, {});
-
 /**
  * Turns an angle into a unit vector? // TODO: check if that's correct.
  * @param angle in radians
@@ -39,7 +32,7 @@ export function getUnitVector(angle: number): Vector2D {
   return new Vector2D(Math.cos(angle), Math.sin(angle));
 }
 
-export function copyInstance(original: object) {
+export function copyInstance<T>(original: T): T {
   return Object.assign(Object.create(Object.getPrototypeOf(original)), original);
 }
 

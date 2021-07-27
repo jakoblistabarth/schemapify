@@ -27,30 +27,22 @@ export enum InflectionType {
 
 class HalfEdge {
   uuid: string;
-  dcel: Dcel;
   tail: Vertex;
-  twin: HalfEdge;
-  face: Face;
-  prev: HalfEdge;
-  next: HalfEdge;
-  assignedDirection: number;
-  isAligning: boolean;
-  class: OrientationClasses;
-  staircase: Staircase;
-  configuration: Configuration;
+  dcel: Dcel;
+  twin?: HalfEdge;
+  face?: Face;
+  prev?: HalfEdge;
+  next?: HalfEdge;
+  assignedDirection?: number;
+  isAligning?: boolean;
+  class?: OrientationClasses;
+  staircase?: Staircase;
+  configuration?: Configuration;
 
   constructor(tail: Vertex, dcel: Dcel) {
     this.uuid = uuid();
-    this.dcel = dcel;
     this.tail = tail;
-    this.twin = null; // TODO: consistency – set this to "undefined" or the last properties to "null"?
-    this.face = null;
-    this.prev = null;
-    this.next = null;
-    this.isAligning = undefined;
-    this.class = undefined;
-    this.staircase = undefined; // TODO: move isAligning, class and staircase to more specific (i.e. "cHalfEdge") class?
-    this.configuration = undefined;
+    this.dcel = dcel;
   }
 
   static getKey(tail: Vertex, head: Vertex): string {
@@ -66,21 +58,18 @@ class HalfEdge {
     return this.uuid.substring(0, length);
   }
 
-  getTail(): Vertex {
-    return this.tail;
+  getHead(): Vertex | undefined {
+    if (this.twin) return this.twin.tail;
   }
 
-  getHead(): Vertex {
-    return this.twin.tail;
-  }
-
-  getEndpoints(): Array<Vertex> {
-    return [this.getTail(), this.getHead()];
+  getEndpoints(): Vertex[] {
+    const head = this.getHead();
+    return head ? [this.tail, head] : [];
   }
 
   getSignificantVertex(): Vertex | undefined {
     const endPoints = this.getEndpoints();
-    return endPoints.find((v) => v.significant);
+    if (endPoints) return endPoints.find((v) => v.significant);
   }
 
   /**
@@ -89,38 +78,42 @@ class HalfEdge {
    * or backwards (clockwise). Default: true.
    * @returns An array of {@link HalfEdge}s.
    */
-  getCycle(forwards: boolean = true): Array<HalfEdge> {
+  getCycle(forwards: boolean = true): HalfEdge[] {
     let currentEdge: HalfEdge = this;
     const initialEdge: HalfEdge = currentEdge;
-    const halfEdges: Array<HalfEdge> = [];
+    const halfEdges: HalfEdge[] = [];
 
     do {
       halfEdges.push(currentEdge);
-      currentEdge = forwards ? currentEdge.next : currentEdge.prev;
+      if (currentEdge.next && currentEdge.prev)
+        currentEdge = forwards ? currentEdge.next : currentEdge.prev;
     } while (currentEdge != initialEdge);
 
     return halfEdges;
   }
 
-  getVector(): Vector2D {
+  getVector(): Vector2D | undefined {
     const [tail, head] = this.getEndpoints();
-    return new Vector2D(head.x - tail.x, head.y - tail.y);
+    if (tail && head) return new Vector2D(head.x - tail.x, head.y - tail.y);
   }
 
   /**
    * Returns an infinite Line going through the HalfEdge.
    * @returns A Line which includes the {@link HalfEdge}.
    */
-  toLine(): Line {
-    return new Line(this.getTail(), this.getAngle());
+  toLine(): Line | undefined {
+    const angle = this.getAngle();
+    if (typeof angle !== "number") return;
+    return new Line(this.tail, angle);
   }
 
   /**
    * Gets the angle of an HalfEdge in respect to the unit circle.
    * @returns The angle in radians.
    */
-  getAngle(): number {
+  getAngle(): number | undefined {
     const vector = this.getVector();
+    if (!vector) return;
     const angle = Math.atan2(vector.dy, vector.dx);
     return angle < 0 ? angle + 2 * Math.PI : angle;
   }
@@ -129,17 +122,20 @@ class HalfEdge {
    * Gets the length of the Halfedge.
    * @returns The Length.
    */
-  getLength(): number {
-    return this.getTail().distanceToVertex(this.getHead());
+  getLength(): number | undefined {
+    const head = this.getHead();
+    if (head) return this.tail.distanceToVertex(head);
   }
 
   /**
    * Gets the midpoint of the HalfEdge.
    * @returns A {@link Point}, indicating the midpoint of the {@link HalfEdge}.
    */
-  getMidpoint(): Point {
-    const [x1, y1] = this.getTail().xy();
-    const [x2, y2] = this.getHead().xy();
+  getMidpoint(): Point | undefined {
+    const head = this.getHead();
+    if (!head) return;
+    const [x1, y1] = this.tail.xy();
+    const [x2, y2] = head.xy();
 
     const mx = (x1 + x2) / 2;
     const my = (y1 + y2) / 2;
@@ -148,12 +144,12 @@ class HalfEdge {
   }
 
   /**
-   * Deletes the halfEdge and possible other occurences in the DCEL linkages.
+   * Deletes the halfEdge and possible other occurrences in the DCEL linkages.
    */
   remove(): void {
     this.tail.removeIncidentEdge(this);
-    if (this.face.outerRing) this.face.outerRing.removeInnerEdge(this);
-    this.dcel.removeHalfEdge(this);
+    if (this.face?.outerRing) this.face.outerRing.removeInnerEdge(this);
+    this.dcel?.removeHalfEdge(this);
   }
 
   /**
@@ -162,16 +158,20 @@ class HalfEdge {
    * @param newPoint {@link Point} which should be added between the {@link HalfEdge}'s tail and head. default: the edge's midpoint
    * @returns the new {@link HalfEdge} which leads from the original {@link HalfEdge}'s tail to the newly created {@link Vertex}.
    */
-  subdivide(newPoint: Point = this.getMidpoint()): HalfEdge {
+  subdivide(newPoint: Point | undefined = this.getMidpoint()): HalfEdge | undefined {
+    if (!newPoint) return;
     const e = this;
     const et = e.twin;
+    if (!et) return;
     const f1 = e.face;
     const f2 = et.face;
+    if (!f2 || !f1) return;
 
     const a = e.next;
     const b = e.prev;
     const c = et.next;
     const d = et.prev;
+    if (!a || !b || !c || !d) return;
 
     const [x, y] = newPoint.xy();
     const N = this.dcel.makeVertex(x, y);
@@ -187,16 +187,18 @@ class HalfEdge {
     et__.prev = d;
     et__.face = f2;
 
+    if (!et.prev || !et.next) return;
     et.prev.next = et__;
     et.next.prev = et_;
 
-    if (f2.edge !== null && !f1.outerRing) {
+    if (f2.edge && !f1.outerRing) {
       // if f2 is not the unbounded face and f1 is not a hole
       f2.edge = et_;
     }
 
     if (f2.innerEdges) {
       f2.innerEdges.forEach((e) => {
+        if (!e.face) return;
         e.face.replaceOuterRingEdge(et, et_);
       });
     }
@@ -227,10 +229,11 @@ class HalfEdge {
     et__.twin = e__;
     e__.twin = et__;
 
-    if (f1.edge !== null && !f2.outerRing) f1.edge = e_; //FIXME: better to use undefined? if e is an clockwise-running edge incident to the unbounded face
+    if (f1.edge && !f2.outerRing) f1.edge = e_; //FIXME: better to use undefined? if e is an clockwise-running edge incident to the unbounded face
 
     if (f1.innerEdges) {
       f1.innerEdges.forEach((e) => {
+        if (!e.face) return;
         e.face.replaceOuterRingEdge(e, e_);
       });
     }
@@ -252,11 +255,12 @@ class HalfEdge {
    * @returns
    */
   intersectsLine(line: Line): Point | undefined {
-    const P = this.toLine().intersectsLine(line);
+    const head = this.getHead();
+    const P = this.toLine()?.intersectsLine(line);
     //TODO: check if the fact that intersectsLine returns undefined for parallel line
     // poses a problem for the case that the halfedge is part of the line
-    if (!P) return;
-    if (P.isOnLineSegment(new LineSegment(this.getTail(), this.getHead()))) return P;
+    if (!P || !head) return;
+    if (P.isOnLineSegment(new LineSegment(this.tail, head))) return P;
   }
 
   /**
@@ -268,11 +272,12 @@ class HalfEdge {
     let currentHalfEdge: HalfEdge = initialHalfEdge;
 
     while (currentHalfEdge != initialHalfEdge.next) {
-      if (currentHalfEdge.getLength() < threshold) {
+      const length = currentHalfEdge.getLength();
+      if (currentHalfEdge.next && typeof length === "number" && length < threshold) {
         currentHalfEdge = currentHalfEdge.next;
       } else {
-        const newHalfEdge: HalfEdge = currentHalfEdge.subdivide();
-        currentHalfEdge = newHalfEdge;
+        const newHalfEdge = currentHalfEdge.subdivide();
+        currentHalfEdge = newHalfEdge ?? currentHalfEdge.next ?? initialHalfEdge;
       }
     }
   }
@@ -283,8 +288,9 @@ class HalfEdge {
    * @returns An Array of angles in radians. It has length one if the {@link HalfEdge} is aligned.
    */
   getAssociatedAngles(): number[] {
-    const sectors = this.dcel.config.c.getSectors();
     const angle = this.getAngle();
+    if (typeof angle !== "number") return [];
+    const sectors = this.dcel.config.c.getSectors();
     let directions: number[] = [];
     sectors.some(function (sector) {
       if (angle === sector.lower) {
@@ -303,27 +309,22 @@ class HalfEdge {
    * Gets the angle of the HalfEdge's assigned direction.
    * @returns The angle in radians.
    */
-  getAssignedAngle(): number {
+  getAssignedAngle(): number | undefined {
+    if (typeof this.assignedDirection !== "number") return;
     const sectors = this.dcel.config.c.getSectors();
     return Math.PI * 2 * (this.assignedDirection / sectors.length);
-  }
-
-  /**
-   * Gets the index of the HalfEdge's assigned direction.
-   * @returns An integer indicating the direction.
-   */
-  getAssignedDirection(): number {
-    return this.assignedDirection;
   }
 
   /**
    * Gets the sector(s) the HalfEdge is enclosed by.
    * @returns An array of Sectors. It has length 2 if the {@link HalfEdge} is aligned.
    */
-  getAssociatedSector(): Array<Sector> {
+  getAssociatedSector(): Sector[] {
+    const associatedAngles = this.getAssociatedAngles();
     const sectors = this.dcel.config.c.getSectors();
-    const direction = this.getAssociatedAngles();
-    return sectors.reduce((acc, sector) => {
+    const direction = associatedAngles;
+
+    return sectors.reduce((acc: Sector[], sector) => {
       if (
         (direction[0] === sector.lower && direction[1] === sector.upper) ||
         +direction === sector.lower ||
@@ -339,17 +340,16 @@ class HalfEdge {
   /**
    * Gets the closest associated angle (one bound of its associated sector)
    * of an unaligned deviating(!) edge in respect to its assigned angle.
-   *
    * Needed for constructing the staircase of an unaligned deviating edge.
-   *
    * @returns The closest associated angle of an edge in respect to its assigned angle.
    */
 
   // TODO: Where does such function live?
   // within the HalfEdge class or rather within Staircase??
-  getClosestAssociatedAngle(): number {
-    if (this.class !== OrientationClasses.UD) return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges
-    const sector = this.getAssociatedSector()[0];
+  getClosestAssociatedAngle(): number | undefined {
+    const associatedSector = this.getAssociatedSector();
+    if (this.class !== OrientationClasses.UD || !associatedSector) return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges
+    const sector = associatedSector[0];
 
     // TODO: refactor: find better solution for last sector and it's upper bound
     // set upperbound of last to Math.PI * 2 ?
@@ -365,11 +365,11 @@ class HalfEdge {
    * @returns A boolean, indicating whether or not the {@link HalfEdge} is deviating.
    */
   isDeviating(): boolean {
-    // an angle needs to be already set for this halfedge, TODO: Error handling?
+    let assignedAngle = this.getAssignedAngle();
+    if (typeof assignedAngle !== "number") return false;
     if (this.isAligned()) {
       return this.getAssociatedAngles()[0] !== this.getAssignedAngle();
     } else {
-      let assignedAngle = this.getAssignedAngle();
       const sector = this.getAssociatedSector()[0];
       //TODO: refactor find better solution for last sector (idx=0)
       if (sector.idx === this.dcel.config.c.getSectors().length - 1 && assignedAngle === 0)
@@ -378,8 +378,10 @@ class HalfEdge {
     }
   }
 
-  getDeviation(sector: Sector): number {
-    const diff = Math.abs(this.getAngle() - sector.lower);
+  getDeviation(sector: Sector): number | undefined {
+    const angle = this.getAngle();
+    if (typeof angle !== "number") return;
+    const diff = Math.abs(angle - sector.lower);
     return diff > Math.PI ? Math.abs(diff - Math.PI * 2) : diff;
   }
 
@@ -392,26 +394,35 @@ class HalfEdge {
     return (this.isAligning = isAligned);
   }
 
-  distanceToEdge(edge: HalfEdge): number {
-    const verticesThis = [this.getTail(), this.getHead()];
-    const verticesEdge = [edge.getTail(), edge.getHead()];
-    const distances = verticesThis.map((v) => v.distanceToEdge(edge));
-    distances.push(...verticesEdge.map((v) => v.distanceToEdge(this)));
+  distanceToEdge(otherEdge: HalfEdge): number | undefined {
+    const head = this.getHead();
+    const otherHead = otherEdge.getHead();
+    if (!head || !otherHead) return;
+    const verticesThis = [this.tail, head];
+    const verticesEdge = [otherEdge.tail, otherHead];
+    const distances = [
+      ...verticesThis.map((v) => v.distanceToEdge(otherEdge)),
+      ...verticesEdge.map((v) => v.distanceToEdge(this)),
+    ].filter((distance): distance is number => !!distance);
     return Math.min(...distances);
   }
 
-  toLineSegment(): LineSegment {
-    return new LineSegment(this.getTail(), this.getHead());
+  toLineSegment(): LineSegment | undefined {
+    const head = this.getHead();
+    if (head) return new LineSegment(this.tail, head);
   }
 
-  classify(): OrientationClasses {
-    this.getTail().assignDirections();
+  classify(): void {
+    this.tail.assignDirections();
 
     if (this.class) return; // do not overwrite classification
-    if (this.getHead().significant) return; // do not classify a HalfEdge which has a significant head
+    const head = this.getHead();
 
-    const sector = this.getAssociatedSector()[0];
-    const significantVertex = this.getSignificantVertex() || this.getTail();
+    if (head && head.significant) return; // do not classify a HalfEdge which has a significant head
+
+    const associatedSector = this.getAssociatedSector();
+    const sector = associatedSector[0];
+    const significantVertex = this.getSignificantVertex() || this.tail;
     const edges = significantVertex
       .getEdgesInSector(sector)
       .filter((edge) => !edge.isAligned() && !edge.isDeviating());
@@ -428,17 +439,21 @@ class HalfEdge {
     }
 
     this.class = classification;
-    return (this.twin.class = classification);
+    if (this.twin) this.twin.class = classification;
   }
 
   getStepLengths(se: number, d1: number): number[] {
     //TODO: move getStepLenghts() to staircase ??
-    const d2 = this.getAssociatedAngles().find((angle) => angle !== d1);
+    const associatedAngles = this.getAssociatedAngles();
+    if (!associatedAngles) return [];
+    const d2 = associatedAngles.find((angle) => angle !== d1);
+    if (typeof d2 !== "number") return [];
     const d1u = getUnitVector(d1);
     const d2u = getUnitVector(d2);
 
     // create vector of edge
     const v = this.getVector();
+    if (!v) return [];
     const vse = v.times(1 / se);
 
     // solve linear equation for l1 and l2 with cramer's rule for 2x2 systems
@@ -457,18 +472,23 @@ class HalfEdge {
    * @param offset The distance the offset Vertex should be moved in respect to its (original) tail Vertex.
    * @returns The Vertex on the edge of which a part should be ignored and from where the edge is considered for calculating the edgeDistance.
    */
-  getOffsetVertex(offsetEdge: HalfEdge, offset: number) {
-    const pointOffset = offsetEdge.getTail().getNewPoint(offset, offsetEdge.getAngle());
-    return new Vertex(pointOffset.x, pointOffset.y, undefined);
+  getOffsetVertex(offsetEdge: HalfEdge, offset: number): Vertex | undefined {
+    const angle = offsetEdge.getAngle();
+    if (typeof angle !== "number") return;
+    const pointOffset = offsetEdge.tail.getNewPoint(offset, angle);
+    return new Vertex(pointOffset.x, pointOffset.y, offsetEdge.dcel);
   }
 
   /**
    * Determines the type of the HalfEdge depending on the convexity or reflexivity of its endpoints.
    * @returns A enum, indicating the inflection Type of the {@link HalfEdge}.
    */
-  getInflectionType() {
-    const tailAngle = this.getTail().getExteriorAngle(this.face);
-    const headAngle = this.getHead().getExteriorAngle(this.face);
+  getInflectionType(): InflectionType | undefined {
+    const head = this.getHead();
+    if (!head || !this.face) return;
+    const tailAngle = this.tail.getExteriorAngle(this.face);
+    const headAngle = head.getExteriorAngle(this.face);
+    if (!tailAngle || !headAngle) return;
 
     if (tailAngle > 0 && headAngle > 0) return InflectionType.C;
     else if (tailAngle < 0 && headAngle < 0) return InflectionType.R;

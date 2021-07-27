@@ -4,7 +4,7 @@ export default abstract class C {
   /**
    * an array of angles in radians, at least 4
    */
-  angles: number[];
+  angles: number[] = [];
 
   abstract getSectorAngle(): number;
   abstract getSectors(): Sector[];
@@ -14,7 +14,7 @@ export default abstract class C {
     return Array.from(Array(n).keys());
   }
 
-  getSector(idx: number): Sector {
+  getSector(idx: number): Sector | undefined {
     return this.getSectors().find((sector) => sector.idx == idx);
   }
 
@@ -23,20 +23,20 @@ export default abstract class C {
       combination: number[],
       directions: number[],
       edges: number
-    ) {
-      if (!edges) return combination;
+    ): number[][] {
+      if (!edges) return [combination];
 
       const firstElements = directions.slice(0, directions.length - edges + 1);
 
       return firstElements
-        .reduce((output, el) => {
+        .reduce((output: number[][][], el) => {
           const start = directions.indexOf(el);
           output.push(
             calculateCombinations([...combination, el], directions.slice(start + 1), edges - 1)
           );
           return output;
         }, [])
-        .flat(edges > 1 ? 1 : 0);
+        .flat(1);
     };
 
     return calculateCombinations([], [...Array(this.angles.length).keys()], numberOfEdges);

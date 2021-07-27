@@ -8,6 +8,7 @@ export enum STEP {
 
 export function drawNavigator() {
   const navigator = document.getElementById("algorithm-navigator");
+  if (!navigator) return;
 
   const ul = navigator.appendChild(document.createElement("ul"));
   ul.className = "plain";
@@ -49,7 +50,8 @@ export function drawNavigator() {
 
   ul.childNodes.forEach((li) => {
     li.addEventListener("click", function () {
-      const stop = this.getAttribute("data-function");
+      console.log("click");
+      // const stop = this.getAttribute("data-function");
     });
   });
 }

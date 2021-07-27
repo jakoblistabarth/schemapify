@@ -19,6 +19,7 @@ describe("The staircase class", function () {
     edge.twin = twin;
     twin.twin = edge;
     edge.class = OrientationClasses.UB;
+    edge.assignedDirection = 0;
 
     const staircase = new Staircase(edge);
     expect(staircase.region).toEqual([
@@ -40,6 +41,7 @@ describe("The staircase class", function () {
     edge.twin = twin;
     twin.twin = edge;
     edge.class = OrientationClasses.UB;
+    edge.assignedDirection = 2;
 
     const staircase = new Staircase(edge);
 
@@ -62,6 +64,7 @@ describe("The staircase class", function () {
     edge.twin = twin;
     twin.twin = edge;
     edge.class = OrientationClasses.UB;
+    edge.assignedDirection = 2;
 
     const staircase = new Staircase(edge);
     expect(staircase.region).toEqual([
@@ -85,12 +88,11 @@ describe("Build staircase for a HalfEdge of class AD", function () {
     edge.twin.twin = edge;
     edge.class = OrientationClasses.AD;
     edge.assignedDirection = 0;
-    edge.dcel = dcel;
 
     edge.staircase = new Staircase(edge);
     edge.staircase.points = edge.staircase.getStaircasePoints();
-    expect(edge.staircase.points.length).toBe(7);
-    expect(edge.staircase.region.length).toBeLessThanOrEqual(edge.staircase.points.length);
+    expect(edge.staircase.points?.length).toBe(7);
+    expect(edge.staircase.region?.length).toBeLessThanOrEqual(edge.staircase.points.length);
   });
 });
 
@@ -107,11 +109,10 @@ describe("Build staircase for a HalfEdge of class UB", function () {
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UB;
     edge.assignedDirection = 0;
-    edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
     const points = staircase.getStaircasePointsUB();
-    expect(points.length).toBeGreaterThanOrEqual(5);
+    expect(points?.length).toBeGreaterThanOrEqual(5);
   });
 });
 
@@ -127,12 +128,11 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 3;
-    edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
     const d2 = staircase.points[staircase.points.length - 1];
 
-    expect(staircase.points.length).toBeGreaterThanOrEqual(9);
+    expect(staircase.points?.length).toBeGreaterThanOrEqual(9);
     expect(d.x).toBeCloseTo(d2.x, 10);
     expect(d.y).toBeCloseTo(d2.y, 10);
   });
@@ -148,7 +148,6 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 2;
-    edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
 
@@ -172,7 +171,6 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 3;
-    edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
 
@@ -196,7 +194,6 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 3;
-    edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
 
@@ -220,7 +217,6 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 0;
-    edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
 
@@ -244,12 +240,11 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 0;
-    edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
     const d2 = staircase.points[staircase.points.length - 1];
 
-    expect(staircase.points.length).toBeGreaterThanOrEqual(9);
+    expect(staircase.points?.length).toBeGreaterThanOrEqual(9);
     expect(d.x).toBeCloseTo(d2.x, 10);
     expect(d.y).toBeCloseTo(d2.y, 10);
   });
@@ -265,12 +260,11 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 2;
-    edge.dcel = dcel;
 
     const staircase = new Staircase(edge);
     const d2 = staircase.points[staircase.points.length - 1];
 
-    expect(staircase.points.length).toBeGreaterThanOrEqual(9);
+    expect(staircase.points?.length).toBeGreaterThanOrEqual(9);
     expect(d.x).toBeCloseTo(d2.x, 10);
     expect(d.y).toBeCloseTo(d2.y, 10);
   });

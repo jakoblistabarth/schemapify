@@ -27,7 +27,7 @@ export function drawMapGrid(files: string[]): void {
     const name = file.slice(file.lastIndexOf("/") + 1, -5);
     map.id = name;
     map.className = "map";
-    grid.appendChild(map);
+    if (grid) grid.appendChild(map);
   });
 }
 

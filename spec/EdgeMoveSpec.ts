@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import Vertex from "src/lib/DCEL/Vertex";
 import Configuration, { Junction } from "../src/lib/c-oriented-schematization/Configuration";
 import Dcel from "../src/lib/Dcel/Dcel";
 
@@ -15,7 +16,7 @@ describe("createConfigurations()", function () {
 
     const edgesDegree4 = dcel
       .getHalfEdges()
-      .filter((e) => e.getEndpoints().some((v) => v.edges.length > 3));
+      .filter((e) => e.getEndpoints()?.some((v) => v.edges.length > 3));
 
     const configurationCount = dcel
       .getHalfEdges()
@@ -39,7 +40,7 @@ describe("getJunctionType() determines the type of a junction in respect to the 
   it("for a junction of type A.", function () {
     const edge = dcel.getHalfEdges()[2];
     const c = new Configuration(edge);
-    const junction = dcel.findVertex(2, 0);
+    const junction = dcel.findVertex(2, 0) as Vertex;
 
     expect(c.getJunctionType(junction)).toBe(Junction.A);
   });
@@ -47,7 +48,7 @@ describe("getJunctionType() determines the type of a junction in respect to the 
   it("for a junction of type B.", function () {
     const edge = dcel.getHalfEdges()[6];
     const c = new Configuration(edge);
-    const junction = dcel.findVertex(1, 2);
+    const junction = dcel.findVertex(1, 2) as Vertex;
 
     expect(c.getJunctionType(junction)).toBe(Junction.B);
   });
@@ -55,8 +56,8 @@ describe("getJunctionType() determines the type of a junction in respect to the 
   it("for a configuration with junctions of type A and C.", function () {
     const edge = dcel.getHalfEdges()[14];
     const c = new Configuration(edge);
-    const junction = dcel.findVertex(3, 2);
-    const junction2 = dcel.findVertex(3, 0);
+    const junction = dcel.findVertex(3, 2) as Vertex;
+    const junction2 = dcel.findVertex(3, 0) as Vertex;
 
     expect(c.getJunctionType(junction)).toBe(Junction.C);
     expect(c.getJunctionType(junction2)).toBe(Junction.A);

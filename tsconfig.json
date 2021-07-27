@@ -10,8 +10,8 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
-    "typeRoots": ["./node_modules/@types", "./src/@types"]
-    // "strict": true //TODO turn strict mode one
+    "typeRoots": ["./node_modules/@types", "./src/@types"],
+    "strict": true
   },
   "include": ["./src/**/*", "./spec/**/*"]
 }

@@ -21,12 +21,12 @@ class Configuration {
   [ContractionType.P]?: Contraction;
 
   constructor(edge: HalfEdge) {
-    this.innerEdge = edge; // TODO: not very elegant, similar problem to saving the dcel explicitly to Vertices and HalfEdges.
+    this.innerEdge = edge;
     this[ContractionType.N] = Contraction.initialize(this, ContractionType.N);
     this[ContractionType.P] = Contraction.initialize(this, ContractionType.P);
   }
 
-  getOuterEdge(position: OuterEdge): HalfEdge {
+  getOuterEdge(position: OuterEdge): HalfEdge | undefined {
     return position === OuterEdge.PREV ? this.innerEdge.prev : this.innerEdge.next;
   }
 
@@ -35,7 +35,8 @@ class Configuration {
    * @returns An array of {@link HalfEdge}s.
    */
   getX(): HalfEdge[] {
-    return [this.getOuterEdge(OuterEdge.PREV), this.innerEdge, this.getOuterEdge(OuterEdge.NEXT)];
+    const [prev, next] = [this.getOuterEdge(OuterEdge.PREV), this.getOuterEdge(OuterEdge.NEXT)];
+    return prev && next ? [prev, this.innerEdge, next] : [];
   }
 
   /**
@@ -44,31 +45,39 @@ class Configuration {
    * @returns An array of {@link HalfEdge}s.
    */
   getX_(): HalfEdge[] {
-    return this.innerEdge.getCycle().filter((edge) => !this.getX().includes(edge));
+    const x = this.getX();
+    return x ? this.innerEdge.getCycle().filter((edge) => !x.includes(edge)) : [];
   }
 
-  getTrack(outerEdge: OuterEdge): Line {
-    if (outerEdge === OuterEdge.PREV)
-      return new Line(this.innerEdge.getTail(), this.getOuterEdge(OuterEdge.PREV).getAngle());
-    else return new Line(this.innerEdge.getHead(), this.getOuterEdge(OuterEdge.NEXT).getAngle());
+  getTrack(outerEdge: OuterEdge): Line | undefined {
+    const [prev, next] = [this.getOuterEdge(OuterEdge.PREV), this.getOuterEdge(OuterEdge.NEXT)];
+    const prevAngle = prev?.getAngle();
+    const nextAngle = next?.getAngle();
+    const head = this.innerEdge.getHead();
+    if (!prev || !next || typeof prevAngle !== "number" || typeof nextAngle !== "number" || !head)
+      return;
+    if (outerEdge === OuterEdge.PREV) return new Line(this.innerEdge.tail, prevAngle);
+    else return new Line(head, nextAngle);
   }
 
-  getTracks(): Line[] {
-    return [this.getTrack(OuterEdge.PREV), this.getTrack(OuterEdge.NEXT)];
+  getTracks(): Line[] | undefined {
+    const [prevTrack, nextTrack] = [this.getTrack(OuterEdge.PREV), this.getTrack(OuterEdge.NEXT)];
+    if (prevTrack && nextTrack) return [prevTrack, nextTrack];
   }
 
   hasJunction(): boolean {
     return this.innerEdge.getEndpoints().some((p) => p.edges.length > 2);
   }
 
-  getJunctionType(vertex: Vertex): Junction {
+  getJunctionType(vertex: Vertex): Junction | undefined {
+    if (!this.innerEdge.twin) return;
     let idx = vertex.edges.indexOf(this.innerEdge);
     idx = idx === -1 ? vertex.edges.indexOf(this.innerEdge.twin) : idx;
     const edge1 = crawlArray(vertex.edges, idx, +1);
     const edge2 = crawlArray(vertex.edges, idx, +2);
 
     if (edge1.getAngle() === edge2.twin.getAngle()) return Junction.A;
-    const normal = this.innerEdge.getVector().getNormal();
+    const normal = this.innerEdge.getVector()?.getNormal();
 
     const o1 = edge1.getVector().dot(normal);
     const o2 = edge2.getVector().dot(normal);

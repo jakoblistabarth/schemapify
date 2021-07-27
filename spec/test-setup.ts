@@ -54,8 +54,6 @@ export function createEdgeVertexSetup() {
     const edge = new HalfEdge(o, dcel);
     edge.twin = new HalfEdge(vertex, dcel);
     edge.twin.twin = edge;
-    edge.dcel = dcel;
-    edge.twin.dcel = dcel;
     directions["o" + key] = edge;
   });
 
@@ -94,12 +92,14 @@ export function createConfigurationSetup(
   edges.forEach((edge, idx) => {
     edge.prev = crawlArray(edges, idx, -1);
     edge.next = crawlArray(edges, idx, +1);
+    if (!edge.twin) return;
     edge.twin.prev = crawlArray(edges, idx, -1).twin;
     edge.twin.next = crawlArray(edges, idx, +1).twin;
   });
 
   vertices.forEach((vertex, idx) => {
-    vertex.edges.push(edges[idx], edges[idx].prev.twin);
+    const edge = edges[idx];
+    if (edge.prev?.twin) vertex.edges.push(edge, edge.prev.twin);
   });
 
   const configuration: ConfigurationSetup = {

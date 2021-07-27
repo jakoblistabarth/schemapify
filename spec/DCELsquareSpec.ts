@@ -28,8 +28,8 @@ describe("A Dcel of a single square", function () {
 
   it("has 4 linked inner edges", function () {
     expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
-    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle().length).toBe(4);
+    expect(dcel.getBoundedFaces()[0].edge?.twin?.getCycle().length).toBe(4);
     expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(4);
-    expect(dcel.getBoundedFaces()[0].edge.twin.getCycle(false).length).toBe(4);
+    expect(dcel.getBoundedFaces()[0].edge?.twin?.getCycle(false).length).toBe(4);
   });
 });
