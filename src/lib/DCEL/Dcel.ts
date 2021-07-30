@@ -425,9 +425,7 @@ class Dcel {
         staircase.edge.class === OrientationClasses.UD
     );
     this.getEdgeDistances(staircasesOfDeviatingEdges);
-    this.getSe(
-      staircasesOfDeviatingEdges.filter((staircase) => staircase.interferesWith.length > 0)
-    );
+    this.getSe(staircasesOfDeviatingEdges.filter((staircase) => staircase.interferesWith));
 
     // calculate edgedistance and stepnumber for remaining edges
     const staircasesOther = this.getStaircases().filter(
@@ -436,7 +434,7 @@ class Dcel {
         staircase.edge.class !== OrientationClasses.UD
     );
     this.getEdgeDistances(staircasesOther);
-    this.getSe(staircasesOther.filter((staircase) => staircase.interferesWith.length > 0));
+    this.getSe(staircasesOther.filter((staircase) => staircase.interferesWith));
 
     this.createSnapshot(STEP.STAIRCASE); // TODO: create one before and after? (for the reference of the staircaseRegions)
 
@@ -475,10 +473,8 @@ class Dcel {
         let e = staircase.edge;
         let e_ = staircaseToCompareWith.edge;
         const eStaircaseEpsilon = e.dcel.config.staircaseEpsilon;
-        const e_angle = e_.getAngle();
         const e_staircaseSe = e_.staircase?.se;
         const eLength = e.getLength();
-        if (!e_angle || !eStaircaseEpsilon || !e_staircaseSe || !eLength) return;
         if (
           e.tail !== e_.tail &&
           e.tail !== e_.getHead() &&
@@ -488,14 +484,22 @@ class Dcel {
           // "If the compared regions' edges do not have a vertex in common,
           // de is is simply the minimal distance between the edges."
           const de = e.distanceToEdge(e_);
-          if (typeof de === "number") staircase.setEdgeDistance(de);
-          return staircase.interferesWith.push(e_);
+          if (typeof de === "number") {
+            staircase.setEdgeDistance(de);
+            staircase.interferesWith.push(e_);
+          }
+          return;
         } else {
           // "If e and e' share a vertex v, they interfere only if the edges reside in the same sector with respect to v."
           const v = e.getEndpoints().find((endpoint) => e_.getEndpoints().indexOf(endpoint) >= 0); // get common vertex
           e = e.tail !== v && e.twin ? e.twin : e;
           e_ = e_.tail !== v && e_.twin ? e_.twin : e_;
-          if (!e.getAssociatedSector().some((sector) => sector.encloses(e_angle))) return;
+          const e_angle = e_.getAngle();
+          if (
+            typeof e_angle !== "number" ||
+            !e.getAssociatedSector().some((sector) => sector.encloses(e_angle))
+          )
+            return;
           staircase.interferesWith.push(e_);
 
           // "However, if e and e' do share a vertex, then we must again look at the classification."
@@ -506,10 +510,11 @@ class Dcel {
               // "If e' is unaligned, then we ignore a fraction of e' equal to the length of the first step."
               // "In other words, we ignore a fraction of 1/(se' − 1) [of e']."
               if (e_.class === OrientationClasses.AD) {
-                const offset = 1 - eStaircaseEpsilon / 2;
+                const offset = (1 - eStaircaseEpsilon) / 2;
                 const vertexOffset = e.getOffsetVertex(e_, offset);
                 de = vertexOffset?.distanceToEdge(e);
               } else {
+                if (!e_staircaseSe) return;
                 const offset = 1 / (e_staircaseSe - 1);
                 const vertexOffset = e.getOffsetVertex(e_, offset);
                 de = vertexOffset?.distanceToEdge(e);
@@ -519,11 +524,13 @@ class Dcel {
             case OrientationClasses.E: {
               // "If e' is an evading edge, we ignore the first half of e (but not of e')."
               // "If e' is a deviating edge, we treat it as if e were an unaligned basic edge."
+              if (typeof eLength !== "number") return;
               if (e_.class === OrientationClasses.E) {
                 const vertexOffset = e.getOffsetVertex(e, (eLength * 1) / 2);
                 de = vertexOffset?.distanceToEdge(e_);
               } else {
                 // AD or UD
+                if (typeof e_staircaseSe !== "number") return;
                 const offset = 1 / (e_staircaseSe - 1);
                 const vertexOffset = e.getOffsetVertex(e_, offset);
                 de = vertexOffset?.distanceToEdge(e);
@@ -537,6 +544,7 @@ class Dcel {
               break;
             }
             case OrientationClasses.UD: {
+              if (typeof eLength !== "number") return;
               const vertexOffset = e.getOffsetVertex(e, (eLength * 1) / 3);
               de = vertexOffset?.distanceToEdge(e_);
               break;
@@ -597,18 +605,16 @@ class Dcel {
   }
 
   replaceWithStaircases() {
-    this.getHalfEdges()
-      .filter((edge) => edge.staircase !== undefined)
-      .forEach((edge) => {
-        if (!edge.staircase?.points) return;
-        const stepPoints = edge.staircase.points.slice(1, -1);
-        let edgeToSubdivide = edge;
-        for (let p of stepPoints) {
-          const dividedEdge = edgeToSubdivide.subdivide(new Point(p.x, p.y));
-          if (!dividedEdge) return;
-          if (dividedEdge.next) edgeToSubdivide = dividedEdge.next;
-        }
-      });
+    this.getHalfEdges().forEach((edge) => {
+      if (!edge.staircase) return;
+      const stepPoints = edge.staircase.getStaircasePoints().slice(1, -1); // TODO: use .points instead
+      let edgeToSubdivide = edge;
+      for (let p of stepPoints) {
+        const dividedEdge = edgeToSubdivide.subdivide(new Point(p.x, p.y));
+        if (!dividedEdge) return;
+        if (dividedEdge.next) edgeToSubdivide = dividedEdge.next;
+      }
+    });
 
     // assign class AB to all edges of just created staircases
     this.getHalfEdges().forEach((edge) => (edge.class = OrientationClasses.AB));
