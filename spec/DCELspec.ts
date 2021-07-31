@@ -77,7 +77,7 @@ describe("getBbox()", function () {
     let bboxPlgn2 = Dcel.fromGeoJSON(plgn2).getBbox();
     let bboxPlgn3 = Dcel.fromGeoJSON(plgn3).getBbox();
 
-    expect(bboxPlgn1).toEqual([0, 0, 2, 2]);
+    expect(bboxPlgn1).toEqual([0, 0, 200, 200]);
     expect(bboxPlgn2).toEqual([0, 0, 4, 2]);
     expect(bboxPlgn3).toEqual([0, 0, 2, 2]);
   });
@@ -111,7 +111,9 @@ describe("getDiameter()", function () {
       fs.readFileSync(path.resolve("data/shapes/3plgn-adjacent.json"), "utf8")
     );
 
-    expect(Dcel.fromGeoJSON(plgn1).getDiameter()).toBe(Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)));
+    expect(Dcel.fromGeoJSON(plgn1).getDiameter()).toBe(
+      Math.sqrt(Math.pow(200, 2) + Math.pow(200, 2))
+    );
     expect(Dcel.fromGeoJSON(plgn3).getDiameter()).toBe(Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)));
   });
 });

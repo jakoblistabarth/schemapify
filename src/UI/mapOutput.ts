@@ -7,6 +7,7 @@ import { STEP } from "./algorithm-navigator";
 export function getMapFrom(dcel: Dcel, name: string): L.Map {
   const DCELMap = L.map(name, {
     zoomControl: false,
+    crs: L.CRS.Simple,
   });
   DCELMap.attributionControl.addAttribution(`${name} (${dcel.halfEdges.size / 2} edges)`);
 

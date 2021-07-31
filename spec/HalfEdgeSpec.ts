@@ -28,7 +28,7 @@ describe("getLength()", function () {
       .getBoundedFaces()[0]
       .edge?.getCycle()
       .forEach((e) => {
-        expect(e.getLength()).toBe(2);
+        expect(e.getLength()).toBe(200);
       });
   });
 
@@ -296,23 +296,23 @@ describe("subdivide()", function () {
 });
 
 describe("subdivideToThreshold()", function () {
-  it("on one egde of a square with side length 2 into 8 edges (epsilon: .5)", function () {
+  it("on one egde of a square with side length 200 into 8 edges (epsilon: .5)", function () {
     const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
     const edge = dcel.getBoundedFaces()[0].edge;
 
     const halfEdgesBefore = dcel.halfEdges.size;
-    edge?.subdivideToThreshold(0.5);
+    edge?.subdivideToThreshold(50);
     const halfEdgesAfter = dcel.halfEdges.size;
 
     expect(halfEdgesAfter).toBe(halfEdgesBefore - 2 + 8 * 2);
   });
 
-  it("turns an square with sides of length 2 into a dcel with 64 edges (epsilon: .5)", function () {
+  it("turns an square with sides of length 200 into a dcel with 64 edges (epsilon: .5)", function () {
     const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
 
-    dcel.splitEdges(0.5);
+    dcel.splitEdges(50);
 
     expect(dcel.halfEdges.size).toBe(64);
   });
