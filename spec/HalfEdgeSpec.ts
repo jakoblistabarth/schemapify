@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "../src/lib/dcel/Dcel";
-import HalfEdge from "../src/lib/dcel/HalfEdge";
-import Vertex from "../src/lib/dcel/Vertex";
+import Dcel from "../src/lib/DCEL/Dcel";
+import HalfEdge from "../src/lib/DCEL/HalfEdge";
+import Vertex from "../src/lib/DCEL/Vertex";
 import Point from "../src/lib/geometry/Point";
 import { config } from "../src/schematization.config";
 import CRegular from "../src/lib/c-oriented-schematization/CRegular";
