@@ -2,8 +2,8 @@ import fs from "fs";
 import path from "path";
 import { hint } from "@mapbox/geojsonhint";
 import { getTestFiles } from "./test-setup";
-import Dcel from "../src/lib/Dcel/Dcel";
-import Face from "../src/lib/Dcel/Face";
+import Dcel from "../src/lib/DCEL/Dcel";
+import Face from "../src/lib/DCEL/Face";
 
 describe("A Dcel of 2 adjacent squares", function () {
   const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/2plgn-adjacent.json"), "utf8"));

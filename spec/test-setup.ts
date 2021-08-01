@@ -1,9 +1,9 @@
 import fs from "fs";
 import Point from "../src/lib/geometry/Point";
-import Vertex from "../src/lib/dcel/Vertex";
-import HalfEdge from "../src/lib/dcel/HalfEdge";
+import Vertex from "../src/lib/DCEL/Vertex";
+import HalfEdge from "../src/lib/DCEL/HalfEdge";
 import Face from "../src/lib/DCEL/Face";
-import Dcel from "../src/lib/dcel/Dcel";
+import Dcel from "../src/lib/DCEL/Dcel";
 import config from "../src/schematization.config";
 import { crawlArray } from "../src/lib/utilities";
 

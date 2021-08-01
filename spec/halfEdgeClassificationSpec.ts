@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import CRegular from "../src/lib/c-oriented-schematization/CRegular";
-import Dcel from "../src/lib/dcel/Dcel";
+import Dcel from "../src/lib/DCEL/Dcel";
 import { OrientationClasses } from "../src/lib/DCEL/HalfEdge";
 import { config } from "../src/schematization.config";
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";

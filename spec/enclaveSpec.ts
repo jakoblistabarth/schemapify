@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "../src/lib/dcel/Dcel";
+import Dcel from "../src/lib/DCEL/Dcel";
 
 describe("A Dcel of an simplified enclave model", function () {
   let dcel: Dcel;

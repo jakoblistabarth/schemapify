@@ -16,7 +16,7 @@ describe("distanceToPoint()", function () {
 });
 
 describe("isInPolygon()", function () {
-  it("test region interference", function () {
+  it("returns interference for 2 regions from AUT_adm1-simple.json.", function () {
     const regionA = [
       new Point(10.172608375549316, 47.269916534423885),
       new Point(10.1726083755, 47.3805885315),
@@ -45,7 +45,7 @@ describe("isInPolygon()", function () {
     expect(regionB[4].isInPolygon(regionA)).toBeFalse();
   });
 
-  it("test2", function () {
+  it("returns interference for 1 regions and a Point of AUT_adm1-simple.json.", function () {
     const polygon = [
       new Point(9.668785095214957, 47.49126052856445),
       new Point(9.6687850952, 47.3313159943),
