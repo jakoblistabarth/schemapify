@@ -45,6 +45,19 @@ class Contraction {
     return this.type !== other.type;
   }
 
+  isConflicting(other: Contraction): boolean | undefined {
+    const overlappingEdges = this.configuration
+      .getX()
+      .filter((edge) => other.configuration.getX().includes(edge));
+    if (!overlappingEdges.length) return false;
+    if (
+      overlappingEdges.length === 1 &&
+      overlappingEdges[0].getInflectionType() === InflectionType.B
+    )
+      return false;
+    return true;
+  }
+
   /**
    * Gets the point which is a possible and valid contraction point for an edge move.
    * @param outerEdge The edge which should be used as track for the edge move.

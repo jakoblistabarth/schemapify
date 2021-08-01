@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
-import Vertex from "src/lib/DCEL/Vertex";
 import Configuration, { Junction } from "../src/lib/c-oriented-schematization/Configuration";
 import Dcel from "../src/lib/DCEL/Dcel";
+import Vertex from "../src/lib/DCEL/Vertex";
 
 describe("createConfigurations()", function () {
   it("adds configuration to all edges which are possible candidates for edge moves (which endpoints are of degree 3 or less).", function () {
