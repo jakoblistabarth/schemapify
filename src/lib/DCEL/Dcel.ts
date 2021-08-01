@@ -405,7 +405,7 @@ class Dcel {
       .filter((staircase): staircase is Staircase => !!staircase);
   }
 
-  edgesToStaircases() {
+  addStaircases() {
     // create staircase for every pair of edges
     this.getHalfEdges(undefined, true).forEach((edge) => {
       if (edge.class === OrientationClasses.AB) return;
@@ -413,7 +413,9 @@ class Dcel {
         edge = edge.twin;
       edge.staircase = new Staircase(edge);
     });
+  }
 
+  calculateStaircases() {
     // calculate edgedistance and stepnumber for deviating edges first
     const staircasesOfDeviatingEdges = this.getStaircases().filter(
       (staircase) =>
@@ -435,9 +437,6 @@ class Dcel {
     this.getSe(staircasesOther.filter((staircase) => staircase.interferesWith.length > 0));
 
     this.createSnapshot(STEP.STAIRCASE); // TODO: create one before and after? (for the reference of the staircaseRegions)
-
-    // create the actual staircase in the DCEL
-    this.replaceWithStaircases();
   }
 
   createSnapshot(name: STEP): Snapshot {
@@ -599,7 +598,7 @@ class Dcel {
     }
   }
 
-  replaceWithStaircases() {
+  replaceEdgesWithStaircases() {
     this.getHalfEdges().forEach((edge) => {
       if (!edge.staircase) return;
       const stepPoints = edge.staircase.getStaircasePoints().slice(1, -1); // TODO: use .points instead
@@ -617,7 +616,9 @@ class Dcel {
 
   constrainAngles(): void {
     this.classify();
-    this.edgesToStaircases();
+    this.addStaircases();
+    this.calculateStaircases();
+    this.replaceEdgesWithStaircases();
   }
 
   simplify(): Dcel {

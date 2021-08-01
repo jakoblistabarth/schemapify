@@ -1,7 +1,9 @@
-import Dcel from "../src/lib/Dcel/Dcel";
+import fs from "fs";
+import path from "path";
+import Dcel from "../src/lib/DCEL/Dcel";
 import CRegular from "../src/lib/c-oriented-schematization/CRegular";
-import { OrientationClasses } from "../src/lib/Dcel/HalfEdge";
-import Vertex from "../src/lib/Dcel/Vertex";
+import { OrientationClasses } from "../src/lib/DCEL/HalfEdge";
+import Vertex from "../src/lib/DCEL/Vertex";
 import Staircase from "../src/lib/c-oriented-schematization/Staircase";
 import Point from "../src/lib/geometry/Point";
 import config from "../src/schematization.config";
@@ -408,5 +410,22 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
     expect(edge.getClosestAssociatedAngle()).toBe(
       ((Math.PI * 2) / edge.dcel.config.c.getDirections().length) * 3
     );
+  });
+});
+
+describe("Staircaseregions incident to a certain vertex are always interfering with each other", function () {
+  // TODO: add more specs with other epsilon
+  it("with an epsilon of 0.05", function () {
+    const input = JSON.parse(
+      fs.readFileSync(path.resolve("data/shapes/triangle-unaligned.json"), "utf8")
+    );
+    const dcel = Dcel.fromGeoJSON(input);
+    dcel.preProcess();
+    dcel.classify();
+    dcel.addStaircases();
+    dcel.calculateStaircases();
+    const v = dcel.findVertex(0, 11);
+    expect(v?.edges[0].staircase?.interferesWith.length).toBeGreaterThan(0);
+    expect(v?.edges[1].staircase?.interferesWith.length).toBeGreaterThan(0);
   });
 });
