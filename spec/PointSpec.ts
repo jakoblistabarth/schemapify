@@ -16,6 +16,48 @@ describe("distanceToPoint()", function () {
 });
 
 describe("isInPolygon()", function () {
+  it("test region interference", function () {
+    const regionA = [
+      new Point(10.172608375549316, 47.269916534423885),
+      new Point(10.1726083755, 47.3805885315),
+      new Point(9.920696735382137, 47.38058853149417),
+      new Point(9.9206967354, 47.2699165344),
+      new Point(10.172608375549316, 47.269916534423885),
+    ];
+
+    const regionB = [
+      new Point(9.668785095214957, 47.49126052856445),
+      new Point(9.6687850952, 47.3805885315),
+      new Point(9.920696735382137, 47.38058853149417),
+      new Point(9.9206967354, 47.4912605286),
+      new Point(9.668785095214957, 47.49126052856445),
+    ];
+
+    expect(regionA[0].isInPolygon(regionB)).toBeFalse();
+    expect(regionA[1].isInPolygon(regionB)).toBeFalse();
+    expect(regionA[2].isInPolygon(regionB)).toBeTrue();
+    expect(regionA[3].isInPolygon(regionB)).toBeFalse();
+    expect(regionA[4].isInPolygon(regionB)).toBeFalse();
+    expect(regionB[0].isInPolygon(regionA)).toBeFalse();
+    expect(regionB[1].isInPolygon(regionA)).toBeFalse();
+    expect(regionB[2].isInPolygon(regionA)).toBeTrue();
+    expect(regionB[3].isInPolygon(regionA)).toBeFalse();
+    expect(regionB[4].isInPolygon(regionA)).toBeFalse();
+  });
+
+  it("test2", function () {
+    const polygon = [
+      new Point(9.668785095214957, 47.49126052856445),
+      new Point(9.6687850952, 47.3313159943),
+      new Point(9.788464546203699, 47.331315994262724),
+      new Point(9.7884645462, 47.4912605286),
+      new Point(9.668785095214957, 47.49126052856445),
+    ];
+    const point = new Point(9.668785095214957, 47.49126052856445);
+
+    expect(point.isInPolygon(polygon)).toBeTrue();
+  });
+
   it("returns false if it lies outside of a convex(!) Polygon", function () {
     const A = [new Point(0, 0), new Point(0, 1), new Point(1, 1), new Point(1, 0)];
     const B = [new Point(-5, -5), new Point(5, -5), new Point(5, 10), new Point(-5, 10)];

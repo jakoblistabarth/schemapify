@@ -409,11 +409,7 @@ class Dcel {
     // create staircase for every pair of edges
     this.getHalfEdges(undefined, true).forEach((edge) => {
       if (edge.class === OrientationClasses.AB) return;
-      if (
-        edge.getSignificantVertex() !== undefined &&
-        edge.getSignificantVertex() !== edge.tail &&
-        edge.twin
-      )
+      if (edge.getSignificantVertex() && edge.getSignificantVertex() !== edge.tail && edge.twin)
         edge = edge.twin;
       edge.staircase = new Staircase(edge);
     });
@@ -425,7 +421,9 @@ class Dcel {
         staircase.edge.class === OrientationClasses.UD
     );
     this.getEdgeDistances(staircasesOfDeviatingEdges);
-    this.getSe(staircasesOfDeviatingEdges.filter((staircase) => staircase.interferesWith));
+    this.getSe(
+      staircasesOfDeviatingEdges.filter((staircase) => staircase.interferesWith.length > 0)
+    );
 
     // calculate edgedistance and stepnumber for remaining edges
     const staircasesOther = this.getStaircases().filter(
@@ -434,7 +432,7 @@ class Dcel {
         staircase.edge.class !== OrientationClasses.UD
     );
     this.getEdgeDistances(staircasesOther);
-    this.getSe(staircasesOther.filter((staircase) => staircase.interferesWith));
+    this.getSe(staircasesOther.filter((staircase) => staircase.interferesWith.length > 0));
 
     this.createSnapshot(STEP.STAIRCASE); // TODO: create one before and after? (for the reference of the staircaseRegions)
 
@@ -464,14 +462,12 @@ class Dcel {
 
     // check if any point of a region is within another region
     for (const staircase of staircases) {
-      const currentStaircaseIdx = staircases.indexOf(staircase);
-      const staircasesToCompareWith = Array.from(staircases);
-      staircasesToCompareWith.splice(currentStaircaseIdx, 1);
-      staircasesToCompareWith.forEach((staircaseToCompareWith) => {
-        if (staircase.region.every((point) => !point.isInPolygon(staircaseToCompareWith.region)))
-          return;
+      staircases.forEach((staircase_) => {
+        if (staircase_ === staircase) return;
+        if (staircase.region.every((point) => !point.isInPolygon(staircase_.region))) return;
+
         let e = staircase.edge;
-        let e_ = staircaseToCompareWith.edge;
+        let e_ = staircase_.edge;
         const eStaircaseEpsilon = e.dcel.config.staircaseEpsilon;
         const e_staircaseSe = e_.staircase?.se;
         const eLength = e.getLength();
@@ -488,7 +484,6 @@ class Dcel {
             staircase.setEdgeDistance(de);
             staircase.interferesWith.push(e_);
           }
-          return;
         } else {
           // "If e and e' share a vertex v, they interfere only if the edges reside in the same sector with respect to v."
           const v = e.getEndpoints().find((endpoint) => e_.getEndpoints().indexOf(endpoint) >= 0); // get common vertex
@@ -550,7 +545,7 @@ class Dcel {
               break;
             }
           }
-          if (de) staircase.setEdgeDistance(de);
+          if (typeof de === "number") staircase.setEdgeDistance(de);
         }
       });
     }
@@ -561,22 +556,17 @@ class Dcel {
       const edge = staircase.edge;
       const length = edge.getLength();
       const angle = edge.getAngle();
-      if (
-        typeof staircase.de !== "number" ||
-        typeof staircase.deltaE !== "number" ||
-        !staircase.points ||
-        typeof length !== "number" ||
-        typeof angle !== "number"
-      )
-        return;
       switch (edge.class) {
         case OrientationClasses.AD: {
+          if (typeof staircase.de !== "number" || typeof staircase.deltaE !== "number") return;
           // "… we use δe = min{de/2,Δe}, where Δe = 0.1||e|| as defined for the staircase regions."
           if (staircase.de / 2 < staircase.deltaE) staircase.deltaE = staircase.de / 2;
           break;
         }
         case OrientationClasses.UD: {
-          const maxVertices = staircase.points
+          if (typeof staircase.de !== "number" || typeof length !== "number") return;
+          const maxVertices = staircase
+            .getStaircasePoints() // TODO: use points property instead
             .slice(1, 2)
             .map((point) => new Vertex(point.x, point.y, new Dcel()));
           const distances = maxVertices.map((vertex) => {
@@ -590,9 +580,14 @@ class Dcel {
           break;
         }
         default: {
-          // console.log("de", staircase.de);
+          if (
+            typeof staircase.de !== "number" ||
+            typeof angle !== "number" ||
+            typeof length !== "number"
+          )
+            return;
           // "Let 𝛼1 denote the absolute angle between vector w−v and the assigned direction of e.
-          // Similarly, 𝛼2 denotes the absolute angle between vector w − v and the other associated direction of e."
+          // Similarly, 𝛼2 denotes the absolute angle between vector w−v and the other associated direction of e."
           const alpha1 = angle - edge.getAssociatedAngles()[0];
           const alpha2 = edge.getAssociatedAngles()[1] - angle;
           const lmax =
@@ -830,7 +825,7 @@ class Dcel {
         properties: {
           uuid: staircase.edge.uuid,
           class: staircase.edge.class,
-          interferesWith: staircase.interferesWith,
+          interferesWith: staircase.interferesWith.map((e) => e.getUuid(5)).join(" ,"),
         },
         geometry: {
           type: "Polygon",

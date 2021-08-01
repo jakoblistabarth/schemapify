@@ -315,12 +315,12 @@ class Staircase {
   }
 
   /**
-   * Sets the edgeDistance of the Staircase, if it is smaller than an possibly already calculated distance.
+   * Sets the edgeDistance of the Staircase, if it is smaller than a possibly already calculated distance.
    * @param edgeDistance Minimum distance between edges.
    * @returns The edge distance.
    */
   setEdgeDistance(edgeDistance: number) {
-    if (this.de === undefined || edgeDistance < this.de) this.de = edgeDistance;
+    if (!this.de || edgeDistance < this.de) this.de = edgeDistance;
     return edgeDistance;
   }
 }

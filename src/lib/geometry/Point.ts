@@ -49,6 +49,8 @@ class Point {
     const B: number[] = [];
     const C: number[] = [];
 
+    // if (polygon.some((p) => p.equals(this))) return true;
+
     polygon.forEach((p, idx) => {
       const p1 = p;
       const p2 = polygon[(idx + 1) % polygon.length];
@@ -56,17 +58,18 @@ class Point {
       // calculate A, B and C
       const a = -(p2.y - p1.y);
       const b = p2.x - p1.x;
-      const c = -(a * p1.x + b * p1.y);
+      const c = -(a * p1.x + b * p1.y).toFixed(10);
 
       A.push(a);
       B.push(b);
       C.push(c);
     });
 
-    const D = A.map((elem, idx) => elem * this.x + B[idx] * this.y + C[idx]);
+    const D = A.map((elem, idx) => +(elem * this.x + B[idx] * this.y + C[idx]).toFixed(10));
 
     const t1 = D.every((d) => d >= 0);
     const t2 = D.every((d) => d <= 0);
+
     return t1 || t2;
   }
 
