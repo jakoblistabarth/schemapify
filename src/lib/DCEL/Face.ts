@@ -16,7 +16,7 @@ class Face {
   /**
    * An array of edges, one for each inner connected component (holes) of this face.
    */
-  innerEdges?: HalfEdge[];
+  innerEdges: HalfEdge[];
 
   /**
    * only for holes, pointer to the outerRing it belongs to.
@@ -31,6 +31,7 @@ class Face {
   constructor() {
     this.uuid = uuid();
     this.FID = [];
+    this.innerEdges = [];
   }
 
   /**
@@ -46,8 +47,7 @@ class Face {
     return this.edge ? this.edge.getCycle(counterclockwise) : [];
   }
 
-  removeInnerEdge(edge: HalfEdge): HalfEdge[] | undefined {
-    if (!this.innerEdges) return;
+  removeInnerEdge(edge: HalfEdge): HalfEdge[] {
     const idx = this.innerEdges.indexOf(edge);
     if (idx > -1) {
       this.innerEdges.splice(idx, 1);
@@ -56,7 +56,6 @@ class Face {
   }
 
   replaceInnerEdge(old: HalfEdge, edge: HalfEdge): HalfEdge[] {
-    if (!this.innerEdges) return [];
     const idx = this.innerEdges.indexOf(old);
     if (idx === -1) {
       return [];

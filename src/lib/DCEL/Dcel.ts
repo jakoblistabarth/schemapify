@@ -5,7 +5,7 @@ import Configuration from "../c-oriented-schematization/Configuration";
 import FaceFaceBoundaries from "../c-oriented-schematization/FaceFaceBoundaries";
 import Staircase from "../c-oriented-schematization/Staircase";
 import Point from "../geometry/Point";
-import { copyInstance, createGeoJSON } from "../utilities";
+import { createGeoJSON } from "../utilities";
 import Face from "./Face";
 import HalfEdge, { OrientationClasses } from "./HalfEdge";
 import Vertex from "./Vertex";
@@ -269,19 +269,19 @@ class Dcel {
             if (idx === 0) {
               // only for outer ring
               outerRingFace = subdivision.makeFace();
-              outerRingFace.FID = [FID];
+              outerRingFace.FID.push(FID);
               edge?.getCycle().forEach((e) => (e.face = outerRingFace));
               outerRingFace.edge = edge;
             } else {
               const innerRingFace = subdivision.makeFace();
-              innerRingFace.FID = [FID];
+              innerRingFace.FID.push(FID);
               innerRingFace.outerRing = outerRingFace;
 
               edge.getCycle().forEach((e) => (e.face = innerRingFace));
               innerRingFace.edge = edge;
-              if (!outerRingFace.innerEdges) outerRingFace.innerEdges = [];
+              if (!outerRingFace.innerEdges.length) outerRingFace.innerEdges = [];
 
-              outerRingFace.innerEdges?.push(edge);
+              outerRingFace.innerEdges.push(edge);
 
               edge.twin?.getCycle().forEach((e) => (e.face = outerRingFace));
             }
@@ -677,7 +677,7 @@ class Dcel {
           const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
           coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
           featureCoordinates.push([coordinates]);
-          if (ring.innerEdges) {
+          if (ring.innerEdges.length) {
             const ringCoordinates: number[][][] = [];
             ring.innerEdges.forEach((innerEdge: HalfEdge) => {
               const halfEdges: HalfEdge[] = innerEdge.getCycle(false); // go backwards to go counterclockwise also for holes

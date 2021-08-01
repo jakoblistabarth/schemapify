@@ -139,6 +139,7 @@ describe("schematize() returns a result which can be turned into a valid geojson
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
+    // TODO: run specs only on some of the shapes?
     it("for the simple input " + file, function () {
       const inputJson = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
       const dcel = Dcel.fromGeoJSON(inputJson);

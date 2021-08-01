@@ -196,12 +196,10 @@ class HalfEdge {
       f2.edge = et_;
     }
 
-    if (f2.innerEdges) {
-      f2.innerEdges.forEach((e) => {
-        if (!e.face) return;
-        e.face.replaceOuterRingEdge(et, et_);
-      });
-    }
+    f2.innerEdges.forEach((e) => {
+      if (!e.face) return;
+      e.face.replaceOuterRingEdge(et, et_);
+    });
 
     if (f2.outerRing) {
       // if f2 is a hole
@@ -231,12 +229,10 @@ class HalfEdge {
 
     if (f1.edge && !f2.outerRing) f1.edge = e_; //FIXME: better to use undefined? if e is an clockwise-running edge incident to the unbounded face
 
-    if (f1.innerEdges) {
-      f1.innerEdges.forEach((e) => {
-        if (!e.face) return;
-        e.face.replaceOuterRingEdge(e, e_);
-      });
-    }
+    f1.innerEdges.forEach((e) => {
+      if (!e.face) return;
+      e.face.replaceOuterRingEdge(e, e_);
+    });
 
     if (f1.outerRing) {
       // if f1 is a hole
