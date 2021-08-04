@@ -84,6 +84,16 @@ class Configuration {
     if ((o1 > 0 && o2 < 0) || (o1 < 0 && o2 > 0)) return Junction.B;
     else return Junction.C;
   }
+
+  getSmallerContraction(): Contraction | undefined {
+    const cN = this[ContractionType.N];
+    const cP = this[ContractionType.P];
+    if (!cN && cP) return cP;
+    else if (!cP && cN) return cN;
+    else if (cP && cN) {
+      return cN.area < cP.area ? cN : cP;
+    } else return;
+  }
 }
 
 export default Configuration;

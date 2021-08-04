@@ -490,6 +490,16 @@ class HalfEdge {
     else if (tailAngle < 0 && headAngle < 0) return InflectionType.R;
     else return InflectionType.B;
   }
+
+  /**
+   * Converts the halfedge into a short string. For debbuging purposes.
+   * @returns A string representing the {@link Halfedge}'s endpoints.
+   */
+  toString() {
+    return this.getEndpoints()
+      .map((p) => p.xy().join("/"))
+      .join("->");
+  }
 }
 
 export default HalfEdge;

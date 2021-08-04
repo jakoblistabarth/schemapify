@@ -1,9 +1,10 @@
 import HalfEdge, { InflectionType } from "../DCEL/HalfEdge";
+import Point from "../geometry/Point";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
-import Point from "../geometry/Point";
+import Polygon from "../geometry/Polygon";
 import Vector2D from "../geometry/Vector2D";
-import { crawlArray, getPolygonArea } from "../utilities";
+import { crawlArray } from "../utilities";
 import Configuration, { OuterEdge } from "./Configuration";
 
 export enum ContractionType {
@@ -45,10 +46,10 @@ class Contraction {
     return this.type !== other.type;
   }
 
-  isConflicting(other: Contraction): boolean | undefined {
+  isConflicting(complementary: Contraction): boolean | undefined {
     const overlappingEdges = this.configuration
       .getX()
-      .filter((edge) => other.configuration.getX().includes(edge));
+      .filter((edge) => complementary.configuration.getX().includes(edge));
     if (!overlappingEdges.length) return false;
     if (
       overlappingEdges.length === 1 &&
@@ -144,31 +145,36 @@ class Contraction {
   }
 
   getArea(): number {
-    return this.areaPoints ? getPolygonArea(this.areaPoints) : 0;
+    return this.areaPoints ? new Polygon(this.areaPoints).area : 0;
   }
 
   getBlockingEdges(): HalfEdge[] {
     const blockingEdges: HalfEdge[] = [];
     if (!this.point) return blockingEdges;
-    const areaPoints = this.areaPoints;
-
-    const contractionAreaP = areaPoints.map(
-      (point, idx) => new LineSegment(point, crawlArray(areaPoints, idx, +1))
-    );
+    const area = new Polygon(this.areaPoints);
+    const contractionAreaP = area.getLineSegments();
 
     this.configuration.getX_().forEach((boundaryEdge) => {
+      const pointsInPolygon = boundaryEdge
+        .getEndpoints()
+        .filter((point) => point.isInPolygon(area));
       // add edges which resides entirely in the contraction area
-      if (boundaryEdge.getEndpoints().every((point) => point.isInPolygon(areaPoints))) {
-        blockingEdges.push(boundaryEdge);
-      }
+      if (pointsInPolygon.length === 2) return blockingEdges.push(boundaryEdge);
+      if (pointsInPolygon.length === 1) {
+        contractionAreaP.forEach((areaEdge) => {
+          const intersection = boundaryEdge.toLineSegment()?.intersectsLineSegment(areaEdge);
 
-      // add edges which resides partially in the contraction area
-      contractionAreaP.forEach((edge) => {
-        const intersection = boundaryEdge.toLineSegment()?.intersectsLineSegment(edge);
-        if (intersection && areaPoints.every((p) => !p.equals(intersection))) {
-          blockingEdges.push(boundaryEdge);
-        }
-      });
+          if (
+            intersection &&
+            !blockingEdges.includes(boundaryEdge) &&
+            !this.configuration.getX().some((xEdge) => {
+              const lineOfX = xEdge.toLineSegment();
+              return lineOfX && intersection?.isOnLineSegment(lineOfX);
+            })
+          )
+            blockingEdges.push(boundaryEdge);
+        });
+      }
     });
 
     return blockingEdges;

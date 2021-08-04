@@ -1,11 +1,12 @@
 import HalfEdge, { OrientationClasses } from "../DCEL/HalfEdge";
 import Point from "../geometry/Point";
 import Line from "../geometry/Line";
+import Polygon from "../geometry/Polygon";
 import ConvexHullGrahamScan from "graham_scan";
 
 class Staircase {
   edge: HalfEdge;
-  region: Point[];
+  region: Polygon;
   deltaE?: number;
   points: Point[];
   de?: number;
@@ -33,23 +34,23 @@ class Staircase {
    * If that's not the case its twin is used for calculating the staircase region.
    * @returns The region of an edge.
    */
-  getRegion(): Point[] {
+  getRegion(): Polygon {
     const edge =
       !this.edge.getSignificantVertex() || this.edge.getSignificantVertex() === this.edge.tail
         ? this.edge
         : this.edge.twin;
     const head = edge?.getHead();
     const assignedAngle = edge?.getAssignedAngle();
-    if (!edge || !head || typeof assignedAngle !== "number") return [];
+    if (!edge || !head || typeof assignedAngle !== "number") return new Polygon([]);
 
     switch (edge.class) {
       case OrientationClasses.AB:
-        return [
+        return new Polygon([
           new Point(edge.tail.x, edge.tail.y),
           new Point(head.x, head.y),
           new Point(head.x, head.y),
           new Point(edge.tail.x, edge.tail.y),
-        ];
+        ]);
       case OrientationClasses.UB:
         return this.getSimpleRegion();
       case OrientationClasses.E:
@@ -59,7 +60,7 @@ class Staircase {
         this.points = this.getStaircasePoints();
 
         const [lower, upper] = edge.getAssociatedSector()[0].getBounds();
-        if (typeof lower !== "number" || typeof upper !== "number") return [];
+        if (typeof lower !== "number" || typeof upper !== "number") return new Polygon([]);
         const smallestAssociatedAngle = edge.getClosestAssociatedAngle();
         const largestAssociatedAngle = edge
           .getAssociatedAngles()
@@ -68,7 +69,7 @@ class Staircase {
           typeof smallestAssociatedAngle !== "number" ||
           typeof largestAssociatedAngle !== "number"
         )
-          return [];
+          return new Polygon([]);
         const V = new Point(edge.tail.x, edge.tail.y);
         const a = new Line(V, assignedAngle); // QUESTION: not mentioned in the paper!
         const e = new Line(V, largestAssociatedAngle);
@@ -82,24 +83,24 @@ class Staircase {
         const C = b.intersectsLine(c);
         const B = a.intersectsLine(b);
         const D = e.intersectsLine(d);
-        if (!B || !C || !D) return [];
+        if (!B || !C || !D) return new Polygon([]);
         let regionPoints = [V, B, C, W, D];
 
         // We assumed that p lies in the defined region.
         // However, if this is not the case, we can extend the staircase region
         // by including the vertices of the appended region;
-        if (!P.isInPolygon(regionPoints)) {
+        if (!P.isInPolygon(new Polygon(regionPoints))) {
           regionPoints.splice(2, 0, P);
         }
 
-        return regionPoints;
+        return new Polygon(regionPoints);
       case OrientationClasses.AD:
         this.points = this.getStaircasePoints();
         const convexHull = new ConvexHullGrahamScan();
         this.points.forEach((p) => convexHull.addPoint(p.x, p.y));
-        return convexHull.getHull().map((p) => new Point(p.x, p.y));
+        return new Polygon(convexHull.getHull().map((p) => new Point(p.x, p.y)));
       default:
-        return [];
+        return new Polygon([]);
     }
   }
 
@@ -166,13 +167,13 @@ class Staircase {
    * The region is the area bounded by lines oriented according to the associated directions (both at v and w).
    * @returns a set of Points defining the region
    */
-  getSimpleRegion(): Point[] {
+  getSimpleRegion(): Polygon {
     const edge = this.edge;
     const head = edge.getHead();
-    if (!head) return [];
+    if (!head) return new Polygon([]);
 
     const associatedSector = edge.getAssociatedSector();
-    if (!associatedSector) return [];
+    if (!associatedSector) return new Polygon([]);
     const [lower, upper] = associatedSector[0].getBounds();
     const A = new Point(edge.tail.x, edge.tail.y);
     const a = new Line(A, lower);
@@ -182,7 +183,7 @@ class Staircase {
     const c = new Line(C, lower);
     const B = a.intersectsLine(b);
     const D = d.intersectsLine(c);
-    return B && D ? [A, B, C, D] : [];
+    return B && D ? new Polygon([A, B, C, D]) : new Polygon([]);
   }
 
   /**

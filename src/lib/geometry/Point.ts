@@ -1,4 +1,5 @@
 import LineSegment from "./LineSegment";
+import Polygon from "./Polygon";
 
 class Point {
   x: number;
@@ -38,22 +39,20 @@ class Point {
 
   /**
    * Checks whether the {@link Point} lies within the specified polygon.
-   * This algorithm works only on convex polygons.
+   * This algorithm works only(!) on convex polygons.
    * This poses no problem as all {@link staircase} regions are by definition convex polygons.
    * as seen @ [algorithmtutor.com](https://algorithmtutor.com/Computational-Geometry/Check-if-a-point-is-inside-a-polygon/)
    * @param polygon An array of Points.
    * @returns A boolean indicating, whether the Point is within the specified polygon.
    */
-  isInPolygon(polygon: Point[]) {
+  isInPolygon(polygon: Polygon) {
     const A: number[] = [];
     const B: number[] = [];
     const C: number[] = [];
 
-    // if (polygon.some((p) => p.equals(this))) return true;
-
-    polygon.forEach((p, idx) => {
+    polygon.points.forEach((p, idx) => {
       const p1 = p;
-      const p2 = polygon[(idx + 1) % polygon.length];
+      const p2 = polygon.points[(idx + 1) % polygon.points.length];
 
       // calculate A, B and C
       const a = -(p2.y - p1.y);

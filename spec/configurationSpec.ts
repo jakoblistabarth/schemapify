@@ -235,6 +235,20 @@ describe("setBlockingEdges() returns interfering edges", function () {
     expect(c[ContractionType.P]?.blockingEdges.length).toBe(2);
     expect(c[ContractionType.P]?.blockingEdges).toEqual(s.edges.slice(5, 7));
   });
+
+  it("for a rectilinear setup", function () {
+    const s = createConfigurationSetup(
+      new Point(11, 0),
+      new Point(11, 1),
+      new Point(10, 1),
+      new Point(10, 7),
+      [new Point(0, 7), new Point(0, 0)]
+    );
+    const c = new Configuration(s.innerEdge);
+
+    expect(c[ContractionType.N]?.blockingEdges.length).toBe(1);
+    expect(c[ContractionType.P]?.blockingEdges.length).toBe(0);
+  });
 });
 
 describe("isFeasible() returns", function () {

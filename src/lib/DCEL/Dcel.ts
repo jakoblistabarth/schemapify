@@ -2,7 +2,7 @@ import * as geojson from "geojson";
 import { STEP } from "../../../src/UI/algorithm-navigator";
 import config, { Config } from "../../schematization.config";
 import Configuration from "../c-oriented-schematization/Configuration";
-import FaceFaceBoundaries from "../c-oriented-schematization/FaceFaceBoundaries";
+import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
 import Staircase from "../c-oriented-schematization/Staircase";
 import Point from "../geometry/Point";
 import { createGeoJSON } from "../utilities";
@@ -37,7 +37,7 @@ class Dcel {
   featureProperties: geojson.GeoJsonProperties;
   config: Config;
   snapShots: SnapShots;
-  facefaceBoundaries?: FaceFaceBoundaries;
+  faceFaceBoundaryList?: FaceFaceBoundaryList;
 
   constructor() {
     this.vertices = new Map();
@@ -463,7 +463,7 @@ class Dcel {
     for (const staircase of staircases) {
       staircases.forEach((staircase_) => {
         if (staircase_ === staircase) return;
-        if (staircase.region.every((point) => !point.isInPolygon(staircase_.region))) return;
+        if (staircase.region.points.every((point) => !point.isInPolygon(staircase_.region))) return;
 
         let e = staircase.edge;
         let e_ = staircase_.edge;
@@ -622,7 +622,7 @@ class Dcel {
   }
 
   simplify(): Dcel {
-    this.facefaceBoundaries = new FaceFaceBoundaries(this);
+    this.faceFaceBoundaryList = new FaceFaceBoundaryList(this);
     this.createConfigurations();
     return this;
   }
@@ -748,7 +748,7 @@ class Dcel {
   staircasesToGeoJSON(): geojson.FeatureCollection {
     const staircaseFeatures = this.getHalfEdges(undefined, true).map((edge): geojson.Feature => {
       const staircase: Staircase = new Staircase(edge);
-      const coordinates: number[][] = staircase.region.map((p) => [p.x, p.y]);
+      const coordinates: number[][] = staircase.region.points.map((p) => [p.x, p.y]);
       return {
         type: "Feature",
         geometry: {
@@ -817,9 +817,9 @@ class Dcel {
 
   staircaseRegionsToGeoJSON(): geojson.FeatureCollection {
     const regionFeatures = this.getStaircases().map((staircase): geojson.Feature => {
-      const regionPoints = staircase.region;
+      const region = staircase.region.points;
       // add first Point to close geoJSON polygon
-      regionPoints.push(regionPoints[0]);
+      region.push(region[0]);
 
       return {
         type: "Feature",
@@ -830,7 +830,7 @@ class Dcel {
         },
         geometry: {
           type: "Polygon",
-          coordinates: [regionPoints.map((p) => [p.x, p.y])],
+          coordinates: [region.map((p) => [p.x, p.y])],
         },
       };
     });

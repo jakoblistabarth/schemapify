@@ -3,14 +3,14 @@ import { draw } from "./mapGrid";
 export function drawDataSelect(inputFiles: string[]) {
   const bottomNav = document.getElementById("select-data");
   if (!bottomNav) return;
-  const show = inputFiles.slice(0, 1);
+  const show = inputFiles.slice(13, 14);
 
-  inputFiles.forEach((file) => {
+  inputFiles.forEach((file, idx) => {
     const filename = file.substring(file.lastIndexOf("/") + 1, file.length - 5);
     const label = document.createElement("label");
     const checkbox = document.createElement("input");
     const span = document.createElement("span");
-    span.innerHTML = filename;
+    span.innerHTML = "#" + idx + " " + filename;
     checkbox.setAttribute("type", "checkbox");
     checkbox.value = file;
     checkbox.checked = show.includes(file);
@@ -51,6 +51,7 @@ export const tests: string[] = [
   "shapes/enclave.json",
   "shapes/enclave2.json",
   "shapes/inflection-test.json",
+  "shapes/smallestContraction-2.json",
   // "shapes/square-hole-island-hole.json",
   // "shapes/square-hole-island.json",
   "shapes/square-hole.json",

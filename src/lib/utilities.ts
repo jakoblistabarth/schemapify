@@ -35,25 +35,3 @@ export function getUnitVector(angle: number): Vector2D {
 export function copyInstance<T>(original: T): T {
   return Object.assign(Object.create(Object.getPrototypeOf(original)), original);
 }
-
-/**
- * Calculates the area of the irregular polyon defined by a set of points.
- * TODO: add credits!
- * @param points An array of Points, which has to be sorted (either clockwise or counter-clockwise).
- * @returns A number indicating the area of the polygon.
- */
-export function getPolygonArea(points: Point[]): number {
-  let total = 0;
-
-  for (let i = 0; i < points.length; i++) {
-    const addX = points[i].x;
-    const addY = points[i == points.length - 1 ? 0 : i + 1].y;
-    const subX = points[i == points.length - 1 ? 0 : i + 1].x;
-    const subY = points[i].y;
-
-    total += addX * addY * 0.5;
-    total -= subX * subY * 0.5;
-  }
-
-  return Math.abs(total);
-}

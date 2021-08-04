@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import { getPolygonArea } from "../utilities";
+import Polygon from "../geometry/Polygon";
 import HalfEdge from "./HalfEdge";
 
 class Face {
@@ -82,7 +82,7 @@ class Face {
     const edges = this.getEdges();
     if (!edges) return;
     const vertices = edges.map((edge) => edge.tail);
-    return getPolygonArea(vertices);
+    return new Polygon(vertices).area;
   }
 }
 
