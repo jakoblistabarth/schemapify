@@ -1,6 +1,6 @@
 import HalfEdge from "../DCEL/HalfEdge";
 import Face from "../DCEL/Face";
-import Contraction from "./Contraction";
+import Contraction, { ContractionType } from "./Contraction";
 
 class FaceFaceBoundary {
   faces: [Face, Face];
@@ -11,29 +11,57 @@ class FaceFaceBoundary {
     this.edges = [edge];
   }
 
+  /**
+   * Gets the minimal configuration pair of a face-face-boundary. Using the 6 smallest positive and negative contractions, as described in Buchin et al. 2016.
+   * @returns A tuple of two complementary, feasible contractions, posing  minimal configuration pair of a {@link FaceFaceBoundary}.
+   */
   getMinimalConfigurationPair(): [Contraction, Contraction] | undefined {
-    const contractions = this.edges.reduce((contractions: Contraction[], edge) => {
-      const smaller = edge.configuration?.getSmallerContraction();
-      if (smaller && smaller.isFeasible()) contractions.push(smaller);
-      return contractions;
-    }, []);
-    contractions.sort((a, b) => a.area - b.area);
+    const pContractions = this.edges
+      .reduce((contractions: Contraction[], edge) => {
+        const pContraction = edge.configuration?.[ContractionType.P];
+        if (pContraction && pContraction.isFeasible()) contractions.push(pContraction);
+        return contractions;
+      }, [])
+      .sort((a, b) => a.area - b.area);
 
-    let idx = 0;
-    let complementary: Contraction | undefined;
-    do {
-      const complementaries = contractions.filter((c) => c.isComplementary(contractions[idx]));
-      complementary = complementaries.reduce((solution: Contraction | undefined, candidate) => {
-        if (
-          !candidate.isConflicting(contractions[idx]) &&
-          (!solution || candidate.area < solution.area)
-        )
-          return (solution = candidate);
-        return solution;
-      }, undefined);
-    } while (!complementary && idx > contractions.length);
+    const nContractions = this.edges
+      .reduce((contractions: Contraction[], edge) => {
+        const nContraction = edge.configuration?.[ContractionType.N];
+        if (nContraction && nContraction.isFeasible()) contractions.push(nContraction);
+        return contractions;
+      }, [])
+      .sort((a, b) => a.area - b.area);
 
-    return contractions[idx] && complementary ? [contractions[idx], complementary] : undefined;
+    const contractionCandidates = [...pContractions.slice(0, 6), ...nContractions.slice(0, 6)].sort(
+      (a, b) => a.area - b.area
+    );
+
+    type CompensationCandidate = { contraction: Contraction; distance: number };
+
+    let contraction: Contraction | undefined;
+    let compensation: Contraction | undefined;
+    for (const contractionCandidate of contractionCandidates) {
+      const compensationCandidates =
+        contractionCandidate.type === ContractionType.N ? pContractions : nContractions;
+      const compensationCandidate = compensationCandidates
+        .reduce((solutions: CompensationCandidate[], candidate) => {
+          if (!candidate.isConflicting(contractionCandidate))
+            solutions.push({
+              contraction: candidate,
+              distance: contractionCandidate.configuration.innerEdge.getMinimalCycleDistance(
+                candidate.configuration.innerEdge
+              ),
+            });
+          return solutions;
+        }, [])
+        .sort((a, b) => a.distance - b.distance)[0];
+      if (compensationCandidate) {
+        contraction = contractionCandidate;
+        compensation = compensationCandidate.contraction;
+        break;
+      }
+    }
+    return contraction && compensation ? [contraction, compensation] : undefined;
   }
 }
 

@@ -361,3 +361,16 @@ describe("intersectsLine()", function () {
     expect(halfEdge.intersectsLine(line)).toBeUndefined();
   });
 });
+
+describe("getMinimalCycleDistance()", function () {
+  it("returns the correct distance for a square.", function () {
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
+    const dcel = Dcel.fromGeoJSON(json);
+
+    const edge0 = dcel.getHalfEdges()[0];
+
+    expect(edge0.getMinimalCycleDistance(dcel.getHalfEdges()[2])).toBe(1);
+    expect(edge0.getMinimalCycleDistance(dcel.getHalfEdges()[4])).toBe(2);
+    expect(edge0.getMinimalCycleDistance(dcel.getHalfEdges()[6])).toBe(1);
+  });
+});

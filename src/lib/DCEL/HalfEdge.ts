@@ -92,6 +92,18 @@ class HalfEdge {
     return halfEdges;
   }
 
+  /**
+   * Gets the minimum amount of steps it takes to get from the halfedge to another.
+   * Looking at both directions, clock-wise and counter-clockwise.
+   * @param other {@link HalfEdge} to which the distance in steps is measured.
+   * @returns An integer, indicating the minimum step distance to the {@link Halfedge}.
+   */
+  getMinimalCycleDistance(other: HalfEdge): number {
+    const forwards = this.getCycle().indexOf(other);
+    const backwards = this.getCycle(false).indexOf(other);
+    return Math.min(forwards, backwards);
+  }
+
   getVector(): Vector2D | undefined {
     const [tail, head] = this.getEndpoints();
     if (tail && head) return new Vector2D(head.x - tail.x, head.y - tail.y);
