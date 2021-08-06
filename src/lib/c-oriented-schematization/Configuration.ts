@@ -60,11 +60,6 @@ class Configuration {
     else return new Line(head, nextAngle);
   }
 
-  getTracks(): Line[] | undefined {
-    const [prevTrack, nextTrack] = [this.getTrack(OuterEdge.PREV), this.getTrack(OuterEdge.NEXT)];
-    if (prevTrack && nextTrack) return [prevTrack, nextTrack];
-  }
-
   hasJunction(): boolean {
     return this.innerEdge.getEndpoints().some((p) => p.edges.length > 2);
   }
@@ -83,16 +78,6 @@ class Configuration {
     const o2 = edge2.getVector().dot(normal);
     if ((o1 > 0 && o2 < 0) || (o1 < 0 && o2 > 0)) return Junction.B;
     else return Junction.C;
-  }
-
-  getSmallerContraction(): Contraction | undefined {
-    const cN = this[ContractionType.N];
-    const cP = this[ContractionType.P];
-    if (!cN && cP) return cP;
-    else if (!cP && cN) return cN;
-    else if (cP && cN) {
-      return cN.area < cP.area ? cN : cP;
-    } else return;
   }
 }
 
