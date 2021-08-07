@@ -52,6 +52,11 @@ class FaceFaceBoundaryList {
     );
   }
 
+  doEdgeMove(contraction: Contraction, compensation: Contraction) {
+    // calculate compensation trapeze height
+    const shift = compensation.getCompensationHeight(contraction.area);
+  }
+
   update(dcel: Dcel, EdgesToDelete: HalfEdge[], EdgesToAdd: HalfEdge[]) {
     //do something
   }

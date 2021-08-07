@@ -4,7 +4,6 @@ import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
 import Polygon from "../geometry/Polygon";
 import Vector2D from "../geometry/Vector2D";
-import { crawlArray } from "../utilities";
 import Configuration, { OuterEdge } from "./Configuration";
 
 export enum ContractionType {
@@ -180,9 +179,22 @@ class Contraction {
     return blockingEdges;
   }
 
-  doEdgeMove(): void {
-    if (this.configuration.hasJunction()) return;
-    console.log(this.type);
+  getCompensationHeight(contractionArea: number): number | undefined {
+    const a = this.configuration.innerEdge;
+    const aLength = a.getLength();
+    if (!a.face || !aLength) return;
+    const alpha1 = a.tail.getExteriorAngle(a.face);
+    const alpha2 = a.getHead()?.getExteriorAngle(a.face);
+    if (!alpha1 || !alpha2) return;
+    const alpha1_ = -Math.abs(alpha1) + Math.PI * 0.5;
+    const alpha2_ = -Math.abs(alpha2) + Math.PI * 0.5;
+    if (alpha1_ === 0 && alpha2_ === 0) {
+      return contractionArea / aLength;
+    } else {
+      const p = (aLength * 2) / (Math.tan(alpha1_) + Math.tan(alpha2_));
+      const q = (-contractionArea * 2) / (Math.tan(alpha1_) + Math.tan(alpha2_));
+      return -p * 0.5 + Math.sqrt(Math.pow(p * 0.5, 2) - q);
+    }
   }
 }
 

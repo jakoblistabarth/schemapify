@@ -1,8 +1,10 @@
 import fs from "fs";
 import path from "path";
+import Point from "../src/lib/geometry/Point";
 import Configuration from "../src/lib/c-oriented-schematization/Configuration";
 import Contraction, { ContractionType } from "../src/lib/c-oriented-schematization/Contraction";
 import Dcel from "../src/lib/DCEL/Dcel";
+import { configurationCases, createConfigurationSetup } from "./test-setup";
 
 describe("isConflicting() returns", function () {
   let dcel: Dcel;
@@ -46,5 +48,64 @@ describe("isConflicting() returns", function () {
     expect(cA[ContractionType.N]?.isConflicting(cB[ContractionType.N] as Contraction)).toBeTrue();
     expect(cA[ContractionType.N]?.isConflicting(cB[ContractionType.P] as Contraction)).toBeTrue();
     expect(cA[ContractionType.N]?.isConflicting(cC[ContractionType.N] as Contraction)).toBeTrue();
+  });
+});
+
+describe("getCompensationShift() returns", function () {
+  it("for a rectangular compensation area.", function () {
+    const s = configurationCases.negConvexParallelTracks;
+    const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
+
+    expect(c[ContractionType.N]?.getCompensationHeight(2)).toBe(0.5);
+    expect(c[ContractionType.N]?.getCompensationHeight(4)).toBe(1);
+    expect(c[ContractionType.N]?.getCompensationHeight(6)).toBe(1.5);
+  });
+
+  it("for an inwards trapezoid compensation area.", function () {
+    const s = configurationCases.posReflex;
+    const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
+
+    expect(c[ContractionType.P]?.getCompensationHeight(5)).toBe(1);
+  });
+
+  it("for an outwards trapezoid compensation area.", function () {
+    const s = configurationCases.negConvex;
+    const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
+
+    expect(c[ContractionType.N]?.getCompensationHeight(5)).toBe(1);
+    expect(c[ContractionType.N]?.getCompensationHeight(8.25)).toBe(1.5);
+  });
+
+  it("for a inwards trapezoid compensation area.", function () {
+    const s = configurationCases.posReflex;
+    const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
+
+    expect(c[ContractionType.P]?.getCompensationHeight(5)).toBe(1);
+  });
+
+  it("for a trapezoid compensation area with 2 90deg angles.", function () {
+    const s = createConfigurationSetup(
+      new Point(-2, 0),
+      new Point(-2, 2),
+      new Point(2, 2),
+      new Point(4, 0),
+      [new Point(4, 6), new Point(-4, 6)]
+    );
+    const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
+
+    expect(c[ContractionType.P]?.getCompensationHeight(4.5)).toBe(1);
+  });
+
+  it("for a trapezoid compensation area with 2 90deg angles.", function () {
+    const s = createConfigurationSetup(
+      new Point(-4, 0),
+      new Point(-2, 2),
+      new Point(2, 2),
+      new Point(2, 0),
+      [new Point(4, 6), new Point(-4, 4)]
+    );
+    const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
+
+    expect(c[ContractionType.P]?.getCompensationHeight(4.5)).toBe(1);
   });
 });
