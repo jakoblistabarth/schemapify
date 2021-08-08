@@ -51,7 +51,7 @@ export const tests: string[] = [
   "shapes/enclave.json",
   "shapes/enclave2.json",
   "shapes/inflection-test.json",
-  "shapes/smallestContraction-2.json",
+  "shapes/smallest-contraction.json",
   // "shapes/square-hole-island-hole.json",
   // "shapes/square-hole-island.json",
   "shapes/square-hole.json",

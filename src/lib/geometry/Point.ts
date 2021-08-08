@@ -1,5 +1,6 @@
 import LineSegment from "./LineSegment";
 import Polygon from "./Polygon";
+import Vector2D from "./Vector2D";
 
 class Point {
   x: number;
@@ -12,6 +13,10 @@ class Point {
 
   xy() {
     return [this.x, this.y];
+  }
+
+  toVector(): Vector2D {
+    return new Vector2D(this.x, this.y);
   }
 
   distanceToPoint(p: Point) {

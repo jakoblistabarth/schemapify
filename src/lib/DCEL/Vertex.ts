@@ -292,6 +292,12 @@ class Vertex extends Point {
           );
   }
 
+  moveTo(x: number, y: number): Vertex {
+    this.x = x;
+    this.y = y;
+    return this;
+  }
+
   toPoint(): Point {
     return new Point(this.x, this.y);
   }

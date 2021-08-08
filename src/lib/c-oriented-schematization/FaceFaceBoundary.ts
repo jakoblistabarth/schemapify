@@ -1,6 +1,7 @@
 import HalfEdge from "../DCEL/HalfEdge";
 import Face from "../DCEL/Face";
 import Contraction, { ContractionType } from "./Contraction";
+import ConfigurationPair from "./ConfigurationPair";
 
 class FaceFaceBoundary {
   faces: [Face, Face];
@@ -15,7 +16,7 @@ class FaceFaceBoundary {
    * Gets the minimal configuration pair of a face-face-boundary. Using the 6 smallest positive and negative contractions, as described in Buchin et al. 2016.
    * @returns A tuple of two complementary, feasible contractions, posing  minimal configuration pair of a {@link FaceFaceBoundary}.
    */
-  getMinimalConfigurationPair(): [Contraction, Contraction] | undefined {
+  getMinimalConfigurationPair(): ConfigurationPair | undefined {
     const pContractions = this.edges
       .reduce((contractions: Contraction[], edge) => {
         const pContraction = edge.configuration?.[ContractionType.P];
@@ -61,7 +62,7 @@ class FaceFaceBoundary {
         break;
       }
     }
-    return contraction && compensation ? [contraction, compensation] : undefined;
+    if (contraction && compensation) return new ConfigurationPair(contraction, compensation);
   }
 }
 

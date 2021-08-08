@@ -185,7 +185,7 @@ class Contraction {
     if (!a.face || !aLength) return;
     const alpha1 = a.tail.getExteriorAngle(a.face);
     const alpha2 = a.getHead()?.getExteriorAngle(a.face);
-    if (!alpha1 || !alpha2) return;
+    if (typeof alpha1 !== "number" || typeof alpha2 !== "number") return;
     const alpha1_ = -Math.abs(alpha1) + Math.PI * 0.5;
     const alpha2_ = -Math.abs(alpha2) + Math.PI * 0.5;
     if (alpha1_ === 0 && alpha2_ === 0) {

@@ -1,3 +1,5 @@
+import Point from "./Point";
+
 class Vector2D {
   dx: number;
   dy: number;
@@ -41,6 +43,10 @@ class Vector2D {
 
   cross(vector: Vector2D): number {
     return this.dx * vector.dy - this.dy * vector.dx;
+  }
+
+  toPoint(): Point {
+    return new Point(this.dx, this.dy);
   }
 }
 

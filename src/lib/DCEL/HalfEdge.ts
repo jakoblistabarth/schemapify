@@ -256,6 +256,19 @@ class HalfEdge {
     return e_;
   }
 
+  move(newTail: Point, newHead: Point) {
+    const head = this.getHead();
+    const prevTail = this.prev?.tail;
+    const nextHead = this.next?.getHead();
+    if (!head || !nextHead || !prevTail) return;
+    if (newHead.equals(nextHead)) {
+      head.remove();
+    } else head.moveTo(newHead.x, newHead.y);
+    if (newTail.equals(prevTail)) {
+      this.tail.remove();
+    } else this.tail.moveTo(newTail.x, newTail.y);
+  }
+
   /**
    * Returns the intersection point of the HalfEdge and a line, if exists.
    * @credits Part that determines whether or not the point is on the line segment, was adapted from this [stack overflow answer](https://stackoverflow.com/a/17590923).

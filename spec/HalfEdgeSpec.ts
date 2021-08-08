@@ -6,7 +6,7 @@ import Vertex from "../src/lib/DCEL/Vertex";
 import Point from "../src/lib/geometry/Point";
 import { config } from "../src/schematization.config";
 import CRegular from "../src/lib/c-oriented-schematization/CRegular";
-import { createEdgeVertexSetup, TestSetup, getTestFiles } from "./test-setup";
+import { createEdgeVertexSetup, TestSetup, getTestFiles, configurationCases } from "./test-setup";
 import Line from "../src/lib/geometry/Line";
 
 describe("getLength()", function () {
@@ -372,5 +372,39 @@ describe("getMinimalCycleDistance()", function () {
     expect(edge0.getMinimalCycleDistance(dcel.getHalfEdges()[2])).toBe(1);
     expect(edge0.getMinimalCycleDistance(dcel.getHalfEdges()[4])).toBe(2);
     expect(edge0.getMinimalCycleDistance(dcel.getHalfEdges()[6])).toBe(1);
+  });
+});
+
+describe("move().", function () {
+  it("deletes(merges) a vertex if target point is existing.", function () {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("data/shapes/smallest-contraction.json"), "utf8")
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    dcel.getBoundedFaces()[0].getEdges()[1].move(new Point(10, 0), new Point(10, 1));
+
+    expect(dcel.getBoundedFaces()[0].getEdges()[1].toString()).toBe("10/0->10/1");
+  });
+
+  it("deletes(merges) vertices if target points are existing.", function () {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("data/shapes/smallest-contraction.json"), "utf8")
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    dcel.getBoundedFaces()[0].getEdges()[5].move(new Point(10, 7), new Point(10, 8));
+
+    expect(dcel.getBoundedFaces()[0].getEdges()[3].toString()).toBe("10/1->10/7");
+    expect(dcel.getBoundedFaces()[0].getEdges()[4].toString()).toBe("10/7->10/8");
+    expect(dcel.getBoundedFaces()[0].getEdges()[5].toString()).toBe("10/8->10/10");
+  });
+
+  it("moves and edge.", function () {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("data/shapes/smallest-contraction.json"), "utf8")
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    dcel.getBoundedFaces()[0].getEdges()[1].move(new Point(10.5, 0), new Point(10.5, 1));
+
+    expect(dcel.getBoundedFaces()[0].getEdges()[1].toString()).toBe("10.5/0->10.5/1");
   });
 });
