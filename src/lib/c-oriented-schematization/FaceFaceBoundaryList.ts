@@ -15,9 +15,9 @@ class FaceFaceBoundaryList {
   }
 
   static getKey(faceA: Face, faceB: Face): string {
-    const faces = [faceA, faceB];
-    faces.sort();
-    return `${faces[0].getUuid(10)}|${faces[1].getUuid(10)}`;
+    const uuids = [faceA.getUuid(10), faceB.getUuid(10)];
+    uuids.sort();
+    return `${uuids[0]}|${uuids[1]}`;
   }
 
   create(dcel: Dcel) {
