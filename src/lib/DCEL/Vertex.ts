@@ -92,8 +92,9 @@ class Vertex extends Point {
   /**
    * Removes the vertex and replaces the incident HalfEdges with a new one.
    * Only works on vertices of degree 2 (with a maximum of two incident {@link HalfEdge}s).
+   * @returns The new ("merged") {@link HalfEdge}.
    */
-  remove(): void {
+  remove(face?: Face): HalfEdge | undefined {
     if (!this.dcel) return;
     else if (this.edges.length > 2)
       throw new Error(
@@ -105,16 +106,16 @@ class Vertex extends Point {
     const ex__ = this.edges[0];
     const ex_ = ex__.prev;
 
-    const a = ex__.next;
+    const a = ex_?.prev;
     const b = a?.twin;
-    const c = ex_?.prev;
+    const c = ex__.next;
     const d = c?.twin;
 
     const f1 = ex__.face;
     const f2 = ex__.twin?.face;
 
-    const eTail = c?.getHead();
-    const eHead = a?.tail;
+    const eTail = a?.getHead();
+    const eHead = c?.tail;
 
     if (!ex__?.twin || !ex_?.twin || !eTail || !eHead || !f1 || !f2 || !a || !b || !c || !d) return;
     const e = this.dcel.makeHalfEdge(eTail, eHead);
@@ -137,21 +138,23 @@ class Vertex extends Point {
     e.face = ex__.face;
     e.twin.face = ex__.twin.face;
 
-    e.prev = c;
-    c.next = e;
-    e.next = a;
-    a.prev = e;
+    e.next = c;
+    c.prev = e;
+    e.prev = a;
+    a.next = e;
 
-    e.twin.prev = b;
-    b.next = e.twin;
-    e.twin.next = d;
-    d.prev = e.twin;
+    e.twin.prev = d;
+    d.next = e.twin;
+    e.twin.next = b;
+    b.prev = e.twin;
 
     ex_.twin.remove();
     ex_.remove();
     ex__.twin.remove();
     ex__.remove();
     this.dcel.removeVertex(this);
+
+    return face && e.face !== face ? e.twin : e;
   }
 
   /**

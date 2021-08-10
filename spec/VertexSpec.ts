@@ -83,7 +83,7 @@ describe("sortEdges()", function () {
 });
 
 describe("remove() on a vertex", function () {
-  it("return a correct triangle dcel when removing one vertex of a square shape", function () {
+  it("generates a correct triangle dcel when removing one vertex of a square shape", function () {
     const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
 
@@ -93,6 +93,27 @@ describe("remove() on a vertex", function () {
 
     expect(squareFace.getEdges().length).toBe(3);
     expect(squareFace.getEdges(false).length).toBe(3);
+  });
+
+  it("returns any of the just created halfedges if no face is given", function () {
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
+    const dcel = Dcel.fromGeoJSON(json);
+
+    const vertex = dcel.findVertex(0, 0);
+    const e = vertex?.remove();
+
+    expect(e?.toString()).toBe("200/0->0/200");
+  });
+
+  it("returns the specific halfedge if a face is given", function () {
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
+    const dcel = Dcel.fromGeoJSON(json);
+
+    const squareFace = dcel.getBoundedFaces()[0];
+    const vertex = dcel.findVertex(0, 0);
+    const e = vertex?.remove(squareFace);
+
+    expect(e?.toString()).toBe("0/200->200/0");
   });
 });
 
