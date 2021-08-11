@@ -5,6 +5,7 @@ import Configuration from "../c-oriented-schematization/Configuration";
 import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
 import Staircase from "../c-oriented-schematization/Staircase";
 import Point from "../geometry/Point";
+import Polygon from "../geometry/Polygon";
 import { createGeoJSON } from "../utilities";
 import Face from "./Face";
 import HalfEdge, { OrientationClasses } from "./HalfEdge";
@@ -149,6 +150,13 @@ class Dcel {
     return [...this.vertices].map(([k, v]) => v);
   }
 
+  getArea(): number {
+    return this.getBoundedFaces().reduce((acc, face) => {
+      acc = acc + new Polygon(face.getEdges().map((e) => e.tail)).area;
+      return acc;
+    }, 0);
+  }
+
   findVertex(x: number, y: number): Vertex | undefined {
     return this.vertices.get(Vertex.getKey(x, y));
   }
@@ -162,8 +170,14 @@ class Dcel {
   removeHalfEdge(edge: HalfEdge): Map<string, HalfEdge> {
     const head = edge.getHead();
     if (!head) return this.halfEdges;
-    const key = HalfEdge.getKey(edge.tail, head);
-    this.halfEdges.delete(key);
+    const edgeKey = HalfEdge.getKey(edge.tail, head);
+    this.halfEdges.delete(edgeKey);
+    if (edge.face && edge.twin?.face) {
+      const boundaryKey = FaceFaceBoundaryList.getKey(edge.face, edge.twin.face);
+      let boundaryEdges = this.faceFaceBoundaryList?.boundaries.get(boundaryKey)?.edges;
+      if (boundaryEdges && boundaryEdges.indexOf(edge) >= 0)
+        boundaryEdges.splice(boundaryEdges.indexOf(edge), 1);
+    }
     return this.halfEdges;
   }
 
@@ -624,6 +638,31 @@ class Dcel {
   simplify(): Dcel {
     this.faceFaceBoundaryList = new FaceFaceBoundaryList(this);
     this.createConfigurations();
+    console.log(
+      "before",
+      [...this.faceFaceBoundaryList.boundaries].map(([k, v]) => v.edges.length),
+      this.getArea()
+    );
+
+    for (let index = 0; index < 3; index++) {
+      let pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
+      console.log(pair?.contraction.configuration.innerEdge.toString(), pair?.contraction.area);
+      console.log(pair?.compensation?.configuration.innerEdge.toString(), pair?.compensation?.area);
+      console.log("-");
+
+      pair?.doEdgeMove();
+    }
+    // while (pair || s.halfEdges.size/2 >= k) {
+    //   pair?.doEdgeMove();
+    //   idx++;
+    //   pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
+    // }
+
+    console.log(
+      "after",
+      [...this.faceFaceBoundaryList.boundaries].map(([k, v]) => v.edges.length),
+      this.getArea()
+    );
     return this;
   }
 
@@ -838,7 +877,7 @@ class Dcel {
   }
 
   /**
-   * Creates Configurations only for edges which endpoints are of degree 3 or less.
+   * Creates Configurations for all valid edges.
    */
   createConfigurations() {
     this.getHalfEdges().forEach((edge) => {

@@ -19,7 +19,7 @@ export interface Config {
 }
 
 export const config = {
-  lambda: 0.05,
+  lambda: 1,
   k: 100, // TODO: set meaningful value
   c: new CRegular(2),
   // c: new CIrregular([Math.PI * 0.25, Math.PI * 1, Math.PI * (5 / 3)]),

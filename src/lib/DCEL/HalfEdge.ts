@@ -1,15 +1,15 @@
 import { v4 as uuid } from "uuid";
-import Vertex from "./Vertex";
-import Dcel from "./Dcel";
-import Face from "./Face";
-import Sector from "../c-oriented-schematization/Sector";
-import { getUnitVector } from "../utilities";
-import Staircase from "../c-oriented-schematization/Staircase";
 import Configuration from "../c-oriented-schematization/Configuration";
-import Point from "../geometry/Point";
+import Sector from "../c-oriented-schematization/Sector";
+import Staircase from "../c-oriented-schematization/Staircase";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
+import Point from "../geometry/Point";
 import Vector2D from "../geometry/Vector2D";
+import { getUnitVector } from "../utilities";
+import Dcel from "./Dcel";
+import Face from "./Face";
+import Vertex from "./Vertex";
 
 export enum OrientationClasses {
   AB = "alignedBasic",
@@ -261,11 +261,26 @@ class HalfEdge {
     const prevTail = this.prev?.tail;
     const nextHead = this.next?.getHead();
     if (!head || !nextHead || !prevTail) return;
+    // console.log(
+    //   "to be modified",
+    //   this.tail.xy(),
+    //   "->",
+    //   newTail.xy(),
+    //   this.getHead()?.xy(),
+    //   "->",
+    //   newHead.xy()
+    // );
     if (newHead.equals(nextHead)) {
-      head.remove();
+      const newEdge = head.remove(this.face);
+      if (newEdge) newEdge.configuration = new Configuration(newEdge);
+      newEdge?.dcel.faceFaceBoundaryList?.addEdge(newEdge);
+      // console.log("newEdge head", newEdge?.toString());
     } else head.moveTo(newHead.x, newHead.y);
     if (newTail.equals(prevTail)) {
-      this.tail.remove();
+      const newEdge = this.tail.remove(this.face);
+      if (newEdge) newEdge.configuration = new Configuration(newEdge);
+      newEdge?.dcel.faceFaceBoundaryList?.addEdge(newEdge);
+      // console.log("newEdge tail", newEdge?.toString());
     } else this.tail.moveTo(newTail.x, newTail.y);
   }
 

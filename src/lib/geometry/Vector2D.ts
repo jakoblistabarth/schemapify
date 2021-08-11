@@ -13,8 +13,8 @@ class Vector2D {
     return Math.sqrt(Math.pow(this.dx, 2) + Math.pow(this.dy, 2));
   }
 
-  getNormal(): Vector2D {
-    return new Vector2D(-this.dy, this.dx);
+  getNormal(counterclockwise = true): Vector2D {
+    return counterclockwise ? new Vector2D(-this.dy, this.dx) : new Vector2D(this.dy, -this.dx);
   }
 
   getInvers(): Vector2D {

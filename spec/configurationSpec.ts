@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import FaceFaceBoundaryList from "src/lib/c-oriented-schematization/FaceFaceBoundaryList";
 import HalfEdge from "src/lib/DCEL/HalfEdge";
 import Configuration, { OuterEdge } from "../src/lib/c-oriented-schematization/Configuration";
 import Contraction, { ContractionType } from "../src/lib/c-oriented-schematization/Contraction";

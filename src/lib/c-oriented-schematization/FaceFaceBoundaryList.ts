@@ -50,8 +50,10 @@ class FaceFaceBoundaryList {
     }, undefined);
   }
 
-  update(dcel: Dcel, EdgesToDelete: HalfEdge[], EdgesToAdd: HalfEdge[]) {
-    //do something
+  addEdge(edge: HalfEdge) {
+    if (!edge.face || !edge.twin?.face) return;
+    const key = FaceFaceBoundaryList.getKey(edge.face, edge.twin?.face);
+    this.boundaries.get(key)?.edges.push(edge);
   }
 }
 

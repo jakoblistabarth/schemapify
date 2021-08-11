@@ -45,10 +45,12 @@ class Contraction {
     return this.type !== other.type;
   }
 
+  getOverlappingEdges(other: Contraction): HalfEdge[] {
+    return this.configuration.getX().filter((edge) => other.configuration.getX().includes(edge));
+  }
+
   isConflicting(complementary: Contraction): boolean | undefined {
-    const overlappingEdges = this.configuration
-      .getX()
-      .filter((edge) => complementary.configuration.getX().includes(edge));
+    const overlappingEdges = this.getOverlappingEdges(complementary);
     if (!overlappingEdges.length) return false;
     if (
       overlappingEdges.length === 1 &&
@@ -56,6 +58,13 @@ class Contraction {
     )
       return false;
     return true;
+  }
+
+  reducesComplexity(complementary: Contraction): boolean | undefined {
+    const head = complementary.configuration.innerEdge.getHead();
+    const tail = complementary.configuration.innerEdge.tail;
+    if (!head) return;
+    return this.area > 0 && !this.point.equals(tail) && !this.point.equals(head);
   }
 
   /**

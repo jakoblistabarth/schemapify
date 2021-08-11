@@ -38,7 +38,6 @@ class FaceFaceBoundary {
     );
 
     type CompensationCandidate = { contraction: Contraction; distance: number };
-
     let contraction: Contraction | undefined;
     let compensation: Contraction | undefined;
     for (const contractionCandidate of contractionCandidates) {
@@ -46,7 +45,10 @@ class FaceFaceBoundary {
         contractionCandidate.type === ContractionType.N ? pContractions : nContractions;
       const compensationCandidate = compensationCandidates
         .reduce((solutions: CompensationCandidate[], candidate) => {
-          if (!candidate.isConflicting(contractionCandidate))
+          if (
+            !candidate.isConflicting(contractionCandidate) &&
+            candidate.reducesComplexity(contractionCandidate)
+          )
             solutions.push({
               contraction: candidate,
               distance: contractionCandidate.configuration.innerEdge.getMinimalCycleDistance(
@@ -56,13 +58,16 @@ class FaceFaceBoundary {
           return solutions;
         }, [])
         .sort((a, b) => a.distance - b.distance)[0];
-      if (compensationCandidate) {
+      if (contractionCandidate.area === 0 || compensationCandidate) {
         contraction = contractionCandidate;
-        compensation = compensationCandidate.contraction;
+        compensation =
+          contractionCandidate.area > 0 ? compensationCandidate.contraction : undefined;
         break;
       }
     }
+
     if (contraction && compensation) return new ConfigurationPair(contraction, compensation);
+    if (contraction) return new ConfigurationPair(contraction);
   }
 }
 
