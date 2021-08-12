@@ -1,11 +1,11 @@
-import { draw } from "./mapGrid";
+import Dcel from "src/lib/DCEL/Dcel";
+import { draw } from "./mapContainer";
 
-export function drawDataSelect(inputFiles: string[]) {
+export function drawDataSelect() {
   const bottomNav = document.getElementById("select-data");
   if (!bottomNav) return;
-  const show = inputFiles.slice(13, 14);
 
-  inputFiles.forEach((file, idx) => {
+  tests.forEach((file, idx) => {
     const filename = file.substring(file.lastIndexOf("/") + 1, file.length - 5);
     const label = document.createElement("label");
     const checkbox = document.createElement("input");
@@ -13,21 +13,20 @@ export function drawDataSelect(inputFiles: string[]) {
     span.innerHTML = "#" + idx + " " + filename;
     checkbox.setAttribute("type", "checkbox");
     checkbox.value = file;
-    checkbox.checked = show.includes(file);
+    checkbox.checked = file === activeDcel;
     checkbox.name = "files";
     checkbox.addEventListener("change", function (event) {
-      if ((event.target as HTMLInputElement).checked) {
-        show.push(file);
-      } else {
-        show.splice(show.indexOf(file), 1);
-      }
-      draw(show);
+      Array.from(document.querySelectorAll<HTMLInputElement>('input[name="files"]')).forEach(
+        (i) => (i.checked = i.value === file)
+      );
+      activeDcel = file;
+      draw(file, dcelMap);
     });
     label.append(checkbox, span);
     bottomNav.append(label);
   });
 
-  draw(show);
+  draw(activeDcel, dcelMap);
   return bottomNav;
 }
 
@@ -64,3 +63,13 @@ export const tests: string[] = [
   "shapes/unaligned-deviating.json",
   "shapes/v-shape.json",
 ];
+
+let activeDcel = tests[0];
+
+export function getActiveDcel(): Dcel | undefined {
+  return dcelMap.get(activeDcel);
+}
+
+export type DCELMap = Map<string, Dcel>;
+
+export const dcelMap: DCELMap = new Map();

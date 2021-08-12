@@ -1,15 +1,18 @@
-import Dcel from "../lib/DCEL/Dcel";
-import * as L from "leaflet/";
+import Dcel, { STEP } from "../lib/DCEL/Dcel";
+import L from "leaflet/";
 import Sector from "../lib/c-oriented-schematization/Sector";
 import HalfEdge from "../lib/DCEL/HalfEdge";
-import { STEP } from "./algorithm-navigator";
 
-export function getMapFrom(dcel: Dcel, name: string): L.Map {
-  const DCELMap = L.map(name, {
-    zoomControl: false,
-    crs: L.CRS.Simple,
-  });
-  DCELMap.attributionControl.addAttribution(`${name} (${dcel.halfEdges.size / 2} edges)`);
+let map: L.Map;
+
+export function renderDcel(dcel: Dcel, step: STEP = STEP.LOAD): L.Map {
+  if (!map)
+    map = L.map("map", {
+      zoomControl: false,
+      crs: L.CRS.Simple,
+    });
+
+  map.attributionControl.addAttribution(`${dcel.name} (${dcel.halfEdges.size / 2} edges)`);
 
   function highlightDCELFeature(e: L.LeafletMouseEvent) {
     const feature = e.target;
@@ -20,7 +23,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     });
   }
 
-  const vertexLayer = L.geoJSON(dcel.verticesToGeoJSON(), {
+  const vertexLayer = L.geoJSON(dcel.snapShots[step].layers.vertices, {
     pointToLayer: function (feature, latlng) {
       const props = feature.properties;
       const v = feature.geometry.coordinates;
@@ -82,7 +85,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  const faceLayer = L.geoJSON(dcel.facesToGeoJSON(), {
+  const faceLayer = L.geoJSON(dcel.snapShots[step].layers.faces, {
     style: function (feature) {
       return {
         color: "transparent",
@@ -121,7 +124,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  const edgeLayer = L.geoJSON(dcel.edgesToGeoJSON(), {
+  const edgeLayer = L.geoJSON(dcel.snapShots[step].layers.edges, {
     style: function (feature) {
       return {
         color: feature?.properties.class ? "black" : "red",
@@ -152,7 +155,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  const polygonLayer = L.geoJSON(dcel.toGeoJSON(), {
+  const polygonLayer = L.geoJSON(dcel.snapShots[step].layers.features, {
     style: function (feature) {
       return {
         color: "grey",
@@ -240,23 +243,19 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  DCELMap.fitBounds(vertexLayer.getBounds());
+  map.fitBounds(vertexLayer.getBounds());
 
   function toggleLayer() {
+    map.eachLayer((layer) => layer.remove());
     if (showPolygons) {
-      polygonLayer.addTo(DCELMap);
-      faceLayer.remove();
-      vertexLayer.remove();
-      edgeLayer.remove();
-      staircaseRegionLayer.remove();
+      polygonLayer.addTo(map);
       facesLabel.classList.remove("active");
       polygonsLabel.classList.add("active");
     } else {
-      polygonLayer.remove();
-      faceLayer.addTo(DCELMap);
-      staircaseRegionLayer.addTo(DCELMap);
-      edgeLayer.addTo(DCELMap);
-      vertexLayer.addTo(DCELMap);
+      faceLayer.addTo(map);
+      edgeLayer.addTo(map);
+      vertexLayer.addTo(map);
+      step === STEP.STAIRCASE && staircaseRegionLayer.addTo(map);
       facesLabel.classList.add("active");
       polygonsLabel.classList.remove("active");
     }
@@ -265,10 +264,11 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
   const polygonsLabel = <HTMLElement>document.querySelector("#polygons-label");
   const facesLabel = <HTMLElement>document.getElementById("faces-label");
   let showPolygons = toggleBtn.checked ? true : false;
+
   toggleLayer();
   toggleBtn.addEventListener("click", function () {
     showPolygons = !showPolygons;
     toggleLayer();
   });
-  return DCELMap;
+  return map;
 }

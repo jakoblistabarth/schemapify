@@ -1,10 +1,6 @@
-export enum STEP {
-  LOAD = "loadData",
-  SUBDIVIDE = "subdivide",
-  CLASSIFY = "classify",
-  STAIRCASE = "staircase",
-  SIMPLIFY = "simplify",
-}
+import { renderDcel } from "./mapOutput";
+import { getActiveDcel } from "./selectData";
+import { STEP } from "../lib/DCEL/Dcel";
 
 export function drawNavigator() {
   const navigator = document.getElementById("algorithm-navigator");
@@ -15,7 +11,7 @@ export function drawNavigator() {
 
   Object.values(STEP).forEach((stop) => {
     const li = document.createElement("li");
-    if (stop === STEP.SIMPLIFY) li.className = "muted";
+    // if (stop === STEP.SIMPLIFY) li.className = "muted";
     const icon = document.createElement("span");
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     const span = document.createElement("span");
@@ -42,16 +38,14 @@ export function drawNavigator() {
     icon.innerHTML = "circle";
 
     li.append(svg, " ", span);
-    li.setAttribute("data-function", stop);
     li.style.height = sideLength + "px";
     li.style.lineHeight = sideLength + "px";
-    ul.appendChild(li);
-  });
 
-  ul.childNodes.forEach((li) => {
     li.addEventListener("click", function () {
-      console.log("click");
-      // const stop = this.getAttribute("data-function");
+      const dcel = getActiveDcel();
+      dcel ? renderDcel(dcel, stop) : console.error("dcel could not be rendered");
     });
+
+    ul.appendChild(li);
   });
 }
