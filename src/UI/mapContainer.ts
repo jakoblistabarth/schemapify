@@ -1,4 +1,4 @@
-import Dcel from "../lib/DCEL/Dcel";
+import Dcel, { STEP } from "../lib/DCEL/Dcel";
 import { getJSON } from "../lib/utilities";
 import { renderDcel } from "./mapOutput";
 import { DCELMap } from "./selectData";
@@ -24,7 +24,7 @@ export async function draw(test: string, map: DCELMap) {
   dcel.name = name;
   map.set(test, dcel);
   dcel.toConsole();
-  renderDcel(dcel);
+  renderDcel(dcel, STEP.SIMPLIFY);
 }
 
 export async function generateDcel(path: string) {

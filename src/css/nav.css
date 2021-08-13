@@ -99,11 +99,6 @@ nav.floating {
   font-weight: bold;
 }
 
-#algorithm-navigator li.muted {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
 #algorithm-navigator li:hover {
   background-color: var(--secondary);
   border-radius: var(--border-radius);
