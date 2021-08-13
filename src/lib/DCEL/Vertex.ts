@@ -296,6 +296,9 @@ class Vertex extends Point {
   }
 
   moveTo(x: number, y: number): Vertex {
+    if (this.x === x && this.y === y) return this;
+    this.dcel.vertices.set(Vertex.getKey(x, y), this);
+    this.dcel.vertices.delete(Vertex.getKey(this.x, this.y));
     this.x = x;
     this.y = y;
     return this;
