@@ -95,6 +95,10 @@ nav.floating {
   align-items: center;
 }
 
+#algorithm-navigator li.active {
+  font-weight: bold;
+}
+
 #algorithm-navigator li.muted {
   opacity: 0.5;
   pointer-events: none;

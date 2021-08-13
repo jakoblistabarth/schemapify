@@ -1,11 +1,9 @@
 import * as geojson from "geojson";
-import { STEP } from "../../../src/UI/algorithm-navigator";
 import config, { Config } from "../../schematization.config";
 import Configuration from "../c-oriented-schematization/Configuration";
 import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
 import Staircase from "../c-oriented-schematization/Staircase";
 import Point from "../geometry/Point";
-import Polygon from "../geometry/Polygon";
 import { createGeoJSON } from "../utilities";
 import Face from "./Face";
 import HalfEdge, { OrientationClasses } from "./HalfEdge";
@@ -18,6 +16,15 @@ type Snapshot = {
   layers: SnapshotLayers;
   time?: number;
 };
+
+export enum STEP {
+  LOAD = "loadData",
+  SUBDIVIDE = "subdivide",
+  CLASSIFY = "classify",
+  STAIRCASEREGIONS = "staircaseregions",
+  STAIRCASE = "staircase",
+  SIMPLIFY = "simplify",
+}
 
 type SnapshotLayers = {
   vertices: geojson.FeatureCollection;
@@ -32,6 +39,7 @@ type SnapShots = {
 };
 
 class Dcel {
+  name?: string;
   vertices: Map<string, Vertex>;
   halfEdges: Map<string, HalfEdge>;
   faces: Face[];
@@ -382,9 +390,9 @@ class Dcel {
   }
 
   preProcess(): void {
-    this.createSnapshot(STEP.LOAD);
+    this.takeSnapshot(STEP.LOAD);
     this.splitEdges();
-    this.createSnapshot(STEP.SUBDIVIDE);
+    this.takeSnapshot(STEP.SUBDIVIDE);
   }
 
   /**
@@ -408,6 +416,7 @@ class Dcel {
   classify(): void {
     this.classifyVertices();
     this.halfEdges.forEach((e) => e.classify());
+    this.takeSnapshot(STEP.CLASSIFY);
   }
 
   /**
@@ -450,11 +459,9 @@ class Dcel {
     );
     this.getEdgeDistances(staircasesOther);
     this.getSe(staircasesOther.filter((staircase) => staircase.interferesWith.length > 0));
-
-    this.createSnapshot(STEP.STAIRCASE); // TODO: create one before and after? (for the reference of the staircaseRegions)
   }
 
-  createSnapshot(name: STEP): Snapshot {
+  takeSnapshot(name: STEP): Snapshot {
     const snapshot: Snapshot = {
       layers: {
         vertices: this.verticesToGeoJSON(),
@@ -462,9 +469,9 @@ class Dcel {
         faces: this.facesToGeoJSON(),
         features: this.toGeoJSON(),
       },
-      time: undefined,
+      time: Date.now(),
     };
-    if (name === STEP.STAIRCASE)
+    if (name === STEP.STAIRCASEREGIONS)
       snapshot.layers.staircaseRegions = this.staircaseRegionsToGeoJSON();
     this.snapShots[name] = snapshot;
     return snapshot;
@@ -633,7 +640,9 @@ class Dcel {
     this.classify();
     this.addStaircases();
     this.calculateStaircases();
+    this.takeSnapshot(STEP.STAIRCASEREGIONS);
     this.replaceEdgesWithStaircases();
+    this.takeSnapshot(STEP.STAIRCASE);
   }
 
   simplify(): Dcel {
@@ -664,6 +673,7 @@ class Dcel {
       [...this.faceFaceBoundaryList.boundaries].map(([k, v]) => v.edges.length),
       this.getArea()
     );
+    this.takeSnapshot(STEP.SIMPLIFY);
     return this;
   }
 
@@ -673,8 +683,8 @@ class Dcel {
     this.simplify();
   }
 
-  toConsole(name: string, verbose: boolean = false): void {
-    if (!verbose) console.log("DCEL " + name, this);
+  toConsole(verbose: boolean = false): void {
+    if (!verbose) console.log("DCEL " + this.name, this);
     else {
       console.log("🡒 START DCEL:", this);
 

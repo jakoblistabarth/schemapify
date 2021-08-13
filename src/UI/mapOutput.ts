@@ -1,15 +1,18 @@
-import Dcel from "../lib/DCEL/Dcel";
-import * as L from "leaflet/";
+import Dcel, { STEP } from "../lib/DCEL/Dcel";
+import L from "leaflet/";
 import Sector from "../lib/c-oriented-schematization/Sector";
 import HalfEdge from "../lib/DCEL/HalfEdge";
-import { STEP } from "./algorithm-navigator";
 
-export function getMapFrom(dcel: Dcel, name: string): L.Map {
-  const DCELMap = L.map(name, {
-    zoomControl: false,
-    crs: L.CRS.Simple,
-  });
-  DCELMap.attributionControl.addAttribution(`${name} (${dcel.halfEdges.size / 2} edges)`);
+let map: L.Map;
+
+export function renderDcel(dcel: Dcel, step: STEP = STEP.LOAD): L.Map {
+  if (!map)
+    map = L.map("map", {
+      zoomControl: false,
+      crs: L.CRS.Simple,
+    });
+
+  map.attributionControl.addAttribution(`${dcel.name} (${dcel.halfEdges.size / 2} edges)`);
 
   function highlightDCELFeature(e: L.LeafletMouseEvent) {
     const feature = e.target;
@@ -20,7 +23,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     });
   }
 
-  const vertexLayer = L.geoJSON(dcel.verticesToGeoJSON(), {
+  const vertexLayer = L.geoJSON(dcel.snapShots[step].layers.vertices, {
     pointToLayer: function (feature, latlng) {
       const props = feature.properties;
       const v = feature.geometry.coordinates;
@@ -82,7 +85,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  const faceLayer = L.geoJSON(dcel.facesToGeoJSON(), {
+  const faceLayer = L.geoJSON(dcel.snapShots[step].layers.faces, {
     style: function (feature) {
       return {
         color: "transparent",
@@ -121,11 +124,11 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  const edgeLayer = L.geoJSON(dcel.edgesToGeoJSON(), {
+  const edgeLayer = L.geoJSON(dcel.snapShots[step].layers.edges, {
     style: function (feature) {
       return {
-        color: feature?.properties.class ? "black" : "red",
-        weight: feature?.properties.class ? 1 : 4,
+        color: !feature?.properties.class && step === STEP.CLASSIFY ? "red" : "black",
+        weight: !feature?.properties.class && step === STEP.CLASSIFY ? 4 : 1,
         dashArray: feature?.properties.incidentFaceType === "inner" ? "3,3" : "0",
       };
     },
@@ -152,7 +155,7 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  const polygonLayer = L.geoJSON(dcel.toGeoJSON(), {
+  const polygonLayer = L.geoJSON(dcel.snapShots[step].layers.features, {
     style: function (feature) {
       return {
         color: "grey",
@@ -196,67 +199,66 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
     },
   });
 
-  const staircaseRegionLayer = L.geoJSON(dcel.snapShots[STEP.STAIRCASE].layers.staircaseRegions, {
-    // TODO: implement better structure for snapshots
-    style: function (feature) {
-      return {
-        color: feature?.properties.interferesWith.length > 0 ? "red" : "blue",
-        weight: 1,
-        fillOpacity: 0.2,
-      };
-    },
-    onEachFeature: function (feature, layer) {
-      layer.on({
-        mouseover: function (e) {
-          const feature = e.target;
-          feature.setStyle({
-            weight: 2,
-            fillOpacity: 0.5,
-          });
-        },
-        mouseout: function (e) {
-          staircaseRegionLayer.resetStyle(e.target);
-        },
-      });
+  const staircaseRegionLayer = L.geoJSON(
+    dcel.snapShots[STEP.STAIRCASEREGIONS].layers.staircaseRegions,
+    {
+      // TODO: implement better structure for snapshots
+      style: function (feature) {
+        return {
+          color: feature?.properties.interferesWith.length > 0 ? "red" : "blue",
+          weight: 1,
+          fillOpacity: 0.2,
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: function (e) {
+            const feature = e.target;
+            feature.setStyle({
+              weight: 2,
+              fillOpacity: 0.5,
+            });
+          },
+          mouseout: function (e) {
+            staircaseRegionLayer.resetStyle(e.target);
+          },
+        });
 
-      const properties = Object.entries(feature.properties)
-        .map((elem) => {
-          return `
+        const properties = Object.entries(feature.properties)
+          .map((elem) => {
+            return `
             <tr>
               <td>${elem[0]}</td>
               <td><strong>${elem[1]}</strong></td>
             </tr>
           `;
-        })
-        .join("");
+          })
+          .join("");
 
-      layer.bindTooltip(
-        `
+        layer.bindTooltip(
+          `
           <table>
             ${properties}
           </table>
         `
-      );
-    },
-  });
+        );
+      },
+    }
+  );
 
-  DCELMap.fitBounds(vertexLayer.getBounds());
+  map.fitBounds(vertexLayer.getBounds());
 
   function toggleLayer() {
+    map.eachLayer((layer) => layer.remove());
     if (showPolygons) {
-      polygonLayer.addTo(DCELMap);
-      faceLayer.remove();
-      vertexLayer.remove();
-      edgeLayer.remove();
-      staircaseRegionLayer.remove();
+      polygonLayer.addTo(map);
       facesLabel.classList.remove("active");
       polygonsLabel.classList.add("active");
     } else {
-      polygonLayer.remove();
-      faceLayer.addTo(DCELMap);
-      staircaseRegionLayer.addTo(DCELMap);
-      edgeLayer.addTo(DCELMap);
-      vertexLayer.addTo(DCELMap);
+      faceLayer.addTo(map);
+      step === STEP.STAIRCASEREGIONS && staircaseRegionLayer.addTo(map);
+      edgeLayer.addTo(map);
+      vertexLayer.addTo(map);
       facesLabel.classList.add("active");
       polygonsLabel.classList.remove("active");
     }
@@ -265,10 +267,11 @@ export function getMapFrom(dcel: Dcel, name: string): L.Map {
   const polygonsLabel = <HTMLElement>document.querySelector("#polygons-label");
   const facesLabel = <HTMLElement>document.getElementById("faces-label");
   let showPolygons = toggleBtn.checked ? true : false;
+
   toggleLayer();
   toggleBtn.addEventListener("click", function () {
     showPolygons = !showPolygons;
     toggleLayer();
   });
-  return DCELMap;
+  return map;
 }
