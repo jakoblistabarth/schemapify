@@ -152,7 +152,8 @@ class Dcel {
 
   getArea(): number {
     return this.getBoundedFaces().reduce((acc, face) => {
-      acc = acc + new Polygon(face.getEdges().map((e) => e.tail)).area;
+      const faceArea = face.getArea();
+      if (faceArea) acc = acc + faceArea;
       return acc;
     }, 0);
   }

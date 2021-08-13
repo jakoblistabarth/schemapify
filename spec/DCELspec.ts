@@ -131,11 +131,24 @@ describe("getArea()", function () {
     const dcel = Dcel.fromGeoJSON(json);
     expect(dcel.getArea()).toBe(1 * 1 * 3);
   });
+
+  it("returns the correct area of a square with negative coordinates.", function () {
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square-neg.json"), "utf8"));
+    const dcel = Dcel.fromGeoJSON(json);
+    expect(dcel.getArea()).toBe(4);
+  });
+
   //TODO: use geojson of dcel for area calculation to get correct values for dcels with lakes and enclaves.
   xit("returns the correct area of the enclave test case", function () {
     const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/enclave.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
     expect(dcel.getArea()).toBe(2 * 2);
+  });
+
+  xit("returns the correct area of Austria.", function () {
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/geodata/AUT_adm0-s1.json"), "utf8"));
+    const dcel = Dcel.fromGeoJSON(json);
+    expect(dcel.getArea()).toBe(83738962592.38892);
   });
 });
 
