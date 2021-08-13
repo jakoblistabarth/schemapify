@@ -69,7 +69,6 @@ describe("doEdgeMove() on a minimal configuration pair does the expected edgemov
     const compensationEdge = pair?.compensation?.configuration.innerEdge.toString();
     pair?.doEdgeMove();
     const newArea = dcel.getArea();
-    console.log(originalArea, newArea);
 
     expect(contractionEdge).toEqual("9.5/7->9.5/8");
     expect(compensationEdge).toEqual("11/0->11/1");
@@ -91,7 +90,6 @@ describe("doEdgeMove() on a minimal configuration pair does the expected edgemov
     const compensationEdge = pair?.compensation?.configuration.innerEdge.toString();
     pair?.doEdgeMove();
     const newArea = dcel.getArea();
-    console.log(originalArea, newArea);
 
     expect(contractionEdge).toEqual("10.5/7->10.5/8");
     expect(compensationEdge).toEqual("9/2->9/3");
@@ -110,19 +108,12 @@ describe("recursive doEdgeMove() on minimal configuration pairs", function () {
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
     const contractionEdges: string[] = [];
 
-    for (let index = 0; index < 3; index++) {
+    for (let index = 0; index < 10; index++) {
       const pair = dcel.faceFaceBoundaryList.getMinimalConfigurationPair();
       const contractionEdge = pair?.contraction.configuration.innerEdge;
-      contractionEdges.push(contractionEdge?.toString() as string);
-      console.log(
-        dcel
-          .getBoundedFaces()[0]
-          .getEdges()
-          .map((e) => e.tail.xy())
-      );
-      if (index < 4) pair?.doEdgeMove();
-      console.log("-");
+      if (contractionEdge) contractionEdges.push(contractionEdge?.toString() as string);
+      pair?.doEdgeMove();
     }
-    expect(contractionEdges).toEqual(["9.5/7->9.5/8", "10/7->10/8", "10/8->10/10"]);
+    expect(contractionEdges).toEqual(["9.5/7->9.5/8", "10/1->10/7", "10/8->10/10"]);
   });
 });

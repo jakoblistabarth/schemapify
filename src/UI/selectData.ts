@@ -32,7 +32,7 @@ export function drawDataSelect(inputFiles: string[]) {
 }
 
 export const tests: string[] = [
-  "geodata/AUT_adm0-s2.json",
+  "geodata/AUT_adm0-s1.json",
   "geodata/AUT_adm1-simple.json",
   "geodata/AUT_adm1.json",
   "geodata/ne_50m_europe_mapunits-s20.json",

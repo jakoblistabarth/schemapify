@@ -17,13 +17,13 @@ class ConfigurationPair {
       this.contraction.area > 0 ? this.compensation?.configuration.innerEdge : undefined;
     const dcel = contractionEdge.dcel;
 
-    console.log(
-      "contractionEdge:",
-      contractionEdge?.toString(),
-      this.contraction.point.xy(),
-      this.contraction.area
-    );
-    console.log("compensationEdge:", compensationEdge?.toString());
+    // console.log(
+    //   "contractionEdge:",
+    //   contractionEdge?.toString(),
+    //   this.contraction.point.xy(),
+    //   this.contraction.area
+    // );
+    // console.log("compensationEdge:", compensationEdge?.toString());
 
     //TODO: update blockingedges
     dcel.getHalfEdges().forEach((edge) => {
@@ -47,7 +47,7 @@ class ConfigurationPair {
       this.contraction.area > 0 && this.compensation
         ? this.compensation.getCompensationHeight(this.contraction.area)
         : undefined;
-    console.log(shift);
+    // console.log(shift);
 
     // 2. do compensation, if necessary
     if (compensationEdge && typeof shift === "number" && shift > 0) {

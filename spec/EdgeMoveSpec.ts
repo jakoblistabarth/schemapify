@@ -3,14 +3,17 @@ import path from "path";
 import Vertex from "../src/lib/DCEL/Vertex";
 import Configuration, { Junction } from "../src/lib/c-oriented-schematization/Configuration";
 import Dcel from "../src/lib/DCEL/Dcel";
+import FaceFaceBoundaryList from "../src/lib/c-oriented-schematization/FaceFaceBoundaryList";
 
-xdescribe("createConfigurations()", function () {
+describe("createConfigurations()", function () {
   it("adds configuration to all edges which are possible candidates for edge moves (which endpoints are of degree 3 or less).", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("data/shapes/aligned-deviating.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.schematize(); //FIXME: without schematize()
+    dcel.preProcess();
+    dcel.constrainAngles();
+    dcel.createConfigurations();
 
     const verticesDegree4 = dcel.getVertices().filter((v) => v.edges.length === 4);
 
@@ -25,6 +28,27 @@ xdescribe("createConfigurations()", function () {
     expect(verticesDegree4.length).toBe(1);
     expect(edgesDegree4.length).toBe(8);
     expect(configurationCount).toBe(dcel.getHalfEdges().length - edgesDegree4.length);
+  });
+});
+
+describe("doEdgeMove() removes first all collinear points (contraction area 0", function () {
+  it("on a square shape", function () {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("data/shapes/smallest-contraction-1a.json"), "utf8")
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    dcel.splitEdges(5);
+    dcel.createConfigurations();
+    dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
+    let contractionArea = 0;
+
+    for (let index = 0; index < 9; index++) {
+      const pair = dcel.faceFaceBoundaryList.getMinimalConfigurationPair();
+      const area = pair?.contraction.area;
+      if (area && area > contractionArea) contractionArea = area;
+      pair?.doEdgeMove();
+    }
+    expect(contractionArea).toEqual(0);
   });
 });
 

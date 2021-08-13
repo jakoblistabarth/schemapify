@@ -38,7 +38,7 @@ class Contraction {
 
   isFeasible(): boolean {
     if (!this.point) return false;
-    return !this.blockingEdges.length ? true : false;
+    return this.area === 0 || (this.area > 0 && !this.blockingEdges.length) ? true : false;
   }
 
   isComplementary(other: Contraction): boolean {
