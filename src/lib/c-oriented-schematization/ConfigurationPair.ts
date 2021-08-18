@@ -73,10 +73,30 @@ class ConfigurationPair {
       contractionEdge.move(pointA, pointB);
     else contractionEdge.move(pointB, pointA);
 
-    //TODO: update (affected) configurations
+    //TODO: update only affected configurations
+    // const affectedEdges = [
+    //   contractionEdge.prev,
+    //   contractionEdge,
+    //   contractionEdge.next,
+    //   compensationEdge?.prev,
+    //   compensationEdge,
+    //   compensationEdge?.next,
+    // ];
+    // console.log(affectedEdges);
+
+    // affectedEdges.forEach((edge) => {
+    //   if (!edge || !edge.configuration) return;
+    //   console.log("affected", edge.face?.getUuid(5), edge.twin?.face?.getUuid(5));
+
+    // if (edge.getEndpoints().every((vertex) => vertex.edges.length <= 3)) {
+    //   edge.configuration = new Configuration(edge);
+    // }
+    // });
     if (!contractionEdge?.face || !contractionEdge.twin?.face) return;
     const key = FaceFaceBoundaryList.getKey(contractionEdge.face, contractionEdge.twin?.face);
     dcel.faceFaceBoundaryList?.boundaries.get(key)?.edges.forEach((edge) => {
+      // console.log("all", edge.face?.getUuid(5), edge.twin?.face?.getUuid(5));
+
       if (edge.getEndpoints().every((vertex) => vertex.edges.length <= 3))
         edge.configuration = new Configuration(edge);
     });

@@ -654,7 +654,7 @@ class Dcel {
       this.getArea()
     );
 
-    for (let index = 0; index < 3; index++) {
+    for (let index = 0; index < 2; index++) {
       let pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
       console.log(pair?.contraction.configuration.innerEdge.toString(), pair?.contraction.area);
       console.log(pair?.compensation?.configuration.innerEdge.toString(), pair?.compensation?.area);
