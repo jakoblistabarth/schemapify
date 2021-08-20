@@ -2,6 +2,9 @@ import { renderDcel } from "./mapOutput";
 import { getActiveDcel } from "./selectData";
 import { STEP } from "../lib/DCEL/Dcel";
 
+export const computationalTimeNode: HTMLSpanElement = document.createElement("span");
+export let timeNodes: HTMLSpanElement[] = [];
+
 export function drawNavigator() {
   const navigator = document.getElementById("algorithm-navigator");
   if (!navigator) return;
@@ -9,12 +12,21 @@ export function drawNavigator() {
   const ul = navigator.appendChild(document.createElement("ul"));
   ul.className = "plain";
 
+  const time = document.createElement("div");
+  time.appendChild(document.createTextNode("Computational Time: "));
+  time.className = "computational-time";
+  time.appendChild(computationalTimeNode);
+  navigator.appendChild(time);
+
   Object.values(STEP).forEach((stop) => {
     const li = document.createElement("li");
     const icon = document.createElement("span");
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const div = document.createElement("div");
     const span = document.createElement("span");
-    span.innerHTML = stop;
+    span.className = "time";
+    timeNodes.push(span);
+    div.append(stop, span);
     svg.id = "path-" + stop;
     const sideLength = 30;
     const o = sideLength / 2;
@@ -36,7 +48,7 @@ export function drawNavigator() {
     icon.className = "material-icons-outlined";
     icon.innerHTML = "circle";
 
-    li.append(svg, " ", span);
+    li.append(svg, " ", div);
     li.style.height = sideLength + "px";
     li.style.lineHeight = sideLength + "px";
 

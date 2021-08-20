@@ -104,6 +104,15 @@ nav.floating {
   border-radius: var(--border-radius);
 }
 
+#algorithm-navigator .time {
+  font-size: 0.75em;
+  margin-left: 1em;
+}
+
+#algorithm-navigator > div {
+  margin-top: 1rem;
+}
+
 .divider {
   position: relative;
   width: 1px;

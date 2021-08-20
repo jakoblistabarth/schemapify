@@ -47,8 +47,10 @@ class Dcel {
   config: Config;
   snapShots: SnapShots;
   faceFaceBoundaryList?: FaceFaceBoundaryList;
+  created: number;
 
   constructor() {
+    this.created = Date.now();
     this.vertices = new Map();
     this.halfEdges = new Map();
     this.faces = [];
@@ -654,7 +656,7 @@ class Dcel {
       this.getArea()
     );
 
-    for (let index = 0; index < 2; index++) {
+    for (let index = 0; index < 3; index++) {
       let pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
       console.log(pair?.contraction.configuration.innerEdge.toString(), pair?.contraction.area);
       console.log(pair?.compensation?.configuration.innerEdge.toString(), pair?.compensation?.area);
@@ -896,6 +898,22 @@ class Dcel {
         edge.configuration = new Configuration(edge);
     });
   }
+
+  getTimestamps() {
+    return Object.values(this.snapShots)
+      .sort((a, b) => (a.time && b.time ? a?.time - b?.time : 0))
+      .map((snapshot) => snapshot.time)
+      .reduce<number[]>((durations, time, i, timestamps) => {
+        const prevTimestamp = timestamps[i - 1];
+        durations[i] = !time ? 0 : prevTimestamp ? time - prevTimestamp : time - this.created;
+        return durations;
+      }, []);
+  }
+
+  getDuration() {
+    return this.getTimestamps().reduce((a, b) => a + b, 0);
+  }
 }
 
 export default Dcel;
+2;

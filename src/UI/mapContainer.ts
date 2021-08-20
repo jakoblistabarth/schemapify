@@ -2,6 +2,8 @@ import Dcel, { STEP } from "../lib/DCEL/Dcel";
 import { getJSON } from "../lib/utilities";
 import { renderDcel } from "./mapOutput";
 import { DCELMap } from "./selectData";
+import { timeNodes, computationalTimeNode } from "./algorithm-navigator";
+import { time } from "console";
 
 export function drawMapContainer(): void {
   const containerID = "map-container";
@@ -24,6 +26,9 @@ export async function draw(test: string, map: DCELMap) {
   dcel.name = name;
   map.set(test, dcel);
   dcel.toConsole();
+  const times = dcel.getTimestamps();
+  timeNodes.forEach((s, i) => (s.innerHTML = `${times[i]}ms`));
+  computationalTimeNode.innerHTML = `${dcel.getDuration()}ms`;
   renderDcel(dcel, STEP.SIMPLIFY);
 }
 
