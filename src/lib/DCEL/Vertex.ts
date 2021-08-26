@@ -107,9 +107,9 @@ class Vertex extends Point {
     const ex_ = ex__.prev;
 
     const a = ex_?.prev;
-    const b = a?.twin;
+    const b = ex_?.twin?.next;
     const c = ex__.next;
-    const d = c?.twin;
+    const d = ex__.twin?.prev;
 
     const f1 = ex__.face;
     const f2 = ex__.twin?.face;
