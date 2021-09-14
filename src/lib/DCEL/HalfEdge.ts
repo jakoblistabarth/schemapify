@@ -239,7 +239,7 @@ class HalfEdge {
     et__.twin = e__;
     e__.twin = et__;
 
-    if (f1.edge && !f2.outerRing) f1.edge = e_; //FIXME: better to use undefined? if e is an clockwise-running edge incident to the unbounded face
+    if (f1.edge && !f2.outerRing) f1.edge = e_; // if e is an clockwise-running edge incident to the unbounded face
 
     f1.innerEdges.forEach((e) => {
       if (!e.face) return;

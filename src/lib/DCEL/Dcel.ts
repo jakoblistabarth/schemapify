@@ -194,8 +194,9 @@ class Dcel {
 
   /**
    * Creates a Doubly Connected Edge List (DCEL) data structure from a geoJSON.
+   * @credits adapted from [cs.stackexchange.com](https://cs.stackexchange.com/questions/2450/how-do-i-construct-a-doubly-connected-edge-list-given-a-set-of-line-segments)
    * @param geoJSON a valid geojson with features of type 'Polygon' or 'Multipolyon'
-   * @returns
+   * @returns A {@link Dcel}.
    */
   static fromGeoJSON(geoJSON: geojson.FeatureCollection): Dcel {
     const subdivision = new Dcel();
@@ -247,7 +248,6 @@ class Dcel {
     // TODO: sort edges everytime a new edge is pushed to vertex.edges
     subdivision.vertices.forEach((vertex) => {
       // sort the half-edges whose tail vertex is that endpoint in clockwise order.
-      // own words: sort all outgoing edges of current point in clockwise order
       vertex.sortEdges();
 
       // For every pair of half-edges e1, e2 in clockwise order, assign e1->twin->next = e2 and e2->prev = e1->twin.
