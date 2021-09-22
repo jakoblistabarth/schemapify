@@ -12,6 +12,7 @@ export function renderDcel(dcel: Dcel, step: STEP = STEP.LOAD): L.Map {
       crs: L.CRS.Simple,
     });
 
+  // FIXME: replace attribution everytime map is drawn?
   map.attributionControl.addAttribution(`${dcel.name} (${dcel.halfEdges.size / 2} edges)`);
 
   function highlightDCELFeature(e: L.LeafletMouseEvent) {

@@ -37,6 +37,8 @@ class FaceFaceBoundary {
       (a, b) => a.area - b.area
     );
 
+    // console.log("candidates", contractionCandidates);
+
     type CompensationCandidate = { contraction: Contraction; distance: number };
     let contraction: Contraction | undefined;
     let compensation: Contraction | undefined;
@@ -45,6 +47,14 @@ class FaceFaceBoundary {
         contractionCandidate.type === ContractionType.N ? pContractions : nContractions;
       const compensationCandidate = compensationCandidates
         .reduce((solutions: CompensationCandidate[], candidate) => {
+          // console.log(
+          //   contractionCandidate.configuration.innerEdge.toString(),
+          //   candidate.configuration.innerEdge.toString(),
+          //   "not conflicts:",
+          //   !candidate.isConflicting(contractionCandidate),
+          //   "reduces complexity",
+          //   candidate.reducesComplexity(contractionCandidate)
+          // );
           if (
             !candidate.isConflicting(contractionCandidate) &&
             candidate.reducesComplexity(contractionCandidate)

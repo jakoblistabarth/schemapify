@@ -42,6 +42,10 @@ class Point {
     return parseFloat((PA + PB).toFixed(10)) === parseFloat(lineSegment.getLength().toFixed(10));
   }
 
+  isOnLineSegments(lineSegments: LineSegment[]) {
+    return lineSegments.some((lineSegment) => this.isOnLineSegment(lineSegment));
+  }
+
   /**
    * Checks whether the {@link Point} lies within the specified polygon.
    * This algorithm works only(!) on convex polygons.

@@ -1,3 +1,4 @@
+import LineSegment from "../src/lib/geometry/LineSegment";
 import Point from "../src/lib/geometry/Point";
 import Polygon from "../src/lib/geometry/Polygon";
 
@@ -97,6 +98,19 @@ describe("isInPolygon()", function () {
   });
 });
 
+it("returns true if it lies inside of a convex(!) Polygon", function () {
+  const a = new Point(1, 1);
+  const b = new Point(2, 1);
+  const c = new Point(2, 2);
+  const d = new Point(1, 2);
+  const A = new Polygon([a, b, c, d]);
+
+  expect(a.isInPolygon(A)).toBeTrue();
+  expect(b.isInPolygon(A)).toBeTrue();
+  expect(c.isInPolygon(A)).toBeTrue();
+  expect(d.isInPolygon(A)).toBeTrue();
+});
+
 describe("getArea()", function () {
   it("returns correct area for a given set of 4 Points (a square).", function () {
     const plgn = new Polygon([new Point(0, 0), new Point(0, 1), new Point(1, 1), new Point(1, 0)]);
@@ -116,5 +130,23 @@ describe("equals()", function () {
 
   it("returns false if two points reside on different locations.", function () {
     expect(new Point(0, 0).equals(new Point(0, 0.0000000001))).toBeFalse();
+  });
+});
+
+describe("isOnLineSegments()", function () {
+  it("returns true if the point lies on one of the given linesegments.", function () {
+    const lineSegments = [
+      new LineSegment(new Point(0, 0), new Point(4, 4)),
+      new LineSegment(new Point(4, 4), new Point(0, 8)),
+      new LineSegment(new Point(0, 8), new Point(0, -8)),
+    ];
+    const pointA = new Point(2, 2);
+    const pointB = new Point(-2, -2);
+    const pointC = new Point(4, 4);
+    const pointD = new Point(0, -8);
+    expect(pointA.isOnLineSegments(lineSegments)).toBeTrue();
+    expect(pointB.isOnLineSegments(lineSegments)).toBeFalse();
+    expect(pointC.isOnLineSegments(lineSegments)).toBeTrue();
+    expect(pointD.isOnLineSegments(lineSegments)).toBeTrue();
   });
 });

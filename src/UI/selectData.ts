@@ -31,6 +31,7 @@ export function drawDataSelect() {
 }
 
 export const tests: string[] = [
+  "geodata/AUT_adm0-s0_5.json",
   "geodata/AUT_adm0-s1.json",
   "geodata/AUT_adm1-simple.json",
   "geodata/AUT_adm1.json",

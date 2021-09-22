@@ -650,31 +650,30 @@ class Dcel {
   simplify(): Dcel {
     this.faceFaceBoundaryList = new FaceFaceBoundaryList(this);
     this.createConfigurations();
-    console.log(
-      "before",
-      [...this.faceFaceBoundaryList.boundaries].map(([k, v]) => v.edges.length),
-      this.getArea()
-    );
+    // console.log(
+    //   "before",
+    //   [...this.faceFaceBoundaryList.boundaries].map(([k, v]) => v.edges.length),
+    //   this.getArea()
+    // );
 
-    for (let index = 0; index < 3; index++) {
+    for (let index = 0; index < 4; index++) {
       let pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
-      console.log(pair?.contraction.configuration.innerEdge.toString(), pair?.contraction.area);
-      console.log(pair?.compensation?.configuration.innerEdge.toString(), pair?.compensation?.area);
-      console.log("-");
+      // console.log(pair?.contraction.configuration.innerEdge.toString(), pair?.contraction.area);
+      // console.log(pair?.compensation?.configuration.innerEdge.toString(), pair?.compensation?.area);
+      // console.log("-");
 
-      pair?.doEdgeMove();
+      if (index < 3) pair?.doEdgeMove();
     }
-    // while (pair || s.halfEdges.size/2 >= k) {
+    // while (pair || s.halfEdges.size/2 > k) {
     //   pair?.doEdgeMove();
-    //   idx++;
     //   pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
     // }
 
-    console.log(
-      "after",
-      [...this.faceFaceBoundaryList.boundaries].map(([k, v]) => v.edges.length),
-      this.getArea()
-    );
+    // console.log(
+    //   "after",
+    //   [...this.faceFaceBoundaryList.boundaries].map(([k, v]) => v.edges.length),
+    //   this.getArea()
+    // );
     this.takeSnapshot(STEP.SIMPLIFY);
     return this;
   }

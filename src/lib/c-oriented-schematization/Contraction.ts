@@ -17,7 +17,7 @@ class Contraction {
   point: Point;
   areaPoints: Point[];
   area: number;
-  blockingEdges: HalfEdge[];
+  blockingNumber: number;
 
   constructor(configuration: Configuration, contractionType: ContractionType, point: Point) {
     this.type = contractionType;
@@ -25,7 +25,7 @@ class Contraction {
     this.point = point;
     this.areaPoints = this.getAreaPoints();
     this.area = this.getArea();
-    this.blockingEdges = this.getBlockingEdges();
+    this.blockingNumber = this.initializeBlockingNumber();
   }
 
   static initialize(
@@ -38,7 +38,7 @@ class Contraction {
 
   isFeasible(): boolean {
     if (!this.point) return false;
-    return this.area === 0 || (this.area > 0 && !this.blockingEdges.length) ? true : false;
+    return this.area === 0 || (this.area > 0 && this.blockingNumber === 0) ? true : false;
   }
 
   isComplementary(other: Contraction): boolean {
@@ -156,36 +156,48 @@ class Contraction {
     return this.areaPoints ? new Polygon(this.areaPoints).area : 0;
   }
 
-  getBlockingEdges(): HalfEdge[] {
-    const blockingEdges: HalfEdge[] = [];
-    if (!this.point) return blockingEdges;
+  /**
+   * Determines whether or not the specified HalfEdge blocks the contraction.
+   * @param edge The {@link HalfEdge}
+   * @returns A boolean, indicating whether or not the {@link Contraction} is blocked by the specified {@link HalfEdge}.
+   */
+  isBlockedBy(edge: HalfEdge): boolean | undefined {
+    const edgeLine = edge.toLineSegment();
+    if (!edgeLine) return;
     const area = new Polygon(this.areaPoints);
-    const contractionAreaP = area.getLineSegments();
+    const pointsInPolygon = edge.getEndpoints().filter((vertex) => vertex.isInPolygon(area));
+    const intersections = area.getIntersections(edge);
+    const x = this.configuration.getX();
+    const xLineSegments = x.reduce((acc: LineSegment[], edge) => {
+      const lineSegment = edge.toLineSegment();
+      if (typeof lineSegment === "object") acc.push(lineSegment);
+      return acc;
+    }, []);
+
+    // return true, if both endpoints of the edge reside within the contraction area
+    // (i.e., the edge resides entirely within contraction area)
+    // or if one intersection of the edge and the contraction area boundaries is not part of X
+    if (
+      pointsInPolygon.length == 2 ||
+      (intersections &&
+        intersections.some((intersection) => !intersection.isOnLineSegments(xLineSegments)))
+    )
+      return true;
+    // TODO: make specs
+    return false;
+  }
+
+  initializeBlockingNumber(): number {
+    let blockingNumber = 0;
+    if (!this.point) return blockingNumber;
 
     this.configuration.getX_().forEach((boundaryEdge) => {
-      const pointsInPolygon = boundaryEdge
-        .getEndpoints()
-        .filter((point) => point.isInPolygon(area));
-      // add edges which resides entirely in the contraction area
-      if (pointsInPolygon.length === 2) return blockingEdges.push(boundaryEdge);
-      if (pointsInPolygon.length === 1) {
-        contractionAreaP.forEach((areaEdge) => {
-          const intersection = boundaryEdge.toLineSegment()?.intersectsLineSegment(areaEdge);
-
-          if (
-            intersection &&
-            !blockingEdges.includes(boundaryEdge) &&
-            !this.configuration.getX().some((xEdge) => {
-              const lineOfX = xEdge.toLineSegment();
-              return lineOfX && intersection?.isOnLineSegment(lineOfX);
-            })
-          )
-            blockingEdges.push(boundaryEdge);
-        });
+      if (this.isBlockedBy(boundaryEdge)) {
+        blockingNumber++;
       }
     });
 
-    return blockingEdges;
+    return blockingNumber;
   }
 
   getCompensationHeight(contractionArea: number): number | undefined {

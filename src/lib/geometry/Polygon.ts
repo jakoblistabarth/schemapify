@@ -41,7 +41,7 @@ class Line {
   getIntersections(edge: HalfEdge): Point[] | undefined {
     return this.getLineSegments().reduce((acc: Point[], boundaryEdge) => {
       const intersection = edge.toLineSegment()?.intersectsLineSegment(boundaryEdge);
-      if (intersection) acc.push(intersection);
+      if (intersection && acc.every((point) => !point.equals(intersection))) acc.push(intersection);
       return acc;
     }, []);
   }

@@ -1,4 +1,5 @@
 import Point from "./Point";
+import Polygon from "./Polygon";
 import Vector2D from "./Vector2D";
 
 class LineSegment {
@@ -67,6 +68,15 @@ class LineSegment {
 
     // 5. Otherwise, the two line segments are not parallel but do not intersect.
     return;
+  }
+
+  intersectsPolygon(polygon: Polygon): Point[] {
+    const boundary = polygon.getLineSegments();
+    return boundary.reduce((acc: Point[], boundaryEdge) => {
+      const intersection = this.intersectsLineSegment(boundaryEdge);
+      if (intersection) acc.push(intersection);
+      return acc;
+    }, []);
   }
 }
 

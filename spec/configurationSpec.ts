@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import FaceFaceBoundaryList from "src/lib/c-oriented-schematization/FaceFaceBoundaryList";
 import HalfEdge from "src/lib/DCEL/HalfEdge";
 import Configuration, { OuterEdge } from "../src/lib/c-oriented-schematization/Configuration";
 import Contraction, { ContractionType } from "../src/lib/c-oriented-schematization/Contraction";
@@ -186,17 +185,49 @@ describe("getX() and getX_() returns the correct number of boundary edges", func
   });
 });
 
-describe("setBlockingEdges() returns interfering edges", function () {
+describe("isBlockedBy() determines whether or not a contraction is blocked by an edge", function () {
+  it("for a negtive contraction", function () {
+    const s = createConfigurationSetup(
+      new Point(-4, 2),
+      new Point(-2, 0),
+      new Point(2, 0),
+      new Point(4, 2),
+      [new Point(0, 6), new Point(0, 1)]
+    );
+    const c = new Configuration(s.innerEdge);
+
+    expect(c[ContractionType.N]?.isBlockedBy(s.edges[3])).toBeFalse();
+    expect(c[ContractionType.N]?.isBlockedBy(s.edges[4])).toBeTrue();
+  });
+
+  it("for a positive contraction", function () {
+    const s = createConfigurationSetup(
+      new Point(-4, 0),
+      new Point(-2, 2),
+      new Point(2, 2),
+      new Point(4, 0),
+      [new Point(0, 1), new Point(5, -2), new Point(5, 4), new Point(-4, 4)]
+    );
+    const c = new Configuration(s.innerEdge);
+
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[3])).toBeTrue();
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[4])).toBeTrue();
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[5])).toBeFalse();
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[6])).toBeFalse();
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[7])).toBeFalse();
+  });
+});
+
+describe("initializeBlockingNumber() returns the number of interfering edges", function () {
   it("for a setup with one interference (partially residing).", function () {
     const s = configurationCases.bothBlockingPointNeg;
     const c = new Configuration(s.innerEdge);
 
-    expect(c[ContractionType.N]?.blockingEdges.length).toBe(1);
-    expect(c[ContractionType.N]?.blockingEdges).toEqual(s.edges.slice(-1));
-    expect(c[ContractionType.P]?.blockingEdges.length).toBe(0);
+    expect(c[ContractionType.N]?.blockingNumber).toBe(1);
+    expect(c[ContractionType.P]?.blockingNumber).toBe(0);
   });
 
-  it("for a setup with one interference (partially and entirely residing)", function () {
+  it("for a setup with 3 interferences (partially and entirely residing)", function () {
     const s = createConfigurationSetup(
       new Point(-4, 4),
       new Point(-2, 0),
@@ -207,9 +238,8 @@ describe("setBlockingEdges() returns interfering edges", function () {
 
     const c = new Configuration(s.innerEdge);
 
-    expect(c[ContractionType.N]?.blockingEdges.length).toBe(3);
-    expect(c[ContractionType.N]?.blockingEdges).toEqual(s.edges.slice(-3));
-    expect(c[ContractionType.P]?.blockingEdges.length).toBe(0);
+    expect(c[ContractionType.N]?.blockingNumber).toBe(3);
+    expect(c[ContractionType.P]?.blockingNumber).toBe(0);
   });
 
   it("for a setup with one interference (partially and entirely residing)", function () {
@@ -231,10 +261,8 @@ describe("setBlockingEdges() returns interfering edges", function () {
     );
     const c = new Configuration(s.innerEdge);
 
-    expect(c[ContractionType.N]?.blockingEdges.length).toBe(3);
-    expect(c[ContractionType.N]?.blockingEdges).toEqual(s.edges.slice(-3));
-    expect(c[ContractionType.P]?.blockingEdges.length).toBe(2);
-    expect(c[ContractionType.P]?.blockingEdges).toEqual(s.edges.slice(5, 7));
+    expect(c[ContractionType.N]?.blockingNumber).toBe(3);
+    expect(c[ContractionType.P]?.blockingNumber).toBe(2);
   });
 
   it("for a rectilinear setup", function () {
@@ -247,8 +275,8 @@ describe("setBlockingEdges() returns interfering edges", function () {
     );
     const c = new Configuration(s.innerEdge);
 
-    expect(c[ContractionType.N]?.blockingEdges.length).toBe(1);
-    expect(c[ContractionType.P]?.blockingEdges.length).toBe(0);
+    expect(c[ContractionType.N]?.blockingNumber).toBe(1);
+    expect(c[ContractionType.P]?.blockingNumber).toBe(0);
   });
 });
 
