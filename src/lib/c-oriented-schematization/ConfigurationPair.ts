@@ -1,6 +1,7 @@
 import Contraction, { ContractionType } from "./Contraction";
 import Configuration from "./Configuration";
 import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
+import HalfEdge from "../DCEL/HalfEdge";
 
 class ConfigurationPair {
   contraction: Contraction;
@@ -11,8 +12,19 @@ class ConfigurationPair {
     this.compensation = compensation;
   }
 
+  /**
+   * Get all edges of the configurations involved in the edge move (contraction and a possible and the compensation).
+   * @returns An array of {@link HalfEdge}s.
+   */
+  getX1X2(): HalfEdge[] {
+    const x1x2 = this.contraction.configuration.getX();
+    if (this.compensation) x1x2.push(...this.compensation.configuration.getX());
+    return x1x2;
+  }
+
   doEdgeMove() {
     const contractionEdge = this.contraction.configuration.innerEdge;
+    // const contractionArea = Number(this.contraction.area.toFixed(10));
     const compensationEdge =
       this.contraction.area > 0 ? this.compensation?.configuration.innerEdge : undefined;
     const dcel = contractionEdge.dcel;
@@ -25,28 +37,18 @@ class ConfigurationPair {
     // );
     // console.log("compensationEdge:", compensationEdge?.toString());
 
-    //TODO: update blocking edges
-    dcel
-      .getHalfEdges()
-      .reduce((acc: Contraction[], edge) => {
-        const n = edge.configuration?.[ContractionType.N];
-        const p = edge.configuration?.[ContractionType.P];
-        if (n) acc.push(n);
-        if (p) acc.push(p);
-        return acc;
-      }, [])
-      .forEach((contraction) => {
-        contraction.areaPoints;
-      });
+    // 1. Update blocking edges
+    dcel.getContractions().forEach((contraction) => {
+      contraction.decrementBlockingNumber(this.getX1X2());
+    });
 
-    // calculate compensation trapeze height
+    // 2.1 Calculate compensation trapeze height
     const shift =
       this.contraction.area > 0 && this.compensation
         ? this.compensation.getCompensationHeight(this.contraction.area)
         : undefined;
-    // console.log(shift);
 
-    // do compensation, if necessary
+    // 2.2 Do the compensation, if necessary
     if (compensationEdge && typeof shift === "number" && shift > 0) {
       const normal = compensationEdge
         .getVector()
@@ -60,7 +62,7 @@ class ConfigurationPair {
       compensationEdge.move(newTail, newHead);
     }
 
-    // do contraction
+    // 2.3 Do the contraction
     const pointA = this.contraction.point;
     const pointB = this.contraction.areaPoints[this.contraction.areaPoints.length - 1];
     if (
@@ -70,6 +72,7 @@ class ConfigurationPair {
       contractionEdge.move(pointA, pointB);
     else contractionEdge.move(pointB, pointA);
 
+    // 2.4 Update the affected configurations
     //TODO: update only affected configurations
     // const affectedEdges = [
     //   contractionEdge.prev,
@@ -90,7 +93,10 @@ class ConfigurationPair {
     // }
     // });
 
-    // TODO: update blocking edges number again
+    // TODO: 3. Update blocking numbers again
+    dcel.getContractions().forEach((contraction) => {
+      contraction.incrementBlockingNumber(this.getX1X2());
+    });
 
     if (!contractionEdge?.face || !contractionEdge.twin?.face) return;
     const key = FaceFaceBoundaryList.getKey(contractionEdge.face, contractionEdge.twin?.face);

@@ -162,12 +162,13 @@ class Contraction {
    * @returns A boolean, indicating whether or not the {@link Contraction} is blocked by the specified {@link HalfEdge}.
    */
   isBlockedBy(edge: HalfEdge): boolean | undefined {
+    const x = this.configuration.getX();
+    if (x.includes(edge)) return false;
     const edgeLine = edge.toLineSegment();
     if (!edgeLine) return;
     const area = new Polygon(this.areaPoints);
     const pointsInPolygon = edge.getEndpoints().filter((vertex) => vertex.isInPolygon(area));
     const intersections = area.getIntersections(edge);
-    const x = this.configuration.getX();
     const xLineSegments = x.reduce((acc: LineSegment[], edge) => {
       const lineSegment = edge.toLineSegment();
       if (typeof lineSegment === "object") acc.push(lineSegment);
@@ -187,6 +188,10 @@ class Contraction {
     return false;
   }
 
+  /**
+   * Intitializes the blocking number of the Contraction.
+   * @returns A number, indicating how many {@link HalfEdge}s block the {@link Contraction}.
+   */
   initializeBlockingNumber(): number {
     let blockingNumber = 0;
     if (!this.point) return blockingNumber;
@@ -198,6 +203,30 @@ class Contraction {
     });
 
     return blockingNumber;
+  }
+
+  /**
+   * Discards the contribution that the edges of X1 and X2 made to the blocking numbers, as a preliminary step for an edge-move.
+   * @param x1x2 An array of {@link Halfedge}s involved in the edge-move.
+   */
+  decrementBlockingNumber(x1x2: HalfEdge[]) {
+    if (this.blockingNumber === 0) return; // skip check for interference when no blocking point exists
+    const decrement = x1x2.reduce((acc: number, edge) => {
+      if (this.isBlockedBy(edge)) --acc;
+      return acc;
+    }, 0);
+    this.blockingNumber = this.blockingNumber - decrement;
+  }
+
+  /**
+   * Adds the contribution to the blocking numbers for the edges that changed during the contraction (i.e., the remaining edges of X1 and X2) edge-move.
+   */
+  incrementBlockingNumber(x1x2: HalfEdge[]) {
+    const increment = x1x2.reduce((acc: number, edge) => {
+      if (this.isBlockedBy(edge)) ++acc;
+      return acc;
+    }, 0);
+    this.blockingNumber = this.blockingNumber + increment;
   }
 
   getCompensationHeight(contractionArea: number): number | undefined {

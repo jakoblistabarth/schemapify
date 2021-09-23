@@ -2,6 +2,7 @@ import Dcel, { STEP } from "../lib/DCEL/Dcel";
 import L from "leaflet/";
 import Sector from "../lib/c-oriented-schematization/Sector";
 import HalfEdge from "../lib/DCEL/HalfEdge";
+import { ContractionType } from "src/lib/c-oriented-schematization/Contraction";
 
 let map: L.Map;
 
@@ -141,9 +142,15 @@ export function renderDcel(dcel: Dcel, step: STEP = STEP.LOAD): L.Map {
         },
         click: function (e) {
           const edge = e.target.feature;
+          const length = edge.properties.length;
+          const sectors = edge.properties.sector.map((sector: Sector) => sector.idx).join("+");
+          const blockingNumberN = edge.properties.configuration[ContractionType.N]?.blockingNumber;
+          const blockingNumberP = edge.properties.configuration[ContractionType.P]?.blockingNumber;
           console.log(
-            `edge => length: ${edge.properties.length} sector: ${edge.properties.sector}`,
-            edge.properties.class
+            `EDGE length: ${length}`,
+            `sector: ${sectors}`,
+            edge.properties.class,
+            `blocking numbers: ${blockingNumberN}(-),${blockingNumberP}(+)`
           );
         },
       });

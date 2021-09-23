@@ -1,6 +1,7 @@
 import * as geojson from "geojson";
 import config, { Config } from "../../schematization.config";
 import Configuration from "../c-oriented-schematization/Configuration";
+import Contraction, { ContractionType } from "../c-oriented-schematization/Contraction";
 import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
 import Staircase from "../c-oriented-schematization/Staircase";
 import Point from "../geometry/Point";
@@ -648,7 +649,8 @@ class Dcel {
   }
 
   simplify(): Dcel {
-    this.faceFaceBoundaryList = new FaceFaceBoundaryList(this);
+    const ffbl = new FaceFaceBoundaryList(this);
+    this.faceFaceBoundaryList = ffbl;
     this.createConfigurations();
     // console.log(
     //   "before",
@@ -664,6 +666,16 @@ class Dcel {
 
       if (index < 3) pair?.doEdgeMove();
     }
+
+    // document.addEventListener("keypress", function (e) {
+    //   if (e.key === "Enter") {
+    //     console.log("enter");
+    //     let pair = ffbl.getMinimalConfigurationPair();
+    //     console.log(pair?.contraction.area, pair?.contraction.configuration.innerEdge.toString());
+    //     pair?.doEdgeMove();
+    //   }
+    // });
+
     // while (pair || s.halfEdges.size/2 > k) {
     //   pair?.doEdgeMove();
     //   pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
@@ -839,6 +851,7 @@ class Dcel {
           sector: e.getAssociatedSector(),
           class: e.class,
           assignedDirection: e.assignedDirection,
+          configuration: e.configuration,
           twinClass: e.twin?.class,
           // TODO: move this to mapoutput!
           edge: `
@@ -886,6 +899,21 @@ class Dcel {
       };
     });
     return createGeoJSON(regionFeatures);
+  }
+
+  /**
+   * Gets all contractions within a DCEL.
+   * @returns An array of {@link Contraction}s.
+   */
+  getContractions(): Contraction[] {
+    return this.getHalfEdges().reduce((acc: Contraction[], edge) => {
+      if (!edge.configuration) return acc;
+      const n = edge.configuration[ContractionType.N];
+      const p = edge.configuration[ContractionType.P];
+      if (n) acc.push(n);
+      if (p) acc.push(p);
+      return acc;
+    }, []);
   }
 
   /**

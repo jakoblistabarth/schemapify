@@ -51,6 +51,7 @@ export const tests: string[] = [
   "shapes/edge-move-test.json",
   "shapes/enclave.json",
   "shapes/enclave2.json",
+  "shapes/equal-contractions.json",
   "shapes/inflection-test.json",
   "shapes/smallest-contraction.json",
   "shapes/smallest-contraction-1a.json",
@@ -68,7 +69,7 @@ export const tests: string[] = [
   "shapes/v-shape.json",
 ];
 
-let activeDcel = tests[0];
+let activeDcel = tests[14];
 
 export function getActiveDcel(): Dcel | undefined {
   return dcelMap.get(activeDcel);

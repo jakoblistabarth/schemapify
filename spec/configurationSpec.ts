@@ -196,6 +196,9 @@ describe("isBlockedBy() determines whether or not a contraction is blocked by an
     );
     const c = new Configuration(s.innerEdge);
 
+    expect(c[ContractionType.N]?.isBlockedBy(s.edges[0])).toBeFalse();
+    expect(c[ContractionType.N]?.isBlockedBy(s.edges[1])).toBeFalse();
+    expect(c[ContractionType.N]?.isBlockedBy(s.edges[2])).toBeFalse();
     expect(c[ContractionType.N]?.isBlockedBy(s.edges[3])).toBeFalse();
     expect(c[ContractionType.N]?.isBlockedBy(s.edges[4])).toBeTrue();
   });
@@ -210,11 +213,29 @@ describe("isBlockedBy() determines whether or not a contraction is blocked by an
     );
     const c = new Configuration(s.innerEdge);
 
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[0])).toBeFalse();
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[1])).toBeFalse();
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[2])).toBeFalse();
     expect(c[ContractionType.P]?.isBlockedBy(s.edges[3])).toBeTrue();
     expect(c[ContractionType.P]?.isBlockedBy(s.edges[4])).toBeTrue();
     expect(c[ContractionType.P]?.isBlockedBy(s.edges[5])).toBeFalse();
     expect(c[ContractionType.P]?.isBlockedBy(s.edges[6])).toBeFalse();
     expect(c[ContractionType.P]?.isBlockedBy(s.edges[7])).toBeFalse();
+  });
+
+  it("and handles edges which are part of X correctly", function () {
+    const s = createConfigurationSetup(
+      new Point(-4, 0),
+      new Point(-2, 2),
+      new Point(2, 2),
+      new Point(4, 0),
+      [new Point(0, 1), new Point(5, -2), new Point(5, 4), new Point(-4, 4)]
+    );
+    const c = new Configuration(s.innerEdge);
+
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[0])).toBeFalse();
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[1])).toBeFalse();
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[2])).toBeFalse();
   });
 });
 
