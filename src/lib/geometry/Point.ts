@@ -36,18 +36,28 @@ class Point {
     return new Point(this.x + distance * dx, this.y + distance * dy);
   }
 
+  /**
+   * Determines whether or not the Point lies on a speficied LineSegment.
+   * @param lineSegment A {@link LineSegment} to be checked.
+   * @returns A boolean, indicating whether or not the Point lies on the LineSegment.
+   */
   isOnLineSegment(lineSegment: LineSegment) {
     const PA = this.distanceToPoint(lineSegment.endPoint1);
     const PB = this.distanceToPoint(lineSegment.endPoint2);
     return parseFloat((PA + PB).toFixed(10)) === parseFloat(lineSegment.getLength().toFixed(10));
   }
 
+  /**
+   * Determines whether or not the Point lies on the speficied LineSegments.
+   * @param lineSegment An array of {@link LineSegment}s to be checked.
+   * @returns A boolean, indicating whether or not the Point lies on the LineSegments.
+   */
   isOnLineSegments(lineSegments: LineSegment[]) {
     return lineSegments.some((lineSegment) => this.isOnLineSegment(lineSegment));
   }
 
   /**
-   * Checks whether the {@link Point} lies within the specified polygon.
+   * Determines whether the {@link Point} lies within the specified polygon.
    * This algorithm works only(!) on convex polygons.
    * This poses no problem as all {@link staircase} regions are by definition convex polygons.
    * as seen @ [algorithmtutor.com](https://algorithmtutor.com/Computational-Geometry/Check-if-a-point-is-inside-a-polygon/)
@@ -81,6 +91,11 @@ class Point {
     return t1 || t2;
   }
 
+  /**
+   * Determines whether two Points' positions are equal.
+   * @param point A {@link Point} the Point is compared to.
+   * @returns A boolean, indicating whether or not the {@link Point}'s position equals the specified {@link Point}'s position.
+   */
   equals(point: Point): boolean {
     return (
       Number((this.x - point.x).toFixed(10)) === 0 && Number((this.y - point.y).toFixed(10)) === 0

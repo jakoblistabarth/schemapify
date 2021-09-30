@@ -50,7 +50,7 @@ class HalfEdge {
   }
 
   /**
-   *
+   * Get the uinique identifier of the HalfEdge.
    * @param stop defines how many strings of the uuid are returned
    * @returns the edge's uuid
    */
@@ -58,15 +58,28 @@ class HalfEdge {
     return this.uuid.substring(0, length);
   }
 
+  /**
+   * Gets the Head of the HalfEdge.
+   * @returns A {@link Vertex}, representing the {@link HalfEdge}'s head.
+   */
   getHead(): Vertex | undefined {
     if (this.twin) return this.twin.tail;
   }
 
+  /**
+   * Gets the Vertices of the HalfEdge.
+   * @returns An array of {@link Vertex}s, representing the {@link HalfEdge}'s endpoints.
+   */
   getEndpoints(): Vertex[] {
     const head = this.getHead();
     return head ? [this.tail, head] : [];
   }
 
+  /**
+   * Gets the significant Vertex of the HalfEdge.
+   * A Vertex is significant if its incident Edges reside in the same sector or adjacent sectors.
+   * @returns The signficant {@link Vertex} of the {@link HalfEdge}, if it exists.
+   */
   getSignificantVertex(): Vertex | undefined {
     const endPoints = this.getEndpoints();
     if (endPoints) return endPoints.find((v) => v.significant);
@@ -256,6 +269,12 @@ class HalfEdge {
     return e_;
   }
 
+  /**
+   * Moves an Halfedge to the specified tail's and head's position.
+   * @param newTail {@link} A {@link Point}, indicating the new position of the {@link HalfEdge}'s tail.
+   * @param newHead A {@link Point}, indicating the new position of the {@link HalfEdge}'s head.
+   * @returns The moved {@link HalfEdge}.
+   */
   move(newTail: Point, newHead: Point) {
     const head = this.getHead();
     const prevTail = this.prev?.tail;
@@ -377,7 +396,7 @@ class HalfEdge {
    * Gets the closest associated angle (one bound of its associated sector)
    * of an unaligned deviating(!) edge in respect to its assigned angle.
    * Needed for constructing the staircase of an unaligned deviating edge.
-   * @returns The closest associated angle of an edge in respect to its assigned angle.
+   * @returns The closest associated angle of an {@link HalfEdge} in respect to its assigned angle.
    */
 
   // TODO: Where does such function live?
@@ -430,6 +449,11 @@ class HalfEdge {
     return (this.isAligning = isAligned);
   }
 
+  /**
+   * Gets the minimum distance between two HalfEdges.
+   * @param otherEdge The {@link HalfEdge} the distance to is calculated.
+   * @returns A number, indicating the minimum distance.
+   */
   distanceToEdge(otherEdge: HalfEdge): number | undefined {
     const head = this.getHead();
     const otherHead = otherEdge.getHead();
@@ -443,11 +467,19 @@ class HalfEdge {
     return Math.min(...distances);
   }
 
+  /**
+   * Converts the HalfEdge into its equivalent LineSegment.
+   * @returns A {@link LineSegment}.
+   */
   toLineSegment(): LineSegment | undefined {
     const head = this.getHead();
     if (head) return new LineSegment(this.tail, head);
   }
 
+  /**
+   * Classifies a HalfEdge and its twin, based on its orientation.
+   * The classes depend on the defined set of orientations, the setup of {@link C}.
+   */
   classify(): void {
     this.tail.assignDirections();
 

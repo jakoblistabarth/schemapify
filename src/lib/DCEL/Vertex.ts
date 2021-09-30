@@ -295,6 +295,12 @@ class Vertex extends Point {
           );
   }
 
+  /**
+   * Moves the Vertex to a new position.
+   * @param x A number, indicating the new x position of the {@link Vertex}.
+   * @param y A number, indicating the new y position of the {@link Vertex}.
+   * @returns The moved {@link Vertex}.
+   */
   moveTo(x: number, y: number): Vertex {
     if (this.x === x && this.y === y) return this;
     this.dcel.vertices.set(Vertex.getKey(x, y), this);
@@ -304,6 +310,10 @@ class Vertex extends Point {
     return this;
   }
 
+  /**
+   * Converts a Vertex to a Point.
+   * @returns A {@link Point}.
+   */
   toPoint(): Point {
     return new Point(this.x, this.y);
   }
