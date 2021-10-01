@@ -5,7 +5,7 @@ import Contraction, { ContractionType } from "../c-oriented-schematization/Contr
 import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
 import Staircase from "../c-oriented-schematization/Staircase";
 import Point from "../geometry/Point";
-import { createGeoJSON } from "../utilities";
+import { createGeoJSON, validateGeoJSON } from "../utilities";
 import Face from "./Face";
 import HalfEdge, { OrientationClasses } from "./HalfEdge";
 import Vertex from "./Vertex";
@@ -200,6 +200,7 @@ class Dcel {
    * @returns A {@link Dcel}.
    */
   static fromGeoJSON(geoJSON: geojson.FeatureCollection): Dcel {
+    if (!validateGeoJSON(geoJSON)) throw new Error("invalid input");
     const subdivision = new Dcel();
 
     subdivision.featureProperties = geoJSON.features.map(
@@ -209,8 +210,6 @@ class Dcel {
     const polygons = geoJSON.features.reduce((acc: Vertex[][][], feature: geojson.Feature) => {
       if (feature.geometry.type !== "Polygon" && feature.geometry.type !== "MultiPolygon")
         return acc;
-      // TODO: check in e.g, parseGeoJSON()? if only polygons or multipolygons in geojson
-      // TODO: add error-handling
 
       const multiPolygons =
         feature.geometry.type !== "MultiPolygon"
