@@ -280,27 +280,9 @@ class HalfEdge {
     const prevTail = this.prev?.tail;
     const nextHead = this.next?.getHead();
     if (!head || !nextHead || !prevTail) return;
-    // console.log(
-    //   "to be modified",
-    //   this.tail.xy(),
-    //   "->",
-    //   newTail.xy(),
-    //   this.getHead()?.xy(),
-    //   "->",
-    //   newHead.xy()
-    // );
-    if (newHead.equals(nextHead)) {
-      const newEdge = head.remove(this.face);
-      if (newEdge) newEdge.configuration = new Configuration(newEdge);
-      newEdge?.dcel.faceFaceBoundaryList?.addEdge(newEdge);
-      // console.log("newEdge head", newEdge?.toString());
-    } else head.moveTo(newHead.x, newHead.y);
-    if (newTail.equals(prevTail)) {
-      const newEdge = this.tail.remove(this.face);
-      if (newEdge) newEdge.configuration = new Configuration(newEdge);
-      newEdge?.dcel.faceFaceBoundaryList?.addEdge(newEdge);
-      // console.log("newEdge tail", newEdge?.toString());
-    } else this.tail.moveTo(newTail.x, newTail.y);
+    head.moveTo(newHead.x, newHead.y);
+    this.tail.moveTo(newTail.x, newTail.y);
+    return this;
   }
 
   /**

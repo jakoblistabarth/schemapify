@@ -56,10 +56,13 @@ class Contraction {
    */
   isConflicting(complementary: Contraction): boolean | undefined {
     const overlappingEdges = this.getOverlappingEdges(complementary);
+    const contractionX = this.configuration.getX();
+    const complementaryX = complementary.configuration.getX();
+    const outerEdges = [contractionX[0], contractionX[2], complementaryX[0], complementaryX[2]];
     if (!overlappingEdges.length) return false;
     if (
       overlappingEdges.length === 1 &&
-      overlappingEdges[0].getInflectionType() === InflectionType.B
+      outerEdges.some((edge) => edge.getInflectionType() === InflectionType.B)
     )
       return false;
     return true;
@@ -72,6 +75,7 @@ class Contraction {
    * @returns A boolean, indicating whether or not the pair of contractions reduces complexity in an edge move.
    */
   reducesComplexity(complementary: Contraction): boolean | undefined {
+    // return true;
     const head = complementary.configuration.innerEdge.getHead();
     const tail = complementary.configuration.innerEdge.tail;
     if (!head) return;
@@ -174,6 +178,8 @@ class Contraction {
    */
   isBlockedBy(edge: HalfEdge): boolean | undefined {
     const x = this.configuration.getX();
+    const x_ = this.configuration.innerEdge.twin?.configuration?.getX();
+    if (x_) x.push(...x_);
     if (x.includes(edge)) return false;
     const edgeLine = edge.toLineSegment();
     if (!edgeLine) return;
@@ -223,7 +229,7 @@ class Contraction {
   decrementBlockingNumber(x1x2: HalfEdge[]) {
     if (this.blockingNumber === 0) return; // skip check for interference when no blocking point exists
     const decrement = x1x2.reduce((acc: number, edge) => {
-      if (this.isBlockedBy(edge)) --acc;
+      if (this.isBlockedBy(edge)) ++acc;
       return acc;
     }, 0);
     this.blockingNumber = this.blockingNumber - decrement;
@@ -231,10 +237,16 @@ class Contraction {
 
   /**
    * Adds the contribution to the blocking numbers for the edges that changed during the contraction (i.e., the remaining edges of X1 and X2) edge-move.
+   * @param x1x2 An array of {@link HalfEdges} that changed during the contraction.
    */
   incrementBlockingNumber(x1x2: HalfEdge[]) {
     const increment = x1x2.reduce((acc: number, edge) => {
-      if (this.isBlockedBy(edge)) ++acc;
+      // console.log("---->", this.configuration.innerEdge.toString());
+
+      if (this.isBlockedBy(edge)) {
+        // console.log("blocking edge", edge.toString());
+        ++acc;
+      }
       return acc;
     }, 0);
     this.blockingNumber = this.blockingNumber + increment;

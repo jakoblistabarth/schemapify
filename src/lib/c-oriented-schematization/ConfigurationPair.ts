@@ -2,6 +2,7 @@ import Contraction, { ContractionType } from "./Contraction";
 import Configuration from "./Configuration";
 import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
 import HalfEdge from "../DCEL/HalfEdge";
+import Vertex from "../DCEL/Vertex";
 
 class ConfigurationPair {
   contraction: Contraction;
@@ -39,8 +40,35 @@ class ConfigurationPair {
 
     // 1. Update blocking edges
     dcel.getContractions().forEach((contraction) => {
-      contraction.decrementBlockingNumber(this.getX1X2());
+      // console.log(
+      //   "blockingNumber before",
+      //   contraction.configuration.innerEdge.toString(),
+      //   contraction.blockingNumber
+      // );
+      contraction.decrementBlockingNumber(this.getX1X2()); // FIXME: fix blocking Number!!
+      // console.log(
+      //   "blockingNumber after",
+      //   contraction.configuration.innerEdge.toString(),
+      //   contraction.blockingNumber
+      // );
     });
+
+    const movedVertices: Vertex[] = [];
+
+    // 2.1 Do the contraction
+    const pointA = this.contraction.point;
+    const pointB = this.contraction.areaPoints[this.contraction.areaPoints.length - 1];
+    const prevEdgeLineSegment = contractionEdge.prev?.toLineSegment();
+    const nextEdgeLineSegment = contractionEdge.next?.toLineSegment();
+    if (!prevEdgeLineSegment || !nextEdgeLineSegment) return;
+
+    if (pointA.isOnLineSegment(prevEdgeLineSegment)) {
+      contractionEdge.move(pointA, pointB);
+    } else contractionEdge.move(pointB, pointA);
+
+    movedVertices.push(contractionEdge.tail);
+    const contractionHead = contractionEdge.getHead();
+    if (contractionHead) movedVertices.push(contractionHead);
 
     // 2.1 Calculate compensation trapeze height
     const shift =
@@ -49,7 +77,7 @@ class ConfigurationPair {
         : undefined;
 
     // 2.2 Do the compensation, if necessary
-    if (compensationEdge && typeof shift === "number" && shift > 0) {
+    if (compensationEdge && typeof shift === "number") {
       const normal = compensationEdge
         .getVector()
         ?.getUnitVector()
@@ -60,17 +88,37 @@ class ConfigurationPair {
       const newHead = compensationEdge.getHead()?.toVector().plus(normal).toPoint();
       if (!newHead) return;
       compensationEdge.move(newTail, newHead);
+
+      movedVertices.push(compensationEdge.tail);
+      const compensationHead = compensationEdge.getHead();
+      if (compensationHead) movedVertices.push(compensationHead);
     }
 
-    // 2.3 Do the contraction
-    const pointA = this.contraction.point;
-    const pointB = this.contraction.areaPoints[this.contraction.areaPoints.length - 1];
-    if (
-      contractionEdge.prev?.tail.equals(pointA) ||
-      contractionEdge.next?.getHead()?.equals(pointB)
-    )
-      contractionEdge.move(pointA, pointB);
-    else contractionEdge.move(pointB, pointA);
+    console.log(movedVertices.length);
+    console.log(Array.from(dcel.vertices.keys()));
+
+    // 2.3 Remove redundant vertices
+    movedVertices.forEach((vertex) => {
+      const key = Vertex.getKey(vertex.x, vertex.y);
+      console.log(
+        key,
+        dcel.vertices.get(key)?.edges.map((e) => e.toString())
+      );
+
+      if (dcel.vertices.has(key)) {
+        const redundantVertex = dcel.vertices.get(key);
+        if (!redundantVertex) return;
+        redundantVertex.edges = vertex.edges;
+        const newEdge = redundantVertex.remove(contractionEdge.face);
+        if (!newEdge) return;
+        dcel.vertices.set(key, redundantVertex);
+        dcel.faceFaceBoundaryList?.addEdge(newEdge);
+        newEdge.configuration = new Configuration(newEdge);
+      } else {
+        dcel.vertices.set(key, vertex);
+      }
+      dcel.vertices.delete(key + "m");
+    });
 
     // 2.4 Update the affected configurations
     //TODO: update only affected configurations
@@ -93,11 +141,6 @@ class ConfigurationPair {
     // }
     // });
 
-    // TODO: 3. Update blocking numbers again
-    dcel.getContractions().forEach((contraction) => {
-      contraction.incrementBlockingNumber(this.getX1X2());
-    });
-
     if (!contractionEdge?.face || !contractionEdge.twin?.face) return;
     const key = FaceFaceBoundaryList.getKey(contractionEdge.face, contractionEdge.twin?.face);
     dcel.faceFaceBoundaryList?.boundaries.get(key)?.edges.forEach((edge) => {
@@ -105,6 +148,23 @@ class ConfigurationPair {
 
       if (edge.getEndpoints().every((vertex) => vertex.edges.length <= 3))
         edge.configuration = new Configuration(edge);
+    });
+
+    console.log("moved vertices", movedVertices);
+
+    console.log(
+      contractionEdge.prev?.getUuid() +
+        " " +
+        contractionEdge.prev?.tail.xy() +
+        "->" +
+        contractionEdge.prev?.getHead()?.xy(),
+      contractionEdge.getUuid() + " " + contractionEdge.toString(),
+      contractionEdge.next?.getUuid() + " " + contractionEdge.next?.toString()
+    );
+
+    // TODO: 3. Update blocking numbers again
+    dcel.getContractions().forEach((contraction) => {
+      contraction.incrementBlockingNumber(this.getX1X2());
     });
   }
 }

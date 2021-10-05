@@ -146,11 +146,13 @@ export function renderDcel(dcel: Dcel, step: STEP = STEP.LOAD): L.Map {
           const sectors = edge.properties.sector.map((sector: Sector) => sector.idx).join("+");
           const blockingNumberN = edge.properties.configuration[ContractionType.N]?.blockingNumber;
           const blockingNumberP = edge.properties.configuration[ContractionType.P]?.blockingNumber;
+          const contractionAreaN = edge.properties.configuration[ContractionType.N]?.area;
+          const contractionAreaP = edge.properties.configuration[ContractionType.P]?.area;
           console.log(
             `EDGE length: ${length}`,
             `sector: ${sectors}`,
             edge.properties.class,
-            `blocking numbers: ${blockingNumberN}(-),${blockingNumberP}(+)`
+            `contraction: (-)${blockingNumberN}:${contractionAreaN}, (+)${blockingNumberP}:${contractionAreaP}`
           );
         },
       });

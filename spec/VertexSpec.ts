@@ -95,6 +95,24 @@ describe("remove() on a vertex", function () {
     expect(squareFace.getEdges(false).length).toBe(3);
   });
 
+  it("returns a correctly linked halfedge when removing one vertex of a square shape", function () {
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
+    const dcel = Dcel.fromGeoJSON(json);
+
+    const squareFace = dcel.getBoundedFaces()[0];
+    const vertex = dcel.findVertex(0, 0);
+    const newEdge = vertex?.remove(squareFace);
+
+    expect(newEdge?.prev?.tail.xy()).toEqual([200, 200]);
+    expect(newEdge?.prev?.getHead()?.xy()).toEqual([0, 200]);
+    expect(newEdge?.prev?.toString()).toBe("200/200->0/200");
+    expect(newEdge?.prev?.next?.toString()).toBe("0/200->200/0");
+    expect(newEdge?.next?.tail.xy()).toEqual([200, 0]);
+    expect(newEdge?.next?.getHead()?.xy()).toEqual([200, 200]);
+    expect(newEdge?.next?.toString()).toBe("200/0->200/200");
+    expect(newEdge?.next?.prev?.toString()).toBe("0/200->200/0");
+  });
+
   it("returns any of the just created halfedges if no face is given", function () {
     const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);

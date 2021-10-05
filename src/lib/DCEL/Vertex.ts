@@ -92,6 +92,7 @@ class Vertex extends Point {
   /**
    * Removes the vertex and replaces the incident HalfEdges with a new one.
    * Only works on vertices of degree 2 (with a maximum of two incident {@link HalfEdge}s).
+   * @param face The face to which the new {@link HalfEdge}, which is returned, should be incident to.
    * @returns The new ("merged") {@link HalfEdge}.
    */
   remove(face?: Face): HalfEdge | undefined {
@@ -303,7 +304,7 @@ class Vertex extends Point {
    */
   moveTo(x: number, y: number): Vertex {
     if (this.x === x && this.y === y) return this;
-    this.dcel.vertices.set(Vertex.getKey(x, y), this);
+    this.dcel.vertices.set(Vertex.getKey(x, y) + "m", this);
     this.dcel.vertices.delete(Vertex.getKey(this.x, this.y));
     this.x = x;
     this.y = y;

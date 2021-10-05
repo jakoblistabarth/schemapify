@@ -657,13 +657,17 @@ class Dcel {
     //   this.getArea()
     // );
 
-    for (let index = 0; index < 4; index++) {
+    for (let index = 0; index < 2; index++) {
       let pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
-      // console.log(pair?.contraction.configuration.innerEdge.toString(), pair?.contraction.area);
-      // console.log(pair?.compensation?.configuration.innerEdge.toString(), pair?.compensation?.area);
-      // console.log("-");
+      console.log(
+        pair?.contraction.configuration.innerEdge.toString(),
+        pair?.contraction.area,
+        pair?.contraction.point.xy()
+      );
+      console.log(pair?.compensation?.configuration.innerEdge.toString(), pair?.compensation?.area);
+      console.log("-");
 
-      if (index < 3) pair?.doEdgeMove();
+      pair?.doEdgeMove();
     }
 
     // document.addEventListener("keypress", function (e) {
@@ -714,12 +718,10 @@ class Dcel {
   }
 
   toGeoJSON(): geojson.FeatureCollection {
-    // copy faces, so that every face has only one FID
-
     const outerRingsByFID = this.getBoundedFaces().reduce(
       (groupedFaces: { [key: number]: Face[] }, face) => {
         face.FID.forEach((fid, idx) => {
-          if (face.outerRing && idx === 0) return groupedFaces;
+          if (face.outerRing && idx === 0) return groupedFaces; // TODO: why do we need this 0? for cases like vienna within noe
           if (groupedFaces[fid]) groupedFaces[fid].push(face);
           else groupedFaces[fid] = [face];
         });

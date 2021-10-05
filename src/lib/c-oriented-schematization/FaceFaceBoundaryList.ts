@@ -2,7 +2,6 @@ import HalfEdge from "../DCEL/HalfEdge";
 import Face from "../DCEL/Face";
 import Dcel from "../DCEL/Dcel";
 import FaceFaceBoundary from "./FaceFaceBoundary";
-import Contraction from "./Contraction";
 import ConfigurationPair from "./ConfigurationPair";
 
 export type FaceFaceBoundaryMap = Map<string, FaceFaceBoundary>;
@@ -39,7 +38,7 @@ class FaceFaceBoundaryList {
 
   /**
    * Gets the overall minimal configuration pair of a Face-Face-Boundary structure.
-   * @returns A tuple, containing 2 complementairy, non-conflicting {@link Contraction}s, the minimal Configuration Pair.
+   * @returns A tuple, containing 2 complementary, non-conflicting {@link Contraction}s, the minimal Configuration Pair.
    */
   getMinimalConfigurationPair(): ConfigurationPair | undefined {
     return this.getBoundaries().reduce((minimum: ConfigurationPair | undefined, boundary) => {
@@ -50,10 +49,16 @@ class FaceFaceBoundaryList {
     }, undefined);
   }
 
+  /**
+   * Adds the edge to the face-face-boundary-list.
+   * @param edge The {@link HalfEdge} which should be added to the respective {@link FaceFaceBoundary}
+   * @returns The added {@link HalfEdge}.
+   */
   addEdge(edge: HalfEdge) {
     if (!edge.face || !edge.twin?.face) return;
     const key = FaceFaceBoundaryList.getKey(edge.face, edge.twin?.face);
     this.boundaries.get(key)?.edges.push(edge);
+    return edge;
   }
 }
 

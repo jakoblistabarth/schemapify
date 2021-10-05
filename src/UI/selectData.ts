@@ -46,20 +46,21 @@ export const tests: string[] = [
   "shapes/3plgn-complex.json",
   // "shapes/3plgn-adjacent.json",
   "shapes/aligned-deviating.json",
+  "shapes/contractions-equal.json",
+  "shapes/contractions-2.json",
   "shapes/dart.json",
   "shapes/edge-cases.json",
   "shapes/edge-move-test.json",
   "shapes/enclave.json",
   "shapes/enclave2.json",
-  "shapes/equal-contractions.json",
   "shapes/inflection-test.json",
   "shapes/smallest-contraction.json",
   "shapes/smallest-contraction-1a.json",
   "shapes/smallest-contraction-2.json",
-  // "shapes/square-hole-island-hole.json",
-  // "shapes/square-hole-island.json",
+  "shapes/square-hole-island-hole.json",
+  "shapes/square-hole-island.json",
   "shapes/square-hole.json",
-  // "shapes/square-islands.json",
+  "shapes/square-islands.json",
   "shapes/square.json",
   // "shapes/triangle-hole.json",
   "shapes/triangle-unaligned.json",
@@ -69,7 +70,7 @@ export const tests: string[] = [
   "shapes/v-shape.json",
 ];
 
-let activeDcel = tests[14];
+let activeDcel = tests[17];
 
 export function getActiveDcel(): Dcel | undefined {
   return dcelMap.get(activeDcel);
