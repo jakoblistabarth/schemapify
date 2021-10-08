@@ -178,62 +178,6 @@ class HalfEdge {
   }
 
   /**
-   * Deletes the halfEdge, its twin and possible other occurrences in the DCEL linkages.
-   */
-  delete(): void {
-    const e = this;
-    const e_ = e.twin;
-    if (!e_) return;
-    const eTail = e.tail;
-    const eHead = e.getHead();
-    const ePrev = e.prev;
-    const ePrevPrev = ePrev?.prev;
-    const e_Prev = e_.prev;
-    const e_PrevPrev = e_.prev?.prev;
-    const eNext = e.next;
-    const eNextNext = eNext?.next;
-    const e_Next = e_.next;
-    const e_NextNext = e_Next?.next;
-    const eNextHead = eNext?.getHead();
-    if (
-      !eHead ||
-      !ePrev ||
-      !ePrevPrev ||
-      !e_PrevPrev ||
-      !e_Prev ||
-      !eNext ||
-      !eNextNext ||
-      !e_NextNext ||
-      !e_Next ||
-      !eNextHead
-    )
-      return;
-
-    console.log(ePrev.tail.xy(), eNextHead.xy());
-    const eNew = this.dcel.makeHalfEdge(ePrev.tail, eNextHead);
-    const e_New = this.dcel.makeHalfEdge(eNextHead, ePrev.tail);
-    eNew.twin = e_New;
-    eNew.prev = ePrevPrev;
-    ePrevPrev.next = eNew;
-    eNew.next = eNextNext;
-    eNextNext.prev = eNew;
-    e_New.twin = eNew;
-    e_New.prev = e_PrevPrev;
-    e_PrevPrev.next = e_New;
-    e_New.next = e_NextNext;
-    e_NextNext.prev = e_New;
-
-    this.dcel.removeHalfEdge(e);
-    this.dcel.removeHalfEdge(e_);
-    this.dcel.removeHalfEdge(ePrev);
-    this.dcel.removeHalfEdge(e_Prev);
-    this.dcel.removeHalfEdge(eNext);
-    this.dcel.removeHalfEdge(e_Next);
-    this.dcel.removeVertex(eTail);
-    this.dcel.removeVertex(eHead);
-  }
-
-  /**
    * Subdivides a halfedge by adding a new vertex between a halfedge's tail and head.
    * @credits adapted from [Doubly Connect Edge List (DCEL)](https://www2.cs.sfu.ca/~binay/813.2011/DCEL.pdf)
    * @param newPoint {@link Point} which should be added between the {@link HalfEdge}'s tail and head. default: the edge's midpoint
@@ -336,9 +280,16 @@ class HalfEdge {
     const prevTail = this.prev?.tail;
     const nextHead = this.next?.getHead();
     if (!head || !nextHead || !prevTail) return;
-    head.moveTo(newHead.x, newHead.y);
-    this.tail.moveTo(newTail.x, newTail.y);
-    return this;
+    if (newHead.equals(nextHead)) {
+      const newEdge = head.remove(this.face);
+      if (newEdge) newEdge.configuration = new Configuration(newEdge);
+      newEdge?.dcel.faceFaceBoundaryList?.addEdge(newEdge);
+    } else head.moveTo(newHead.x, newHead.y);
+    if (newTail.equals(prevTail)) {
+      const newEdge = this.tail.remove(this.face);
+      if (newEdge) newEdge.configuration = new Configuration(newEdge);
+      newEdge?.dcel.faceFaceBoundaryList?.addEdge(newEdge);
+    } else this.tail.moveTo(newTail.x, newTail.y);
   }
 
   /**

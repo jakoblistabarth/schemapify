@@ -381,6 +381,28 @@ describe("getMinimalCycleDistance()", function () {
 });
 
 describe("move().", function () {
+  it("deletes(merges) a vertex if target point is existing.", function () {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("data/shapes/smallest-contraction.json"), "utf8")
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    dcel.getBoundedFaces()[0].getEdges()[1].move(new Point(10, 0), new Point(10, 1));
+
+    expect(dcel.getBoundedFaces()[0].getEdges()[1].toString()).toBe("10/0->10/1");
+  });
+
+  it("deletes(merges) vertices if target points are existing.", function () {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("data/shapes/smallest-contraction.json"), "utf8")
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    dcel.getBoundedFaces()[0].getEdges()[5].move(new Point(10, 7), new Point(10, 8));
+
+    expect(dcel.getBoundedFaces()[0].getEdges()[3].toString()).toBe("10/1->10/7");
+    expect(dcel.getBoundedFaces()[0].getEdges()[4].toString()).toBe("10/7->10/8");
+    expect(dcel.getBoundedFaces()[0].getEdges()[5].toString()).toBe("10/8->10/10");
+  });
+
   it("moves an edge.", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("data/shapes/smallest-contraction.json"), "utf8")
@@ -389,80 +411,5 @@ describe("move().", function () {
     dcel.getBoundedFaces()[0].getEdges()[1].move(new Point(10.5, 0), new Point(10.5, 1));
 
     expect(dcel.getBoundedFaces()[0].getEdges()[1].toString()).toBe("10.5/0->10.5/1");
-  });
-});
-
-describe("delete().", function () {
-  it("returns a correct dcel after removing an halfedge on a square with 4 collinear points", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("data/shapes/square-contraction-zero.json"), "utf8")
-    );
-    const dcel = Dcel.fromGeoJSON(json);
-    const edge = dcel.findHalfEdge(new Point(200, 100), new Point(200, 150));
-    console.log(edge?.toString());
-    edge?.delete();
-
-    console.log(
-      dcel
-        .getBoundedFaces()[0]
-        .getEdges()
-        .map((e) => e.toString())
-    );
-
-    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
-    expect(dcel.getBoundedFaces()[0].edge?.getCycle().length).toBe(4);
-    expect(dcel.getBoundedFaces()[0].edge?.twin?.getCycle().length).toBe(4);
-    expect(dcel.vertices.size).toBe(4);
-  });
-
-  it("returns a correct dcel after removing an halfedge on a square with 4 collinear points", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("data/shapes/square-contraction-zero.json"), "utf8")
-    );
-    const dcel = Dcel.fromGeoJSON(json);
-    const edge = dcel.findHalfEdge(new Point(200, 150), new Point(200, 200));
-    console.log(edge?.toString());
-    edge?.delete();
-
-    console.log(
-      dcel
-        .getBoundedFaces()[0]
-        .getEdges()
-        .map((e) => e.toString())
-    );
-
-    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
-    expect(dcel.getBoundedFaces()[0].edge?.getCycle().length).toBe(4);
-    expect(dcel.getBoundedFaces()[0].edge?.twin?.getCycle().length).toBe(4);
-    expect(dcel.vertices.size).toBe(4);
-  });
-
-  xit("returns a correct dcel after removing an halfedge on square with one subdivded edge", function () {
-    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
-    const dcel = Dcel.fromGeoJSON(json);
-    const edge = dcel.findHalfEdge(new Point(200, 0), new Point(200, 200));
-    edge?.next?.subdivide();
-    const newEdge = edge?.subdivide();
-
-    console.log(newEdge?.toString());
-
-    console.log(
-      dcel
-        .getBoundedFaces()[0]
-        .getEdges()
-        .map((e) => e.toString())
-    );
-    newEdge?.delete();
-    console.log(
-      dcel
-        .getBoundedFaces()[0]
-        .getEdges()
-        .map((e) => e.toString())
-    );
-
-    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(3);
-    expect(dcel.getBoundedFaces()[0].edge?.getCycle().length).toBe(3);
-    expect(dcel.getBoundedFaces()[0].edge?.twin?.getCycle().length).toBe(3);
-    expect(dcel.vertices.size).toBe(3);
   });
 });
