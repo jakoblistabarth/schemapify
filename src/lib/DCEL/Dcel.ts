@@ -169,8 +169,29 @@ class Dcel {
     }, 0);
   }
 
+  /**
+   * Find a Vertex within a DCEL, based on x and y coordinates.
+   * @param x x Position
+   * @param y y Position
+   * @returns A {@link Vertex} if one exists on this position, otherwise undefined.
+   */
   findVertex(x: number, y: number): Vertex | undefined {
     return this.vertices.get(Vertex.getKey(x, y));
+  }
+
+  /**
+   * Find a HalfEdge within a DCEL, based on Points representing the tail and the head's position.
+   * @param tailPos {@link Point} representing the position of the {@link HalfEdge}'s tail {@link Vertex}.
+   * @param headPos {@link Point} representing the position of the {@link HalfEdge}'s head {@link Vertex}.
+   * @returns A {@link HalfEdge}, inf one exists with this endpoint positions, otherwise undefined.
+   */
+  findHalfEdge(tailPos: Point, headPos: Point): HalfEdge | undefined {
+    return this.getHalfEdges().find((edge) => {
+      const edgeHeadPos = edge.getHead()?.toPoint();
+      if (!edgeHeadPos) return;
+      const edgeTailPos = edge.tail.toPoint();
+      return edgeHeadPos.equals(headPos) && edgeTailPos.equals(tailPos);
+    });
   }
 
   removeVertex(vertex: Vertex): Map<string, Vertex> {
