@@ -678,7 +678,7 @@ class Dcel {
     //   this.getArea()
     // );
 
-    for (let index = 0; index < 2; index++) {
+    for (let index = 0; index < 1; index++) {
       let pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
       console.log(
         pair?.contraction.configuration.innerEdge.toString(),
@@ -686,9 +686,15 @@ class Dcel {
         pair?.contraction.point.xy()
       );
       console.log(pair?.compensation?.configuration.innerEdge.toString(), pair?.compensation?.area);
-      console.log("-");
 
       pair?.doEdgeMove();
+      console.log("vertices: ", this.vertices.size, "edges: ", this.halfEdges.size / 2);
+      console.log(
+        this.getBoundedFaces()[0]
+          .getEdges()
+          .map((e) => e.toString())
+      );
+      console.log("---------");
     }
 
     // document.addEventListener("keypress", function (e) {

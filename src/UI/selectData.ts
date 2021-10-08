@@ -57,6 +57,7 @@ export const tests: string[] = [
   "shapes/smallest-contraction.json",
   "shapes/smallest-contraction-1a.json",
   "shapes/smallest-contraction-2.json",
+  "shapes/square-contraction-zero.json",
   "shapes/square-hole-island-hole.json",
   "shapes/square-hole-island.json",
   "shapes/square-hole.json",
@@ -70,7 +71,7 @@ export const tests: string[] = [
   "shapes/v-shape.json",
 ];
 
-let activeDcel = tests[17];
+let activeDcel = tests[19];
 
 export function getActiveDcel(): Dcel | undefined {
   return dcelMap.get(activeDcel);
