@@ -93,6 +93,26 @@ describe("remove() on a vertex", function () {
 
     expect(squareFace.getEdges().length).toBe(3);
     expect(squareFace.getEdges(false).length).toBe(3);
+    expect(dcel.halfEdges.size).toBe(6);
+    expect(dcel.vertices.size).toBe(3);
+  });
+
+  it("generates a correct triangle dcel when removing one vertex of a square shape with 4 collinear vertices", function () {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("data/shapes/square-contraction-zero.json"), "utf8")
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+
+    const squareFace = dcel.getBoundedFaces()[0];
+    const vertex = dcel.findVertex(200, 150);
+    const newEdge = vertex?.remove(squareFace);
+
+    expect(squareFace.getEdges().length).toBe(5);
+    expect(squareFace.getEdges(false).length).toBe(5);
+    expect(dcel.halfEdges.size).toBe(10);
+    expect(dcel.vertices.size).toBe(5);
+    expect(newEdge?.tail.xy()).toEqual([200, 200]);
+    expect(newEdge?.getHead()?.xy()).toEqual([200, 100]);
   });
 
   it("returns a correctly linked halfedge when removing one vertex of a square shape", function () {
