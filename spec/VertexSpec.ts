@@ -199,3 +199,19 @@ describe("remove() on all vertices of a square with a hole", function () {
     });
   }
 });
+
+describe("equals() on a vertex", function () {
+  it("returns true for 2 vertices sharing the same position", function () {
+    const vertexA = new Vertex(10, 10, new Dcel());
+    const vertexB = new Vertex(10, 10, new Dcel());
+
+    expect(vertexA.equals(vertexB)).toBeTrue();
+  });
+
+  it("returns true for one vertix and one point sharing the same position", function () {
+    const vertexA = new Vertex(0.25, -3, new Dcel());
+    const pointA = new Vertex(0.25, -3, new Dcel());
+
+    expect(pointA.equals(vertexA)).toBeTrue();
+  });
+});
