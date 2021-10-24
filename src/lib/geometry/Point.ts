@@ -29,6 +29,25 @@ class Point {
     return Math.sqrt(a * a + b * b);
   }
 
+  distanceToLineSegment(l: LineSegment) {
+    const [vx, vy] = this.xy();
+    const [e1x, e1y] = l.endPoint1.xy();
+    const [e2x, e2y] = l.endPoint2.xy();
+    const edx = e2x - e1x;
+    const edy = e2y - e1y;
+    const lineLengthSquared = edx ** 2 + edy ** 2;
+
+    let t = ((vx - e1x) * edx + (vy - e1y) * edy) / lineLengthSquared;
+    if (t < 0) t = 0;
+    else if (t > 1) t = 1;
+
+    const ex = e1x + t * edx,
+      ey = e1y + t * edy,
+      dx = vx - ex,
+      dy = vy - ey;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
   getNewPoint(distance: number, angle: number): Point {
     // QUESTION: do i really need this conditions for dx, and dy because js' sin/cos implementation is inaccurate??
     const dx = angle === Math.PI * 0.5 || angle === Math.PI * 1.5 ? 0 : Math.cos(angle);

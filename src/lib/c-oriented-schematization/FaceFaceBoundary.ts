@@ -47,18 +47,18 @@ class FaceFaceBoundary {
         contractionCandidate.type === ContractionType.N ? pContractions : nContractions;
       const compensationCandidate = compensationCandidates
         .reduce((solutions: CompensationCandidate[], candidate) => {
-          console.log(
-            contractionCandidate.configuration.innerEdge.toString(),
-            contractionCandidate.area,
-            "->",
-            contractionCandidate.point.xy(),
-            candidate.configuration.innerEdge.toString(),
-            candidate.area,
-            "->",
-            candidate.point.xy(),
-            "not conflicts:",
-            !candidate.isConflicting(contractionCandidate)
-          );
+          // console.log(
+          //   contractionCandidate.configuration.innerEdge.toString(),
+          //   contractionCandidate.area,
+          //   "->",
+          //   contractionCandidate.point.xy(),
+          //   candidate.configuration.innerEdge.toString(),
+          //   candidate.area,
+          //   "->",
+          //   candidate.point.xy(),
+          //   "not conflicts:",
+          //   !candidate.isConflicting(contractionCandidate)
+          // );
           if (
             !candidate.isConflicting(contractionCandidate) &&
             contractionCandidate.area <= candidate.area

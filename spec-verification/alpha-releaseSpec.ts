@@ -3,30 +3,41 @@ import path from "path";
 import { hint } from "@mapbox/geojsonhint";
 import Dcel from "../src/lib/DCEL/Dcel";
 
-xdescribe("2-a. The system shall be able to parse geoJSON as input data.", function () {
-  const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/2plgn-adjacent.json"), "utf8"));
-  //TODO: use more specific functions?
+describe("2-a. The system shall be able to parse geoJSON as input data.", function () {
+  const json = JSON.parse(
+    fs.readFileSync(path.resolve("data/geodata/ne_50m_europe_mapunits-s20.json"), "utf8")
+  );
 
   it("Parses a json object", function () {
-    expect(json).toBeInstanceOf(Object);
+    expect(() => Dcel.fromGeoJSON(json)).not.toThrowError();
   });
 });
 
 describe("3-a. If the input data is not a region i.e., it contains features of type other than polygon or multipolygon – the program shall exit and the user shall be informed.", function () {
-  it("An error is thrown.", function () {
+  it("An error is thrown for a file containing geometry of type 'LineString'.", function () {
     const json = JSON.parse(fs.readFileSync(path.resolve("data/invalid/linestrings.json"), "utf8"));
     expect(() => Dcel.fromGeoJSON(json)).toThrowError("invalid input");
   });
 });
 
-xdescribe("4-a. If the input data is not a valid geoJSON the program shall exit and the user shall be informed.", function () {
-  it("An error is thrown if the right hand side is violated.", function () {
-    const json = JSON.parse(fs.readFileSync(path.resolve("data/invalid/square.json"), "utf8"));
+// TODO: get new geojson parsing library. needs to be commented out because not compatible with testing gui
+describe("4-a. If the input data is not a valid geoJSON the program shall exit and the user shall be informed.", function () {
+  it("An error is thrown for a file containing polygons which are not closed.", function () {
+    const json = JSON.parse(fs.readFileSync(path.resolve("data/invalid/not-closed.json"), "utf8"));
     expect(() => Dcel.fromGeoJSON(json)).toThrowError("invalid input");
   });
 
-  it("An error is thrown if a ring is not closed.", function () {
-    const json = JSON.parse(fs.readFileSync(path.resolve("data/invalid/not-closed.json"), "utf8"));
+  it("An error is thrown for a file containing geometry with a loop edge (same start end endpoint).", function () {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("data/invalid/square-loop-edge.json"), "utf8")
+    );
+    expect(() => Dcel.fromGeoJSON(json)).toThrowError("invalid input");
+  });
+
+  it("An error is thrown for a file containing geometry which violates the geoJSON specification's 'right-hand rule'.", function () {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("data/invalid/square-right-hand-rule-violation.json"), "utf8")
+    );
     expect(() => Dcel.fromGeoJSON(json)).toThrowError("invalid input");
   });
 });
@@ -40,7 +51,9 @@ describe("5-a. If the input data is too detailed, i.e., if it exceeds a maximum 
 });
 
 describe("6-a. If the input data holds attributes attached to its features, the systems shall preserve these attributes in the output.", function () {
-  const json = JSON.parse(fs.readFileSync(path.resolve("data/geodata/AUT_adm0-s1.json"), "utf8"));
+  const json = JSON.parse(
+    fs.readFileSync(path.resolve("data/geodata/AUT_adm1-simple.json"), "utf8")
+  );
   const dcel = Dcel.fromGeoJSON(json);
   dcel.schematize();
   const output = dcel.toGeoJSON();
@@ -94,41 +107,10 @@ describe("9-a. The system shall be able to generate a geoJSON from a DCEL.", fun
       fs.readFileSync(path.resolve("data/geodata/AUT_adm1-simple.json"), "utf8")
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.schematize();
     const output = dcel.toGeoJSON();
 
     const errors = hint(JSON.stringify(output, null, 4));
     if (errors.length > 0) console.log(errors);
     expect(errors.length).toBe(0);
   });
-});
-
-xdescribe("10-a. While the data is being processed, the user shall be informed that the application is processing.", function () {
-  it("", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("data/shapes/2plgn-adjacent.json"), "utf8")
-    );
-  });
-});
-
-xdescribe("11-a. The user shall be able to specify a regular set of directions (without β-shift) of the schematization.", function () {
-  const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/2plgn-adjacent.json"), "utf8"));
-
-  it("Creates a valid geoJSON with a rectilinear setup.", function () {});
-
-  it("Creates a valid geoJSON with a hexilinear setup.", function () {});
-
-  it("Creates a valid geoJSON with a octilinear setup.", function () {});
-});
-
-xdescribe("17-a. The system shall display the schematized region in the map view after the schematization is finished", function () {
-  const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/2plgn-adjacent.json"), "utf8"));
-
-  it("", function () {});
-});
-
-xdescribe("22-a. The user shall be able to track the progress of the schematization.", function () {
-  const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/2plgn-adjacent.json"), "utf8"));
-
-  it("", function () {});
 });

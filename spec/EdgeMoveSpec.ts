@@ -89,7 +89,7 @@ describe("doEdgeMove()", function () {
     expect(originalArea).toEqual(newArea);
   });
 
-  fit("for the test case 'contractions-equal'", function () {
+  it("for the test case 'contractions-equal'", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("data/shapes/contractions-equal.json"), "utf8")
     );
@@ -110,9 +110,10 @@ describe("doEdgeMove()", function () {
     expect(edges[0]).toBe("0/0->4/0");
     expect(edges[1]).toBe("4/0->4/2");
     expect(edges[2]).toBe("4/2->2.5/2");
-    expect(edges[3]).toBe("2.5/2->2.5/4");
-    expect(edges[6]).toBe("2.5/4->0/4");
-    expect(edges[7]).toBe("0/4->0/0");
+    expect(edges[3]).toBe("2.5/2->2.5/3");
+    expect(edges[4]).toBe("2.5/3->2.5/4");
+    expect(edges[5]).toBe("2.5/4->0/4");
+    expect(edges[6]).toBe("0/4->0/0");
     expect(pair?.contraction.area).toEqual(1);
     expect(originalArea).toEqual(newArea);
   });
