@@ -57,11 +57,14 @@ class FaceFaceBoundary {
           //   "->",
           //   candidate.point.xy(),
           //   "not conflicts:",
-          //   !candidate.isConflicting(contractionCandidate)
+          //   !candidate.isConflicting(contractionCandidate),
+          //   "reduces complexity",
+          //   candidate.reducesComplexity(contractionCandidate)
           // );
           if (
             !candidate.isConflicting(contractionCandidate) &&
-            contractionCandidate.area <= candidate.area
+            contractionCandidate.area <= candidate.area &&
+            candidate.reducesComplexity(contractionCandidate)
           )
             solutions.push({
               contraction: candidate,

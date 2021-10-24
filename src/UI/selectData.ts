@@ -71,7 +71,7 @@ export const tests: string[] = [
   "shapes/v-shape.json",
 ];
 
-let activeDcel = tests[0];
+let activeDcel = tests[19];
 
 export function getActiveDcel(): Dcel | undefined {
   return dcelMap.get(activeDcel);

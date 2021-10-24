@@ -69,6 +69,20 @@ class Contraction {
   }
 
   /**
+   * Determines whether or not the contraction combined with the specified complementary contraction would reduce the complexity of the subdivision.
+   * Only relevant for edge moves which involve junctions (i.e., {@link Vertex} of degree 3)
+   * @param complementary The complementary {@link Contraction} of the {@link ConfigurationPair}.
+   * @returns A boolean, indicating whether or not the pair of contractions reduces complexity in an edge move.
+   */
+  reducesComplexity(complementary: Contraction): boolean | undefined {
+    // return true;
+    const head = complementary.configuration.innerEdge.getHead();
+    const tail = complementary.configuration.innerEdge.tail;
+    if (!head) return;
+    return this.area > 0 && !this.point.equals(tail) && !this.point.equals(head);
+  }
+
+  /**
    * Gets the point which is a possible and valid contraction point for an edge move.
    * @param outerEdge The edge which should be used as track for the edge move.
    * @returns A {@link Point}, posing a configuration's contraction point.

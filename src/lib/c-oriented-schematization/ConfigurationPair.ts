@@ -24,16 +24,14 @@ class ConfigurationPair {
 
   doEdgeMove() {
     const contractionEdge = this.contraction.configuration.innerEdge;
-    const contractionHead = contractionEdge.getHead();
-    if (!contractionHead) return;
     const dcel = contractionEdge.dcel;
     const compensationEdge =
       this.contraction.area > 0 ? this.compensation?.configuration.innerEdge : undefined;
 
-    // 0. Do a simple vertex deletion, in case of a contraction with area 0
+    // 0. Do a simple vertex deletion in case of a contraction with area 0
     if (!compensationEdge) {
       this.doSimpleEdgeMove();
-      return; // TODO: remove this return
+      return;
     }
 
     // 1. Update (decrement) blocking edges
@@ -53,42 +51,9 @@ class ConfigurationPair {
 
     const movedPositions: Point[] = [];
 
-    // 2.1 Calculate new positions for contaction edge
+    // 2.1 Do the contraction
     const pointA = this.contraction.point;
     const pointB = this.contraction.areaPoints[this.contraction.areaPoints.length - 1];
-    const contractionSegment = contractionEdge.toLineSegment();
-    if (!contractionSegment) return;
-    const contractionShift = pointA.distanceToLineSegment(contractionSegment);
-
-    // 2.2 Calculate compensation trapeze height
-    const compensationShift = this.getCompensationShift();
-    if (!compensationShift) return;
-
-    // 2.3 Calculate new positions for compensation edge
-    let normal = compensationEdge
-      .getVector()
-      ?.getUnitVector()
-      .getNormal(this.compensation?.type === ContractionType.N)
-      .times(compensationShift);
-    if (!normal) return;
-    const newTail = compensationEdge.tail.toVector().plus(normal).toPoint();
-    const newHead = compensationEdge.getHead()?.toVector().plus(normal).toPoint();
-    if (!newHead) return;
-
-    console.log("contractionshift", contractionShift, "compensationshift", compensationShift);
-
-    // Check whether one of new positions for the compensation edge are equal
-    // to one of the original positions of the contraction ege
-    if (
-      [contractionEdge.tail, contractionHead].some(
-        (point) => point.equals(newTail) || point.equals(newHead)
-      )
-    ) {
-      this.doHalfEdgeMove();
-      return; // TODO: remove this return
-    }
-
-    // 2.3 Do the contraction and the compensation
     const prevEdgeLineSegment = contractionEdge.prev?.toLineSegment();
     const nextEdgeLineSegment = contractionEdge.next?.toLineSegment();
     if (!prevEdgeLineSegment || !nextEdgeLineSegment) return;
@@ -98,8 +63,26 @@ class ConfigurationPair {
     } else contractionEdge.move(pointB, pointA);
 
     movedPositions.push(contractionEdge.tail.toPoint());
-    movedPositions.push(contractionHead.toPoint());
+    const contractionHead = contractionEdge.getHead()?.toPoint();
+    if (contractionHead) movedPositions.push(contractionHead);
 
+    // 2.1 Calculate compensation trapeze height
+    const shift =
+      this.contraction.area > 0 && this.compensation
+        ? this.compensation.getCompensationHeight(this.contraction.area)
+        : undefined;
+    if (typeof shift !== "number") return;
+
+    // 2.2 Do the compensation
+    const normal = compensationEdge
+      .getVector()
+      ?.getUnitVector()
+      .getNormal(this.compensation?.type === ContractionType.N)
+      .times(shift);
+    if (!normal) return;
+    const newTail = compensationEdge.tail.toVector().plus(normal).toPoint();
+    const newHead = compensationEdge.getHead()?.toVector().plus(normal).toPoint();
+    if (!newHead) return;
     compensationEdge.move(newTail, newHead);
 
     movedPositions.push(compensationEdge.tail.toPoint());
@@ -109,21 +92,53 @@ class ConfigurationPair {
     console.log("moved Positions", movedPositions.length);
     console.log(Array.from(dcel.vertices.keys()));
 
-    const remainingEdges = movedPositions.reduce((acc: HalfEdge[], pos: Point) => {
+    // 2.3 Remove redundant vertices
+    const involvedEdges = movedPositions.reduce((acc: HalfEdge[], pos: Point) => {
       let key = `${pos.x}/${pos.y}`;
-      const vertex = dcel.vertices.get(key);
+      let vertex = dcel.vertices.get(key);
+      if (!vertex) key = key + "m";
+      vertex = dcel.vertices.get(key);
       if (!vertex) return acc;
+      console.log(
+        "checked vertex",
+        vertex.xy(),
+        vertex.edges.map((e) => e.toString())
+      );
       vertex.edges.forEach((edge) => {
+        console.log("checkedEdge", edge.toString());
         if (edge.face === contractionEdge.face) acc.push(edge);
         else if (edge.twin) acc.push(edge.twin);
       });
       return acc;
     }, []);
 
+    const remainingEdges = involvedEdges.filter((edge) => {
+      const tailPos = edge.tail.toPoint();
+      const headPos = edge.getHead()?.toPoint();
+      if (!headPos) return;
+      return !tailPos.equals(headPos);
+    });
+
+    involvedEdges.forEach((edge) => {
+      if (remainingEdges.includes(edge)) return;
+      console.log("deleting", edge.toString());
+      edge.remove();
+      edge.twin?.remove();
+    });
+
     console.log(
       "remainingEdges",
       remainingEdges.map((e) => e.toString())
     );
+
+    // rename moved vertices
+    movedPositions.forEach((pos) => {
+      const key = `${pos.x}/${pos.y}`;
+      const vertex = dcel.vertices.get(key + "m");
+      if (!vertex) return;
+      dcel.vertices.delete(key + "m");
+      dcel.vertices.set(key, vertex);
+    });
 
     // 2.4 Update the affected configurations
     this.updateConfigurations(remainingEdges);
@@ -144,33 +159,6 @@ class ConfigurationPair {
     dcel.getContractions().forEach((contraction) => {
       contraction.incrementBlockingNumber(this.getX1X2());
     });
-  }
-
-  getCompensationShift() {
-    return this.contraction.area > 0 && this.compensation
-      ? this.compensation.getCompensationHeight(this.contraction.area)
-      : undefined;
-  }
-
-  doHalfEdgeMove() {
-    console.log("halfmove");
-    const contractionEdge = this.contraction.configuration.innerEdge;
-    const compensationEdge = this.compensation?.configuration.innerEdge;
-    const compensationShift = this.getCompensationShift();
-    if (!compensationEdge || !compensationShift) return;
-    const normal = compensationEdge
-      .getVector()
-      ?.getUnitVector()
-      .getNormal(this.compensation?.type === ContractionType.N)
-      .times(compensationShift / 2);
-    if (!normal) return;
-    const newTailComp = compensationEdge.tail.toVector().plus(normal).toPoint();
-    const newHeadComp = compensationEdge.getHead()?.toVector().plus(normal).toPoint();
-    const newTailCon = contractionEdge.tail.toVector().minus(normal).toPoint();
-    const newHeadCon = contractionEdge.getHead()?.toVector().minus(normal).toPoint();
-
-    if (newHeadCon) contractionEdge.move(newTailCon, newHeadCon);
-    if (newHeadComp) compensationEdge.move(newTailComp, newHeadComp);
   }
 
   doSimpleEdgeMove() {

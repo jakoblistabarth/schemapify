@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
-import ConfigurationPair from "../src/lib/c-oriented-schematization/ConfigurationPair";
+import Vertex from "../src/lib/DCEL/Vertex";
+import Configuration, { Junction } from "../src/lib/c-oriented-schematization/Configuration";
 import Dcel from "../src/lib/DCEL/Dcel";
 import FaceFaceBoundaryList from "../src/lib/c-oriented-schematization/FaceFaceBoundaryList";
 
@@ -30,7 +31,7 @@ describe("createConfigurations()", function () {
   });
 });
 
-describe("doEdgeMove() removes first all collinear points (contraction area 0)", function () {
+describe("doEdgeMove() removes first all collinear points (contraction area 0", function () {
   it("on a square shape", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("data/shapes/smallest-contraction-1a.json"), "utf8")
@@ -51,102 +52,38 @@ describe("doEdgeMove() removes first all collinear points (contraction area 0)",
   });
 });
 
-describe("doEdgeMove()", function () {
-  it("for the test case 'smallest-contraction'", function () {
+describe("getJunctionType() determines the type of a junction in respect to the inneredge", function () {
+  let dcel: Dcel;
+  beforeEach(function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("data/shapes/smallest-contraction.json"), "utf8")
+      fs.readFileSync(path.resolve("data/shapes/edge-move-test.json"), "utf8")
     );
-    const dcel = Dcel.fromGeoJSON(json);
-    dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
-    const originalArea = dcel.getArea();
-    dcel.createConfigurations();
-    const pair = dcel.faceFaceBoundaryList.getBoundaries()[0].getMinimalConfigurationPair();
-    pair?.doEdgeMove();
-    const newArea = dcel.getArea();
-
-    expect(dcel.getBoundedFaces()[0].getEdges()[2].toString()).toBe("10.5/1->10/1");
-    expect(dcel.getBoundedFaces()[0].getEdges()[3].toString()).toBe("10/1->10/7");
-    expect(dcel.getBoundedFaces()[0].getEdges()[4].toString()).toBe("10/7->10/8");
-    expect(dcel.getBoundedFaces()[0].getEdges()[5].toString()).toBe("10/8->10/10");
-    expect(pair?.contraction.area).toEqual(0.5);
-    expect(originalArea).toEqual(newArea);
+    dcel = Dcel.fromGeoJSON(json);
   });
 
-  it("for the test case 'smallest-contraction-2", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("data/shapes/smallest-contraction-2.json"), "utf8")
-    );
-    const dcel = Dcel.fromGeoJSON(json);
-    const originalArea = dcel.getArea();
-    dcel.createConfigurations();
-    dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
-    const pair = dcel.faceFaceBoundaryList.getMinimalConfigurationPair();
-    pair?.doEdgeMove();
-    const newArea = dcel.getArea();
+  it("for a junction of type A.", function () {
+    const edge = dcel.getHalfEdges()[2];
+    const c = new Configuration(edge);
+    const junction = dcel.findVertex(2, 0) as Vertex;
 
-    expect(dcel.halfEdges.size / 2).toEqual(10);
-    expect(dcel.vertices.size).toEqual(10);
-    expect(originalArea).toEqual(newArea);
+    expect(c.getJunctionType(junction)).toBe(Junction.A);
   });
 
-  it("for the test case 'contractions-equal'", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("data/shapes/contractions-equal.json"), "utf8")
-    );
-    const dcel = Dcel.fromGeoJSON(json);
-    dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
-    const originalArea = dcel.getArea();
-    dcel.createConfigurations();
-    const pair = dcel.faceFaceBoundaryList.getBoundaries()[0].getMinimalConfigurationPair();
-    pair?.doEdgeMove();
-    const newArea = dcel.getArea();
+  it("for a junction of type B.", function () {
+    const edge = dcel.getHalfEdges()[6];
+    const c = new Configuration(edge);
+    const junction = dcel.findVertex(1, 2) as Vertex;
 
-    const edges = dcel
-      .getBoundedFaces()[0]
-      .getEdges()
-      .map((e) => e.toString());
-    console.log(edges);
-
-    expect(edges[0]).toBe("0/0->4/0");
-    expect(edges[1]).toBe("4/0->4/2");
-    expect(edges[2]).toBe("4/2->2.5/2");
-    expect(edges[3]).toBe("2.5/2->2.5/3");
-    expect(edges[4]).toBe("2.5/3->2.5/4");
-    expect(edges[5]).toBe("2.5/4->0/4");
-    expect(edges[6]).toBe("0/4->0/0");
-    expect(pair?.contraction.area).toEqual(1);
-    expect(originalArea).toEqual(newArea);
+    expect(c.getJunctionType(junction)).toBe(Junction.B);
   });
 
-  it("for contractions with area 0 (3 collinear points)", function () {
-    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
-    const dcel = Dcel.fromGeoJSON(json);
-    dcel.getBoundedFaces()[0].getEdges()[0].subdivide();
+  it("for a configuration with junctions of type A and C.", function () {
+    const edge = dcel.getHalfEdges()[14];
+    const c = new Configuration(edge);
+    const junction = dcel.findVertex(3, 2) as Vertex;
+    const junction2 = dcel.findVertex(3, 0) as Vertex;
 
-    dcel.createConfigurations();
-    const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
-    const boundary = [...ffb.boundaries].map(([k, v]) => v)[0];
-    const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
-    pair.doEdgeMove();
-
-    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
-    expect(dcel.getHalfEdges().length).toBe(8);
-    expect(dcel.getVertices().length).toBe(4);
-  });
-
-  it("for contractions with area 0 (4 collinear points)", function () {
-    const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
-    const dcel = Dcel.fromGeoJSON(json);
-    dcel.getBoundedFaces()[0].getEdges()[0].subdivide()?.subdivide();
-
-    dcel.createConfigurations();
-    const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
-    const boundary = [...ffb.boundaries].map(([k, v]) => v)[0];
-    const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
-    pair.doEdgeMove();
-
-    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(5);
-    expect(dcel.getHalfEdges().length).toBe(10);
-    expect(dcel.getVertices().length).toBe(5);
+    expect(c.getJunctionType(junction)).toBe(Junction.C);
+    expect(c.getJunctionType(junction2)).toBe(Junction.A);
   });
 });

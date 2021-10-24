@@ -54,9 +54,24 @@ class Vertex extends Point {
    * @returns The distance.
    */
   distanceToEdge(edge: HalfEdge): number | undefined {
-    const linesegment = edge.toLineSegment();
-    if (!linesegment) return;
-    return this.distanceToLineSegment(linesegment);
+    const head = edge.getHead();
+    if (!head) return;
+    const [vx, vy] = this.xy();
+    const [e1x, e1y] = edge.tail.xy();
+    const [e2x, e2y] = head.xy();
+    const edx = e2x - e1x;
+    const edy = e2y - e1y;
+    const lineLengthSquared = edx ** 2 + edy ** 2;
+
+    let t = ((vx - e1x) * edx + (vy - e1y) * edy) / lineLengthSquared;
+    if (t < 0) t = 0;
+    else if (t > 1) t = 1;
+
+    const ex = e1x + t * edx,
+      ey = e1y + t * edy,
+      dx = vx - ex,
+      dy = vy - ey;
+    return Math.sqrt(dx * dx + dy * dy);
   }
 
   /**
@@ -289,7 +304,7 @@ class Vertex extends Point {
    */
   moveTo(x: number, y: number): Vertex {
     if (this.x === x && this.y === y) return this;
-    this.dcel.vertices.set(Vertex.getKey(x, y), this);
+    this.dcel.vertices.set(Vertex.getKey(x, y) + "m", this);
     this.dcel.vertices.delete(Vertex.getKey(this.x, this.y));
     this.x = x;
     this.y = y;
