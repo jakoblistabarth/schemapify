@@ -110,7 +110,6 @@ describe("9-a. The system shall be able to generate a geoJSON from a DCEL.", fun
     const output = dcel.toGeoJSON();
 
     const errors = hint(JSON.stringify(output, null, 4));
-    if (errors.length > 0) console.log(errors);
     expect(errors.length).toBe(0);
   });
 });
