@@ -75,7 +75,7 @@ class ConfigurationPair {
     const newHead = compensationEdge.getHead()?.toVector().plus(normal).toPoint();
     if (!newHead) return;
 
-    console.log("contractionshift", contractionShift, "compensationshift", compensationShift);
+    // console.log("contractionshift", contractionShift, "compensationshift", compensationShift);
 
     // Check whether one of new positions for the compensation edge are equal
     // to one of the original positions of the contraction ege
@@ -106,8 +106,8 @@ class ConfigurationPair {
     const compensationHead = compensationEdge.getHead()?.toPoint();
     if (compensationHead) movedPositions.push(compensationHead);
 
-    console.log("moved Positions", movedPositions.length);
-    console.log(Array.from(dcel.vertices.keys()));
+    // console.log("moved Positions", movedPositions.length);
+    // console.log(Array.from(dcel.vertices.keys()));
 
     const remainingEdges = movedPositions.reduce((acc: HalfEdge[], pos: Point) => {
       let key = `${pos.x}/${pos.y}`;
@@ -120,25 +120,25 @@ class ConfigurationPair {
       return acc;
     }, []);
 
-    console.log(
-      "remainingEdges",
-      remainingEdges.map((e) => e.toString())
-    );
+    // console.log(
+    //   "remainingEdges",
+    //   remainingEdges.map((e) => e.toString())
+    // );
 
     // 2.4 Update the affected configurations
     this.updateConfigurations(remainingEdges);
 
-    console.log("moved vertices", movedPositions);
+    // console.log("moved vertices", movedPositions);
 
-    console.log(
-      contractionEdge.prev?.getUuid() +
-        " " +
-        contractionEdge.prev?.tail.xy() +
-        "->" +
-        contractionEdge.prev?.getHead()?.xy(),
-      contractionEdge.getUuid() + " " + contractionEdge.toString(),
-      contractionEdge.next?.getUuid() + " " + contractionEdge.next?.toString()
-    );
+    // console.log(
+    //   contractionEdge.prev?.getUuid() +
+    //     " " +
+    //     contractionEdge.prev?.tail.xy() +
+    //     "->" +
+    //     contractionEdge.prev?.getHead()?.xy(),
+    //   contractionEdge.getUuid() + " " + contractionEdge.toString(),
+    //   contractionEdge.next?.getUuid() + " " + contractionEdge.next?.toString()
+    // );
 
     // TODO: 3. Update (increment) blocking numbers again
     dcel.getContractions().forEach((contraction) => {
@@ -153,7 +153,7 @@ class ConfigurationPair {
   }
 
   doHalfEdgeMove() {
-    console.log("halfmove");
+    // console.log("halfmove");
     const contractionEdge = this.contraction.configuration.innerEdge;
     const compensationEdge = this.compensation?.configuration.innerEdge;
     const compensationShift = this.getCompensationShift();
@@ -174,27 +174,27 @@ class ConfigurationPair {
   }
 
   doSimpleEdgeMove() {
-    console.log("simple contraction", this.contraction.point.xy());
+    // console.log("simple contraction", this.contraction.point.xy());
     const contractionEdge = this.contraction.configuration.innerEdge;
     const prevAngle = contractionEdge.prev?.getAngle();
 
-    console.log(
-      contractionEdge.prev?.toString(),
-      prevAngle,
-      contractionEdge.next?.toString(),
-      contractionEdge.next?.getAngle(),
-      contractionEdge.getAngle()
-    );
+    // console.log(
+    //   contractionEdge.prev?.toString(),
+    //   prevAngle,
+    //   contractionEdge.next?.toString(),
+    //   contractionEdge.next?.getAngle(),
+    //   contractionEdge.getAngle()
+    // );
 
     const vertexToDelete =
       typeof prevAngle === "number" && prevAngle === contractionEdge.getAngle()
         ? contractionEdge.tail
         : contractionEdge.getHead();
     if (!vertexToDelete) return;
-    console.log("toDelete", vertexToDelete);
+    // console.log("toDelete", vertexToDelete);
     const newEdge = vertexToDelete.remove(contractionEdge.face);
     if (!newEdge || !newEdge.prev || !newEdge.next) return;
-    console.log(newEdge.prev.toString(), newEdge.toString(), newEdge.next.toString());
+    // console.log(newEdge.prev.toString(), newEdge.toString(), newEdge.next.toString());
     this.updateConfigurations([newEdge, newEdge.prev, newEdge.next]);
   }
 
