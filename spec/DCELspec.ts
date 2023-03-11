@@ -162,7 +162,6 @@ xdescribe("schematize() returns a result which can be turned into a valid geojso
     const outputJson = dcel.toGeoJSON();
     const outputJsonPretty = JSON.stringify(outputJson, null, 4);
     const errors = hint(outputJsonPretty);
-    if (errors.length > 0) console.log(errors);
     expect(errors.length).toBe(0);
     expect(inputJson.features.length).toBe(outputJson.features.length);
   });
@@ -181,7 +180,6 @@ xdescribe("schematize() returns a result which can be turned into a valid geojso
       const outputJson = dcel.toGeoJSON();
       const outputJsonPretty = JSON.stringify(outputJson, null, 4);
       const errors = hint(outputJsonPretty);
-      if (errors.length > 0) console.log(errors);
       expect(errors.length).toBe(0);
       expect(inputJson.features.length).toBe(outputJson.features.length);
     });
