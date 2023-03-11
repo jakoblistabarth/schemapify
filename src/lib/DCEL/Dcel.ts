@@ -680,21 +680,21 @@ class Dcel {
 
     for (let index = 0; index < 100; index++) {
       let pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
-      console.log(
-        pair?.contraction.configuration.innerEdge.toString(),
-        pair?.contraction.area,
-        pair?.contraction.point.xy()
-      );
-      console.log(pair?.compensation?.configuration.innerEdge.toString(), pair?.compensation?.area);
+      // console.log(
+      //   pair?.contraction.configuration.innerEdge.toString(),
+      //   pair?.contraction.area,
+      //   pair?.contraction.point.xy()
+      // );
+      // console.log(pair?.compensation?.configuration.innerEdge.toString(), pair?.compensation?.area);
 
       pair?.doEdgeMove();
-      console.log("vertices: ", this.vertices.size, "edges: ", this.halfEdges.size / 2);
-      console.log(
-        this.getBoundedFaces()[0]
-          .getEdges()
-          .map((e) => e.toString())
-      );
-      console.log("---------");
+      // console.log("vertices: ", this.vertices.size, "edges: ", this.halfEdges.size / 2);
+      // console.log(
+      //   this.getBoundedFaces()[0]
+      //     .getEdges()
+      //     .map((e) => e.toString())
+      // );
+      // console.log("---------");
     }
 
     // document.addEventListener("keypress", function (e) {
