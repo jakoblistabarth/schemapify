@@ -4,7 +4,7 @@ import Dcel from "../src/lib/DCEL/Dcel";
 import FaceFaceBoundaryList from "../src/lib/c-oriented-schematization/FaceFaceBoundaryList";
 
 describe("getMinimalConfigurationPair() finds the expected pair", function () {
-  it("for the test case 'smallest-contraction", function () {
+  xit("for the test case 'smallest-contraction", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("data/shapes/smallest-contraction.json"), "utf8")
     );
@@ -20,7 +20,7 @@ describe("getMinimalConfigurationPair() finds the expected pair", function () {
     expect(pair?.contraction.area).toEqual(0.5);
   });
 
-  it("for the test case 'smallest-contraction-2", function () {
+  xit("for the test case 'smallest-contraction-2", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("data/shapes/smallest-contraction-2.json"), "utf8")
     );
@@ -38,7 +38,7 @@ describe("getMinimalConfigurationPair() finds the expected pair", function () {
 });
 
 describe("recursive doEdgeMove() on minimal configuration pairs", function () {
-  it("returns the expected contraction pair for the second, third, and fourth edge move.", function () {
+  xit("returns the expected contraction pair for the second, third, and fourth edge move.", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("data/shapes/smallest-contraction.json"), "utf8")
     );

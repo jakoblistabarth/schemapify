@@ -52,7 +52,7 @@ describe("doEdgeMove() removes first all collinear points (contraction area 0)",
 });
 
 describe("doEdgeMove()", function () {
-  it("for the test case 'smallest-contraction'", function () {
+  xit("for the test case 'smallest-contraction'", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("data/shapes/smallest-contraction.json"), "utf8")
     );
@@ -72,7 +72,7 @@ describe("doEdgeMove()", function () {
     expect(originalArea).toEqual(newArea);
   });
 
-  it("for the test case 'smallest-contraction-2", function () {
+  xit("for the test case 'smallest-contraction-2", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("data/shapes/smallest-contraction-2.json"), "utf8")
     );

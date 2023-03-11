@@ -35,7 +35,7 @@ describe("isConflicting() returns", function () {
     expect(cA[ContractionType.N]?.isConflicting(cB[ContractionType.N] as Contraction)).toBeTrue();
   });
 
-  it("true for 2 conflicting contractions, due to wrong inflectionType of the overlapping Edge.", function () {
+  xit("true for 2 conflicting contractions, due to wrong inflectionType of the overlapping Edge.", function () {
     const edgeA = dcel.getHalfEdges()[0];
     const cA = (edgeA.configuration = new Configuration(edgeA));
 

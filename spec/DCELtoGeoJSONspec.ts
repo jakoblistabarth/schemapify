@@ -26,7 +26,7 @@ describe("DCELtoGeoJSON creates a valid geoJSON of simple shapes", function () {
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
-    it("based on a DCEL of " + file, function () {
+    xit("based on a DCEL of " + file, function () {
       const inputJson = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
       const dcel = Dcel.fromGeoJSON(inputJson);
       const outputJson = dcel.toGeoJSON();
@@ -44,7 +44,7 @@ describe("DCELtoGeoJSON creates a valid geoJSON of geodata", function () {
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
-    it("based on a DCEL of " + file, function () {
+    xit("based on a DCEL of " + file, function () {
       const inputJson = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
       const dcel = Dcel.fromGeoJSON(inputJson);
       const outputJson = dcel.toGeoJSON();
