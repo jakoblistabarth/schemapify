@@ -11,7 +11,6 @@ describe("validate geoJSON file (simple shape)", function () {
     xit(file + " to return 0 errors, e.i., to be valid", function () {
       const json = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
       const errors = hint(JSON.stringify(json, null, 4));
-      if (errors.length > 0) console.log(errors);
       expect(errors.length).toBe(0);
     });
   });
@@ -25,7 +24,6 @@ describe("validate geoJSON file (geodata)", function () {
     it(file + " to return 0 errors, e.i., to be valid", function () {
       const json = JSON.parse(fs.readFileSync(path.resolve(dir + "/" + file), "utf8"));
       const errors = hint(JSON.stringify(json, null, 4));
-      if (errors.length > 0) console.log(errors);
       expect(errors.length).toBe(0);
     });
   });

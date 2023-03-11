@@ -105,7 +105,6 @@ describe("doEdgeMove()", function () {
       .getBoundedFaces()[0]
       .getEdges()
       .map((e) => e.toString());
-    console.log(edges);
 
     expect(edges[0]).toBe("0/0->4/0");
     expect(edges[1]).toBe("4/0->4/2");
