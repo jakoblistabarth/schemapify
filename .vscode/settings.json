@@ -1,13 +1,22 @@
 {
-    "cSpell.allowCompoundWords": true,
-    "cSpell.words": [
-        "dcel"
-    ],
-    "cSpell.ignoreWords": [
-        "bbox",
-        "plgn"
-    ],
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "prettier.printWidth": 100
+  "cSpell.allowCompoundWords": true,
+  "cSpell.words": ["dcel"],
+  "cSpell.ignoreWords": ["bbox", "plgn"],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.printWidth": 100,
+  "todohighlight.keywords": [
+    {
+      "text": "TODO:",
+      "backgroundColor": "orange",
+      "border": "1px solid red",
+      "borderRadius": "3px"
+    },
+    {
+      "text": "QUESTION:",
+      "backgroundColor": "skyblue",
+      "border": "1px solid darkblue",
+      "borderRadius": "3px"
+    }
+  ]
 }
