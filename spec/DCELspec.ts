@@ -77,7 +77,7 @@ describe("getBbox()", function () {
     let bboxPlgn2 = Dcel.fromGeoJSON(plgn2).getBbox();
     let bboxPlgn3 = Dcel.fromGeoJSON(plgn3).getBbox();
 
-    expect(bboxPlgn1).toEqual([0, 0, 200, 200]);
+    expect(bboxPlgn1).toEqual([0, 0, 20, 20]);
     expect(bboxPlgn2).toEqual([0, 0, 4, 2]);
     expect(bboxPlgn3).toEqual([0, 0, 2, 2]);
   });
@@ -112,7 +112,7 @@ describe("getDiameter()", function () {
     );
 
     expect(Dcel.fromGeoJSON(plgn1).getDiameter()).toBe(
-      Math.sqrt(Math.pow(200, 2) + Math.pow(200, 2))
+      Math.sqrt(Math.pow(20, 2) + Math.pow(20, 2))
     );
     expect(Dcel.fromGeoJSON(plgn3).getDiameter()).toBe(Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)));
   });
@@ -122,7 +122,7 @@ describe("getArea()", function () {
   it("returns the correct area of a square", function () {
     const json = JSON.parse(fs.readFileSync(path.resolve("data/shapes/square.json"), "utf8"));
     const dcel = Dcel.fromGeoJSON(json);
-    expect(dcel.getArea()).toBe(200 * 200);
+    expect(dcel.getArea()).toBe(20 * 20);
   });
   it("returns the correct area of 3 adjacent squares", function () {
     const json = JSON.parse(
