@@ -2,15 +2,25 @@ import LineSegment from "./LineSegment";
 import Polygon from "./Polygon";
 import Vector2D from "./Vector2D";
 
+/** Class representing a 2-dimensional point. */
 class Point {
   x: number;
   y: number;
 
+  /**
+   * Create a point.
+   * @param {number} x - The x value.
+   * @param {number} y - The y value.
+   */
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
   }
 
+  /**
+   * Gets the x and y coordinates of the point as tuple.
+   * @returns A tuple.
+   */
   xy() {
     return [this.x, this.y];
   }
