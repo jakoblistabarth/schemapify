@@ -3,7 +3,6 @@ import { getJSON } from "../lib/utilities";
 import { renderDcel } from "./mapOutput";
 import { DCELMap } from "./selectData";
 import { timeNodes, computationalTimeNode } from "./algorithm-navigator";
-import { time } from "console";
 
 export function drawMapContainer(): void {
   const containerID = "map-container";
