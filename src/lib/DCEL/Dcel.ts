@@ -669,6 +669,7 @@ class Dcel {
   }
 
   simplify(): Dcel {
+    this.removeSuperfluousVertices();
     const ffbl = new FaceFaceBoundaryList(this);
     this.faceFaceBoundaryList = ffbl;
     this.createConfigurations();
@@ -678,7 +679,7 @@ class Dcel {
     //   this.getArea()
     // );
 
-    for (let index = 0; index < 100; index++) {
+    for (let index = 0; index < 0; index++) {
       let pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
       // console.log(
       //   pair?.contraction.configuration.innerEdge.toString(),
@@ -718,6 +719,23 @@ class Dcel {
     // );
     this.takeSnapshot(STEP.SIMPLIFY);
     return this;
+  }
+
+  /**
+   * Removes all vertices of the DCEL which are superfluous in the sense of
+   * that they can be removed without changing the visual geometry of the DCEL.
+   */
+  removeSuperfluousVertices(): void {
+    const superfluousVertices = this.getVertices().filter((v) => {
+      if (v.edges.length != 2) return false;
+      const angle = v.edges
+        .map((h) => h.getAngle() ?? Infinity)
+        .reduce((acc, h) => Math.abs(acc - h), 0);
+      // QUESTION: how to deal with precision for trigonometry in general?
+      const hasOpposingEdges = Math.abs(Math.PI - angle) < 0.00000001;
+      return hasOpposingEdges;
+    });
+    superfluousVertices.forEach((v) => v.remove());
   }
 
   schematize(): void {
