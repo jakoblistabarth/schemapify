@@ -13,8 +13,11 @@ export function renderDcel(dcel: Dcel, step: STEP = STEP.LOAD): L.Map {
       crs: L.CRS.Simple,
     });
 
-  // FIXME: replace attribution everytime map is drawn?
-  map.attributionControl.addAttribution(`${dcel.name} (${dcel.halfEdges.size / 2} edges)`);
+  map.attributionControl.remove();
+  L.control
+    .attribution({ position: "bottomright" })
+    .addAttribution(`${dcel.name} (${dcel.halfEdges.size / 2} edges)`)
+    .addTo(map);
 
   function highlightDCELFeature(e: L.LeafletMouseEvent) {
     const feature = e.target;
