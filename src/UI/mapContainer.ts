@@ -29,6 +29,22 @@ export async function draw(test: string, map: DCELMap) {
   timeNodes.forEach((s, i) => (s.innerHTML = `${times[i]}ms`));
   computationalTimeNode.innerHTML = `${dcel.getDuration()}ms`;
   renderDcel(dcel, STEP.SIMPLIFY);
+
+  const onEnter = (event: KeyboardEvent): void => {
+    {
+      if (event.key === "Enter") {
+        console.log("enter");
+        const pair = dcel.faceFaceBoundaryList?.getMinimalConfigurationPair();
+        console.log(pair?.contraction.area, pair?.contraction.configuration.innerEdge.toString());
+        pair?.doEdgeMove();
+        dcel.takeSnapshot(STEP.SIMPLIFY);
+        renderDcel(dcel, STEP.SIMPLIFY);
+        console.log(dcel.halfEdges.size);
+      }
+    }
+  };
+
+  document.addEventListener("keypress", onEnter);
 }
 
 export async function generateDcel(path: string) {

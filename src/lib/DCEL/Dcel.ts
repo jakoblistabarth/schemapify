@@ -698,15 +698,6 @@ class Dcel {
       // console.log("---------");
     }
 
-    // document.addEventListener("keypress", function (e) {
-    //   if (e.key === "Enter") {
-    //     console.log("enter");
-    //     let pair = ffbl.getMinimalConfigurationPair();
-    //     console.log(pair?.contraction.area, pair?.contraction.configuration.innerEdge.toString());
-    //     pair?.doEdgeMove();
-    //   }
-    // });
-
     // while (pair || s.halfEdges.size/2 > k) {
     //   pair?.doEdgeMove();
     //   pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
