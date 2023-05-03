@@ -26,6 +26,10 @@
   "author": "Jakob Listabarth",
   "license": "MIT",
   "dependencies": {
+    "@fontsource/dm-mono": "^4.5.10",
+    "@fontsource/dm-sans": "^4.5.9",
+    "@fontsource/inter": "^4.5.15",
+    "@fontsource/material-icons": "^4.5.4",
     "@mapbox/geojsonhint": "^3.1.0",
     "@types/jasmine": "^3.7.7",
     "@types/node": "^18.15.0",

@@ -1,3 +1,8 @@
+@import url("../../node_modules/@fontsource/dm-mono/index.css");
+@import url("../../node_modules/@fontsource/dm-sans/index.css");
+@import url("../../node_modules/@fontsource/inter/index.css");
+@import url("../../node_modules/@fontsource/material-icons/index.css");
+
 @import url("variables.css");
 @import url("typography.css");
 @import url("leaflet.css");
