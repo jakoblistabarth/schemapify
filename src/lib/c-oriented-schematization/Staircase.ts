@@ -5,12 +5,19 @@ import Polygon from "../geometry/Polygon";
 import ConvexHullGrahamScan from "graham_scan";
 
 class Staircase {
+  /** The {@link HalfEdge} the staircase belongs to. */
   edge: HalfEdge;
+  /** A {@link Polygon} encompassing the staircase. */
   region: Polygon;
+  /** Upper bound on the maximal distance between the staircase of e and e itself. */
   deltaE?: number;
+  /** An array of {@link Point}s describing the staircase. */
   points: Point[];
+  /** The minimal distance from e to another point in subdivision S. */
   de?: number;
+  /** The number of steps the staircase the must use.  */
   se?: number;
+  /** A list of {@link HalfEdge}s whose staircase regions interfer with this staircase region.  */
   interferesWith: HalfEdge[];
 
   constructor(edge: HalfEdge) {
@@ -133,7 +140,7 @@ class Staircase {
 
   /**
    * Returns a staircase for an "aligned deviating" edge.
-   * @returns All points constructing the staircase (including tail and head of the original edge).
+   * @returns All {@link Point}s constructing the {@link Staircase} (including tail and head of the original edge).
    */
   getStaircasePointsAD(): Point[] {
     const edge = this.edge;

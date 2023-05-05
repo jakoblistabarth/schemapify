@@ -501,10 +501,11 @@ class Dcel {
   }
 
   getEdgeDistances(staircases: Staircase[]) {
-    // TODO: make sure the edgedistance cannot be too small? for topology error ("Must Be Larger Than Cluster tolerance"), when minimum distance between points to small
+    // TODO: make sure the edgedistance cannot be too small?
+    // To account for topology error ("Must Be Larger Than Cluster tolerance"), when minimum distance between points is too small
     // see: https://pro.arcgis.com/en/pro-app/latest/help/editing/geodatabase-topology-rules-for-polygon-features.htm
 
-    // check if any point of a region is within another region
+    // check if any point of a region is within another staircase region
     for (const staircase of staircases) {
       staircases.forEach((staircase_) => {
         if (staircase_ === staircase) return;
