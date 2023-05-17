@@ -10,50 +10,50 @@
         "type": "Polygon",
         "coordinates": [
           [
-            [0,0],
-            [1,0],
-            [1,1],
-            [0,1],
-            [0,0]
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 1],
+            [0, 0]
           ]
         ]
       }
     },
     {
-        "type": "Feature",
-        "properties": {
-          "id": 2
-        },
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": [
-            [
-              [1,0],
-              [2,0],
-              [2,1],
-              [1,1],
-              [1,0]
-            ]
-          ]
-        }
+      "type": "Feature",
+      "properties": {
+        "id": 2
       },
-      {
-        "type": "Feature",
-        "properties": {
-          "id": 1
-        },
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": [
-            [
-              [1,1],
-              [2,1],
-              [2,2],
-              [1,2],
-              [1,1]
-            ]
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [1, 0],
+            [2, 0],
+            [2, 1],
+            [1, 1],
+            [1, 0]
           ]
-        }
+        ]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [1, 1],
+            [2, 1],
+            [2, 2],
+            [1, 2],
+            [1, 1]
+          ]
+        ]
+      }
+    }
   ]
 }
