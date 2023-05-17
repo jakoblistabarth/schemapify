@@ -1,0 +1,25 @@
+<svg width="10" height="10" viewBox="0 0 10 10"
+    xmlns="http://www.w3.org/2000/svg">
+    <style>
+    path { stroke-linejoin: round;}
+    .filled {
+        fill: black;
+    }
+    .outline {
+        fill: none;
+        stroke: black;
+    }
+    @media (prefers-color-scheme: dark) {
+      .filled {
+        fill: white;
+      }
+      .outline {
+        stroke: white;
+      }
+    }
+    </style>
+    <path class="outline" d="M1 1V7.16955L2.06812 9H9V4.9526L6.71844 1.03646L1 1Z"/>
+    <path class="outline" d="M2 6H7" />
+    <path class="filled" d="M5.5 5C5.77614 5 6 4.77614 6 4.5C6 4.22386 5.77614 4 5.5 4C5.22386 4 5 4.22386 5 4.5C5 4.77614 5.22386 5 5.5 5Z"/>
+    <path class="filled" d="M3.5 5C3.77614 5 4 4.77614 4 4.5C4 4.22386 3.77614 4 3.5 4C3.22386 4 3 4.22386 3 4.5C3 4.77614 3.22386 5 3.5 5Z"/>
+</svg>

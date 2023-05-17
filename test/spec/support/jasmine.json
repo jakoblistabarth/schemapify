@@ -1,0 +1,6 @@
+{
+  "stopSpecOnExpectationFailure": false,
+  "spec_dir": "test/spec",
+  "spec_files": ["**/*[sS]pec.ts"],
+  "helpers": ["helpers/**/*.js"]
+}

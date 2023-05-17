@@ -18,5 +18,8 @@
       "border": "1px solid darkblue",
       "borderRadius": "3px"
     }
-  ]
+  ],
+  "[xml]": {
+    "editor.defaultFormatter": "DotJoshJohnson.xml"
+  }
 }
