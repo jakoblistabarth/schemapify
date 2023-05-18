@@ -8,6 +8,7 @@ import { handleSimplify } from "./helpers/handleSimplify";
 import useAppStore from "./helpers/store";
 import MapView from "./components/MapView";
 import { useHotkeys } from "react-hotkeys-hook";
+import Teaser from "./components/Teaser";
 
 const Home = () => {
   const { dcel, setDcel } = useAppStore();
@@ -18,12 +19,17 @@ const Home = () => {
     <>
       <div className="grid h-screen grid-cols-1 grid-rows-1">
         <main className="relative">
-          <MapView />
           <div className="relative mt-4 flex justify-center">
             <Brand />
           </div>
-          <Configurator />
-          <FileSelect />
+          <MapView />
+          <div className="grid grid-cols-[1fr_3fr]">
+            <div>
+              <Configurator />
+              <FileSelect />
+            </div>
+            {!dcel && <Teaser />}
+          </div>
         </main>
         <Footer />
       </div>
