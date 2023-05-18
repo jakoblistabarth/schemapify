@@ -34,16 +34,16 @@ describe("isInPolygon()", function () {
       new Point(9.668785095214957, 47.49126052856445),
     ]);
 
-    expect(regionA.points[0].isInPolygon(regionB)).toBeFalse();
-    expect(regionA.points[1].isInPolygon(regionB)).toBeFalse();
-    expect(regionA.points[2].isInPolygon(regionB)).toBeTrue();
-    expect(regionA.points[3].isInPolygon(regionB)).toBeFalse();
-    expect(regionA.points[4].isInPolygon(regionB)).toBeFalse();
-    expect(regionB.points[0].isInPolygon(regionA)).toBeFalse();
-    expect(regionB.points[1].isInPolygon(regionA)).toBeFalse();
-    expect(regionB.points[2].isInPolygon(regionA)).toBeTrue();
-    expect(regionB.points[3].isInPolygon(regionA)).toBeFalse();
-    expect(regionB.points[4].isInPolygon(regionA)).toBeFalse();
+    expect(regionA.points[0].isInPolygon(regionB)).toBe(false);
+    expect(regionA.points[1].isInPolygon(regionB)).toBe(false);
+    expect(regionA.points[2].isInPolygon(regionB)).toBe(true);
+    expect(regionA.points[3].isInPolygon(regionB)).toBe(false);
+    expect(regionA.points[4].isInPolygon(regionB)).toBe(false);
+    expect(regionB.points[0].isInPolygon(regionA)).toBe(false);
+    expect(regionB.points[1].isInPolygon(regionA)).toBe(false);
+    expect(regionB.points[2].isInPolygon(regionA)).toBe(true);
+    expect(regionB.points[3].isInPolygon(regionA)).toBe(false);
+    expect(regionB.points[4].isInPolygon(regionA)).toBe(false);
   });
 
   it("returns interference for 1 regions and a Point of AUT_adm1-simple.json.", function () {
@@ -56,11 +56,16 @@ describe("isInPolygon()", function () {
     ]);
     const point = new Point(9.668785095214957, 47.49126052856445);
 
-    expect(point.isInPolygon(polygon)).toBeTrue();
+    expect(point.isInPolygon(polygon)).toBe(true);
   });
 
   it("returns false if it lies outside of a convex(!) Polygon", function () {
-    const A = new Polygon([new Point(0, 0), new Point(0, 1), new Point(1, 1), new Point(1, 0)]);
+    const A = new Polygon([
+      new Point(0, 0),
+      new Point(0, 1),
+      new Point(1, 1),
+      new Point(1, 0),
+    ]);
     const B = new Polygon([
       new Point(-5, -5),
       new Point(5, -5),
@@ -72,14 +77,19 @@ describe("isInPolygon()", function () {
     const b = new Point(-1, -1);
     const c = new Point(1.1, 0);
 
-    expect(a.isInPolygon(A)).toBeFalse();
-    expect(a.isInPolygon(B)).toBeFalse();
-    expect(b.isInPolygon(A)).toBeFalse();
-    expect(c.isInPolygon(A)).toBeFalse();
+    expect(a.isInPolygon(A)).toBe(false);
+    expect(a.isInPolygon(B)).toBe(false);
+    expect(b.isInPolygon(A)).toBe(false);
+    expect(c.isInPolygon(A)).toBe(false);
   });
 
   it("returns true if it lies inside of a convex(!) Polygon", function () {
-    const A = new Polygon([new Point(0, 0), new Point(0, 1), new Point(1, 1), new Point(1, 0)]);
+    const A = new Polygon([
+      new Point(0, 0),
+      new Point(0, 1),
+      new Point(1, 1),
+      new Point(1, 0),
+    ]);
     const B = new Polygon([
       new Point(-5, -5),
       new Point(5, -5),
@@ -91,10 +101,10 @@ describe("isInPolygon()", function () {
     const c = new Point(0.5, 0);
     const d = new Point(-2.5, -2.5);
 
-    expect(a.isInPolygon(A)).toBeTrue();
-    expect(b.isInPolygon(A)).toBeTrue();
-    expect(c.isInPolygon(A)).toBeTrue();
-    expect(d.isInPolygon(B)).toBeTrue();
+    expect(a.isInPolygon(A)).toBe(true);
+    expect(b.isInPolygon(A)).toBe(true);
+    expect(c.isInPolygon(A)).toBe(true);
+    expect(d.isInPolygon(B)).toBe(true);
   });
 });
 
@@ -105,31 +115,40 @@ it("returns true if it lies inside of a convex(!) Polygon", function () {
   const d = new Point(1, 2);
   const A = new Polygon([a, b, c, d]);
 
-  expect(a.isInPolygon(A)).toBeTrue();
-  expect(b.isInPolygon(A)).toBeTrue();
-  expect(c.isInPolygon(A)).toBeTrue();
-  expect(d.isInPolygon(A)).toBeTrue();
+  expect(a.isInPolygon(A)).toBe(true);
+  expect(b.isInPolygon(A)).toBe(true);
+  expect(c.isInPolygon(A)).toBe(true);
+  expect(d.isInPolygon(A)).toBe(true);
 });
 
 describe("getArea()", function () {
   it("returns correct area for a given set of 4 Points (a square).", function () {
-    const plgn = new Polygon([new Point(0, 0), new Point(0, 1), new Point(1, 1), new Point(1, 0)]);
+    const plgn = new Polygon([
+      new Point(0, 0),
+      new Point(0, 1),
+      new Point(1, 1),
+      new Point(1, 0),
+    ]);
     expect(plgn.area).toBe(1);
   });
 
   it("returns correct area for a given set of 3 Points (a triangle).", function () {
-    const plgn = new Polygon([new Point(0, 0), new Point(0, 1), new Point(1, 1)]);
+    const plgn = new Polygon([
+      new Point(0, 0),
+      new Point(0, 1),
+      new Point(1, 1),
+    ]);
     expect(plgn.area).toBe(0.5);
   });
 });
 
 describe("equals()", function () {
   it("returns true if two points reside on the exact same location.", function () {
-    expect(new Point(0, 0).equals(new Point(0, 0))).toBeTrue();
+    expect(new Point(0, 0).equals(new Point(0, 0))).toBe(true);
   });
 
   it("returns false if two points reside on different locations.", function () {
-    expect(new Point(0, 0).equals(new Point(0, 0.0000000001))).toBeFalse();
+    expect(new Point(0, 0).equals(new Point(0, 0.0000000001))).toBe(false);
   });
 });
 
@@ -144,9 +163,9 @@ describe("isOnLineSegments()", function () {
     const pointB = new Point(-2, -2);
     const pointC = new Point(4, 4);
     const pointD = new Point(0, -8);
-    expect(pointA.isOnLineSegments(lineSegments)).toBeTrue();
-    expect(pointB.isOnLineSegments(lineSegments)).toBeFalse();
-    expect(pointC.isOnLineSegments(lineSegments)).toBeTrue();
-    expect(pointD.isOnLineSegments(lineSegments)).toBeTrue();
+    expect(pointA.isOnLineSegments(lineSegments)).toBe(true);
+    expect(pointB.isOnLineSegments(lineSegments)).toBe(false);
+    expect(pointC.isOnLineSegments(lineSegments)).toBe(true);
+    expect(pointD.isOnLineSegments(lineSegments)).toBe(true);
   });
 });

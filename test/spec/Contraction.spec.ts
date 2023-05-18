@@ -29,7 +29,7 @@ describe("isConflicting() returns", function () {
 
     expect(
       cA[ContractionType.N]?.isConflicting(cB[ContractionType.P] as Contraction)
-    ).toBeFalse();
+    ).toBe(false);
   });
 
   it("true for 2 conflicting contractions, due to 2 overlapping Edges.", function () {
@@ -41,7 +41,7 @@ describe("isConflicting() returns", function () {
 
     expect(
       cA[ContractionType.N]?.isConflicting(cB[ContractionType.N] as Contraction)
-    ).toBeTrue();
+    ).toBe(true);
   });
 
   xit("true for 2 conflicting contractions, due to wrong inflectionType of the overlapping Edge.", function () {
@@ -56,13 +56,13 @@ describe("isConflicting() returns", function () {
 
     expect(
       cA[ContractionType.N]?.isConflicting(cB[ContractionType.N] as Contraction)
-    ).toBeTrue();
+    ).toBe(true);
     expect(
       cA[ContractionType.N]?.isConflicting(cB[ContractionType.P] as Contraction)
-    ).toBeTrue();
+    ).toBe(true);
     expect(
       cA[ContractionType.N]?.isConflicting(cC[ContractionType.N] as Contraction)
-    ).toBeTrue();
+    ).toBe(true);
   });
 });
 

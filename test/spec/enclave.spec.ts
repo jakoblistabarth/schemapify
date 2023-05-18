@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import Dcel from "../../src/DCEL/Dcel";
+import Face from "../../src/DCEL/Face";
 
 describe("A Dcel of an simplified enclave model", function () {
   let dcel: Dcel;
@@ -13,7 +14,7 @@ describe("A Dcel of an simplified enclave model", function () {
   });
 
   it("has 1 unbounded face", function () {
-    expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
+    expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
   it("has 3 faces", function () {
@@ -37,7 +38,7 @@ describe("A Dcel of an simplified enclave model (reversed order)", function () {
   });
 
   it("has 1 unbounded face", function () {
-    expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
+    expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
   it("has 3 faces", function () {

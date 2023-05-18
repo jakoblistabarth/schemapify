@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import Dcel from "../../src/DCEL/Dcel";
+import Face from "../../src/DCEL/Face";
 
 describe("A Dcel of a single square with one square hole", function () {
   let dcel: Dcel;
@@ -13,7 +14,7 @@ describe("A Dcel of a single square with one square hole", function () {
   });
 
   it("has 1 unbounded face", function () {
-    expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
+    expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
   it("has 3 faces (1 outer, 2 inner) in total", function () {

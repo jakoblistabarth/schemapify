@@ -16,7 +16,7 @@ describe("A Dcel of 2 adjacent squares", function () {
   const dcel = Dcel.fromGeoJSON(json);
 
   it("has 1 unbounded face", function () {
-    expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
+    expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
   it("has 3 faces", function () {
@@ -52,7 +52,7 @@ describe("A Dcel of 3 adjacent squares", function () {
   const dcel = Dcel.fromGeoJSON(json);
 
   it("has 1 unbounded face", function () {
-    expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
+    expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
   it("has 4 faces", function () {

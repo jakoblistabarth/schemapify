@@ -98,32 +98,32 @@ describe("isSignficant()", function () {
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.directions.od0, s.directions.od90);
-    expect(s.o.isSignificant()).toBeFalse();
+    expect(s.o.isSignificant()).toBe(false);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.directions.od37, s.directions.od284);
-    expect(s.o.isSignificant()).toBeTrue();
+    expect(s.o.isSignificant()).toBe(true);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.directions.od0, s.directions.od180);
-    expect(s.o.isSignificant()).toBeFalse();
+    expect(s.o.isSignificant()).toBe(false);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.directions.od0, s.directions.od37);
-    expect(s.o.isSignificant()).toBeTrue();
+    expect(s.o.isSignificant()).toBe(true);
   });
 
   it("classifies a vertex correctly", function () {
     s.o.edges.push(s.directions.od104, s.directions.od37);
-    expect(s.o.isSignificant()).toBeTrue();
+    expect(s.o.isSignificant()).toBe(true);
   });
 
   it("classifies a vertex with edges in disjoint sectors as not significant.", function () {
     s.o.edges.push(s.directions.od217, s.directions.od37);
-    expect(s.o.isSignificant()).toBeFalse();
+    expect(s.o.isSignificant()).toBe(false);
   });
 });
 
@@ -178,7 +178,10 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
     expect(s.directions.od180.getAssociatedAngles()).toEqual([Math.PI]);
     expect(s.directions.od270.getAssociatedAngles()).toEqual([Math.PI * 1.5]);
     expect(s.directions.od37.getAssociatedAngles()).toEqual([0, Math.PI * 0.5]);
-    expect(s.directions.od284.getAssociatedAngles()).toEqual([Math.PI * 1.5, Math.PI * 2]);
+    expect(s.directions.od284.getAssociatedAngles()).toEqual([
+      Math.PI * 1.5,
+      Math.PI * 2,
+    ]);
   });
 
   it("using getAssociatedAngles() for C4", function () {
@@ -187,8 +190,14 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
     expect(s.directions.od90.getAssociatedAngles()).toEqual([Math.PI * 0.5]);
     expect(s.directions.od180.getAssociatedAngles()).toEqual([Math.PI]);
     expect(s.directions.od270.getAssociatedAngles()).toEqual([Math.PI * 1.5]);
-    expect(s.directions.od37.getAssociatedAngles()).toEqual([0, Math.PI * 0.25]);
-    expect(s.directions.od284.getAssociatedAngles()).toEqual([Math.PI * 1.5, Math.PI * 1.75]);
+    expect(s.directions.od37.getAssociatedAngles()).toEqual([
+      0,
+      Math.PI * 0.25,
+    ]);
+    expect(s.directions.od284.getAssociatedAngles()).toEqual([
+      Math.PI * 1.5,
+      Math.PI * 1.75,
+    ]);
   });
 });
 

@@ -77,7 +77,7 @@ describe("getSignificantVertex()", function () {
 
   it("returns an significant endpoint if one is specified", function () {
     const significantVertex = s.directions.od53.getSignificantVertex();
-    expect(significantVertex?.significant).toBeTrue();
+    expect(significantVertex?.significant).toBe(true);
   });
   it("returns null if none of its endpoints are significant", function () {
     s.o.significant = false;

@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import Dcel from "../../src/DCEL/Dcel";
+import Face from "../../src/DCEL/Face";
 
 describe("A Dcel of a single triangle with one triangular hole", function () {
   let dcel: Dcel;
@@ -16,7 +17,7 @@ describe("A Dcel of a single triangle with one triangular hole", function () {
   });
 
   it("has 1 unbounded face", function () {
-    expect(dcel.getUnboundedFace()).toEqual(jasmine.any(Object));
+    expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
   it("has 3 faces (1 outer, 2 inner) in total", function () {
@@ -35,13 +36,13 @@ describe("A Dcel of a single triangle with one triangular hole", function () {
     const innerFaces = dcel.getBoundedFaces();
     const innerRing = innerFaces.find((f) => f.outerRing);
     const holeLinkages = innerRing?.getEdges().every((e) => e.face?.outerRing);
-    expect(holeLinkages).toBeTrue();
+    expect(holeLinkages).toBe(true);
   });
 
   it("a counterclockwise halfedge of the outer ring has edges face with no pointer to an outer Ring", function () {
     const innerFaces = dcel.getBoundedFaces();
     const outerRing = innerFaces.find((f) => !f.outerRing);
     const holeLinkages = outerRing?.getEdges().every((e) => !e.face?.outerRing);
-    expect(holeLinkages).toBeTrue();
+    expect(holeLinkages).toBe(true);
   });
 });

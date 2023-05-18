@@ -5,15 +5,23 @@ import Configuration, {
   OuterEdge,
   Junction,
 } from "../../src/c-oriented-schematization/Configuration";
-import Contraction, { ContractionType } from "../../src/c-oriented-schematization/Contraction";
+import Contraction, {
+  ContractionType,
+} from "../../src/c-oriented-schematization/Contraction";
 import Dcel from "../../src/DCEL/Dcel";
 import Point from "../../src/geometry/Point";
 import Vertex from "../../src/DCEL/Vertex";
-import { configurationCases, ConfigurationSetup, createConfigurationSetup } from "./test-setup";
+import {
+  configurationCases,
+  ConfigurationSetup,
+  createConfigurationSetup,
+} from "./test-setup";
 
 describe("getTrack()", function () {
   it("return the correct angles for the reflex point for a square shape", function () {
-    const json = JSON.parse(fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"));
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8")
+    );
     const dcel = Dcel.fromGeoJSON(json);
 
     const outerEdge1 = dcel.getBoundedFaces()[0].edge as HalfEdge; //TODO: check if casting is a good way of handle these kind of type issues
@@ -21,10 +29,18 @@ describe("getTrack()", function () {
     outerEdge1.configuration = new Configuration(outerEdge1);
     outerEdge2.configuration = new Configuration(outerEdge2);
 
-    expect(outerEdge1?.configuration.getTrack(OuterEdge.PREV)?.angle).toBe(Math.PI * 1.5);
-    expect(outerEdge1?.configuration.getTrack(OuterEdge.NEXT)?.angle).toBe(Math.PI * 0.5);
-    expect(outerEdge2?.configuration.getTrack(OuterEdge.PREV)?.angle).toBe(Math.PI * 0);
-    expect(outerEdge2?.configuration.getTrack(OuterEdge.NEXT)?.angle).toBe(Math.PI);
+    expect(outerEdge1?.configuration.getTrack(OuterEdge.PREV)?.angle).toBe(
+      Math.PI * 1.5
+    );
+    expect(outerEdge1?.configuration.getTrack(OuterEdge.NEXT)?.angle).toBe(
+      Math.PI * 0.5
+    );
+    expect(outerEdge2?.configuration.getTrack(OuterEdge.PREV)?.angle).toBe(
+      Math.PI * 0
+    );
+    expect(outerEdge2?.configuration.getTrack(OuterEdge.NEXT)?.angle).toBe(
+      Math.PI
+    );
   });
 });
 
@@ -200,11 +216,11 @@ describe("isBlockedBy() determines whether or not a contraction is blocked by an
     );
     const c = new Configuration(s.innerEdge);
 
-    expect(c[ContractionType.N]?.isBlockedBy(s.edges[0])).toBeFalse();
-    expect(c[ContractionType.N]?.isBlockedBy(s.edges[1])).toBeFalse();
-    expect(c[ContractionType.N]?.isBlockedBy(s.edges[2])).toBeFalse();
-    expect(c[ContractionType.N]?.isBlockedBy(s.edges[3])).toBeFalse();
-    expect(c[ContractionType.N]?.isBlockedBy(s.edges[4])).toBeTrue();
+    expect(c[ContractionType.N]?.isBlockedBy(s.edges[0])).toBe(false);
+    expect(c[ContractionType.N]?.isBlockedBy(s.edges[1])).toBe(false);
+    expect(c[ContractionType.N]?.isBlockedBy(s.edges[2])).toBe(false);
+    expect(c[ContractionType.N]?.isBlockedBy(s.edges[3])).toBe(false);
+    expect(c[ContractionType.N]?.isBlockedBy(s.edges[4])).toBe(true);
   });
 
   it("for a positive contraction", function () {
@@ -217,14 +233,14 @@ describe("isBlockedBy() determines whether or not a contraction is blocked by an
     );
     const c = new Configuration(s.innerEdge);
 
-    expect(c[ContractionType.P]?.isBlockedBy(s.edges[0])).toBeFalse();
-    expect(c[ContractionType.P]?.isBlockedBy(s.edges[1])).toBeFalse();
-    expect(c[ContractionType.P]?.isBlockedBy(s.edges[2])).toBeFalse();
-    expect(c[ContractionType.P]?.isBlockedBy(s.edges[3])).toBeTrue();
-    expect(c[ContractionType.P]?.isBlockedBy(s.edges[4])).toBeTrue();
-    expect(c[ContractionType.P]?.isBlockedBy(s.edges[5])).toBeFalse();
-    expect(c[ContractionType.P]?.isBlockedBy(s.edges[6])).toBeFalse();
-    expect(c[ContractionType.P]?.isBlockedBy(s.edges[7])).toBeFalse();
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[0])).toBe(false);
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[1])).toBe(false);
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[2])).toBe(false);
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[3])).toBe(true);
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[4])).toBe(true);
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[5])).toBe(false);
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[6])).toBe(false);
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[7])).toBe(false);
   });
 
   it("and handles edges which are part of X correctly", function () {
@@ -237,9 +253,9 @@ describe("isBlockedBy() determines whether or not a contraction is blocked by an
     );
     const c = new Configuration(s.innerEdge);
 
-    expect(c[ContractionType.P]?.isBlockedBy(s.edges[0])).toBeFalse();
-    expect(c[ContractionType.P]?.isBlockedBy(s.edges[1])).toBeFalse();
-    expect(c[ContractionType.P]?.isBlockedBy(s.edges[2])).toBeFalse();
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[0])).toBe(false);
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[1])).toBe(false);
+    expect(c[ContractionType.P]?.isBlockedBy(s.edges[2])).toBe(false);
   });
 });
 
@@ -311,8 +327,8 @@ describe("isFeasible() returns", function () {
 
     const c = new Configuration(s.innerEdge);
 
-    expect(c[ContractionType.N]?.isFeasible()).toBeFalse();
-    expect(c[ContractionType.P]?.isFeasible()).toBeTrue();
+    expect(c[ContractionType.N]?.isFeasible()).toBe(false);
+    expect(c[ContractionType.P]?.isFeasible()).toBe(true);
   });
 });
 
@@ -353,13 +369,13 @@ describe("is Complementary() returns", function () {
   });
 
   it("true, when the configuration has a contraction point of the complementary contraction type.", function () {
-    expect(neg.isComplementary(pos)).toBeTrue();
-    expect(pos.isComplementary(neg)).toBeTrue();
+    expect(neg.isComplementary(pos)).toBe(true);
+    expect(pos.isComplementary(neg)).toBe(true);
   });
 
   it("false, when the configuration has no contraction point of the complementary contraction type.", function () {
-    expect(pos.isComplementary(pos)).toBeFalse();
-    expect(neg.isComplementary(neg)).toBeFalse();
+    expect(pos.isComplementary(pos)).toBe(false);
+    expect(neg.isComplementary(neg)).toBe(false);
   });
 });
 
@@ -367,7 +383,10 @@ describe("getJunctionType() determines the type of a junction in respect to the 
   let dcel: Dcel;
   beforeEach(function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/edge-move-test.json"), "utf8")
+      fs.readFileSync(
+        path.resolve("test/data/shapes/edge-move-test.json"),
+        "utf8"
+      )
     );
     dcel = Dcel.fromGeoJSON(json);
   });

@@ -78,7 +78,7 @@ describe("sortEdges()", function () {
 
       dcel.vertices.forEach((vertex) => {
         const angles = vertex.edges.map((e) => e.getAngle()) as number[];
-        expect(angles.every((v, i, a) => !i || a[i - 1] >= v)).toBeTrue();
+        expect(angles.every((v, i, a) => !i || a[i - 1] >= v)).toBe(true);
       });
     });
   });
@@ -220,13 +220,13 @@ describe("equals() on a vertex", function () {
     const vertexA = new Vertex(10, 10, new Dcel());
     const vertexB = new Vertex(10, 10, new Dcel());
 
-    expect(vertexA.equals(vertexB)).toBeTrue();
+    expect(vertexA.equals(vertexB)).toBe(true);
   });
 
   it("returns true for one vertix and one point sharing the same position", function () {
     const vertexA = new Vertex(0.25, -3, new Dcel());
     const pointA = new Vertex(0.25, -3, new Dcel());
 
-    expect(pointA.equals(vertexA)).toBeTrue();
+    expect(pointA.equals(vertexA)).toBe(true);
   });
 });
