@@ -15,7 +15,7 @@ const Footer = () => {
           <div className="flex justify-end">
             <Link
               className="flex items-center"
-              href={"https://github.com/jakoblistabarth/polygon-schematization"}
+              href={"https://github.com/jakoblistabarth/schemapify"}
             >
               <div className="mr-1">
                 <RiGithubLine />
