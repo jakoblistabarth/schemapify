@@ -1,4 +1,4 @@
-import { Snapshot } from "@/src/DCEL/Dcel";
+import Snapshot from "@/src/Snapshot/Snapshot";
 import { FC } from "react";
 import useAppStore from "../helpers/store";
 import clsx from "clsx";
@@ -8,11 +8,14 @@ type Props = {
   snapshots: Snapshot[];
 };
 
-const StepMap: FC<Props> = ({ snapshots }) => {
+const SnapshotTimeline: FC<Props> = ({ snapshots }) => {
   const { setActiveSnapshot, activeSnapshot } = useAppStore();
   const width = 10;
   const height = 25;
+  const baseStrokeWidth = 2;
+  const grow = 5;
   const gap = 2;
+
   return (
     <svg
       width={snapshots.length * width + (snapshots.length - 1) * gap + 2}
@@ -25,14 +28,18 @@ const StepMap: FC<Props> = ({ snapshots }) => {
             <Tooltip.Root open={isActive}>
               <Tooltip.Trigger asChild>
                 <rect
-                  x={width * i + gap * i + 1}
-                  y={1}
+                  x={width * i + gap * i + baseStrokeWidth / 2}
+                  y={
+                    isActive
+                      ? baseStrokeWidth / 2
+                      : (baseStrokeWidth + grow) / 2
+                  }
                   rx={2}
                   width={width}
-                  height={height}
+                  height={isActive ? height : height - grow}
                   className={clsx(
-                    "cursor-pointer fill-blue-300 stroke-transparent stroke-1 transition-colors hover:stroke-blue-600",
-                    isActive && "fill-blue-400 stroke-blue-900 !stroke-2"
+                    "duration-50 cursor-pointer fill-blue-300 stroke-transparent stroke-1 transition-colors hover:stroke-blue-600",
+                    isActive && "stroke-blue-900 !stroke-2"
                   )}
                   onClick={() => setActiveSnapshot(d.id)}
                 />
@@ -44,7 +51,7 @@ const StepMap: FC<Props> = ({ snapshots }) => {
                 >
                   <strong>{d.step}</strong>
                   <p>
-                    {i + 1}/{snapshots.length}
+                    {i + 1}/{snapshots.length} {d.duration}ms
                   </p>
                   <Tooltip.Arrow className="fill-white" />
                 </Tooltip.Content>
@@ -57,4 +64,4 @@ const StepMap: FC<Props> = ({ snapshots }) => {
   );
 };
 
-export default StepMap;
+export default SnapshotTimeline;

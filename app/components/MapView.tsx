@@ -28,7 +28,7 @@ const MapView = () => {
         {activeSnapshot?.layers &&
           layers.map(([layerName, layer]) => (
             <GeoJSON
-              key={`${layerName}-${activeSnapshot.time}`}
+              key={`${layerName}-${activeSnapshot.id}`}
               data={layer}
               onEachFeature={onEachFeature}
               pointToLayer={pointToLayer}

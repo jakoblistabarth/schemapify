@@ -1,4 +1,4 @@
-import { SnapshotLayers } from "@/src/DCEL/Dcel";
+import { SnapshotLayers } from "@/src/Snapshot/Snapshot";
 import { Feature, FeatureCollection } from "geojson";
 import { PathOptions, Path, CircleMarker, LatLng } from "leaflet";
 import { MapMode } from "./store";

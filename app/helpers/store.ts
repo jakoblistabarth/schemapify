@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { FeatureCollection, Polygon, MultiPolygon } from "geojson";
-import Dcel, { Snapshot } from "@/src/DCEL/Dcel";
+import Dcel from "@/src/DCEL/Dcel";
+import Snapshot from "@/src/Snapshot/Snapshot";
 
 export type MapMode = "dcel" | "polygon";
 
@@ -32,7 +33,7 @@ const useAppStore = create<AppState>((set) => ({
       return {
         source: { name, data },
         dcel,
-        activeSnapshot: dcel.snapShots[0],
+        activeSnapshot: dcel.snapshotList.snapshots[0],
       };
     });
   },
@@ -49,7 +50,7 @@ const useAppStore = create<AppState>((set) => ({
   activeSnapshot: undefined,
   setActiveSnapshot: (id: string) =>
     set((state) => ({
-      activeSnapshot: state.dcel?.snapShots.find((d) => d.id === id),
+      activeSnapshot: state.dcel?.snapshotList.getSnapshot(id),
     })),
 }));
 

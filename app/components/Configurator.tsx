@@ -1,7 +1,7 @@
 import { FC } from "react";
 import useAppStore from "../helpers/store";
 import { MdClose, MdFace } from "react-icons/md";
-import SnapshotList from "./SnapshotList";
+import SnapshotList from "./SnapshotNavigator";
 import FileSelect from "./FileSelect";
 
 const Configurator: FC = () => {

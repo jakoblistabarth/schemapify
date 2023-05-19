@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import * as geojson from "geojson";
 import config, {
   Config,
@@ -14,17 +13,7 @@ import { createGeoJSON, validateGeoJSON } from "../utilities";
 import Face from "./Face";
 import HalfEdge, { OrientationClasses } from "./HalfEdge";
 import Vertex from "./Vertex";
-
-/**
- * Holds the current state of the schematized data as an array of GeoJSON Feature Collections.
- */
-export type Snapshot = {
-  id: string;
-  step: STEP;
-  layers: SnapshotLayers;
-  time: number;
-  duration: number;
-};
+import SnapshotList from "../Snapshot/SnapshotList";
 
 export enum STEP {
   LOAD = "loadData",
@@ -35,14 +24,6 @@ export enum STEP {
   SIMPLIFY = "simplify",
 }
 
-export type SnapshotLayers = {
-  vertices: geojson.FeatureCollection<geojson.Point>;
-  edges: geojson.FeatureCollection<geojson.LineString>;
-  faces: geojson.FeatureCollection<geojson.Polygon>;
-  features: geojson.FeatureCollection<geojson.Polygon | geojson.MultiPolygon>;
-  staircaseRegions?: geojson.FeatureCollection<geojson.Polygon>;
-};
-
 class Dcel {
   name?: string;
   vertices: Map<string, Vertex>;
@@ -50,7 +31,7 @@ class Dcel {
   faces: Face[];
   featureProperties: geojson.GeoJsonProperties;
   config: Config;
-  snapShots: Snapshot[];
+  snapshotList: SnapshotList;
   faceFaceBoundaryList?: FaceFaceBoundaryList;
   created: number;
 
@@ -60,7 +41,7 @@ class Dcel {
     this.halfEdges = new Map();
     this.faces = [];
     this.featureProperties = {};
-    this.snapShots = [];
+    this.snapshotList = new SnapshotList(this);
     this.config = config;
   }
 
@@ -439,9 +420,9 @@ class Dcel {
   }
 
   preProcess(): void {
-    this.takeSnapshot(STEP.LOAD);
+    this.snapshotList.takeSnapshot(STEP.LOAD);
     this.splitEdges();
-    this.takeSnapshot(STEP.SUBDIVIDE);
+    this.snapshotList.takeSnapshot(STEP.SUBDIVIDE);
   }
 
   /**
@@ -465,7 +446,7 @@ class Dcel {
   classify(): void {
     this.classifyVertices();
     this.halfEdges.forEach((e) => e.classify());
-    this.takeSnapshot(STEP.CLASSIFY);
+    this.snapshotList.takeSnapshot(STEP.CLASSIFY);
   }
 
   /**
@@ -516,25 +497,6 @@ class Dcel {
     this.getSe(
       staircasesOther.filter((staircase) => staircase.interferesWith.length > 0)
     );
-  }
-
-  takeSnapshot(step: STEP): Snapshot {
-    const snapshot: Snapshot = {
-      id: uuid(),
-      layers: {
-        vertices: this.verticesToGeoJSON(),
-        edges: this.edgesToGeoJSON(),
-        faces: this.facesToGeoJSON(),
-        features: this.toGeoJSON(),
-      },
-      time: Date.now(),
-      duration: 0,
-      step,
-    };
-    if (step === STEP.STAIRCASEREGIONS)
-      snapshot.layers.staircaseRegions = this.staircaseRegionsToGeoJSON();
-    this.snapShots.push(snapshot);
-    return snapshot;
   }
 
   getEdgeDistances(staircases: Staircase[]) {
@@ -716,9 +678,9 @@ class Dcel {
     this.classify();
     this.addStaircases();
     this.calculateStaircases();
-    this.takeSnapshot(STEP.STAIRCASEREGIONS);
+    this.snapshotList.takeSnapshot(STEP.STAIRCASEREGIONS);
     this.replaceEdgesWithStaircases();
-    this.takeSnapshot(STEP.STAIRCASE);
+    this.snapshotList.takeSnapshot(STEP.STAIRCASE);
   }
 
   simplify(): Dcel {
@@ -761,7 +723,7 @@ class Dcel {
     //   [...this.faceFaceBoundaryList.boundaries].map(([k, v]) => v.edges.length),
     //   this.getArea()
     // );
-    this.takeSnapshot(STEP.SIMPLIFY);
+    this.snapshotList.takeSnapshot(STEP.SIMPLIFY);
     return this;
   }
 
@@ -1038,26 +1000,6 @@ class Dcel {
         edge.configuration = new Configuration(edge);
     });
   }
-
-  getTimestamps() {
-    return Object.values(this.snapShots)
-      .sort((a, b) => (a.time && b.time ? a?.time - b?.time : 0))
-      .map((snapshot) => snapshot.time)
-      .reduce<number[]>((durations, time, i, timestamps) => {
-        const prevTimestamp = timestamps[i - 1];
-        durations[i] = !time
-          ? 0
-          : prevTimestamp
-          ? time - prevTimestamp
-          : time - this.created;
-        return durations;
-      }, []);
-  }
-
-  getDuration() {
-    return this.getTimestamps().reduce((a, b) => a + b, 0);
-  }
 }
 
 export default Dcel;
-2;

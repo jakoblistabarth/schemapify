@@ -9,13 +9,13 @@ import useAppStore from "./helpers/store";
 import MapView from "./components/MapView";
 import { useHotkeys } from "react-hotkeys-hook";
 import Teaser from "./components/Teaser";
-import SnapshotList from "./components/SnapshotList";
+import SnapshotList from "./components/SnapshotNavigator";
 
 const Home = () => {
   const { dcel, setDcel, removeSource, setSource } = useAppStore();
 
   useHotkeys(["ctrl+s"], () => handleSimplify(setDcel, dcel));
-  useHotkeys(["ctrl+esc"], () => removeSource());
+  useHotkeys(["ctrl+c"], () => removeSource());
   useHotkeys(["ctrl+1"], () => setSource("AUT_adm0-s0_5.json"));
 
   return (
