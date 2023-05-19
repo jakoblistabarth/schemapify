@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { FeatureCollection, Polygon, MultiPolygon } from "geojson";
-import Dcel, { STEP, Snapshot } from "@/src/DCEL/Dcel";
+import Dcel, { Snapshot } from "@/src/DCEL/Dcel";
 
 export type MapMode = "dcel" | "polygon";
 
@@ -15,8 +15,8 @@ type AppState = {
   setDcel: (dcel: Dcel) => void;
   mapMode: MapMode;
   toggleMapMode: () => void;
-  activeSnapshot: STEP;
-  setActiveSnapshot: (step: STEP) => void;
+  activeSnapshot?: Snapshot;
+  setActiveSnapshot: (id: string) => void;
 };
 
 const useAppStore = create<AppState>((set) => ({
@@ -29,17 +29,28 @@ const useAppStore = create<AppState>((set) => ({
     const dcel = Dcel.fromGeoJSON(data);
     dcel.schematize();
     set(() => {
-      return { source: { name, data }, dcel };
+      return {
+        source: { name, data },
+        dcel,
+        activeSnapshot: dcel.snapShots[0],
+      };
     });
   },
   removeSource: () => {
-    set(() => ({ source: undefined, dcel: undefined }));
+    set(() => ({
+      source: undefined,
+      dcel: undefined,
+      activeSnapshot: undefined,
+    }));
   },
   mapMode: "dcel",
   toggleMapMode: () =>
     set((state) => ({ mapMode: state.mapMode == "dcel" ? "polygon" : "dcel" })),
-  activeSnapshot: STEP.LOAD,
-  setActiveSnapshot: (step: STEP) => set(() => ({ activeSnapshot: step })),
+  activeSnapshot: undefined,
+  setActiveSnapshot: (id: string) =>
+    set((state) => ({
+      activeSnapshot: state.dcel?.snapShots.find((d) => d.id === id),
+    })),
 }));
 
 export default useAppStore;

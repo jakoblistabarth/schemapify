@@ -12,25 +12,23 @@ import { GeoJSON as LGeoJSON } from "leaflet";
 import MapControl from "./Map/MapControl";
 
 const MapView = () => {
-  const { source, dcel, activeSnapshot, mapMode } = useAppStore();
+  const { source, activeSnapshot, mapMode } = useAppStore();
 
   const regionBounds = useMemo(() => {
     return new LGeoJSON(source?.data).getBounds();
   }, [source]);
 
-  const layers = dcel?.snapShots
-    ? //@ts-expect-error
-      getMapLayers(dcel.snapShots[activeSnapshot].layers, mapMode)
+  const layers = activeSnapshot
+    ? getMapLayers(activeSnapshot?.layers, mapMode)
     : [];
 
   return (
     <div id="map" className="absolute inset-0">
       <Map>
-        {activeSnapshot &&
-          dcel?.snapShots[activeSnapshot]?.layers &&
+        {activeSnapshot?.layers &&
           layers.map(([layerName, layer]) => (
             <GeoJSON
-              key={`${layerName}-${dcel.snapShots[activeSnapshot]?.time}`}
+              key={`${layerName}-${activeSnapshot.time}`}
               data={layer}
               onEachFeature={onEachFeature}
               pointToLayer={pointToLayer}

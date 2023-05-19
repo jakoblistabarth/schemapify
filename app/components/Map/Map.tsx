@@ -12,6 +12,7 @@ const Map: FC<PropsWithChildren> = ({ children, ...rest }) => {
       zoomControl={false}
       doubleClickZoom={false}
       dragging={source ? true : false}
+      keyboard={false}
       key={source?.name ?? ""}
       {...rest}
     >

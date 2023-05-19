@@ -24,8 +24,6 @@ const Configurator: FC = () => {
             </button>
           )}
         </div>
-
-        <SnapshotList />
       </div>
     </>
   );

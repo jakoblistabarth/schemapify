@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid";
 import * as geojson from "geojson";
 import config, {
   Config,
@@ -18,8 +19,11 @@ import Vertex from "./Vertex";
  * Holds the current state of the schematized data as an array of GeoJSON Feature Collections.
  */
 export type Snapshot = {
+  id: string;
+  step: STEP;
   layers: SnapshotLayers;
-  time?: number;
+  time: number;
+  duration: number;
 };
 
 export enum STEP {
@@ -39,10 +43,6 @@ export type SnapshotLayers = {
   staircaseRegions?: geojson.FeatureCollection<geojson.Polygon>;
 };
 
-type SnapShots = {
-  [key in STEP]?: Snapshot;
-};
-
 class Dcel {
   name?: string;
   vertices: Map<string, Vertex>;
@@ -50,7 +50,7 @@ class Dcel {
   faces: Face[];
   featureProperties: geojson.GeoJsonProperties;
   config: Config;
-  snapShots: SnapShots;
+  snapShots: Snapshot[];
   faceFaceBoundaryList?: FaceFaceBoundaryList;
   created: number;
 
@@ -60,7 +60,7 @@ class Dcel {
     this.halfEdges = new Map();
     this.faces = [];
     this.featureProperties = {};
-    this.snapShots = {};
+    this.snapShots = [];
     this.config = config;
   }
 
@@ -518,8 +518,9 @@ class Dcel {
     );
   }
 
-  takeSnapshot(name: STEP): Snapshot {
+  takeSnapshot(step: STEP): Snapshot {
     const snapshot: Snapshot = {
+      id: uuid(),
       layers: {
         vertices: this.verticesToGeoJSON(),
         edges: this.edgesToGeoJSON(),
@@ -527,10 +528,12 @@ class Dcel {
         features: this.toGeoJSON(),
       },
       time: Date.now(),
+      duration: 0,
+      step,
     };
-    if (name === STEP.STAIRCASEREGIONS)
+    if (step === STEP.STAIRCASEREGIONS)
       snapshot.layers.staircaseRegions = this.staircaseRegionsToGeoJSON();
-    this.snapShots[name] = snapshot;
+    this.snapShots.push(snapshot);
     return snapshot;
   }
 
