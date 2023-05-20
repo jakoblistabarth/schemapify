@@ -25,6 +25,7 @@
     "@mapbox/geojsonhint": "^3.1.0",
     "@radix-ui/react-select": "^1.2.1",
     "@radix-ui/react-tooltip": "^1.0.5",
+    "@types/geojson": "^7946.0.10",
     "@types/node": "^20.1.7",
     "@types/react": "^18.2.6",
     "@types/react-dom": "^18.2.4",
