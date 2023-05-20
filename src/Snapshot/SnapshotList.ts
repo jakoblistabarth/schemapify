@@ -61,7 +61,7 @@ class SnapshotList {
       .map((d, i) => (i === 0 ? d - 1 : d + 1))
       .map((d) =>
         d != undefined && d >= 0 && d < this.snapshots.length
-          ? this.snapshots[d].id
+          ? this.snapshots[d]
           : undefined
       );
     return [prevId, nextId];

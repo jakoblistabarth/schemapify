@@ -1,29 +1,22 @@
-"use client";
-
-import Footer from "./components/Footer";
-import Brand from "./components/Brand";
-import FileSelect from "./components/FileSelect";
-import Configurator from "./components/Configurator";
-import { handleSimplify } from "./helpers/handleSimplify";
-import useAppStore from "./helpers/store";
-import { useHotkeys } from "react-hotkeys-hook";
-import Teaser from "./components/Teaser";
-import SnapshotList from "./components/SnapshotNavigator";
 import dynamic from "next/dynamic";
+import Brand from "./components/Brand";
+import Configurator from "./components/Configurator";
+import Footer from "./components/Footer";
+import Hotkeys from "./components/Hotkeys";
+import SnapshotNavigator from "./components/SnapshotNavigator";
+import Teaser from "./components/Teaser";
+import getGroupedTestFiles from "./helpers/getGroupedTestFiles";
 
 const DynamicMap = dynamic(() => import("./components/Map/Map"), {
   ssr: false,
 });
 
-const Home = () => {
-  const { dcel, removeSource, setSource, setActiveSnapshot } = useAppStore();
-
-  useHotkeys(["ctrl+s"], () => handleSimplify(setActiveSnapshot, dcel));
-  useHotkeys(["ctrl+c"], () => removeSource());
-  useHotkeys(["ctrl+1"], () => setSource("AUT_adm0-s0_5.json"));
+const Home = async () => {
+  const files = await getGroupedTestFiles();
 
   return (
     <>
+      <Hotkeys />
       <div className="relative grid h-screen grid-cols-1 grid-rows-1">
         <main className="relative">
           <div id="map" className="absolute inset-0">
@@ -34,14 +27,13 @@ const Home = () => {
               <Brand />
             </div>
             <div className="self-start justify-self-start grid-in-[sidebar]">
-              <Configurator />
-              <FileSelect />
+              <Configurator files={files} />
             </div>
             <div className="self-center grid-in-[main]">
-              {!dcel && <Teaser />}
+              <Teaser />
             </div>
             <div className="self-end justify-self-center grid-in-[bottom-nav]">
-              {dcel && <SnapshotList />}
+              <SnapshotNavigator />
             </div>
           </div>
         </main>

@@ -1,3 +1,5 @@
+"use client";
+
 import Snapshot from "@/src/Snapshot/Snapshot";
 import { FC } from "react";
 import useAppStore from "../helpers/store";
@@ -11,14 +13,16 @@ type Props = {
 };
 
 const SnapshotTimeline: FC<Props> = ({ snapshots, colorScale }) => {
-  const { setActiveSnapshot, activeSnapshot } = useAppStore();
+  const { setActiveSnapshot, activeSnapshot, dcel } = useAppStore();
   const width = 10;
   const height = 25;
   const baseStrokeWidth = 2;
   const grow = 5;
   const gap = 2;
 
-  return (
+  return !dcel?.snapshotList ? (
+    <></>
+  ) : (
     <svg
       width={snapshots.length * width + (snapshots.length - 1) * gap + 2}
       height={height + 2}
@@ -44,7 +48,7 @@ const SnapshotTimeline: FC<Props> = ({ snapshots, colorScale }) => {
                     "cursor-pointer stroke-transparent stroke-1 transition-all duration-100 hover:stroke-blue-600",
                     isActive && "stroke-blue-900 !stroke-2"
                   )}
-                  onClick={() => setActiveSnapshot(d.id)}
+                  onClick={() => setActiveSnapshot(d.id, dcel?.snapshotList)}
                 />
               </Tooltip.Trigger>
               <Tooltip.Portal>

@@ -43,7 +43,6 @@
     "react-hotkeys-hook": "^4.4.0",
     "react-icons": "^4.8.0",
     "react-leaflet": "^4.2.1",
-    "swr": "^2.1.5",
     "uuid": "^9.0.0",
     "zustand": "^4.3.8"
   },

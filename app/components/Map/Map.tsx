@@ -1,3 +1,5 @@
+"use client";
+
 import useAppStore from "@/app/helpers/store";
 import { GeoJSON as LGeoJSON } from "leaflet";
 import "leaflet/dist/leaflet.css";

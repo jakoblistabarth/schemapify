@@ -1,3 +1,5 @@
+"use client";
+
 import { FC } from "react";
 import useAppStore from "../helpers/store";
 import SnapshotTimeline from "./SnapshotTimeline";
@@ -7,11 +9,10 @@ import {
   RiSkipForwardLine,
 } from "react-icons/ri";
 import Button from "./Button";
-import { useHotkeys } from "react-hotkeys-hook";
 import { extent, scaleLinear } from "d3";
 
 const SnapshotList: FC = () => {
-  const { dcel, activeSnapshot, setActiveSnapshot } = useAppStore();
+  const { dcel, nextSnapshot, prevSnapshot, setActiveSnapshot } = useAppStore();
 
   if (!dcel?.snapshotList.hasSnapshots()) return <></>;
 
@@ -21,13 +22,6 @@ const SnapshotList: FC = () => {
   const colorScale = scaleLinear<string, string>()
     .domain([durationMin ?? 0, durationMax ?? 1])
     .range(["rgb(200, 215, 255)", "rgb(0,0,150)"]);
-
-  const [prevId, nextId] = activeSnapshot
-    ? dcel.snapshotList.getPrevNext(activeSnapshot.id)
-    : [undefined, undefined];
-
-  useHotkeys(["left"], () => (prevId ? setActiveSnapshot(prevId) : undefined));
-  useHotkeys(["right"], () => (nextId ? setActiveSnapshot(nextId) : undefined));
 
   const snapshotsByStep = dcel.snapshotList.getSnapshotByStep();
 
@@ -45,15 +39,23 @@ const SnapshotList: FC = () => {
       <div className="flex">
         <Button
           className="p-2 transition-opacity duration-500 disabled:pointer-events-none disabled:opacity-20"
-          onClick={() => (prevId ? setActiveSnapshot(prevId) : undefined)}
-          disabled={!!!prevId}
+          onClick={() =>
+            prevSnapshot
+              ? setActiveSnapshot(prevSnapshot.id, dcel.snapshotList)
+              : undefined
+          }
+          disabled={!!!prevSnapshot}
         >
           <RiSkipBackLine size={15} />
         </Button>
         <Button
           className="p-2 transition-opacity duration-500 disabled:pointer-events-none disabled:opacity-20"
-          onClick={() => (nextId ? setActiveSnapshot(nextId) : undefined)}
-          disabled={!!!nextId}
+          onClick={() =>
+            nextSnapshot
+              ? setActiveSnapshot(nextSnapshot.id, dcel.snapshotList)
+              : undefined
+          }
+          disabled={!!!nextSnapshot}
         >
           <RiSkipForwardLine size={15} />
         </Button>

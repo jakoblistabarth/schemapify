@@ -1,37 +1,22 @@
+"use client";
+
 import { FC, Fragment } from "react";
-import useSWR from "swr";
-import fetcher from "../helpers/fetcher";
-import getTestFiles, { TestFile } from "../helpers/getTestFiles";
 import useAppStore from "../helpers/store";
 import * as Select from "@radix-ui/react-select";
 import { GoChevronDown, GoChevronUp } from "react-icons/go";
 import SelectItem from "./SelectItem";
+import { GroupedTestFiles } from "../helpers/getGroupedTestFiles";
 
-const FileSelect: FC = () => {
-  const {
-    data: fileList,
-    error,
-    isLoading,
-  } = useSWR<ReturnType<typeof getTestFiles>>("/api/data/shapes", fetcher);
+type Props = { files: GroupedTestFiles };
 
-  const filesGrouped = fileList
-    ?.filter((d) => d.type != "invalid")
-    .reduce((acc: { [key: string]: TestFile[] }, d) => {
-      if (acc[d.type]) {
-        acc[d.type].push(d);
-        return acc;
-      }
-      acc[d.type] = [d];
-      return acc;
-    }, {});
-
+const FileSelect: FC<Props> = ({ files }) => {
   const { setSource, source } = useAppStore();
 
   return (
     <Select.Root
       value={source?.name ?? undefined}
       onValueChange={(value) => setSource(value)}
-      key={source?.name ?? "s"}
+      key={source?.name ?? ""}
     >
       <Select.Trigger
         className="inline-flex h-[35px] items-center justify-center gap-[5px] rounded bg-white px-[15px] text-[13px] leading-none shadow-[0_2px_10px] shadow-black/10 outline-none hover:bg-blue-50 focus:shadow-[0_0_0_2px] focus:shadow-black data-[placeholder]:text-blue-900"
@@ -48,20 +33,20 @@ const FileSelect: FC = () => {
             <GoChevronUp />
           </Select.ScrollUpButton>
           <Select.Viewport className="p-[5px]">
-            {filesGrouped &&
-              Object.entries(filesGrouped).map(([groupName, files], i) => (
+            {files &&
+              Object.entries(files).map(([groupName, filesInGroup], i) => (
                 <Fragment key={groupName}>
                   <Select.Group>
                     <Select.Label className="px-[25px] text-xs leading-[25px]">
                       {groupName}
                     </Select.Label>
-                    {files.map((d) => (
+                    {filesInGroup.map((d) => (
                       <SelectItem key={d.name} value={d.name}>
                         {d.name} ({d.size})
                       </SelectItem>
                     ))}
                   </Select.Group>
-                  {i + 1 < Object.entries(filesGrouped).length && (
+                  {i + 1 < Object.keys(files).length && (
                     <Select.Separator className="my-4 h-[1px] bg-blue-300" />
                   )}
                 </Fragment>

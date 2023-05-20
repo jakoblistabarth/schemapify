@@ -1,7 +1,8 @@
 import Dcel, { STEP } from "@/src/DCEL/Dcel";
+import SnapshotList from "@/src/Snapshot/SnapshotList";
 
 export const handleSimplify = (
-  setActiveSnapshot: (id: string) => void,
+  setActiveSnapshot: (id: string, snapshotList: SnapshotList) => void,
   dcel?: Dcel
 ) => {
   const startTime = new Date();
@@ -9,5 +10,5 @@ export const handleSimplify = (
   const pair = dcel?.faceFaceBoundaryList?.getMinimalConfigurationPair();
   pair?.doEdgeMove();
   const newSnapshot = dcel.snapshotList.takeSnapshot(STEP.SIMPLIFY, startTime);
-  setActiveSnapshot(newSnapshot.id);
+  setActiveSnapshot(newSnapshot.id, dcel.snapshotList);
 };
