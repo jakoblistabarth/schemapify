@@ -3,12 +3,14 @@ import { FC } from "react";
 import useAppStore from "../helpers/store";
 import clsx from "clsx";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import { ScaleLinear } from "d3";
 
 type Props = {
   snapshots: Snapshot[];
+  colorScale: ScaleLinear<string, string, string>;
 };
 
-const SnapshotTimeline: FC<Props> = ({ snapshots }) => {
+const SnapshotTimeline: FC<Props> = ({ snapshots, colorScale }) => {
   const { setActiveSnapshot, activeSnapshot } = useAppStore();
   const width = 10;
   const height = 25;
@@ -24,7 +26,7 @@ const SnapshotTimeline: FC<Props> = ({ snapshots }) => {
       {snapshots.map((d, i) => {
         const isActive = activeSnapshot?.id === d.id;
         return (
-          <Tooltip.Provider key={d.id}>
+          <Tooltip.Provider key={`${d.id}`}>
             <Tooltip.Root open={isActive}>
               <Tooltip.Trigger asChild>
                 <rect
@@ -37,8 +39,9 @@ const SnapshotTimeline: FC<Props> = ({ snapshots }) => {
                   rx={2}
                   width={width}
                   height={isActive ? height : height - grow}
+                  fill={colorScale(d.duration)}
                   className={clsx(
-                    "duration-50 cursor-pointer fill-blue-300 stroke-transparent stroke-1 transition-colors hover:stroke-blue-600",
+                    "cursor-pointer stroke-transparent stroke-1 transition-all duration-100 hover:stroke-blue-600",
                     isActive && "stroke-blue-900 !stroke-2"
                   )}
                   onClick={() => setActiveSnapshot(d.id)}

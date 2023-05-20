@@ -31,6 +31,7 @@
     "@types/react-dom": "^18.2.4",
     "@types/uuid": "^9.0.1",
     "clsx": "^1.2.1",
+    "d3": "^7.8.4",
     "eslint": "^8.40.0",
     "eslint-config-next": "^13.4.2",
     "graham_scan": "^1.0.4",
@@ -47,6 +48,7 @@
   },
   "devDependencies": {
     "@savvywombat/tailwindcss-grid-areas": "^3.0.1",
+    "@types/d3": "^7.4.0",
     "@types/graham_scan": "^1.0.28",
     "@types/jest": "^29.5.1",
     "@types/leaflet": "^1.9.3",

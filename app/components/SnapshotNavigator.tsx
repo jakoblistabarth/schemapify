@@ -8,11 +8,19 @@ import {
 } from "react-icons/ri";
 import Button from "./Button";
 import { useHotkeys } from "react-hotkeys-hook";
+import { extent, scaleLinear } from "d3";
 
 const SnapshotList: FC = () => {
   const { dcel, activeSnapshot, setActiveSnapshot } = useAppStore();
 
   if (!dcel?.snapshotList.hasSnapshots()) return <></>;
+
+  const [durationMin, durationMax] = extent(
+    dcel.snapshotList.snapshots.map((d) => d.duration)
+  );
+  const colorScale = scaleLinear<string, string>()
+    .domain([durationMin ?? 0, durationMax ?? 1])
+    .range(["rgb(200, 215, 255)", "rgb(0,0,150)"]);
 
   const [prevId, nextId] = activeSnapshot
     ? dcel.snapshotList.getPrevNext(activeSnapshot.id)
@@ -31,19 +39,19 @@ const SnapshotList: FC = () => {
       </h2>
       {snapshotsByStep.map(([step, snapshots]) => (
         <div key={step}>
-          <SnapshotTimeline snapshots={snapshots} />
+          <SnapshotTimeline colorScale={colorScale} snapshots={snapshots} />
         </div>
       ))}
       <div className="flex">
         <Button
-          className="p-2 disabled:pointer-events-none disabled:opacity-20"
+          className="p-2 transition-opacity duration-500 disabled:pointer-events-none disabled:opacity-20"
           onClick={() => (prevId ? setActiveSnapshot(prevId) : undefined)}
           disabled={!!!prevId}
         >
           <RiSkipBackLine size={15} />
         </Button>
         <Button
-          className="p-2 disabled:pointer-events-none disabled:opacity-20"
+          className="p-2 transition-opacity duration-500 disabled:pointer-events-none disabled:opacity-20"
           onClick={() => (nextId ? setActiveSnapshot(nextId) : undefined)}
           disabled={!!!nextId}
         >
