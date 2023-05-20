@@ -1,4 +1,5 @@
 import { readdirSync, statSync } from "fs";
+import { resolve } from "path";
 import prettyBytes from "pretty-bytes";
 
 export type TestFile = {
@@ -9,7 +10,7 @@ export type TestFile = {
 };
 
 const getTestFiles = () => {
-  const baseDir = "./test/data";
+  const baseDir = resolve("./test/data");
   const subDirs = readdirSync(baseDir, { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .map((d) => d.name);
