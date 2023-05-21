@@ -9,7 +9,7 @@ import { crawlArray } from "../../src/utilities";
 
 export function getTestFiles(dir: string) {
   const filesInDir = fs.readdirSync(dir);
-  return filesInDir.filter((f) => f.substr(-5, f.length) === ".json");
+  return filesInDir.filter((f) => f.match(/.json$/));
 }
 
 type Directions = {
