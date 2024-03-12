@@ -114,12 +114,14 @@ class Staircase {
    */
   getRegion(): Polygon {
     const edge =
-      !this.edge.getSignificantVertex() || this.edge.getSignificantVertex() === this.edge.tail
+      !this.edge.getSignificantVertex() ||
+      this.edge.getSignificantVertex() === this.edge.tail
         ? this.edge
         : this.edge.twin;
     const head = edge?.getHead();
     const assignedAngle = edge?.getAssignedAngle();
-    if (!edge || !head || typeof assignedAngle !== "number") return new Polygon([]);
+    if (!edge || !head || typeof assignedAngle !== "number")
+      return new Polygon([]);
 
     switch (edge.class) {
       case OrientationClasses.AB:
@@ -134,11 +136,13 @@ class Staircase {
       case OrientationClasses.E:
         return this.getSimpleRegion();
       case OrientationClasses.UD:
-        // like UB and E but accommodate for the appendex area
+        // like UB and E but accommodate for the appended area
+        // "that is used to make the staircase adhere to the assigned direction (see Figure 12(b–c))."
         this.points = this.getStaircasePoints();
 
         const [lower, upper] = edge.getAssociatedSector()[0].getBounds();
-        if (typeof lower !== "number" || typeof upper !== "number") return new Polygon([]);
+        if (typeof lower !== "number" || typeof upper !== "number")
+          return new Polygon([]);
         const smallestAssociatedAngle = edge.getClosestAssociatedAngle();
         const largestAssociatedAngle = edge
           .getAssociatedAngles()
@@ -176,7 +180,9 @@ class Staircase {
         this.points = this.getStaircasePoints();
         const convexHull = new ConvexHullGrahamScan();
         this.points.forEach((p) => convexHull.addPoint(p.x, p.y));
-        return new Polygon(convexHull.getHull().map((p) => new Point(p.x, p.y)));
+        return new Polygon(
+          convexHull.getHull().map((p) => new Point(p.x, p.y))
+        );
       default:
         return new Polygon([]);
     }
@@ -189,8 +195,12 @@ class Staircase {
    * @param associatedEdge The length of the associated step edge.
    * @returns The area of a step.
    */
-  getStepArea(assignedEdge: number, associatedEdge: number): number | undefined {
-    const enclosingAngle = (Math.PI * 2) / this.edge.dcel.config.c.getDirections().length;
+  getStepArea(
+    assignedEdge: number,
+    associatedEdge: number
+  ): number | undefined {
+    const enclosingAngle =
+      (Math.PI * 2) / this.edge.dcel.config.c.getDirections().length;
     return (assignedEdge * associatedEdge * Math.sin(enclosingAngle)) / 2;
   }
 
@@ -346,7 +356,8 @@ class Staircase {
   ): Point[] {
     const stepArea = this.getStepArea(l1, l2);
     const assignedAngle = this.edge.getAssignedAngle();
-    if (typeof stepArea !== "number" || typeof assignedAngle !== "number") return [];
+    if (typeof stepArea !== "number" || typeof assignedAngle !== "number")
+      return [];
     const height = (stepArea * 2) / l2; // get the height of a parallelogram, using A/b = h
     const a = stepArea / height;
 

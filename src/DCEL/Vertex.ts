@@ -103,7 +103,19 @@ class Vertex extends Point {
     const eTail = a?.getHead();
     const eHead = c?.tail;
 
-    if (!ex__?.twin || !ex_?.twin || !eTail || !eHead || !f1 || !f2 || !a || !b || !c || !d) return;
+    if (
+      !ex__?.twin ||
+      !ex_?.twin ||
+      !eTail ||
+      !eHead ||
+      !f1 ||
+      !f2 ||
+      !a ||
+      !b ||
+      !c ||
+      !d
+    )
+      return;
     const e = this.dcel.makeHalfEdge(eTail, eHead);
     e.twin = this.dcel.makeHalfEdge(eHead, eTail);
     e.twin.twin = e;
@@ -177,12 +189,18 @@ class Vertex extends Point {
     }
 
     // classify as significant if one sector occurs multiple times
-    const occupiedSectors = this.edges.map((edge) => edge.getAssociatedSector()).flat();
+    const occupiedSectors = this.edges
+      .map((edge) => edge.getAssociatedSector())
+      .flat();
 
-    const uniqueSectors: Sector[] = occupiedSectors.reduce((acc: Sector[], sector: Sector) => {
-      if (!acc.find((accSector) => accSector.idx == sector.idx)) acc.push(sector);
-      return acc;
-    }, []);
+    const uniqueSectors: Sector[] = occupiedSectors.reduce(
+      (acc: Sector[], sector: Sector) => {
+        if (!acc.find((accSector) => accSector.idx == sector.idx))
+          acc.push(sector);
+        return acc;
+      },
+      []
+    );
 
     if (occupiedSectors.length !== uniqueSectors.length) {
       return (this.significant = true);
@@ -192,7 +210,8 @@ class Vertex extends Point {
     const isSignificant = uniqueSectors.every((sector: Sector) => {
       const [prevSector, nextSector] = sector.getNeighbors();
       return (
-        this.getEdgesInSector(prevSector).length > 0 || this.getEdgesInSector(nextSector).length > 0
+        this.getEdgesInSector(prevSector).length > 0 ||
+        this.getEdgesInSector(nextSector).length > 0
       );
     });
     return (this.significant = isSignificant);
@@ -221,7 +240,9 @@ class Vertex extends Point {
     function getDeviation(edges: HalfEdge[], directions: number[]): number {
       return edges.reduce((deviation, edge, index) => {
         const newDeviation = edge.getDeviation(sectors[directions[index]]);
-        return typeof newDeviation === "number" ? deviation + newDeviation : Infinity;
+        return typeof newDeviation === "number"
+          ? deviation + newDeviation
+          : Infinity;
       }, 0);
     }
 

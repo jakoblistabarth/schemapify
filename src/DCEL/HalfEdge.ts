@@ -183,7 +183,9 @@ class HalfEdge {
    * @param newPoint {@link Point} which should be added between the {@link HalfEdge}'s tail and head. default: the edge's midpoint
    * @returns the new {@link HalfEdge} which leads from the original {@link HalfEdge}'s tail to the newly created {@link Vertex}.
    */
-  subdivide(newPoint: Point | undefined = this.getMidpoint()): HalfEdge | undefined {
+  subdivide(
+    newPoint: Point | undefined = this.getMidpoint()
+  ): HalfEdge | undefined {
     if (!newPoint) return;
     const e = this;
     const et = e.twin;
@@ -317,11 +319,16 @@ class HalfEdge {
 
     while (currentHalfEdge != initialHalfEdge.next) {
       const length = currentHalfEdge.getLength();
-      if (currentHalfEdge.next && typeof length === "number" && length < threshold) {
+      if (
+        currentHalfEdge.next &&
+        typeof length === "number" &&
+        length < threshold
+      ) {
         currentHalfEdge = currentHalfEdge.next;
       } else {
         const newHalfEdge = currentHalfEdge.subdivide();
-        currentHalfEdge = newHalfEdge ?? currentHalfEdge.next ?? initialHalfEdge;
+        currentHalfEdge =
+          newHalfEdge ?? currentHalfEdge.next ?? initialHalfEdge;
       }
     }
   }
@@ -397,11 +404,17 @@ class HalfEdge {
 
     // TODO: refactor: find better solution for last sector and it's upper bound
     // set upperbound of last to Math.PI * 2 ?
-    const upper = sector.idx === this.dcel.config.c.getSectors().length - 1 ? 0 : sector.upper;
+    const upper =
+      sector.idx === this.dcel.config.c.getSectors().length - 1
+        ? 0
+        : sector.upper;
     const lower = sector.lower;
-    const angle = this.getAssignedAngle() === 0 ? Math.PI * 2 : this.getAssignedAngle();
+    const angle =
+      this.getAssignedAngle() === 0 ? Math.PI * 2 : this.getAssignedAngle();
 
-    return upper + this.dcel.config.c.getSectorAngle() === angle ? upper : lower;
+    return upper + this.dcel.config.c.getSectorAngle() === angle
+      ? upper
+      : lower;
   }
 
   /**
@@ -416,7 +429,10 @@ class HalfEdge {
     } else {
       const sector = this.getAssociatedSector()[0];
       //TODO: refactor find better solution for last sector (idx=0)
-      if (sector.idx === this.dcel.config.c.getSectors().length - 1 && assignedAngle === 0)
+      if (
+        sector.idx === this.dcel.config.c.getSectors().length - 1 &&
+        assignedAngle === 0
+      )
         assignedAngle = Math.PI * 2;
       return !sector.encloses(assignedAngle);
     }
@@ -486,7 +502,9 @@ class HalfEdge {
 
     let classification: OrientationClasses;
     if (this.isAligned()) {
-      classification = this.isDeviating() ? OrientationClasses.AD : OrientationClasses.AB;
+      classification = this.isDeviating()
+        ? OrientationClasses.AD
+        : OrientationClasses.AB;
     } else if (this.isDeviating()) {
       classification = OrientationClasses.UD;
     } else if (edges.length == 2) {
@@ -500,7 +518,7 @@ class HalfEdge {
   }
 
   getStepLengths(se: number, d1: number): number[] {
-    //TODO: move getStepLenghts() to staircase ??
+    //TODO: move getStepLengths() to staircase ??
     const associatedAngles = this.getAssociatedAngles();
     if (!associatedAngles) return [];
     const d2 = associatedAngles.find((angle) => angle !== d1);
