@@ -3,6 +3,8 @@ import Point from "../geometry/Point";
 import Line from "../geometry/Line";
 import Polygon from "../geometry/Polygon";
 import ConvexHullGrahamScan from "graham_scan";
+import Vertex from "../DCEL/Vertex";
+import Dcel from "../DCEL/Dcel";
 
 class Staircase {
   /** The {@link HalfEdge} the staircase belongs to. */
@@ -14,7 +16,7 @@ class Staircase {
   /** An array of {@link Point}s describing the staircase. */
   points: Point[];
   /** The minimal distance from e to another point in subdivision S. */
-  de?: number;
+  _de?: number;
   /** The number of steps the staircase the must use.  */
   se?: number;
   /** A list of {@link HalfEdge}s whose staircase regions interfer with this staircase region.  */
@@ -22,15 +24,84 @@ class Staircase {
 
   constructor(edge: HalfEdge) {
     this.edge = edge;
-    this.deltaE = this.setDeltaE();
+    this.deltaE = this.getDeltaE();
     this.points = [];
     this.region = this.getRegion();
     this.interferesWith = [];
   }
 
-  setDeltaE(): number | undefined {
+  get de(): number | undefined {
+    return this._de;
+  }
+
+  /**
+   * Sets de of the Staircase, if it is smaller than a possibly already calculated distance.
+   * @param edgeDistance Minimum distance to another point in the subdivision S.
+   */
+  set de(edgeDistance: number) {
+    if (!this.de || edgeDistance < this.de) this._de = edgeDistance;
+  }
+
+  /**
+   * Set se, defined as "the number of steps a {@link Staircase} must use"
+   * The number of steps is per staircase is determined by the distance to the next edge:
+   * "By increasing the number of steps in the staircase, intersections can be avoided."
+   * @returns the number of steps
+   */
+  setSe() {
+    const edge = this.edge;
+    const length = edge.getLength();
+    const angle = edge.getAngle();
+    switch (edge.class) {
+      // "Aligned deviating edges do not use steps but a value δe instead. (p.17)"
+      // TODO: make this function pure by not setting deltaE from within
+      case OrientationClasses.AD: {
+        if (typeof this.de !== "number" || typeof this.deltaE !== "number")
+          return;
+        // "… we use δe = min{de/2,Δe}, where Δe = 0.1||e|| as defined for the staircase regions."
+        if (this.de / 2 < this.deltaE) this.deltaE = this.de / 2;
+        break;
+      }
+      case OrientationClasses.UD: {
+        if (typeof this.de !== "number" || typeof length !== "number") return;
+        const maxVertices = this.getStaircasePoints() // TODO: use points property instead
+          .slice(1, 2)
+          .map((point) => new Vertex(point.x, point.y, new Dcel()));
+        const distances = maxVertices.map((vertex) => {
+          const distance = vertex.distanceToEdge(edge);
+          return distance ? distance : Infinity; // QUESTION: is it ok to return infinity here?
+        });
+        const d1 = Math.min(...distances);
+        let se = Math.ceil((2 * d1 * length) / this.de + 1);
+        se = se % 2 === 0 ? se + 2 : se + 1; // TODO: check if this is correct? (p. 18)
+        this.se = Math.max(4, se);
+        break;
+      }
+      default: {
+        if (
+          typeof this.de !== "number" ||
+          typeof angle !== "number" ||
+          typeof length !== "number"
+        )
+          return;
+        // "Let 𝛼1 denote the absolute angle between vector w−v and the assigned direction of e.
+        // Similarly, 𝛼2 denotes the absolute angle between vector w−v and the other associated direction of e."
+        const alpha1 = angle - edge.getAssociatedAngles()[0];
+        const alpha2 = edge.getAssociatedAngles()[1] - angle;
+        const maximum_step_length =
+          ((Math.pow(Math.tan(alpha1), -1) + Math.pow(Math.tan(alpha2), -1)) *
+            this.de) /
+          2;
+        let se = Math.ceil(length / maximum_step_length);
+        this.se = se % 2 === 0 ? se + 2 : se + 1; // TODO: check if this is correct? (p. 18)
+      }
+    }
+  }
+
+  getDeltaE(): number | undefined {
     const length = this.edge.getLength();
-    return typeof length === "number" && this.edge.class === OrientationClasses.AD
+    return typeof length === "number" &&
+      this.edge.class === OrientationClasses.AD
       ? length * 0.1
       : undefined;
   }
@@ -320,16 +391,6 @@ class Staircase {
     points.splice(1, 0, p1, p2);
 
     return points;
-  }
-
-  /**
-   * Sets the edgeDistance of the Staircase, if it is smaller than a possibly already calculated distance.
-   * @param edgeDistance Minimum distance between edges.
-   * @returns The edge distance.
-   */
-  setEdgeDistance(edgeDistance: number) {
-    if (!this.de || edgeDistance < this.de) this.de = edgeDistance;
-    return edgeDistance;
   }
 }
 

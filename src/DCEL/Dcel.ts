@@ -474,14 +474,14 @@ class Dcel {
   }
 
   calculateStaircases() {
-    // calculate edgedistance and stepnumber for deviating edges first
+    // calculate edgedistance and stepnumber for deviating edges first (p. 18)
     const staircasesOfDeviatingEdges = this.getStaircases().filter(
       (staircase) =>
         staircase.edge.class === OrientationClasses.AD ||
         staircase.edge.class === OrientationClasses.UD
     );
-    this.getEdgeDistances(staircasesOfDeviatingEdges);
-    this.getSe(
+    this.setEdgeDistances(staircasesOfDeviatingEdges);
+    this.setSes(
       staircasesOfDeviatingEdges.filter(
         (staircase) => staircase.interferesWith.length > 0
       )
@@ -493,13 +493,13 @@ class Dcel {
         staircase.edge.class !== OrientationClasses.AD &&
         staircase.edge.class !== OrientationClasses.UD
     );
-    this.getEdgeDistances(staircasesOther);
-    this.getSe(
+    this.setEdgeDistances(staircasesOther);
+    this.setSes(
       staircasesOther.filter((staircase) => staircase.interferesWith.length > 0)
     );
   }
 
-  getEdgeDistances(staircases: Staircase[]) {
+  setEdgeDistances(staircases: Staircase[]) {
     // TODO: make sure the edgedistance cannot be too small?
     // To account for topology error ("Must Be Larger Than Cluster tolerance"), when minimum distance between points is too small
     // see: https://pro.arcgis.com/en/pro-app/latest/help/editing/geodatabase-topology-rules-for-polygon-features.htm
@@ -530,7 +530,7 @@ class Dcel {
           // de is is simply the minimal distance between the edges."
           const de = e.distanceToEdge(e_);
           if (typeof de === "number") {
-            staircase.setEdgeDistance(de);
+            staircase.de = de;
             staircase.interferesWith.push(e_);
           }
         } else {
@@ -596,65 +596,21 @@ class Dcel {
               break;
             }
           }
-          if (typeof de === "number") staircase.setEdgeDistance(de);
+          if (typeof de === "number") staircase.de = de;
         }
       });
     }
   }
 
-  getSe(staircases: Staircase[]) {
+  /**
+   * Calculate and set se, defined as "the number of steps a {@link Staircase} must use"
+   * for each staircase of a given array of staircases.
+   * @param staircases
+   * @returns
+   */
+  setSes(staircases: Staircase[]) {
     for (const staircase of staircases) {
-      const edge = staircase.edge;
-      const length = edge.getLength();
-      const angle = edge.getAngle();
-      switch (edge.class) {
-        case OrientationClasses.AD: {
-          if (
-            typeof staircase.de !== "number" ||
-            typeof staircase.deltaE !== "number"
-          )
-            return;
-          // "… we use δe = min{de/2,Δe}, where Δe = 0.1||e|| as defined for the staircase regions."
-          if (staircase.de / 2 < staircase.deltaE)
-            staircase.deltaE = staircase.de / 2;
-          break;
-        }
-        case OrientationClasses.UD: {
-          if (typeof staircase.de !== "number" || typeof length !== "number")
-            return;
-          const maxVertices = staircase
-            .getStaircasePoints() // TODO: use points property instead
-            .slice(1, 2)
-            .map((point) => new Vertex(point.x, point.y, new Dcel()));
-          const distances = maxVertices.map((vertex) => {
-            const distance = vertex.distanceToEdge(edge);
-            return distance ? distance : Infinity; // QUESTION: is it ok to return infinity here?
-          });
-          const d1 = Math.min(...distances);
-          let se = Math.ceil((2 * d1 * length) / staircase.de + 1);
-          se = se % 2 === 0 ? se + 2 : se + 1; // TODO: check if this is correct? (p. 18)
-          staircase.se = Math.max(4, se);
-          break;
-        }
-        default: {
-          if (
-            typeof staircase.de !== "number" ||
-            typeof angle !== "number" ||
-            typeof length !== "number"
-          )
-            return;
-          // "Let 𝛼1 denote the absolute angle between vector w−v and the assigned direction of e.
-          // Similarly, 𝛼2 denotes the absolute angle between vector w−v and the other associated direction of e."
-          const alpha1 = angle - edge.getAssociatedAngles()[0];
-          const alpha2 = edge.getAssociatedAngles()[1] - angle;
-          const lmax =
-            ((Math.pow(Math.tan(alpha1), -1) + Math.pow(Math.tan(alpha2), -1)) *
-              staircase.de) /
-            2;
-          let se = Math.ceil(length / lmax);
-          staircase.se = se % 2 === 0 ? se + 2 : se + 1; // TODO: check if this is correct? (p. 18)
-        }
-      }
+      staircase.setSe();
     }
   }
 
