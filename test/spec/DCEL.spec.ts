@@ -198,7 +198,7 @@ describe("getArea()", function () {
   });
 });
 
-xdescribe("schematize() returns a result which can be turned into a valid geojson", function () {
+describe("schematize() returns a result which can be turned into a valid geojson", function () {
   it("for simplied boundaries of Austria.", function () {
     const inputJson = JSON.parse(
       fs.readFileSync(

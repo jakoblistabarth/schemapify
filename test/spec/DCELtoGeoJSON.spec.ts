@@ -42,22 +42,21 @@ describe("DCELtoGeoJSON creates a valid geoJSON of simple shapes", function () {
   });
 });
 
-describe("DCELtoGeoJSON creates a valid geoJSON of geodata", function () {
-  const dir = "test/data/geodata";
-  const testFiles = getTestFiles(dir);
+describe("DCELtoGeoJSON creates a valid geoJSON of (simplified) geodata", function () {
+  const testFile = "test/data/geodata/AUT_adm0-s0_5.json";
 
-  testFiles.forEach((file) => {
-    xit("based on a DCEL of " + file, function () {
+  it(
+    "based on a DCEL of " + testFile.slice(0, testFile.lastIndexOf("/")),
+    function () {
       const inputJson = JSON.parse(
-        fs.readFileSync(path.resolve(dir + "/" + file), "utf8")
+        fs.readFileSync(path.resolve(testFile), "utf8")
       );
       const dcel = Dcel.fromGeoJSON(inputJson);
       const outputJson = dcel.toGeoJSON();
       const outputJsonPretty = JSON.stringify(outputJson, null, 4);
       const errors = hint(outputJsonPretty);
-      // fs.writeFileSync("/tmp/test" + file, outputJsonPretty);
       expect(errors.length).toBe(0);
       expect(inputJson.features.length).toBe(outputJson.features.length);
-    });
-  });
+    }
+  );
 });
