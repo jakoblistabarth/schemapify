@@ -50,7 +50,7 @@ class HalfEdge {
   }
 
   /**
-   * Get the uinique identifier of the HalfEdge.
+   * Get the unique identifier of the HalfEdge.
    * @param stop defines how many strings of the uuid are returned
    * @returns the edge's uuid
    */
@@ -78,7 +78,7 @@ class HalfEdge {
   /**
    * Gets the significant Vertex of the HalfEdge.
    * A Vertex is significant if its incident Edges reside in the same sector or adjacent sectors.
-   * @returns The signficant {@link Vertex} of the {@link HalfEdge}, if it exists.
+   * @returns The significant {@link Vertex} of the {@link HalfEdge}, if it exists.
    */
   getSignificantVertex(): Vertex | undefined {
     const endPoints = this.getEndpoints();
@@ -524,9 +524,9 @@ class HalfEdge {
   }
 
   /**
-   * Gets the modified tail Vertex, which is used for calculating the edgeDistance between HalfEdges sharing one Vertex.
-   * @param offsetEdge The edge of which a part should be ignored.
-   * @param offset The distance the offset Vertex should be moved in respect to its (original) tail Vertex.
+   * Gets the modified tail {@link Vertex}, which is used for calculating the edgeDistance between HalfEdges sharing one Vertex.
+   * @param offsetEdge The {@link HalfEdge} of which a part should be ignored.
+   * @param offset The distance the offset Vertex should be moved in respect to its (original) tail {@link Vertex}.
    * @returns The Vertex on the edge of which a part should be ignored and from where the edge is considered for calculating the edgeDistance.
    */
   getOffsetVertex(offsetEdge: HalfEdge, offset: number): Vertex | undefined {

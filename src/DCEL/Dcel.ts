@@ -641,8 +641,8 @@ class Dcel {
 
   simplify(): Dcel {
     this.removeSuperfluousVertices();
-    const ffbl = new FaceFaceBoundaryList(this);
-    this.faceFaceBoundaryList = ffbl;
+    const faceFaceBoundaryList = new FaceFaceBoundaryList(this);
+    this.faceFaceBoundaryList = faceFaceBoundaryList;
     this.createConfigurations();
     // console.log(
     //   "before",
