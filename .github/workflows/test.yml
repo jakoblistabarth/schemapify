@@ -1,7 +1,7 @@
 name: test
 on: push
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -11,7 +11,7 @@ jobs:
       - uses: pnpm/action-setup@v3
       - name: Install modules
         run: pnpm i
-      - name: Run tsc
+      - name: Check for typescript errors
         run: pnpm type-check
-      - name: Run tests
+      - name: Run jest tests
         run: pnpm test
