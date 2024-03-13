@@ -1,0 +1,17 @@
+name: test
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+      - uses: pnpm/action-setup@v3
+      - name: Install modules
+        run: pnpm i
+      - name: Run tsc
+        run: pnpm type-check
+      - name: Run tests
+        run: pnpm test
