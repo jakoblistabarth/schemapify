@@ -11,6 +11,8 @@ jobs:
       - uses: pnpm/action-setup@v3
       - name: Install modules
         run: pnpm i
+      - name: Run EsLint
+        run: pnpm lint
       - name: Check for typescript errors
         run: pnpm type-check
       - name: Run jest tests
