@@ -4,8 +4,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["InterVariable", "system-ui", "sans-serif"],
-        display: ['"DM Sans"', "serif"],
+        sans: ["Inter Variable", "system-ui", "sans-serif"],
+        display: ['"DM Sans Variable"', "serif"],
         mono: ['"DM Mono"', "mono"],
       },
       zIndex: {

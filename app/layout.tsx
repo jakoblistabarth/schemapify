@@ -1,6 +1,6 @@
-import "@fontsource/inter/variable.css";
+import "@fontsource-variable/inter";
 import "@fontsource/dm-mono/latin.css";
-import "@fontsource/dm-sans/latin.css";
+import "@fontsource-variable/dm-sans";
 
 import "./globals.css";
 
