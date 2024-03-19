@@ -176,7 +176,7 @@ describe("getArea()", function () {
     expect(dcel.getArea()).toBe(4);
   });
 
-  //TODO: use geojson of dcel for area calculation to get correct values for dcels with lakes and enclaves.
+  //TODO: use geojson of dcel for area calculation to get correct values for DCELs with lakes and enclaves.
   xit("returns the correct area of the enclave test case", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/enclave.json"), "utf8"),

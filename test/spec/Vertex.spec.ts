@@ -226,7 +226,7 @@ describe("equals() on a vertex", function () {
     expect(vertexA.equals(vertexB)).toBe(true);
   });
 
-  it("returns true for one vertix and one point sharing the same position", function () {
+  it("returns true for one vertex and one point sharing the same position", function () {
     const vertexA = new Vertex(0.25, -3, new Dcel());
     const pointA = new Vertex(0.25, -3, new Dcel());
 
