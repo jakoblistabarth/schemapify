@@ -14,18 +14,18 @@ const Hotkeys = () => {
     nextSnapshot,
   } = useAppStore();
 
-  useHotkeys(["ctrl+s"], () => handleSimplify(setActiveSnapshot, dcel));
+  useHotkeys(["ctrl+alt+s"], () => handleSimplify(setActiveSnapshot, dcel));
   useHotkeys(["ctrl+c"], () => removeSource());
   useHotkeys(["ctrl+1"], () => setSource("AUT_adm0-s0_5.json"));
   useHotkeys(["left"], () =>
     prevSnapshot && dcel?.snapshotList
       ? setActiveSnapshot(prevSnapshot.id, dcel?.snapshotList)
-      : undefined
+      : undefined,
   );
   useHotkeys(["right"], () =>
     nextSnapshot && dcel?.snapshotList
       ? setActiveSnapshot(nextSnapshot.id, dcel?.snapshotList)
-      : undefined
+      : undefined,
   );
   return <></>;
 };
