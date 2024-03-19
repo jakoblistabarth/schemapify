@@ -28,7 +28,9 @@ class ConfigurationPair {
     if (!contractionHead) return;
     const dcel = contractionEdge.dcel;
     const compensationEdge =
-      this.contraction.area > 0 ? this.compensation?.configuration.innerEdge : undefined;
+      this.contraction.area > 0
+        ? this.compensation?.configuration.innerEdge
+        : undefined;
 
     // 0. Do a simple vertex deletion, in case of a contraction with area 0
     if (!compensationEdge) {
@@ -55,24 +57,29 @@ class ConfigurationPair {
 
     // 2.1 Calculate new positions for contaction edge
     const pointA = this.contraction.point;
-    const pointB = this.contraction.areaPoints[this.contraction.areaPoints.length - 1];
+    const pointB =
+      this.contraction.areaPoints[this.contraction.areaPoints.length - 1];
     const contractionSegment = contractionEdge.toLineSegment();
     if (!contractionSegment) return;
-    const contractionShift = pointA.distanceToLineSegment(contractionSegment);
+    //const contractionShift = pointA.distanceToLineSegment(contractionSegment);
 
     // 2.2 Calculate compensation trapeze height
     const compensationShift = this.getCompensationShift();
     if (!compensationShift) return;
 
     // 2.3 Calculate new positions for compensation edge
-    let normal = compensationEdge
+    const normal = compensationEdge
       .getVector()
       ?.getUnitVector()
       .getNormal(this.compensation?.type === ContractionType.N)
       .times(compensationShift);
     if (!normal) return;
     const newTail = compensationEdge.tail.toVector().plus(normal).toPoint();
-    const newHead = compensationEdge.getHead()?.toVector().plus(normal).toPoint();
+    const newHead = compensationEdge
+      .getHead()
+      ?.toVector()
+      .plus(normal)
+      .toPoint();
     if (!newHead) return;
 
     // console.log("contractionshift", contractionShift, "compensationshift", compensationShift);
@@ -81,7 +88,7 @@ class ConfigurationPair {
     // to one of the original positions of the contraction ege
     if (
       [contractionEdge.tail, contractionHead].some(
-        (point) => point.equals(newTail) || point.equals(newHead)
+        (point) => point.equals(newTail) || point.equals(newHead),
       )
     ) {
       this.doHalfEdgeMove();
@@ -109,16 +116,19 @@ class ConfigurationPair {
     // console.log("moved Positions", movedPositions.length);
     // console.log(Array.from(dcel.vertices.keys()));
 
-    const remainingEdges = movedPositions.reduce((acc: HalfEdge[], pos: Point) => {
-      let key = `${pos.x}/${pos.y}`;
-      const vertex = dcel.vertices.get(key);
-      if (!vertex) return acc;
-      vertex.edges.forEach((edge) => {
-        if (edge.face === contractionEdge.face) acc.push(edge);
-        else if (edge.twin) acc.push(edge.twin);
-      });
-      return acc;
-    }, []);
+    const remainingEdges = movedPositions.reduce(
+      (acc: HalfEdge[], pos: Point) => {
+        const key = `${pos.x}/${pos.y}`;
+        const vertex = dcel.vertices.get(key);
+        if (!vertex) return acc;
+        vertex.edges.forEach((edge) => {
+          if (edge.face === contractionEdge.face) acc.push(edge);
+          else if (edge.twin) acc.push(edge.twin);
+        });
+        return acc;
+      },
+      [],
+    );
 
     // console.log(
     //   "remainingEdges",
@@ -165,9 +175,17 @@ class ConfigurationPair {
       .times(compensationShift / 2);
     if (!normal) return;
     const newTailComp = compensationEdge.tail.toVector().plus(normal).toPoint();
-    const newHeadComp = compensationEdge.getHead()?.toVector().plus(normal).toPoint();
+    const newHeadComp = compensationEdge
+      .getHead()
+      ?.toVector()
+      .plus(normal)
+      .toPoint();
     const newTailCon = contractionEdge.tail.toVector().minus(normal).toPoint();
-    const newHeadCon = contractionEdge.getHead()?.toVector().minus(normal).toPoint();
+    const newHeadCon = contractionEdge
+      .getHead()
+      ?.toVector()
+      .minus(normal)
+      .toPoint();
 
     if (newHeadCon) contractionEdge.move(newTailCon, newHeadCon);
     if (newHeadComp) compensationEdge.move(newTailComp, newHeadComp);

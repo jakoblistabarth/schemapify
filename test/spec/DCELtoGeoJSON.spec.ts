@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-//@ts-ignore
 import { hint } from "@mapbox/geojsonhint";
 import { getTestFiles } from "./test-setup";
 import Dcel from "../../src/DCEL/Dcel";
@@ -8,7 +7,10 @@ import Dcel from "../../src/DCEL/Dcel";
 describe("DCELtoGeoJSON creates a valid geoJSON of a square with a hole", function () {
   it("despite converting it to a multipolygon, the number of outer and inner rings stays the same.", function () {
     const squareOriginal = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square-hole.json"), "utf8")
+      fs.readFileSync(
+        path.resolve("test/data/shapes/square-hole.json"),
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(squareOriginal);
     const squareGenerated = dcel.toGeoJSON();
@@ -30,7 +32,7 @@ describe("DCELtoGeoJSON creates a valid geoJSON of simple shapes", function () {
   testFiles.forEach((file) => {
     xit("based on a DCEL of " + file, function () {
       const inputJson = JSON.parse(
-        fs.readFileSync(path.resolve(dir + "/" + file), "utf8")
+        fs.readFileSync(path.resolve(dir + "/" + file), "utf8"),
       );
       const dcel = Dcel.fromGeoJSON(inputJson);
       const outputJson = dcel.toGeoJSON();
@@ -49,7 +51,7 @@ describe("DCELtoGeoJSON creates a valid geoJSON of (simplified) geodata", functi
     "based on a DCEL of " + testFile.slice(0, testFile.lastIndexOf("/")),
     function () {
       const inputJson = JSON.parse(
-        fs.readFileSync(path.resolve(testFile), "utf8")
+        fs.readFileSync(path.resolve(testFile), "utf8"),
       );
       const dcel = Dcel.fromGeoJSON(inputJson);
       const outputJson = dcel.toGeoJSON();
@@ -57,6 +59,6 @@ describe("DCELtoGeoJSON creates a valid geoJSON of (simplified) geodata", functi
       const errors = hint(outputJsonPretty);
       expect(errors.length).toBe(0);
       expect(inputJson.features.length).toBe(outputJson.features.length);
-    }
+    },
   );
 });

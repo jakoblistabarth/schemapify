@@ -13,7 +13,7 @@ jobs:
         run: pnpm i
       - name: Run EsLint
         run: pnpm lint
-      - name: Check for typescript errors
-        run: pnpm type-check
+      - name: Compile Typescript code and check for errors
+        run: pnpm tsc
       - name: Run jest tests
         run: pnpm test

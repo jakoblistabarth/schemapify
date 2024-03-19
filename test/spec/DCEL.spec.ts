@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-// @ts-ignore
 import { hint } from "@mapbox/geojsonhint";
 import { getTestFiles } from "./test-setup";
 import Dcel from "../../src/DCEL/Dcel";
@@ -10,8 +9,8 @@ describe("A Dcel of 2 adjacent squares", function () {
   const json = JSON.parse(
     fs.readFileSync(
       path.resolve("test/data/shapes/2plgn-adjacent.json"),
-      "utf8"
-    )
+      "utf8",
+    ),
   );
   const dcel = Dcel.fromGeoJSON(json);
 
@@ -46,8 +45,8 @@ describe("A Dcel of 3 adjacent squares", function () {
   const json = JSON.parse(
     fs.readFileSync(
       path.resolve("test/data/shapes/3plgn-adjacent.json"),
-      "utf8"
-    )
+      "utf8",
+    ),
   );
   const dcel = Dcel.fromGeoJSON(json);
 
@@ -81,24 +80,24 @@ describe("A Dcel of 3 adjacent squares", function () {
 describe("getBbox()", function () {
   it("returns the correct boundingbox of a given dcel", function () {
     const plgn1 = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const plgn2 = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/2plgn-adjacent.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const plgn3 = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/3plgn-adjacent.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
 
-    let bboxPlgn1 = Dcel.fromGeoJSON(plgn1).getBbox();
-    let bboxPlgn2 = Dcel.fromGeoJSON(plgn2).getBbox();
-    let bboxPlgn3 = Dcel.fromGeoJSON(plgn3).getBbox();
+    const bboxPlgn1 = Dcel.fromGeoJSON(plgn1).getBbox();
+    const bboxPlgn2 = Dcel.fromGeoJSON(plgn2).getBbox();
+    const bboxPlgn3 = Dcel.fromGeoJSON(plgn3).getBbox();
 
     expect(bboxPlgn1).toEqual([0, 0, 20, 20]);
     expect(bboxPlgn2).toEqual([0, 0, 4, 2]);
@@ -111,7 +110,7 @@ describe("getVertices()", function () {
 
   beforeEach(function () {
     const polygon = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     dcel = Dcel.fromGeoJSON(polygon);
     dcel.preProcess();
@@ -132,20 +131,20 @@ describe("getVertices()", function () {
 describe("getDiameter()", function () {
   it("returns the correct diameter", function () {
     const plgn1 = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const plgn3 = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/3plgn-adjacent.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
 
     expect(Dcel.fromGeoJSON(plgn1).getDiameter()).toBe(
-      Math.sqrt(Math.pow(20, 2) + Math.pow(20, 2))
+      Math.sqrt(Math.pow(20, 2) + Math.pow(20, 2)),
     );
     expect(Dcel.fromGeoJSON(plgn3).getDiameter()).toBe(
-      Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2))
+      Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)),
     );
   });
 });
@@ -153,7 +152,7 @@ describe("getDiameter()", function () {
 describe("getArea()", function () {
   it("returns the correct area of a square", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
     expect(dcel.getArea()).toBe(20 * 20);
@@ -162,8 +161,8 @@ describe("getArea()", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/3plgn-adjacent.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     expect(dcel.getArea()).toBe(1 * 1 * 3);
@@ -171,7 +170,7 @@ describe("getArea()", function () {
 
   it("returns the correct area of a square with negative coordinates.", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square-neg.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/square-neg.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
     expect(dcel.getArea()).toBe(4);
@@ -180,7 +179,7 @@ describe("getArea()", function () {
   //TODO: use geojson of dcel for area calculation to get correct values for dcels with lakes and enclaves.
   xit("returns the correct area of the enclave test case", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/enclave.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/enclave.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
     expect(dcel.getArea()).toBe(2 * 2);
@@ -190,8 +189,8 @@ describe("getArea()", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/geodata/AUT_adm0-s1.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     expect(dcel.getArea()).toBe(83738962592.38892);
@@ -203,8 +202,8 @@ describe("schematize() returns a result which can be turned into a valid geojson
     const inputJson = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/geodata/AUT_adm1-simple.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(inputJson);
     dcel.schematize();
@@ -224,7 +223,7 @@ xdescribe("schematize() returns a result which can be turned into a valid geojso
     // TODO: run specs only on some of the shapes?
     it("for the simple input " + file, function () {
       const inputJson = JSON.parse(
-        fs.readFileSync(path.resolve(dir + "/" + file), "utf8")
+        fs.readFileSync(path.resolve(dir + "/" + file), "utf8"),
       );
       const dcel = Dcel.fromGeoJSON(inputJson);
       dcel.schematize();

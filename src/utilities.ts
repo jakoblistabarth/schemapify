@@ -1,7 +1,5 @@
 import * as geojson from "geojson";
 import Vector2D from "./geometry/Vector2D";
-// @ts-ignore
-// import { hint } from "@mapbox/geojsonhint";
 
 export async function getJSON(path: string) {
   const response = await fetch(path);
@@ -12,7 +10,7 @@ function isRegion(geoJSON: geojson.FeatureCollection) {
   return geoJSON.features.every(
     (feature) =>
       feature.geometry.type === "Polygon" ||
-      feature.geometry.type === "MultiPolygon"
+      feature.geometry.type === "MultiPolygon",
   )
     ? true
     : false;
@@ -37,7 +35,7 @@ function isTooDetailed(geoJSON: geojson.FeatureCollection) {
         }, 0);
         return featureSum + ringCount;
       },
-      0
+      0,
     );
 
     return regionSum + featureVertexCount;
@@ -45,23 +43,17 @@ function isTooDetailed(geoJSON: geojson.FeatureCollection) {
   return totalVertexCount > 5000 ? true : false;
 }
 
-// function isValidGeoJSON(geoJSON: geojson.FeatureCollection) {
-//   const errors = hint(JSON.stringify(geoJSON, null, 4));
-//   return errors.length > 0 ? false : true;
-// }
-
 export function validateGeoJSON(geoJSON: geojson.FeatureCollection): boolean {
-  // if (!isValidGeoJSON(geoJSON)) return false;
   if (!isRegion(geoJSON)) return false;
   if (isTooDetailed(geoJSON)) return false;
   return true;
 }
 
-export function crawlArray(array: any[], index: number, n: number) {
+export function crawlArray<T>(array: T[], index: number, n: number) {
   return array[(((index + n) % array.length) + array.length) % array.length];
 }
 
-export function getOccurrence(array: any[], value: string | number) {
+export function getOccurrence<T>(array: T[], value: string | number) {
   return array.filter((v) => v === value).length;
 }
 
@@ -70,7 +62,7 @@ export function createGeoJSON<
     | geojson.Point
     | geojson.LineString
     | geojson.Polygon
-    | geojson.MultiPolygon
+    | geojson.MultiPolygon,
 >(features: geojson.Feature<G>[]): geojson.FeatureCollection<G> {
   return {
     type: "FeatureCollection",
@@ -91,6 +83,6 @@ export function getUnitVector(angle: number): Vector2D {
 export function copyInstance<T>(original: T): T {
   return Object.assign(
     Object.create(Object.getPrototypeOf(original)),
-    original
+    original,
   );
 }

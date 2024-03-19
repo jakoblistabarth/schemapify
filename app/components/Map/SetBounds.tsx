@@ -1,6 +1,6 @@
+import { LatLngBounds } from "leaflet";
 import { FC } from "react";
 import { useMap } from "react-leaflet";
-import { Bounds, GeoJSON, LatLngBounds } from "leaflet";
 
 type Props = {
   bounds: LatLngBounds;

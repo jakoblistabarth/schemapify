@@ -3,7 +3,7 @@
 import useAppStore from "@/app/helpers/store";
 import { GeoJSON as LGeoJSON } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { FC, PropsWithChildren, useMemo } from "react";
+import { FC, useMemo } from "react";
 import { GeoJSON, MapContainer } from "react-leaflet";
 import {
   getMapLayers,
@@ -13,7 +13,7 @@ import {
 import MapControl from "./MapControl";
 import SetBounds from "./SetBounds";
 
-const Map: FC<PropsWithChildren> = ({ children, ...rest }) => {
+const Map: FC = ({ ...rest }) => {
   const { source, activeSnapshot, mapMode } = useAppStore();
 
   const regionBounds = useMemo(() => {

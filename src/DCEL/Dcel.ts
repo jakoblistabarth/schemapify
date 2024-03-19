@@ -121,7 +121,7 @@ class Dcel {
    * @returns A (sub)set of {@link HalfEdge}s.
    */
   getHalfEdges(edgeClass?: OrientationClasses, simple = false): HalfEdge[] {
-    const halfEdges = Array.from(this.halfEdges.entries()).map(([k, e]) => e);
+    const halfEdges = Array.from(this.halfEdges.values());
     let edges = edgeClass
       ? halfEdges.filter((e) => e.class === edgeClass)
       : halfEdges;
@@ -131,7 +131,7 @@ class Dcel {
 
   getSimpleEdges(edges: HalfEdge[]) {
     // FIXME: confusing for map output: sometimes clockwise/counterclockwise assignment in map output wrong
-    let simpleEdges: HalfEdge[] = [];
+    const simpleEdges: HalfEdge[] = [];
     edges.forEach((e) => {
       if (!e.twin) return;
       const idx = simpleEdges.indexOf(e.twin);
@@ -142,10 +142,10 @@ class Dcel {
 
   getVertices(significant?: boolean) {
     if (significant)
-      return Array.from(this.vertices.entries())
-        .filter(([k, v]) => v.significant === significant)
-        .map(([k, v]) => v);
-    return Array.from(this.vertices.entries()).map(([k, v]) => v);
+      return Array.from(this.vertices.values()).filter(
+        (v) => v.significant === significant,
+      );
+    return Array.from(this.vertices.values());
   }
 
   getArea(): number {
@@ -195,9 +195,9 @@ class Dcel {
     if (edge.face && edge.twin?.face) {
       const boundaryKey = FaceFaceBoundaryList.getKey(
         edge.face,
-        edge.twin.face
+        edge.twin.face,
       );
-      let boundaryEdges =
+      const boundaryEdges =
         this.faceFaceBoundaryList?.boundaries.get(boundaryKey)?.edges;
       if (boundaryEdges && boundaryEdges.indexOf(edge) >= 0)
         boundaryEdges.splice(boundaryEdges.indexOf(edge), 1);
@@ -216,7 +216,7 @@ class Dcel {
     const subdivision = new Dcel();
 
     subdivision.featureProperties = geoJSON.features.map(
-      (feature: geojson.Feature) => feature.properties
+      (feature: geojson.Feature) => feature.properties,
     );
 
     const polygons = geoJSON.features.reduce(
@@ -238,14 +238,14 @@ class Dcel {
               ring.map(
                 (point: number[]) =>
                   subdivision.findVertex(point[0], point[1]) ||
-                  subdivision.makeVertex(point[0], point[1])
-              )
-            )
-          )
+                  subdivision.makeVertex(point[0], point[1]),
+              ),
+            ),
+          ),
         );
         return acc;
       },
-      []
+      [],
     );
 
     polygons.forEach((polygon: Vertex[][]) =>
@@ -260,7 +260,7 @@ class Dcel {
           halfEdge.twin = twinHalfEdge;
           twinHalfEdge.twin = halfEdge;
         });
-      })
+      }),
     );
 
     // TODO: sort edges everytime a new edge is pushed to vertex.edges
@@ -334,7 +334,7 @@ class Dcel {
               edge.twin?.getCycle().forEach((e) => (e.face = outerRingFace));
             }
           }
-        })
+        }),
       );
     });
 
@@ -359,10 +359,7 @@ class Dcel {
    * @returns The bounding box of the {@link Dcel} as [minX, minY, maxX, maxY].
    */
   getBbox() {
-    const points = Array.from(this.vertices.entries()).map(([k, p]) => [
-      p.x,
-      p.y,
-    ]);
+    const points = Array.from(this.vertices.values()).map((v) => [v.x, v.y]);
     const bbox = [Infinity, Infinity, -Infinity, -Infinity];
     points.forEach((p) => {
       if (bbox[0] > p[0]) {
@@ -478,24 +475,26 @@ class Dcel {
     const staircasesOfDeviatingEdges = this.getStaircases().filter(
       (staircase) =>
         staircase.edge.class === OrientationClasses.AD ||
-        staircase.edge.class === OrientationClasses.UD
+        staircase.edge.class === OrientationClasses.UD,
     );
     this.setEdgeDistances(staircasesOfDeviatingEdges);
     this.setSes(
       staircasesOfDeviatingEdges.filter(
-        (staircase) => staircase.interferesWith.length > 0
-      )
+        (staircase) => staircase.interferesWith.length > 0,
+      ),
     );
 
     // calculate edgedistance and stepnumber for remaining edges
     const staircasesOther = this.getStaircases().filter(
       (staircase) =>
         staircase.edge.class !== OrientationClasses.AD &&
-        staircase.edge.class !== OrientationClasses.UD
+        staircase.edge.class !== OrientationClasses.UD,
     );
     this.setEdgeDistances(staircasesOther);
     this.setSes(
-      staircasesOther.filter((staircase) => staircase.interferesWith.length > 0)
+      staircasesOther.filter(
+        (staircase) => staircase.interferesWith.length > 0,
+      ),
     );
   }
 
@@ -510,7 +509,7 @@ class Dcel {
         if (staircase_ === staircase) return;
         if (
           staircase.region.points.every(
-            (point) => !point.isInPolygon(staircase_.region)
+            (point) => !point.isInPolygon(staircase_.region),
           )
         )
           return;
@@ -619,7 +618,7 @@ class Dcel {
       if (!edge.staircase) return;
       const stepPoints = edge.staircase.getStaircasePoints().slice(1, -1); // TODO: use .points instead
       let edgeToSubdivide = edge;
-      for (let p of stepPoints) {
+      for (const p of stepPoints) {
         const dividedEdge = edgeToSubdivide.subdivide(new Point(p.x, p.y));
         if (!dividedEdge) return;
         if (dividedEdge.next) edgeToSubdivide = dividedEdge.next;
@@ -651,7 +650,7 @@ class Dcel {
     // );
 
     for (let index = 0; index < 0; index++) {
-      let pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
+      const pair = this.faceFaceBoundaryList.getMinimalConfigurationPair();
       // console.log(
       //   pair?.contraction.configuration.innerEdge.toString(),
       //   pair?.contraction.area,
@@ -734,7 +733,7 @@ class Dcel {
         });
         return groupedFaces;
       },
-      {}
+      {},
     );
 
     const features = Object.values(outerRingsByFID).map(
@@ -743,7 +742,7 @@ class Dcel {
         if (this.featureProperties)
           featureProperties =
             this.featureProperties[Object.keys(outerRingsByFID)[idx]];
-        let featureCoordinates: number[][][][] = [];
+        const featureCoordinates: number[][][][] = [];
         let ringIdx = 0;
         feature.forEach((ring: Face) => {
           const halfEdges = ring.getEdges();
@@ -773,15 +772,15 @@ class Dcel {
           },
           properties: featureProperties,
         };
-      }
+      },
     );
 
     return createGeoJSON(features);
   }
 
   verticesToGeoJSON(): geojson.FeatureCollection<geojson.Point> {
-    const vertexFeatures = Array.from(this.vertices.entries()).map(
-      ([k, v]): geojson.Feature<geojson.Point> => {
+    const vertexFeatures = Array.from(this.vertices.values()).map(
+      (v): geojson.Feature<geojson.Point> => {
         return {
           type: "Feature",
           geometry: {
@@ -794,7 +793,7 @@ class Dcel {
             edges: v.edges,
           },
         };
-      }
+      },
     );
 
     return createGeoJSON(vertexFeatures);
@@ -818,7 +817,7 @@ class Dcel {
             ringType: f.outerRing ? "inner" : "outer",
           },
         };
-      }
+      },
     );
 
     return createGeoJSON(faceFeatures);
@@ -843,7 +842,7 @@ class Dcel {
             edgeClass: edge.class,
           },
         };
-      }
+      },
     );
     return createGeoJSON(staircaseFeatures);
   }
@@ -882,7 +881,7 @@ class Dcel {
               <span class="material-icons">arrow_forward</span>
               (${e.twin?.tail.x}/${e.twin?.tail.y})
               <span class="material-icons">highlight_alt</span> ${e.face?.getUuid(
-                5
+                5,
               )}
               ${e.class}
               ${e.assignedDirection}
@@ -893,14 +892,14 @@ class Dcel {
               <span class="material-icons">arrow_back</span>
               (${e.tail.x}/${e.tail.y})
               <span class="material-icons">highlight_alt</span> ${e.twin?.face?.getUuid(
-                5
+                5,
               )}
               ${e.twin?.class}
               ${e.twin?.assignedDirection}
               `,
           },
         };
-      }
+      },
     );
 
     return createGeoJSON(edgeFeatures);
@@ -927,7 +926,7 @@ class Dcel {
             coordinates: [region.map((p) => [p.x, p.y])],
           },
         };
-      }
+      },
     );
     return createGeoJSON(regionFeatures);
   }

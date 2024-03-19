@@ -1,6 +1,6 @@
 import C from "./C";
 import CRegular from "./CRegular";
-import CIrregular from "./CIrregular";
+// import CIrregular from "./CIrregular";
 
 /**
  * @property lambda. A constant factor of the DCEL's diameter (0.05 suggested by buchin et al.).

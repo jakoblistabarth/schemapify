@@ -72,9 +72,9 @@ describe("sortEdges()", function () {
 
     testFiles.forEach((file) => {
       const json = JSON.parse(
-        fs.readFileSync(path.resolve(dir + "/" + file), "utf8")
+        fs.readFileSync(path.resolve(dir + "/" + file), "utf8"),
       );
-      let dcel = Dcel.fromGeoJSON(json);
+      const dcel = Dcel.fromGeoJSON(json);
 
       dcel.vertices.forEach((vertex) => {
         const angles = vertex.edges.map((e) => e.getAngle()) as number[];
@@ -87,7 +87,7 @@ describe("sortEdges()", function () {
 describe("remove() on a vertex", function () {
   it("generates a correct triangle dcel when removing one vertex of a square shape", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
 
@@ -105,8 +105,8 @@ describe("remove() on a vertex", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/square-contraction-zero.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
 
@@ -124,7 +124,7 @@ describe("remove() on a vertex", function () {
 
   it("returns a correctly linked halfedge when removing one vertex of a square shape", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
 
@@ -144,7 +144,7 @@ describe("remove() on a vertex", function () {
 
   it("returns any of the just created halfedges if no face is given", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
 
@@ -156,7 +156,7 @@ describe("remove() on a vertex", function () {
 
   it("returns the specific halfedge if a face is given", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
 
@@ -172,7 +172,10 @@ describe("remove() on all vertices of a square with a hole", function () {
   let dcel: Dcel;
   beforeEach(function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square-hole.json"), "utf8")
+      fs.readFileSync(
+        path.resolve("test/data/shapes/square-hole.json"),
+        "utf8",
+      ),
     );
     dcel = Dcel.fromGeoJSON(json);
   });

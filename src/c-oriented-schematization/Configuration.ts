@@ -27,7 +27,9 @@ class Configuration {
   }
 
   getOuterEdge(position: OuterEdge): HalfEdge | undefined {
-    return position === OuterEdge.PREV ? this.innerEdge.prev : this.innerEdge.next;
+    return position === OuterEdge.PREV
+      ? this.innerEdge.prev
+      : this.innerEdge.next;
   }
 
   /**
@@ -35,7 +37,10 @@ class Configuration {
    * @returns An array of {@link HalfEdge}s.
    */
   getX(): HalfEdge[] {
-    const [prev, next] = [this.getOuterEdge(OuterEdge.PREV), this.getOuterEdge(OuterEdge.NEXT)];
+    const [prev, next] = [
+      this.getOuterEdge(OuterEdge.PREV),
+      this.getOuterEdge(OuterEdge.NEXT),
+    ];
     return prev && next ? [prev, this.innerEdge, next] : [];
   }
 
@@ -46,17 +51,29 @@ class Configuration {
    */
   getX_(): HalfEdge[] {
     const x = this.getX();
-    return x ? this.innerEdge.getCycle().filter((edge) => !x.includes(edge)) : [];
+    return x
+      ? this.innerEdge.getCycle().filter((edge) => !x.includes(edge))
+      : [];
   }
 
   getTrack(outerEdge: OuterEdge): Line | undefined {
-    const [prev, next] = [this.getOuterEdge(OuterEdge.PREV), this.getOuterEdge(OuterEdge.NEXT)];
+    const [prev, next] = [
+      this.getOuterEdge(OuterEdge.PREV),
+      this.getOuterEdge(OuterEdge.NEXT),
+    ];
     const prevAngle = prev?.getAngle();
     const nextAngle = next?.getAngle();
     const head = this.innerEdge.getHead();
-    if (!prev || !next || typeof prevAngle !== "number" || typeof nextAngle !== "number" || !head)
+    if (
+      !prev ||
+      !next ||
+      typeof prevAngle !== "number" ||
+      typeof nextAngle !== "number" ||
+      !head
+    )
       return;
-    if (outerEdge === OuterEdge.PREV) return new Line(this.innerEdge.tail, prevAngle);
+    if (outerEdge === OuterEdge.PREV)
+      return new Line(this.innerEdge.tail, prevAngle);
     else return new Line(head, nextAngle);
   }
 
@@ -71,11 +88,13 @@ class Configuration {
     const edge1 = crawlArray(vertex.edges, idx, +1);
     const edge2 = crawlArray(vertex.edges, idx, +2);
 
-    if (edge1.getAngle() === edge2.twin.getAngle()) return Junction.A;
+    if (edge1.getAngle() === edge2.twin?.getAngle()) return Junction.A;
     const normal = this.innerEdge.getVector()?.getNormal();
+    if (!normal) return;
 
-    const o1 = edge1.getVector().dot(normal);
-    const o2 = edge2.getVector().dot(normal);
+    const o1 = edge1.getVector()?.dot(normal);
+    const o2 = edge2.getVector()?.dot(normal);
+    if (!o1 || !o2) return;
     if ((o1 > 0 && o2 < 0) || (o1 < 0 && o2 > 0)) return Junction.B;
     else return Junction.C;
   }

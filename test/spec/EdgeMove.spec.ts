@@ -9,8 +9,8 @@ describe("createConfigurations()", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/aligned-deviating.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.preProcess();
@@ -32,7 +32,7 @@ describe("createConfigurations()", function () {
     expect(verticesDegree4.length).toBe(1);
     expect(edgesDegree4.length).toBe(8);
     expect(configurationCount).toBe(
-      dcel.getHalfEdges().length - edgesDegree4.length
+      dcel.getHalfEdges().length - edgesDegree4.length,
     );
   });
 });
@@ -42,8 +42,8 @@ describe("doEdgeMove() removes first all collinear points (contraction area 0)",
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction-1a.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.splitEdges(5);
@@ -66,8 +66,8 @@ describe("doEdgeMove()", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
@@ -80,16 +80,16 @@ describe("doEdgeMove()", function () {
     const newArea = dcel.getArea();
 
     expect(dcel.getBoundedFaces()[0].getEdges()[2].toString()).toBe(
-      "10.5/1->10/1"
+      "10.5/1->10/1",
     );
     expect(dcel.getBoundedFaces()[0].getEdges()[3].toString()).toBe(
-      "10/1->10/7"
+      "10/1->10/7",
     );
     expect(dcel.getBoundedFaces()[0].getEdges()[4].toString()).toBe(
-      "10/7->10/8"
+      "10/7->10/8",
     );
     expect(dcel.getBoundedFaces()[0].getEdges()[5].toString()).toBe(
-      "10/8->10/10"
+      "10/8->10/10",
     );
     expect(pair?.contraction.area).toEqual(0.5);
     expect(originalArea).toEqual(newArea);
@@ -99,8 +99,8 @@ describe("doEdgeMove()", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction-2.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     const originalArea = dcel.getArea();
@@ -119,8 +119,8 @@ describe("doEdgeMove()", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/contractions-equal.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
@@ -150,14 +150,14 @@ describe("doEdgeMove()", function () {
 
   it("for contractions with area 0 (3 collinear points)", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].getEdges()[0].subdivide();
 
     dcel.createConfigurations();
     const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
-    const boundary = Array.from(ffb.boundaries.entries()).map(([k, v]) => v)[0];
+    const boundary = ffb.boundaries.values().next().value;
     const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
     pair.doEdgeMove();
 
@@ -168,14 +168,14 @@ describe("doEdgeMove()", function () {
 
   it("for contractions with area 0 (4 collinear points)", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].getEdges()[0].subdivide()?.subdivide();
 
     dcel.createConfigurations();
     const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
-    const boundary = Array.from(ffb.boundaries.entries()).map(([k, v]) => v)[0];
+    const boundary = ffb.boundaries.values().next().value;
     const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
     pair.doEdgeMove();
 

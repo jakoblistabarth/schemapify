@@ -9,13 +9,13 @@ describe("create()", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/2plgn-adjacent.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     const ffb = new FaceFaceBoundaryList(dcel);
-    const lengths = Array.from(ffb.boundaries.entries())
-      .map(([k, b]) => b.edges.length)
+    const lengths = Array.from(ffb.boundaries.values())
+      .map((b) => b.edges.length)
       .sort((a, b) => a - b);
 
     expect(ffb.boundaries.size).toBe(3);
@@ -26,13 +26,13 @@ describe("create()", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/3plgn-adjacent.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     const ffb = new FaceFaceBoundaryList(dcel);
-    const lengths = Array.from(ffb.boundaries.entries())
-      .map(([k, b]) => b.edges.length)
+    const lengths = Array.from(ffb.boundaries.values())
+      .map((b) => b.edges.length)
       .sort((a, b) => a - b);
 
     expect(ffb.boundaries.size).toBe(5);
@@ -45,22 +45,22 @@ describe("getMinimalConfigurationPair()", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.createConfigurations();
     const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
-    const boundary = Array.from(ffb.boundaries.entries()).map(([k, v]) => v)[0];
+    const boundary = ffb.boundaries.values().next().value;
     const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
 
     expect(pair.contraction.area).toBe(0.5);
     expect(pair.contraction.configuration.innerEdge.toString()).toBe(
-      "9.5/7->9.5/8"
+      "9.5/7->9.5/8",
     );
     expect(pair.compensation?.area).toBeGreaterThan(0.5);
     expect(pair.compensation?.configuration.innerEdge.toString()).toBe(
-      "11/0->11/1"
+      "11/0->11/1",
     );
   });
 
@@ -68,22 +68,22 @@ describe("getMinimalConfigurationPair()", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction-2.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.createConfigurations();
     const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
-    const boundary = Array.from(ffb.boundaries.entries()).map(([k, v]) => v)[0];
+    const boundary = ffb.boundaries.values().next().value;
     const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
 
     expect(pair.contraction.area).toBe(0.5);
     expect(pair.contraction.configuration.innerEdge.toString()).toBe(
-      "10.5/7->10.5/8"
+      "10.5/7->10.5/8",
     );
     expect(pair.compensation?.area).toBeGreaterThan(0.5);
     expect(pair.compensation?.configuration.innerEdge.toString()).toBe(
-      "9/2->9/3"
+      "9/2->9/3",
     );
   });
 

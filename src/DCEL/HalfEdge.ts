@@ -92,6 +92,7 @@ class HalfEdge {
    * @returns An array of {@link HalfEdge}s.
    */
   getCycle(forwards: boolean = true): HalfEdge[] {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let currentEdge: HalfEdge = this;
     const initialEdge: HalfEdge = currentEdge;
     const halfEdges: HalfEdge[] = [];
@@ -184,9 +185,10 @@ class HalfEdge {
    * @returns the new {@link HalfEdge} which leads from the original {@link HalfEdge}'s tail to the newly created {@link Vertex}.
    */
   subdivide(
-    newPoint: Point | undefined = this.getMidpoint()
+    newPoint: Point | undefined = this.getMidpoint(),
   ): HalfEdge | undefined {
     if (!newPoint) return;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const e = this;
     const et = e.twin;
     if (!et) return;
@@ -314,6 +316,7 @@ class HalfEdge {
    * @param threshold The value determining the maximum length of a subdivision of the original {@link HalfEdge}.
    */
   subdivideToThreshold(threshold: number): void {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const initialHalfEdge: HalfEdge = this;
     let currentHalfEdge: HalfEdge = initialHalfEdge;
 
@@ -342,7 +345,7 @@ class HalfEdge {
     const angle = this.getAngle();
     if (typeof angle !== "number") return [];
     const sectors = this.dcel.config.c.getSectors();
-    let directions: number[] = [];
+    const directions: number[] = [];
     sectors.some(function (sector) {
       if (angle === sector.lower) {
         return directions.push(sector.lower);

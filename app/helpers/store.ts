@@ -33,7 +33,7 @@ const useAppStore = create<AppState>((set) => ({
     const dcel = Dcel.fromGeoJSON(data);
     dcel.schematize();
     const activeSnapshot = dcel.snapshotList.snapshots[0];
-    const [_, nextSnapshot] = dcel.snapshotList.getPrevNext(activeSnapshot.id);
+    const [, nextSnapshot] = dcel.snapshotList.getPrevNext(activeSnapshot.id);
     set(() => {
       return {
         source: { name, data },

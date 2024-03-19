@@ -26,14 +26,18 @@ class FaceFaceBoundaryList {
       if (!edge.face || !edge.twin?.face) return;
       const key = FaceFaceBoundaryList.getKey(edge.face, edge.twin.face);
       if (boundaries.has(key)) boundaries.get(key)?.edges.push(edge);
-      else boundaries.set(key, new FaceFaceBoundary(edge.face, edge.twin.face, edge));
+      else
+        boundaries.set(
+          key,
+          new FaceFaceBoundary(edge.face, edge.twin.face, edge),
+        );
     });
 
     return boundaries;
   }
 
   getBoundaries(): FaceFaceBoundary[] {
-    return Array.from(this.boundaries.entries()).map(([k, e]) => e);
+    return Array.from(this.boundaries.values());
   }
 
   /**
@@ -41,12 +45,18 @@ class FaceFaceBoundaryList {
    * @returns A tuple, containing 2 complementary, non-conflicting {@link Contraction}s, the minimal Configuration Pair.
    */
   getMinimalConfigurationPair(): ConfigurationPair | undefined {
-    return this.getBoundaries().reduce((minimum: ConfigurationPair | undefined, boundary) => {
-      const boundaryPair = boundary.getMinimalConfigurationPair();
-      if (boundaryPair && (!minimum || boundaryPair.contraction.area < minimum.contraction.area))
-        minimum = boundaryPair;
-      return minimum;
-    }, undefined);
+    return this.getBoundaries().reduce(
+      (minimum: ConfigurationPair | undefined, boundary) => {
+        const boundaryPair = boundary.getMinimalConfigurationPair();
+        if (
+          boundaryPair &&
+          (!minimum || boundaryPair.contraction.area < minimum.contraction.area)
+        )
+          minimum = boundaryPair;
+        return minimum;
+      },
+      undefined,
+    );
   }
 
   /**

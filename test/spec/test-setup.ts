@@ -48,7 +48,7 @@ export function createEdgeVertexSetup() {
     d333: new Vertex(4, -2, dcel),
   };
 
-  let directions: Directions = {};
+  const directions: Directions = {};
 
   Object.entries(destinations).forEach(([key, vertex]) => {
     const edge = new HalfEdge(o, dcel);
@@ -72,7 +72,7 @@ export function createConfigurationSetup(
   pointB: Point,
   pointC: Point,
   pointD: Point,
-  otherPoints: Point[]
+  otherPoints: Point[],
 ): ConfigurationSetup {
   const dcel = new Dcel();
   const points = [pointA, pointB, pointC, pointD, ...otherPoints];
@@ -116,55 +116,55 @@ export const configurationCases = {
     new Point(-2, 0),
     new Point(2, 0),
     new Point(4, 2),
-    [new Point(0, 6)]
+    [new Point(0, 6)],
   ),
   posReflex: createConfigurationSetup(
     new Point(-4, 0),
     new Point(-2, 2),
     new Point(2, 2),
     new Point(4, 0),
-    [new Point(0, 6)]
+    [new Point(0, 6)],
   ),
   bothNoBlockingPoint: createConfigurationSetup(
     new Point(-4, 4),
     new Point(-2, 0),
     new Point(2, 0),
     new Point(1, -2),
-    [new Point(8, 6)]
+    [new Point(8, 6)],
   ),
   bothBlockingPointNeg: createConfigurationSetup(
     new Point(-4, 4),
     new Point(-2, 0),
     new Point(2, 0),
     new Point(1, -2),
-    [new Point(6, 2)]
+    [new Point(6, 2)],
   ),
   negConvexParallelTracks: createConfigurationSetup(
     new Point(-2, 2),
     new Point(-2, 0),
     new Point(2, 0),
     new Point(2, 2),
-    [new Point(0, 4)]
+    [new Point(0, 4)],
   ),
   bothParallelTracks: createConfigurationSetup(
     new Point(-2, 2),
     new Point(-2, 0),
     new Point(2, 0),
     new Point(2, -2),
-    [new Point(6, 4)]
+    [new Point(6, 4)],
   ),
   bothContractionOnFirstEdge: createConfigurationSetup(
     new Point(-2, 2),
     new Point(-2, 0),
     new Point(2, 0),
     new Point(8, -2),
-    [new Point(4, 4)]
+    [new Point(4, 4)],
   ),
   bothContractionOnThirdEdge: createConfigurationSetup(
     new Point(-8, -2),
     new Point(-2, 0),
     new Point(2, 0),
     new Point(2, 2),
-    [new Point(-4, 4)]
+    [new Point(-4, 4)],
   ),
 };

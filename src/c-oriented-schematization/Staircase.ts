@@ -92,7 +92,7 @@ class Staircase {
           ((Math.pow(Math.tan(alpha1), -1) + Math.pow(Math.tan(alpha2), -1)) *
             this.de) /
           2;
-        let se = Math.ceil(length / maximum_step_length);
+        const se = Math.ceil(length / maximum_step_length);
         this.se = se % 2 === 0 ? se + 2 : se + 1; // TODO: check if this is correct? (p. 18)
       }
     }
@@ -166,7 +166,7 @@ class Staircase {
         const B = a.intersectsLine(b);
         const D = e.intersectsLine(d);
         if (!B || !C || !D) return new Polygon([]);
-        let regionPoints = [V, B, C, W, D];
+        const regionPoints = [V, B, C, W, D];
 
         // We assumed that p lies in the defined region.
         // However, if this is not the case, we can extend the staircase region
@@ -181,7 +181,7 @@ class Staircase {
         const convexHull = new ConvexHullGrahamScan();
         this.points.forEach((p) => convexHull.addPoint(p.x, p.y));
         return new Polygon(
-          convexHull.getHull().map((p) => new Point(p.x, p.y))
+          convexHull.getHull().map((p) => new Point(p.x, p.y)),
         );
       default:
         return new Polygon([]);
@@ -197,7 +197,7 @@ class Staircase {
    */
   getStepArea(
     assignedEdge: number,
-    associatedEdge: number
+    associatedEdge: number,
   ): number | undefined {
     const enclosingAngle =
       (Math.PI * 2) / this.edge.dcel.config.c.getDirections().length;
@@ -352,7 +352,7 @@ class Staircase {
     originalStaircasePoints: Point[],
     l1: number,
     l2: number,
-    d1: number
+    d1: number,
   ): Point[] {
     const stepArea = this.getStepArea(l1, l2);
     const assignedAngle = this.edge.getAssignedAngle();
