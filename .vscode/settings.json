@@ -1,6 +1,6 @@
 {
   "cSpell.allowCompoundWords": true,
-  "cSpell.words": ["dcel"],
+  "cSpell.words": ["Buchin", "dcel", "Meulemans", "Renssen", "Schemapify"],
   "cSpell.ignoreWords": ["bbox", "plgn"],
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",

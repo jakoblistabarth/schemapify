@@ -353,7 +353,7 @@ describe("subdivide()", function () {
 });
 
 describe("subdivideToThreshold()", function () {
-  it("on one egde of a square with side length 20 into 8 edges (epsilon: .5)", function () {
+  it("on one edge of a square with side length 20 into 8 edges (epsilon: .5)", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
