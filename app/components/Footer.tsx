@@ -10,7 +10,7 @@ const Footer = () => {
       >
         <div className="grid grid-cols-2">
           <div>
-            <Link href={"/about"}>About this tool</Link>
+            <Link href={"/about"}>About</Link>
           </div>
           <div className="flex justify-end">
             <Link
