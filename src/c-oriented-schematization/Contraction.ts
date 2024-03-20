@@ -193,7 +193,7 @@ class Contraction {
   }
 
   getArea(): number {
-    return this.areaPoints ? new Polygon(this.areaPoints).area : 0;
+    return this.areaPoints ? new Polygon([this.areaPoints]).area : 0;
   }
 
   /**
@@ -208,7 +208,7 @@ class Contraction {
     if (x.includes(edge)) return false;
     const edgeLine = edge.toLineSegment();
     if (!edgeLine) return;
-    const area = new Polygon(this.areaPoints);
+    const area = new Polygon([this.areaPoints]);
     const pointsInPolygon = edge
       .getEndpoints()
       .filter((vertex) => vertex.isInPolygon(area));

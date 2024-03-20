@@ -5,13 +5,19 @@ import { crawlArray } from "../utilities";
 
 /**
  * Class representing a 2-dimensional polygon.
- * It is defined by its control points.
+ * It is defined by its rings.
  */
 class Polygon {
-  points: Point[];
+  /**
+   * An array of rings.
+   * A ring is an array of {@link Point}s.
+   * The first ring is always the exterior ring (the polygon's boundary).
+   * Optionally, further rings are inner rings (holes).
+   */
+  rings: Point[][];
 
-  constructor(points: Point[]) {
-    this.points = points;
+  constructor(rings: Point[][]) {
+    this.rings = rings;
   }
 
   /**
@@ -21,29 +27,47 @@ class Polygon {
    * @returns A number indicating the area of the polygon.
    */
   get area(): number {
-    let total = 0;
+    return this.rings.reduce((sum, ring, idx) => {
+      let total = 0;
 
-    for (let i = 0; i < this.points.length; i++) {
-      const addX = this.points[i].x;
-      const addY = this.points[i == this.points.length - 1 ? 0 : i + 1].y;
-      const subX = this.points[i == this.points.length - 1 ? 0 : i + 1].x;
-      const subY = this.points[i].y;
+      for (let i = 0; i < ring.length; i++) {
+        const addX = ring[i].x;
+        const addY = ring[i == ring.length - 1 ? 0 : i + 1].y;
+        const subX = ring[i == ring.length - 1 ? 0 : i + 1].x;
+        const subY = ring[i].y;
 
-      total += addX * addY * 0.5;
-      total -= subX * subY * 0.5;
-    }
+        total += addX * addY * 0.5;
+        total -= subX * subY * 0.5;
+      }
 
-    return Math.abs(total);
+      // subtract area of every hole
+      sum += Math.abs(total) * (idx > 0 ? -1 : 1);
+      return sum;
+    }, 0);
   }
 
-  get lineSegments(): LineSegment[] {
-    return this.points.map(
-      (p, idx) => new LineSegment(p, crawlArray(this.points, idx, +1)),
+  get exteriorRing(): (typeof this.rings)[number] {
+    return this.rings[0];
+  }
+
+  get interiorRings(): typeof this.rings {
+    return this.rings.slice(1);
+  }
+
+  get exteriorLineSegments(): LineSegment[] {
+    return this.exteriorRing.map(
+      (p, idx) => new LineSegment(p, crawlArray(this.exteriorRing, idx, +1)),
     );
   }
 
+  /**
+   * Checks for intersections with a given edge.
+   * Currently only considers the exterior ring.
+   * @param edge
+   * @returns
+   */
   getIntersections(edge: HalfEdge): Point[] | undefined {
-    return this.lineSegments.reduce((acc: Point[], boundaryEdge) => {
+    return this.exteriorLineSegments.reduce((acc: Point[], boundaryEdge) => {
       const intersection = edge
         .toLineSegment()
         ?.intersectsLineSegment(boundaryEdge);
