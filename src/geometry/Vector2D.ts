@@ -14,7 +14,9 @@ class Vector2D {
   }
 
   getNormal(counterclockwise = true): Vector2D {
-    return counterclockwise ? new Vector2D(-this.dy, this.dx) : new Vector2D(this.dy, -this.dx);
+    return counterclockwise
+      ? new Vector2D(-this.dy, this.dx)
+      : new Vector2D(this.dy, -this.dx);
   }
 
   getInvers(): Vector2D {
@@ -47,6 +49,10 @@ class Vector2D {
 
   toPoint(): Point {
     return new Point(this.dx, this.dy);
+  }
+
+  toArray(): [number, number] {
+    return [this.dx, this.dy];
   }
 }
 

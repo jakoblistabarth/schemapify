@@ -1,4 +1,4 @@
-const Home = () => {
+export default function Page() {
   return (
     <div className="py-10">
       <h2 className="text-xl">About this tool</h2>
@@ -21,6 +21,4 @@ const Home = () => {
       </p>
     </div>
   );
-};
-
-export default Home;
+}
