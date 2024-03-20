@@ -74,8 +74,14 @@ class LineSegment {
     return;
   }
 
+  /**
+   * Check whether it intersects with a given {@link Polygon}
+   * TODO: Only considers exterior lineSegments of the polygon!
+   * @param polygon The {@link Polygon} to check for intersections.
+   * @returns
+   */
   intersectsPolygon(polygon: Polygon): Point[] {
-    const boundary = polygon.lineSegments;
+    const boundary = polygon.exteriorLineSegments;
     return boundary.reduce((acc: Point[], boundaryEdge) => {
       const intersection = this.intersectsLineSegment(boundaryEdge);
       if (intersection) acc.push(intersection);

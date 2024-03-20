@@ -254,7 +254,7 @@ class Dcel {
         const points = ring.slice(0, -1);
 
         points.forEach((tail: Vertex, idx: number) => {
-          const head: Vertex = points[(idx + 1) % points.length]; // TODO: make this idx more elegant?
+          const head: Vertex = points[(idx + 1) % points.length];
           const halfEdge = subdivision.makeHalfEdge(tail, head);
           const twinHalfEdge = subdivision.makeHalfEdge(head, tail);
           halfEdge.twin = twinHalfEdge;
@@ -508,7 +508,7 @@ class Dcel {
       staircases.forEach((staircase_) => {
         if (staircase_ === staircase) return;
         if (
-          staircase.region.points.every(
+          staircase.region.exteriorRing.every(
             (point) => !point.isInPolygon(staircase_.region),
           )
         )
@@ -827,10 +827,9 @@ class Dcel {
     const staircaseFeatures = this.getHalfEdges(undefined, true).map(
       (edge): geojson.Feature<geojson.Polygon> => {
         const staircase: Staircase = new Staircase(edge);
-        const coordinates: number[][] = staircase.region.points.map((p) => [
-          p.x,
-          p.y,
-        ]);
+        const coordinates: number[][] = staircase.region.exteriorRing.map(
+          (p) => [p.x, p.y],
+        );
         return {
           type: "Feature",
           geometry: {
@@ -908,7 +907,7 @@ class Dcel {
   staircaseRegionsToGeoJSON(): geojson.FeatureCollection<geojson.Polygon> {
     const regionFeatures = this.getStaircases().map(
       (staircase): geojson.Feature<geojson.Polygon> => {
-        const region = staircase.region.points;
+        const region = staircase.region.exteriorRing;
         // add first Point to close geoJSON polygon
         region.push(region[0]);
 

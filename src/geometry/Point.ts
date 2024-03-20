@@ -93,7 +93,7 @@ class Point {
   }
 
   /**
-   * Determines whether the {@link Point} lies within the specified polygon.
+   * Determines whether the {@link Point} lies within the boundary of the specified polygon.
    * This algorithm works only(!) on convex polygons.
    * This poses no problem as all {@link staircase} regions are by definition convex polygons.
    * as seen @ [algorithmtutor.com](https://algorithmtutor.com/Computational-Geometry/Check-if-a-point-is-inside-a-polygon/)
@@ -105,9 +105,9 @@ class Point {
     const B: number[] = [];
     const C: number[] = [];
 
-    polygon.points.forEach((p, idx) => {
+    polygon.exteriorRing.forEach((p, idx) => {
       const p1 = p;
-      const p2 = polygon.points[(idx + 1) % polygon.points.length];
+      const p2 = polygon.exteriorRing[(idx + 1) % polygon.exteriorRing.length];
 
       // calculate A, B and C
       const a = -(p2.y - p1.y);

@@ -87,7 +87,7 @@ class Face {
     const edges = this.getEdges();
     if (!edges) return;
     const vertices = edges.map((edge) => edge.tail);
-    return new Polygon(vertices).area;
+    return new Polygon([vertices]).area;
   }
 }
 

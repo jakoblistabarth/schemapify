@@ -126,10 +126,12 @@ class Staircase {
     switch (edge.class) {
       case OrientationClasses.AB:
         return new Polygon([
-          new Point(edge.tail.x, edge.tail.y),
-          new Point(head.x, head.y),
-          new Point(head.x, head.y),
-          new Point(edge.tail.x, edge.tail.y),
+          [
+            new Point(edge.tail.x, edge.tail.y),
+            new Point(head.x, head.y),
+            new Point(head.x, head.y),
+            new Point(edge.tail.x, edge.tail.y),
+          ],
         ]);
       case OrientationClasses.UB:
         return this.getSimpleRegion();
@@ -171,18 +173,18 @@ class Staircase {
         // We assumed that p lies in the defined region.
         // However, if this is not the case, we can extend the staircase region
         // by including the vertices of the appended region;
-        if (!P.isInPolygon(new Polygon(regionPoints))) {
+        if (!P.isInPolygon(new Polygon([regionPoints]))) {
           regionPoints.splice(2, 0, P);
         }
 
-        return new Polygon(regionPoints);
+        return new Polygon([regionPoints]);
       case OrientationClasses.AD:
         this.points = this.getStaircasePoints();
         const convexHull = new ConvexHullGrahamScan();
         this.points.forEach((p) => convexHull.addPoint(p.x, p.y));
-        return new Polygon(
+        return new Polygon([
           convexHull.getHull().map((p) => new Point(p.x, p.y)),
-        );
+        ]);
       default:
         return new Polygon([]);
     }
@@ -271,7 +273,7 @@ class Staircase {
     const c = new Line(C, lower);
     const B = a.intersectsLine(b);
     const D = d.intersectsLine(c);
-    return B && D ? new Polygon([A, B, C, D]) : new Polygon([]);
+    return B && D ? new Polygon([[A, B, C, D]]) : new Polygon([]);
   }
 
   /**
