@@ -287,7 +287,7 @@ class Dcel {
       // TODO: check in e.g, parseGeoJSON()? if only polygons or  multipolygons in geojson
       // TODO: add error handling
 
-      const FID = idx;
+      const featureId = idx;
       const multiPolygons =
         feature.geometry.type !== "MultiPolygon"
           ? [feature.geometry.coordinates]
@@ -310,18 +310,18 @@ class Dcel {
           if (!edge) return;
 
           const existingFace = subdivision.faces.find((f) => f.edge === edge);
-          if (existingFace?.FID) {
-            existingFace.FID.push(FID);
+          if (existingFace?.associatedFeatures) {
+            existingFace.associatedFeatures.push(featureId);
           } else {
             if (idx === 0) {
               // only for outer ring
               outerRingFace = subdivision.makeFace();
-              outerRingFace.FID.push(FID);
+              outerRingFace.associatedFeatures.push(featureId);
               edge?.getCycle().forEach((e) => (e.face = outerRingFace));
               outerRingFace.edge = edge;
             } else {
               const innerRingFace = subdivision.makeFace();
-              innerRingFace.FID.push(FID);
+              innerRingFace.associatedFeatures.push(featureId);
               innerRingFace.outerRing = outerRingFace;
 
               edge.getCycle().forEach((e) => (e.face = innerRingFace));
@@ -726,10 +726,10 @@ class Dcel {
   toGeoJSON(): geojson.FeatureCollection<geojson.MultiPolygon> {
     const outerRingsByFID = this.getBoundedFaces().reduce(
       (groupedFaces: { [key: number]: Face[] }, face) => {
-        face.FID.forEach((fid, idx) => {
+        face.associatedFeatures.forEach((featureId, idx) => {
           if (face.outerRing && idx === 0) return groupedFaces; // TODO: why do we need this 0? for cases like vienna within noe
-          if (groupedFaces[fid]) groupedFaces[fid].push(face);
-          else groupedFaces[fid] = [face];
+          if (groupedFaces[featureId]) groupedFaces[featureId].push(face);
+          else groupedFaces[featureId] = [face];
         });
         return groupedFaces;
       },
@@ -813,7 +813,7 @@ class Dcel {
           },
           properties: {
             uuid: f.uuid,
-            FID: f.FID,
+            featureId: f.associatedFeatures,
             ringType: f.outerRing ? "inner" : "outer",
           },
         };

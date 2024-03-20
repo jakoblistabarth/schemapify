@@ -4,33 +4,38 @@ import HalfEdge from "./HalfEdge";
 
 class Face {
   /**
-   * unique ID per face
+   * Unique ID.
    */
   uuid: string;
 
   /**
-   * Pointer to an arbitrary edge of the outer connected component (boundary) of this face.
+   * Pointer to an arbitrary edge of the outer connected component (boundary).
    */
   edge?: HalfEdge;
 
   /**
-   * An array of edges, one for each inner connected component (holes) of this face.
+   * An array of edge pointers.
+   * Each pointer represents an inner connected component (hole).
    */
   innerEdges: HalfEdge[];
 
   /**
-   * only for holes, pointer to the outerRing it belongs to.
+   * Pointer to the outerRing the face belongs to.
+   * Only defined for holes.
    */
   outerRing?: Face;
 
   /**
-   * ID per geoJSON feature
+   * List of IDs of the associated features.
+   * A face can be associated with multiple features:
+   * it can server as an inner ring (hole) for one feature
+   * and as an exterior ring for another.
    */
-  FID: number[];
+  associatedFeatures: number[];
 
   constructor() {
     this.uuid = uuid();
-    this.FID = [];
+    this.associatedFeatures = [];
     this.innerEdges = [];
   }
 
