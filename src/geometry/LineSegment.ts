@@ -2,6 +2,10 @@ import Point from "./Point";
 import Polygon from "./Polygon";
 import Vector2D from "./Vector2D";
 
+/**
+ * Class representing a 2-dimensional finite line.
+ * It is defined by its endpoints.
+ */
 class LineSegment {
   endPoint1: Point;
   endPoint2: Point;
@@ -11,7 +15,7 @@ class LineSegment {
     this.endPoint2 = endPoint2;
   }
 
-  getLength(): number {
+  get length(): number {
     return this.endPoint1.distanceToPoint(this.endPoint2);
   }
 
@@ -24,7 +28,7 @@ class LineSegment {
    */
   intersectsLineSegment(
     lineSegment: LineSegment,
-    considerCollinearOverlap: boolean = false
+    considerCollinearOverlap: boolean = false,
   ): Point | undefined {
     const p1 = new Vector2D(this.endPoint1.x, this.endPoint1.y);
     const p2 = new Vector2D(this.endPoint2.x, this.endPoint2.y);
@@ -71,7 +75,7 @@ class LineSegment {
   }
 
   intersectsPolygon(polygon: Polygon): Point[] {
-    const boundary = polygon.getLineSegments();
+    const boundary = polygon.lineSegments;
     return boundary.reduce((acc: Point[], boundaryEdge) => {
       const intersection = this.intersectsLineSegment(boundaryEdge);
       if (intersection) acc.push(intersection);

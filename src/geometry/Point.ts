@@ -60,29 +60,36 @@ class Point {
 
   getNewPoint(distance: number, angle: number): Point {
     // QUESTION: do i really need this conditions for dx, and dy because js' sin/cos implementation is inaccurate??
-    const dx = angle === Math.PI * 0.5 || angle === Math.PI * 1.5 ? 0 : Math.cos(angle);
-    const dy = angle === Math.PI * 1 || angle === Math.PI * 2 ? 0 : Math.sin(angle);
+    const dx =
+      angle === Math.PI * 0.5 || angle === Math.PI * 1.5 ? 0 : Math.cos(angle);
+    const dy =
+      angle === Math.PI * 1 || angle === Math.PI * 2 ? 0 : Math.sin(angle);
     return new Point(this.x + distance * dx, this.y + distance * dy);
   }
 
   /**
-   * Determines whether or not the Point lies on a speficied LineSegment.
+   * Determines whether or not the Point lies on a specified LineSegment.
    * @param lineSegment A {@link LineSegment} to be checked.
    * @returns A boolean, indicating whether or not the Point lies on the LineSegment.
    */
   isOnLineSegment(lineSegment: LineSegment) {
     const PA = this.distanceToPoint(lineSegment.endPoint1);
     const PB = this.distanceToPoint(lineSegment.endPoint2);
-    return parseFloat((PA + PB).toFixed(10)) === parseFloat(lineSegment.getLength().toFixed(10));
+    return (
+      parseFloat((PA + PB).toFixed(10)) ===
+      parseFloat(lineSegment.length.toFixed(10))
+    );
   }
 
   /**
-   * Determines whether or not the Point lies on the speficied LineSegments.
+   * Determines whether or not the Point lies on the specified LineSegments.
    * @param lineSegment An array of {@link LineSegment}s to be checked.
    * @returns A boolean, indicating whether or not the Point lies on the LineSegments.
    */
   isOnLineSegments(lineSegments: LineSegment[]) {
-    return lineSegments.some((lineSegment) => this.isOnLineSegment(lineSegment));
+    return lineSegments.some((lineSegment) =>
+      this.isOnLineSegment(lineSegment),
+    );
   }
 
   /**
@@ -112,7 +119,9 @@ class Point {
       C.push(c);
     });
 
-    const D = A.map((elem, idx) => +(elem * this.x + B[idx] * this.y + C[idx]).toFixed(10));
+    const D = A.map(
+      (elem, idx) => +(elem * this.x + B[idx] * this.y + C[idx]).toFixed(10),
+    );
 
     const t1 = D.every((d) => d >= 0);
     const t2 = D.every((d) => d <= 0);
@@ -127,7 +136,8 @@ class Point {
    */
   equals(point: Point): boolean {
     return (
-      Number((this.x - point.x).toFixed(10)) === 0 && Number((this.y - point.y).toFixed(10)) === 0
+      Number((this.x - point.x).toFixed(10)) === 0 &&
+      Number((this.y - point.y).toFixed(10)) === 0
     );
   }
 }
