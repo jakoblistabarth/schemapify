@@ -1,5 +1,9 @@
 import Point from "./Point";
 
+/**
+ * Class representing a 2-dimensional infinite line.
+ * It is defined by a point and an angle.
+ */
 class Line {
   point: Point;
   angle: number;

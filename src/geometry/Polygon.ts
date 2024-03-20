@@ -3,13 +3,15 @@ import HalfEdge from "../DCEL/HalfEdge";
 import LineSegment from "./LineSegment";
 import { crawlArray } from "../utilities";
 
-class Line {
+/**
+ * Class representing a 2-dimensional polygon.
+ * It is defined by its control points.
+ */
+class Polygon {
   points: Point[];
-  area: number;
 
   constructor(points: Point[]) {
     this.points = points;
-    this.area = this.getArea();
   }
 
   /**
@@ -18,7 +20,7 @@ class Line {
    * @param points An array of Points, which has to be sorted (either clockwise or counter-clockwise).
    * @returns A number indicating the area of the polygon.
    */
-  getArea(): number {
+  get area(): number {
     let total = 0;
 
     for (let i = 0; i < this.points.length; i++) {
@@ -34,17 +36,22 @@ class Line {
     return Math.abs(total);
   }
 
-  getLineSegments(): LineSegment[] {
-    return this.points.map((p, idx) => new LineSegment(p, crawlArray(this.points, idx, +1)));
+  get lineSegments(): LineSegment[] {
+    return this.points.map(
+      (p, idx) => new LineSegment(p, crawlArray(this.points, idx, +1)),
+    );
   }
 
   getIntersections(edge: HalfEdge): Point[] | undefined {
-    return this.getLineSegments().reduce((acc: Point[], boundaryEdge) => {
-      const intersection = edge.toLineSegment()?.intersectsLineSegment(boundaryEdge);
-      if (intersection && acc.every((point) => !point.equals(intersection))) acc.push(intersection);
+    return this.lineSegments.reduce((acc: Point[], boundaryEdge) => {
+      const intersection = edge
+        .toLineSegment()
+        ?.intersectsLineSegment(boundaryEdge);
+      if (intersection && acc.every((point) => !point.equals(intersection)))
+        acc.push(intersection);
       return acc;
     }, []);
   }
 }
 
-export default Line;
+export default Polygon;
