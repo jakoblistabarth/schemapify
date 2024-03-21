@@ -8,6 +8,7 @@ import { FC } from "react";
 import geometry from "@/test/data/shapes/unaligned-deviating-2.json";
 import { FeatureCollection } from "geojson";
 import HalfEdge from "@/src/DCEL/HalfEdge";
+import { range } from "d3";
 
 const Canvas: FC = () => {
   const dcel = Dcel.fromGeoJSON(geometry as FeatureCollection);
@@ -25,16 +26,29 @@ const Canvas: FC = () => {
     data: vertices,
     getPosition: (d) => [d.x, d.y],
     radiusMinPixels: 1,
-    radiusMaxPixels: 5,
-    getRadius: 0.5,
-    getFillColor: [0, 0, 0],
+    radiusMaxPixels: 4,
+    stroked: true,
+    lineWidthUnits: "pixels",
+    lineWidthMinPixels: 1,
+    getLineColor: [0,0,0],
+    getFillColor: [255,255,255],
+  });
+
+  const gridPoints = range(-50, 50, .5).map((i) => range(-50, 50, .5).map((j) => [i,j])).flat()
+
+  const grid = new ScatterplotLayer({
+    data: gridPoints,
+    getPosition: (d) => d,
+    radiusMinPixels: 1,
+    radiusMaxPixels: 1,
+    getFillColor: [0,0,0,50],
   });
 
   return (
     <DeckGL
       views={new OrthographicView({ flipY: false })}
-      layers={[edges, points]}
-      initialViewState={{ target: [0, 0], zoom: 5 }}
+      layers={[grid, edges, points]}
+      initialViewState={{ target: [0, 0], zoom: 4, minZoom: 4, maxZoom: 7, }}
       controller={true}
     />
   );
