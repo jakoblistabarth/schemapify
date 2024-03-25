@@ -39,8 +39,13 @@ describe("intersectsPolygon()", function () {
   it("returns the expected intersection points for a linesegment going through the polygon", function () {
     const segmentA = new LineSegment(new Point(-2, 2), new Point(8, 2));
     const segmentB = new LineSegment(new Point(-4, 0), new Point(8, 6));
-    const polygon = new Polygon([
-      [new Point(0, 0), new Point(4, 0), new Point(8, 4), new Point(0, 4)],
+    const polygon = Polygon.fromCoordinates([
+      [
+        [0, 0],
+        [4, 0],
+        [8, 4],
+        [0, 4],
+      ],
     ]);
 
     expect(segmentA.intersectsPolygon(polygon)).toEqual([
@@ -55,8 +60,13 @@ describe("intersectsPolygon()", function () {
 
   it("returns the expected intersection points for a linesegment which ends/starts on the polygon boundary", function () {
     const segment = new LineSegment(new Point(-4, 0), new Point(0, 0));
-    const polygon = new Polygon([
-      [new Point(0, 0), new Point(4, 0), new Point(4, 4), new Point(0, 4)],
+    const polygon = Polygon.fromCoordinates([
+      [
+        [0, 0],
+        [4, 0],
+        [4, 4],
+        [0, 4],
+      ],
     ]);
 
     expect(segment.intersectsPolygon(polygon)).toEqual([new Point(0, 0)]);
@@ -64,8 +74,13 @@ describe("intersectsPolygon()", function () {
 
   it("returns the expected intersection points for a linesegment which ends/starts in the polygon", function () {
     const segment = new LineSegment(new Point(-2, -2), new Point(2, 2));
-    const polygon = new Polygon([
-      [new Point(0, 0), new Point(4, 0), new Point(4, 4), new Point(0, 4)],
+    const polygon = Polygon.fromCoordinates([
+      [
+        [0, 0],
+        [4, 0],
+        [4, 4],
+        [0, 4],
+      ],
     ]);
 
     // FIXME: make intersectsPolygon return only unique intersection points

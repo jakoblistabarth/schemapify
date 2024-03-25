@@ -1,30 +1,31 @@
 import Polygon from "../../src/geometry/Polygon";
 import Point from "../../src/geometry/Point";
 import LineSegment from "../../src/geometry/LineSegment";
+import Ring from "../../src/geometry/Ring";
 
 describe("The Polygon's area getter", function () {
   it("gets the correct area of simple squares", function () {
-    const pointsA = [
+    const ringA = new Ring([
       new Point(0, 0),
       new Point(4, 0),
       new Point(4, 4),
       new Point(0, 4),
-    ];
-    const pointsB = [
+    ]);
+    const ringB = new Ring([
       new Point(-2, -2),
       new Point(2, -2),
       new Point(2, 2),
       new Point(-2, 2),
-    ];
-    const pointsC = [
+    ]);
+    const ringC = new Ring([
       new Point(0, -1),
       new Point(1, 0),
       new Point(0, 1),
       new Point(-1, 0),
-    ];
-    const polygonA = new Polygon([pointsA]);
-    const polygonB = new Polygon([pointsB]);
-    const polygonC = new Polygon([pointsC]);
+    ]);
+    const polygonA = new Polygon([ringA]);
+    const polygonB = new Polygon([ringB]);
+    const polygonC = new Polygon([ringC]);
 
     expect(polygonA.area).toBe(16);
     expect(polygonB.area).toBe(16);
@@ -42,25 +43,25 @@ describe("The Polygon's area getter", function () {
   });
 
   it("gets the correct area of shapes with holes", function () {
-    const pointsA = [
+    const exteriorRing = new Ring([
       new Point(0, 0),
       new Point(4, 0),
       new Point(4, 4),
       new Point(0, 4),
-    ];
-    const pointsHole = [
+    ]);
+    const interiorRing = new Ring([
       new Point(0.5, 0.5),
       new Point(1.5, 0.5),
       new Point(1.5, 1.5),
       new Point(0.5, 1.5),
-    ];
+    ]);
 
-    const polygonA = new Polygon([pointsA, pointsHole]);
+    const polygonA = new Polygon([exteriorRing, interiorRing]);
 
     const polygonB = new Polygon([
-      pointsA,
-      pointsHole,
-      pointsHole.map((p) => new Point(p.x + 2, p.y + 2)),
+      exteriorRing,
+      interiorRing,
+      new Ring(interiorRing.points.map((p) => new Point(p.x + 2, p.y + 2))),
     ]);
 
     expect(polygonA.area).toBe(15);
@@ -86,13 +87,14 @@ describe("The Polygon's area getter", function () {
 
 describe("The Polygon's exteriorLineSegments getter", function () {
   it("gets the line segments of simple squares", function () {
-    const points = [
-      new Point(0, -1),
-      new Point(1, 0),
-      new Point(0, 1),
-      new Point(-1, 0),
-    ];
-    const polygon = new Polygon([points]);
+    const polygon = Polygon.fromCoordinates([
+      [
+        [0, -1],
+        [1, 0],
+        [0, 1],
+        [-1, 0],
+      ],
+    ]);
 
     expect(polygon.exteriorLineSegments).toEqual([
       new LineSegment(new Point(0, -1), new Point(1, 0)),
@@ -140,9 +142,9 @@ describe("A polygon created from a set of coordinates", function () {
     ]);
     expect(p).toBeInstanceOf(Polygon);
     expect(p.area).toEqual(13);
-    expect(p.exteriorRing[0]).toEqual(new Point(0, 0));
+    expect(p.exteriorRing.points[0]).toEqual(new Point(0, 0));
     expect(p.interiorRings.length).toEqual(2);
-    expect(p.interiorRings[0][0]).toBeInstanceOf(Point);
-    expect(p.interiorRings[0][0]).toEqual(new Point(1, 1));
+    expect(p.interiorRings[0].points[0]).toBeInstanceOf(Point);
+    expect(p.interiorRings[0].points[0]).toEqual(new Point(1, 1));
   });
 });

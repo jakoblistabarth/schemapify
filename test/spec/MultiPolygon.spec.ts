@@ -1,6 +1,7 @@
 import Polygon from "../../src/geometry/Polygon";
 import Point from "../../src/geometry/Point";
 import MultiPolygon from "../../src/geometry/MultiPolygon";
+import Ring from "../../src/geometry/Ring";
 
 describe("The MultiPolygon's area getter", function () {
   it("gets the correct area of simple shapes", function () {
@@ -47,8 +48,8 @@ describe("The MultiPolygon's area getter", function () {
       new Point(-2, -2),
       new Point(-1, -2),
     ];
-    const polygonA = new Polygon([pointsA, pointsB]);
-    const polygonB = new Polygon([pointsC]);
+    const polygonA = new Polygon([new Ring(pointsA), new Ring(pointsB)]);
+    const polygonB = new Polygon([new Ring(pointsC)]);
 
     const multipolygon = new MultiPolygon([polygonA, polygonB]);
 

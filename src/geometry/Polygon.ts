@@ -2,6 +2,7 @@ import Point from "./Point";
 import HalfEdge from "../DCEL/HalfEdge";
 import LineSegment from "./LineSegment";
 import { crawlArray } from "../utilities";
+import Ring from "./Ring";
 
 /**
  * Class representing a 2-dimensional polygon.
@@ -9,14 +10,13 @@ import { crawlArray } from "../utilities";
  */
 class Polygon {
   /**
-   * An array of rings.
-   * A ring is an array of {@link Point}s.
+   * An array of {@link Ring}s.
    * The first ring is always the exterior ring (the polygon's boundary).
    * Optionally, further rings are inner rings (holes).
    */
-  rings: Point[][];
+  rings: Ring[];
 
-  constructor(rings: Point[][]) {
+  constructor(rings: Ring[]) {
     this.rings = rings;
   }
 
@@ -31,10 +31,10 @@ class Polygon {
       let total = 0;
 
       for (let i = 0; i < ring.length; i++) {
-        const addX = ring[i].x;
-        const addY = ring[i == ring.length - 1 ? 0 : i + 1].y;
-        const subX = ring[i == ring.length - 1 ? 0 : i + 1].x;
-        const subY = ring[i].y;
+        const addX = ring.points[i].x;
+        const addY = ring.points[i == ring.length - 1 ? 0 : i + 1].y;
+        const subX = ring.points[i == ring.length - 1 ? 0 : i + 1].x;
+        const subY = ring.points[i].y;
 
         total += addX * addY * 0.5;
         total -= subX * subY * 0.5;
@@ -55,8 +55,9 @@ class Polygon {
   }
 
   get exteriorLineSegments(): LineSegment[] {
-    return this.exteriorRing.map(
-      (p, idx) => new LineSegment(p, crawlArray(this.exteriorRing, idx, +1)),
+    return this.exteriorRing.points.map(
+      (p, idx) =>
+        new LineSegment(p, crawlArray(this.exteriorRing.points, idx, +1)),
     );
   }
 
@@ -78,8 +79,8 @@ class Polygon {
   }
 
   static fromCoordinates(coordinates: [number, number][][]) {
-    const rings = coordinates.map((ring) =>
-      ring.map(([x, y]) => new Point(x, y)),
+    const rings = coordinates.map(
+      (ring) => new Ring(ring.map(([x, y]) => new Point(x, y))),
     );
 
     return new Polygon(rings);
