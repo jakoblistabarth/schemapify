@@ -1,5 +1,6 @@
 import * as geojson from "geojson";
 import Vector2D from "./geometry/Vector2D";
+import MultiPolygon from "./geometry/MultiPolygon";
 
 export async function getJSON(path: string) {
   const response = await fetch(path);
@@ -86,3 +87,21 @@ export function copyInstance<T>(original: T): T {
     original,
   );
 }
+
+export const geoJsonToGeometry = (
+  geoJson: geojson.FeatureCollection<geojson.Polygon | geojson.MultiPolygon>,
+) => {
+  return geoJson.features.map((feature, idx) => {
+    const geometry =
+      feature.geometry.type !== "MultiPolygon"
+        ? [feature.geometry.coordinates]
+        : feature.geometry.coordinates;
+
+    const multipolygon = MultiPolygon.fromCoordinates(
+      geometry as [number, number][][],
+    );
+    multipolygon.id = idx.toString();
+    multipolygon.properties = feature.properties;
+    return multipolygon;
+  });
+};
