@@ -9,11 +9,16 @@ import Contraction, {
 import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
 import Staircase from "../c-oriented-schematization/Staircase";
 import Point from "../geometry/Point";
-import { createGeoJSON, validateGeoJSON } from "../utilities";
+import {
+  createGeoJSON,
+  geoJsonToGeometry,
+  validateGeoJSON,
+} from "../utilities";
 import Face from "./Face";
 import HalfEdge, { OrientationClasses } from "./HalfEdge";
 import Vertex from "./Vertex";
 import SnapshotList from "../Snapshot/SnapshotList";
+import MultiPolygon from "../geometry/MultiPolygon";
 
 export enum STEP {
   LOAD = "loadData",
@@ -213,42 +218,37 @@ class Dcel {
    */
   static fromGeoJSON(geoJSON: geojson.FeatureCollection): Dcel {
     if (!validateGeoJSON(geoJSON)) throw new Error("invalid input");
+    const geometry = geoJsonToGeometry(geoJSON);
+    return Dcel.fromMultiPolygons(geometry);
+  }
+
+  /**
+   * Creates a Doubly Connected Edge List (DCEL) data structure from a geoJSON.
+   * @credits adapted from [cs.stackexchange.com](https://cs.stackexchange.com/questions/2450/how-do-i-construct-a-doubly-connected-edge-list-given-a-set-of-line-segments)
+   * @param geoJSON a valid geojson with features of type 'Polygon' or 'Multipolyon'
+   * @returns A {@link Dcel}.
+   */
+  static fromMultiPolygons(multiPolygons: MultiPolygon[]): Dcel {
     const subdivision = new Dcel();
 
-    subdivision.featureProperties = geoJSON.features.map(
-      (feature: geojson.Feature) => feature.properties,
-    );
+    subdivision.featureProperties = multiPolygons.map((d) => d.properties);
 
-    const polygons = geoJSON.features.reduce(
-      (acc: Vertex[][][], feature: geojson.Feature) => {
-        if (
-          feature.geometry.type !== "Polygon" &&
-          feature.geometry.type !== "MultiPolygon"
-        )
-          return acc;
-
-        const multiPolygons =
-          feature.geometry.type !== "MultiPolygon"
-            ? [feature.geometry.coordinates]
-            : feature.geometry.coordinates;
-
-        acc.push(
-          ...multiPolygons.map<Vertex[][]>((polygon) =>
-            polygon.map((ring: number[][]) =>
-              ring.map(
-                (point: number[]) =>
-                  subdivision.findVertex(point[0], point[1]) ||
-                  subdivision.makeVertex(point[0], point[1]),
-              ),
+    const polygons = multiPolygons.reduce((acc: Vertex[][][], multiPolygon) => {
+      acc.push(
+        ...multiPolygons.map((polygon) =>
+          polygon.map((ring: number[][]) =>
+            ring.map(
+              (point: number[]) =>
+                subdivision.findVertex(point[0], point[1]) ||
+                subdivision.makeVertex(point[0], point[1]),
             ),
           ),
-        );
-        return acc;
-      },
-      [],
-    );
+        ),
+      );
+      return acc;
+    }, []);
 
-    polygons.forEach((polygon: Vertex[][]) =>
+    multiPolygons.forEach((multiPolygon) =>
       polygon.forEach((ring: Vertex[], idx: number) => {
         ring = idx > 0 ? ring.reverse() : ring; // sort clockwise ordered vertices of inner rings (geojson spec) counterclockwise
         const points = ring.slice(0, -1);
