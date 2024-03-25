@@ -5,6 +5,7 @@ import LineSegment from "../geometry/LineSegment";
 import Polygon from "../geometry/Polygon";
 import Vector2D from "../geometry/Vector2D";
 import Configuration, { OuterEdge } from "./Configuration";
+import Ring from "../geometry/Ring";
 
 export enum ContractionType {
   P = "positive",
@@ -193,7 +194,10 @@ class Contraction {
   }
 
   getArea(): number {
-    return this.areaPoints ? new Polygon([this.areaPoints]).area : 0;
+    return this.areaPoints
+      ? Polygon.fromCoordinates([this.areaPoints.map(({ x, y }) => [x, y])])
+          .area
+      : 0;
   }
 
   /**
@@ -208,7 +212,7 @@ class Contraction {
     if (x.includes(edge)) return false;
     const edgeLine = edge.toLineSegment();
     if (!edgeLine) return;
-    const area = new Polygon([this.areaPoints]);
+    const area = new Polygon([new Ring(this.areaPoints)]);
     const pointsInPolygon = edge
       .getEndpoints()
       .filter((vertex) => vertex.isInPolygon(area));

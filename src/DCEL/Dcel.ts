@@ -508,7 +508,7 @@ class Dcel {
       staircases.forEach((staircase_) => {
         if (staircase_ === staircase) return;
         if (
-          staircase.region.exteriorRing.every(
+          staircase.region.exteriorRing.points.every(
             (point) => !point.isInPolygon(staircase_.region),
           )
         )
@@ -827,9 +827,8 @@ class Dcel {
     const staircaseFeatures = this.getHalfEdges(undefined, true).map(
       (edge): geojson.Feature<geojson.Polygon> => {
         const staircase: Staircase = new Staircase(edge);
-        const coordinates: number[][] = staircase.region.exteriorRing.map(
-          (p) => [p.x, p.y],
-        );
+        const coordinates: number[][] =
+          staircase.region.exteriorRing.points.map((p) => [p.x, p.y]);
         return {
           type: "Feature",
           geometry: {
@@ -909,7 +908,7 @@ class Dcel {
       (staircase): geojson.Feature<geojson.Polygon> => {
         const region = staircase.region.exteriorRing;
         // add first Point to close geoJSON polygon
-        region.push(region[0]);
+        region.points.push(region.points[0]);
 
         return {
           type: "Feature",
@@ -922,7 +921,7 @@ class Dcel {
           },
           geometry: {
             type: "Polygon",
-            coordinates: [region.map((p) => [p.x, p.y])],
+            coordinates: [region.points.map((p) => [p.x, p.y])],
           },
         };
       },

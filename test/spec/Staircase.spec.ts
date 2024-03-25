@@ -5,9 +5,9 @@ import CRegular from "../../src/c-oriented-schematization/CRegular";
 import { OrientationClasses } from "../../src/DCEL/HalfEdge";
 import Vertex from "../../src/DCEL/Vertex";
 import Staircase from "../../src/c-oriented-schematization/Staircase";
-import Point from "../../src/geometry/Point";
 import Polygon from "../../src/geometry/Polygon";
 import config from "../../src/c-oriented-schematization/schematization.config";
+import Ring from "../../src/geometry/Ring";
 
 describe("The staircase class", function () {
   it("returns a staircase region for a HalfEdge of class UB", function () {
@@ -25,8 +25,13 @@ describe("The staircase class", function () {
 
     const staircase = new Staircase(edge);
     expect(staircase.region).toEqual(
-      new Polygon([
-        [new Point(0, 0), new Point(2, 0), new Point(2, 2), new Point(0, 2)],
+      Polygon.fromCoordinates([
+        [
+          [0, 0],
+          [2, 0],
+          [2, 2],
+          [0, 2],
+        ],
       ]),
     );
   });
@@ -47,12 +52,12 @@ describe("The staircase class", function () {
     const staircase = new Staircase(edge);
 
     expect(staircase.region).toEqual(
-      new Polygon([
+      Polygon.fromCoordinates([
         [
-          new Point(0, 0),
-          new Point(-2, 0),
-          new Point(-2, -2),
-          new Point(0, -2),
+          [0, 0],
+          [-2, 0],
+          [-2, -2],
+          [0, -2],
         ],
       ]),
     );
@@ -73,12 +78,12 @@ describe("The staircase class", function () {
 
     const staircase = new Staircase(edge);
     expect(staircase.region).toEqual(
-      new Polygon([
+      Polygon.fromCoordinates([
         [
-          new Point(0, 0),
-          new Point(0, 2),
-          new Point(-10, 2),
-          new Point(-10, 0),
+          [0, 0],
+          [0, 2],
+          [-10, 2],
+          [-10, 0],
         ],
       ]),
     );
@@ -162,9 +167,12 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
     const staircase = new Staircase(edge);
 
-    const appendedArea = new Polygon([staircase.points.slice(0, 4)]).area;
-    const secondLastStep = new Polygon([staircase.points.slice(-5, -2)]).area;
-    const lastStep = new Polygon([staircase.points.slice(-3)]).area;
+    const appendedArea = new Polygon([new Ring(staircase.points.slice(0, 4))])
+      .area;
+    const secondLastStep = new Polygon([
+      new Ring(staircase.points.slice(-5, -2)),
+    ]).area;
+    const lastStep = new Polygon([new Ring(staircase.points.slice(-3))]).area;
 
     expect(appendedArea).toBeCloseTo(secondLastStep, 10);
     expect(appendedArea).toBeCloseTo(lastStep, 10);
@@ -185,9 +193,12 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
     const staircase = new Staircase(edge);
 
-    const appendedArea = new Polygon([staircase.points.slice(0, 4)]).area;
-    const secondLastStep = new Polygon([staircase.points.slice(-5, -2)]).area;
-    const lastStep = new Polygon([staircase.points.slice(-3)]).area;
+    const appendedArea = new Polygon([new Ring(staircase.points.slice(0, 4))])
+      .area;
+    const secondLastStep = new Polygon([
+      new Ring(staircase.points.slice(-5, -2)),
+    ]).area;
+    const lastStep = new Polygon([new Ring(staircase.points.slice(-3))]).area;
 
     expect(appendedArea).toBeCloseTo(secondLastStep, 10);
     expect(appendedArea).toBeCloseTo(lastStep, 10);
@@ -208,9 +219,12 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
     const staircase = new Staircase(edge);
 
-    const appendedArea = new Polygon([staircase.points.slice(0, 4)]).area;
-    const secondLastStep = new Polygon([staircase.points.slice(-5, -2)]).area;
-    const lastStep = new Polygon([staircase.points.slice(-3)]).area;
+    const appendedArea = new Polygon([new Ring(staircase.points.slice(0, 4))])
+      .area;
+    const secondLastStep = new Polygon([
+      new Ring(staircase.points.slice(-5, -2)),
+    ]).area;
+    const lastStep = new Polygon([new Ring(staircase.points.slice(-3))]).area;
 
     expect(appendedArea).toBeCloseTo(secondLastStep, 10);
     expect(appendedArea).toBeCloseTo(lastStep, 10);
@@ -231,9 +245,12 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
     const staircase = new Staircase(edge);
 
-    const appendedArea = new Polygon([staircase.points.slice(0, 4)]).area;
-    const secondLastStep = new Polygon([staircase.points.slice(-5, -2)]).area;
-    const lastStep = new Polygon([staircase.points.slice(-3)]).area;
+    const appendedArea = new Polygon([new Ring(staircase.points.slice(0, 4))])
+      .area;
+    const secondLastStep = new Polygon([
+      new Ring(staircase.points.slice(-5, -2)),
+    ]).area;
+    const lastStep = new Polygon([new Ring(staircase.points.slice(-3))]).area;
 
     expect(appendedArea).toBeCloseTo(secondLastStep, 10);
     expect(appendedArea).toBeCloseTo(lastStep, 10);

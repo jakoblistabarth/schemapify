@@ -5,6 +5,7 @@ import Polygon from "../geometry/Polygon";
 import ConvexHullGrahamScan from "graham_scan";
 import Vertex from "../DCEL/Vertex";
 import Dcel from "../DCEL/Dcel";
+import Ring from "../geometry/Ring";
 
 class Staircase {
   /** The {@link HalfEdge} the staircase belongs to. */
@@ -125,12 +126,12 @@ class Staircase {
 
     switch (edge.class) {
       case OrientationClasses.AB:
-        return new Polygon([
+        return Polygon.fromCoordinates([
           [
-            new Point(edge.tail.x, edge.tail.y),
-            new Point(head.x, head.y),
-            new Point(head.x, head.y),
-            new Point(edge.tail.x, edge.tail.y),
+            [edge.tail.x, edge.tail.y],
+            [head.x, head.y],
+            [head.x, head.y],
+            [edge.tail.x, edge.tail.y],
           ],
         ]);
       case OrientationClasses.UB:
@@ -173,17 +174,17 @@ class Staircase {
         // We assumed that p lies in the defined region.
         // However, if this is not the case, we can extend the staircase region
         // by including the vertices of the appended region;
-        if (!P.isInPolygon(new Polygon([regionPoints]))) {
+        if (!P.isInPolygon(new Polygon([new Ring(regionPoints)]))) {
           regionPoints.splice(2, 0, P);
         }
 
-        return new Polygon([regionPoints]);
+        return new Polygon([new Ring(regionPoints)]);
       case OrientationClasses.AD:
         this.points = this.getStaircasePoints();
         const convexHull = new ConvexHullGrahamScan();
         this.points.forEach((p) => convexHull.addPoint(p.x, p.y));
         return new Polygon([
-          convexHull.getHull().map((p) => new Point(p.x, p.y)),
+          new Ring(convexHull.getHull().map((p) => new Point(p.x, p.y))),
         ]);
       default:
         return new Polygon([]);
@@ -273,7 +274,7 @@ class Staircase {
     const c = new Line(C, lower);
     const B = a.intersectsLine(b);
     const D = d.intersectsLine(c);
-    return B && D ? new Polygon([[A, B, C, D]]) : new Polygon([]);
+    return B && D ? new Polygon([new Ring([A, B, C, D])]) : new Polygon([]);
   }
 
   /**
