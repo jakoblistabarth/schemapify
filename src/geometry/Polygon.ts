@@ -76,6 +76,14 @@ class Polygon {
       return acc;
     }, []);
   }
+
+  static fromCoordinates(coordinates: [number, number][][]) {
+    const rings = coordinates.map((ring) =>
+      ring.map(([x, y]) => new Point(x, y)),
+    );
+
+    return new Polygon(rings);
+  }
 }
 
 export default Polygon;
