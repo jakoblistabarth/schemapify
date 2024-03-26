@@ -1,9 +1,9 @@
 import fs from "fs";
 import path from "path";
-import CRegular from "../../src/c-oriented-schematization/CRegular";
-import Dcel from "../../src/DCEL/Dcel";
-import { OrientationClasses } from "../../src/DCEL/HalfEdge";
-import { config } from "../../src/c-oriented-schematization/schematization.config";
+import CRegular from "@/src/c-oriented-schematization/CRegular";
+import Dcel from "@/src/DCEL/Dcel";
+import { OrientationClasses } from "@/src/DCEL/HalfEdge";
+import { config } from "@/src/c-oriented-schematization/schematization.config";
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
 
 describe("isDeviating()", function () {

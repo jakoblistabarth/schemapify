@@ -1,7 +1,7 @@
-import CRegular from "../../src/c-oriented-schematization/CRegular";
-import Sector from "../../src/c-oriented-schematization/Sector";
-import { crawlArray } from "../../src/utilities";
-import { config } from "../../src/c-oriented-schematization/schematization.config";
+import CRegular from "@/src/c-oriented-schematization/CRegular";
+import Sector from "@/src/c-oriented-schematization/Sector";
+import { crawlArray } from "@/src/utilities";
+import { config } from "@/src/c-oriented-schematization/schematization.config";
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
 
 describe("isAligned() works properly", function () {

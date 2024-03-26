@@ -1,7 +1,7 @@
-import Ring from "../../src/geometry/Ring";
-import LineSegment from "../../src/geometry/LineSegment";
-import Point from "../../src/geometry/Point";
-import Polygon from "../../src/geometry/Polygon";
+import Ring from "@/src/geometry/Ring";
+import LineSegment from "@/src/geometry/LineSegment";
+import Point from "@/src/geometry/Point";
+import Polygon from "@/src/geometry/Polygon";
 
 describe("distanceToPoint()", function () {
   it("returns the correct distance between 2 vertices", function () {

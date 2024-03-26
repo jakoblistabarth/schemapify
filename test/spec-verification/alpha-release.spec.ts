@@ -1,8 +1,8 @@
 import { readFileSync } from "fs";
 import path from "path";
 import { hint } from "@mapbox/geojsonhint";
-import Dcel from "../../src/DCEL/Dcel";
-import Face from "../../src/DCEL/Face";
+import Dcel from "@/src/DCEL/Dcel";
+import Face from "@/src/DCEL/Face";
 
 describe("2-a. The system shall be able to parse geoJSON as input data.", function () {
   const json = JSON.parse(

@@ -1,5 +1,5 @@
 import grahamScanConvexHull from "graham_scan";
-import Point from "../../src/geometry/Point";
+import Point from "@/src/geometry/Point";
 
 describe("ConvexHull()", function () {
   it("returns a convex hull on an array of point arrays", function () {

@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "../../src/DCEL/Dcel";
+import Dcel from "@/src/DCEL/Dcel";
 
 describe("removeSuperfluousVertices()", function () {
   it("on a square-shaped DCEL of with superfluous vertices, results in a DCEL of 4 vertices", function () {

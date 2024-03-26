@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "../../src/DCEL/Dcel";
-import Face from "../../src/DCEL/Face";
+import Dcel from "@/src/DCEL/Dcel";
+import Face from "@/src/DCEL/Face";
 import MultiPolygon from "@/src/geometry/MultiPolygon";
 
 describe("A Dcel from a geojson with a simplified enclave model", function () {

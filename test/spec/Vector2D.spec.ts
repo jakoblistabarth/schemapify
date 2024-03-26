@@ -1,4 +1,4 @@
-import Vector2D from "../../src/geometry/Vector2D";
+import Vector2D from "@/src/geometry/Vector2D";
 
 describe("dot() returns the correct scalar", function () {
   it("for 2 simple vectors", function () {

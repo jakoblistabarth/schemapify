@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
-import Vertex from "../../src/DCEL/Vertex";
-import HalfEdge from "../../src/DCEL/HalfEdge";
-import Dcel from "../../src/DCEL/Dcel";
+import Vertex from "@/src/DCEL/Vertex";
+import HalfEdge from "@/src/DCEL/HalfEdge";
+import Dcel from "@/src/DCEL/Dcel";
 import { getTestFiles } from "./test-setup";
 
 describe("distanceToVertex()", function () {
