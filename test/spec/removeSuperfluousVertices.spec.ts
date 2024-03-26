@@ -7,8 +7,8 @@ describe("removeSuperfluousVertices()", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/superfluous-vertices-square.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.removeSuperfluousVertices();
@@ -20,8 +20,8 @@ describe("removeSuperfluousVertices()", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/superfluous-vertices-triangle.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.removeSuperfluousVertices();

@@ -20,7 +20,7 @@ import {
 describe("getTrack()", function () {
   it("return the correct angles for the reflex point for a square shape", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
 
@@ -30,16 +30,16 @@ describe("getTrack()", function () {
     outerEdge2.configuration = new Configuration(outerEdge2);
 
     expect(outerEdge1?.configuration.getTrack(OuterEdge.PREV)?.angle).toBe(
-      Math.PI * 1.5
+      Math.PI * 1.5,
     );
     expect(outerEdge1?.configuration.getTrack(OuterEdge.NEXT)?.angle).toBe(
-      Math.PI * 0.5
+      Math.PI * 0.5,
     );
     expect(outerEdge2?.configuration.getTrack(OuterEdge.PREV)?.angle).toBe(
-      Math.PI * 0
+      Math.PI * 0,
     );
     expect(outerEdge2?.configuration.getTrack(OuterEdge.NEXT)?.angle).toBe(
-      Math.PI
+      Math.PI,
     );
   });
 });
@@ -99,7 +99,7 @@ describe("getContractionPoint() for a configuration", function () {
       new Point(0, 0),
       new Point(2, 0),
       new Point(0, -2),
-      [new Point(8, 4)]
+      [new Point(8, 4)],
     );
 
     const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
@@ -212,7 +212,7 @@ describe("isBlockedBy() determines whether or not a contraction is blocked by an
       new Point(-2, 0),
       new Point(2, 0),
       new Point(4, 2),
-      [new Point(0, 6), new Point(0, 1)]
+      [new Point(0, 6), new Point(0, 1)],
     );
     const c = new Configuration(s.innerEdge);
 
@@ -229,7 +229,7 @@ describe("isBlockedBy() determines whether or not a contraction is blocked by an
       new Point(-2, 2),
       new Point(2, 2),
       new Point(4, 0),
-      [new Point(0, 1), new Point(5, -2), new Point(5, 4), new Point(-4, 4)]
+      [new Point(0, 1), new Point(5, -2), new Point(5, 4), new Point(-4, 4)],
     );
     const c = new Configuration(s.innerEdge);
 
@@ -249,7 +249,7 @@ describe("isBlockedBy() determines whether or not a contraction is blocked by an
       new Point(-2, 2),
       new Point(2, 2),
       new Point(4, 0),
-      [new Point(0, 1), new Point(5, -2), new Point(5, 4), new Point(-4, 4)]
+      [new Point(0, 1), new Point(5, -2), new Point(5, 4), new Point(-4, 4)],
     );
     const c = new Configuration(s.innerEdge);
 
@@ -274,7 +274,7 @@ describe("initializeBlockingNumber() returns the number of interfering edges", f
       new Point(-2, 0),
       new Point(2, 0),
       new Point(1, -2),
-      [new Point(6, 2), new Point(1, 1), new Point(-1, 1)]
+      [new Point(6, 2), new Point(1, 1), new Point(-1, 1)],
     );
 
     const c = new Configuration(s.innerEdge);
@@ -298,7 +298,7 @@ describe("initializeBlockingNumber() returns the number of interfering edges", f
         new Point(6, 2),
         new Point(1, 1),
         new Point(-1, 1),
-      ]
+      ],
     );
     const c = new Configuration(s.innerEdge);
 
@@ -312,7 +312,7 @@ describe("initializeBlockingNumber() returns the number of interfering edges", f
       new Point(11, 1),
       new Point(10, 1),
       new Point(10, 7),
-      [new Point(0, 7), new Point(0, 0)]
+      [new Point(0, 7), new Point(0, 0)],
     );
     const c = new Configuration(s.innerEdge);
 
@@ -347,7 +347,7 @@ describe("getContractionArea() returns", function () {
       new Point(-2, 0),
       new Point(2, 0),
       new Point(4, 0),
-      [new Point(4, 4), new Point(-4, 4)]
+      [new Point(4, 4), new Point(-4, 4)],
     );
     const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
 
@@ -385,8 +385,8 @@ describe("getJunctionType() determines the type of a junction in respect to the 
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/edge-move-test.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     dcel = Dcel.fromGeoJSON(json);
   });

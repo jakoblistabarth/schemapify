@@ -8,8 +8,8 @@ describe("getMinimalConfigurationPair() finds the expected pair", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.createConfigurations();
@@ -29,8 +29,8 @@ describe("getMinimalConfigurationPair() finds the expected pair", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction-2.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.createConfigurations();
@@ -52,8 +52,8 @@ describe("recursive doEdgeMove() on minimal configuration pairs", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.createConfigurations();

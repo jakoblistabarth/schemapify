@@ -10,7 +10,7 @@ import { createConfigurationSetup } from "./test-setup";
 describe("getInteriorAngle() and getExteriorAngle()", function () {
   it("return the correct angles for the reflex point for a dart shape", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/dart.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/dart.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
 
@@ -25,7 +25,7 @@ describe("getInteriorAngle() and getExteriorAngle()", function () {
 
   it("return the correct angles for any of the convex points for a dart shape", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/dart.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/dart.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
 
@@ -83,7 +83,7 @@ describe("getInflectionType()", function () {
 
   it("returns the correct inflection type on a v-shape", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/v-shape.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/v-shape.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
 
@@ -103,8 +103,8 @@ describe("getInflectionType()", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/inflection-test.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
 
@@ -131,10 +131,10 @@ describe("getInflectionType() on the inner edge of a configuration Setup", funct
       new Point(-2, 0),
       new Point(2, 0),
       new Point(1, -2),
-      [new Point(8, 5)]
+      [new Point(8, 5)],
     );
     expect(configurationSetup.innerEdge.getInflectionType()).toBe(
-      InflectionType.B
+      InflectionType.B,
     );
   });
 
@@ -144,10 +144,10 @@ describe("getInflectionType() on the inner edge of a configuration Setup", funct
       new Point(-2, 0),
       new Point(2, 0),
       new Point(2, 2),
-      [new Point(8, 5)]
+      [new Point(8, 5)],
     );
     expect(configurationSetup.innerEdge.getInflectionType()).toBe(
-      InflectionType.C
+      InflectionType.C,
     );
   });
 
@@ -157,10 +157,10 @@ describe("getInflectionType() on the inner edge of a configuration Setup", funct
       new Point(-2, 0),
       new Point(2, 0),
       new Point(4, -2),
-      [new Point(0, 6)]
+      [new Point(0, 6)],
     );
     expect(configurationSetup.innerEdge.getInflectionType()).toBe(
-      InflectionType.R
+      InflectionType.R,
     );
   });
 });
