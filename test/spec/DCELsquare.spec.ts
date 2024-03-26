@@ -8,7 +8,7 @@ describe("A Dcel of a single square", function () {
 
   beforeEach(function () {
     const polygon = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     dcel = Dcel.fromGeoJSON(polygon);
   });
@@ -34,7 +34,7 @@ describe("A Dcel of a single square", function () {
     expect(dcel.getBoundedFaces()[0].edge?.twin?.getCycle().length).toBe(4);
     expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(4);
     expect(dcel.getBoundedFaces()[0].edge?.twin?.getCycle(false).length).toBe(
-      4
+      4,
     );
   });
 });

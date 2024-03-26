@@ -147,7 +147,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
       s.directions.od0,
       s.directions.od37,
       s.directions.od53,
-      s.directions.od76
+      s.directions.od76,
     );
     s.directions.od0.classify();
     s.directions.od37.classify();
@@ -165,7 +165,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
       s.directions.od315,
       s.directions.od333,
       s.directions.od53,
-      s.directions.od76
+      s.directions.od76,
     );
     s.directions.od315.classify();
     s.directions.od333.classify();
@@ -239,7 +239,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
       s.directions.od0,
       s.directions.od14,
       s.directions.od53,
-      s.directions.od76
+      s.directions.od76,
     );
     s.dcel.config = { ...config, c: new CRegular(4) };
     s.directions.od0.classify();
@@ -258,7 +258,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
       s.directions.od315,
       s.directions.od333,
       s.directions.od53,
-      s.directions.od76
+      s.directions.od76,
     );
     s.dcel.config = { ...config, c: new CRegular(4) };
     s.directions.od315.classify();
@@ -276,7 +276,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 describe("classifyEdges() in a classification where all edges are classified and a halfedge and its twin share the same class", function () {
   it("on simple test data", function () {
     const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/edge-cases.json"), "utf8")
+      fs.readFileSync(path.resolve("test/data/shapes/edge-cases.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.preProcess();
@@ -300,8 +300,8 @@ describe("classifyEdges() in a classification where all edges are classified and
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/geodata/ne_50m_africa_admin0-s20.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.preProcess();

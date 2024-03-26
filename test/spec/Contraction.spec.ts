@@ -14,8 +14,8 @@ describe("isConflicting() returns", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/edge-move-test.json"),
-        "utf8"
-      )
+        "utf8",
+      ),
     );
     dcel = Dcel.fromGeoJSON(json);
   });
@@ -28,7 +28,9 @@ describe("isConflicting() returns", function () {
     const cB = (edgeB.configuration = new Configuration(edgeB));
 
     expect(
-      cA[ContractionType.N]?.isConflicting(cB[ContractionType.P] as Contraction)
+      cA[ContractionType.N]?.isConflicting(
+        cB[ContractionType.P] as Contraction,
+      ),
     ).toBe(false);
   });
 
@@ -40,7 +42,9 @@ describe("isConflicting() returns", function () {
     const cB = (edgeB.configuration = new Configuration(edgeB));
 
     expect(
-      cA[ContractionType.N]?.isConflicting(cB[ContractionType.N] as Contraction)
+      cA[ContractionType.N]?.isConflicting(
+        cB[ContractionType.N] as Contraction,
+      ),
     ).toBe(true);
   });
 
@@ -55,13 +59,19 @@ describe("isConflicting() returns", function () {
     const cC = (edgeC.configuration = new Configuration(edgeC));
 
     expect(
-      cA[ContractionType.N]?.isConflicting(cB[ContractionType.N] as Contraction)
+      cA[ContractionType.N]?.isConflicting(
+        cB[ContractionType.N] as Contraction,
+      ),
     ).toBe(true);
     expect(
-      cA[ContractionType.N]?.isConflicting(cB[ContractionType.P] as Contraction)
+      cA[ContractionType.N]?.isConflicting(
+        cB[ContractionType.P] as Contraction,
+      ),
     ).toBe(true);
     expect(
-      cA[ContractionType.N]?.isConflicting(cC[ContractionType.N] as Contraction)
+      cA[ContractionType.N]?.isConflicting(
+        cC[ContractionType.N] as Contraction,
+      ),
     ).toBe(true);
   });
 });
@@ -104,7 +114,7 @@ describe("getCompensationShift() returns", function () {
       new Point(-2, 2),
       new Point(2, 2),
       new Point(4, 0),
-      [new Point(4, 6), new Point(-4, 6)]
+      [new Point(4, 6), new Point(-4, 6)],
     );
     const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
 
@@ -117,7 +127,7 @@ describe("getCompensationShift() returns", function () {
       new Point(-2, 2),
       new Point(2, 2),
       new Point(2, 0),
-      [new Point(4, 6), new Point(-4, 4)]
+      [new Point(4, 6), new Point(-4, 4)],
     );
     const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
 

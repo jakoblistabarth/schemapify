@@ -39,7 +39,7 @@ describe("Given the examples in the paper of buchin et al., directions are assig
       s.directions.od0,
       s.directions.od37,
       s.directions.od53,
-      s.directions.od76
+      s.directions.od76,
     );
     expect(s.o.assignDirections()).toEqual([3, 0, 1, 2]);
   });
@@ -49,7 +49,7 @@ describe("Given the examples in the paper of buchin et al., directions are assig
       s.directions.od315,
       s.directions.od333,
       s.directions.od53,
-      s.directions.od76
+      s.directions.od76,
     );
     expect(s.o.assignDirections()).toEqual([1, 2, 3, 0]);
   });
@@ -94,7 +94,7 @@ describe("Given the examples in the paper of buchin et al., directions are assig
       s.directions.od0,
       s.directions.od14,
       s.directions.od53,
-      s.directions.od76
+      s.directions.od76,
     );
     s.dcel.config = { ...config, c: new CRegular(4) };
 
@@ -106,7 +106,7 @@ describe("Given the examples in the paper of buchin et al., directions are assig
       s.directions.od315,
       s.directions.od333,
       s.directions.od53,
-      s.directions.od76
+      s.directions.od76,
     );
     s.dcel.config = { ...config, c: new CRegular(4) };
 
@@ -125,7 +125,7 @@ describe("assignDirections() on own examples", function () {
       s.directions.od90,
       s.directions.od143,
       s.directions.od180,
-      s.directions.od217
+      s.directions.od217,
     );
     expect(s.o.assignDirections()).toEqual([0, 1, 2, 3]);
   });
@@ -135,7 +135,7 @@ describe("assignDirections() on own examples", function () {
       s.directions.od90,
       s.directions.od104,
       s.directions.od180,
-      s.directions.od217
+      s.directions.od217,
     );
     expect(s.o.assignDirections()).toEqual([0, 1, 2, 3]);
   });
@@ -145,7 +145,7 @@ describe("assignDirections() on own examples", function () {
       s.directions.od90,
       s.directions.od153,
       s.directions.od180,
-      s.directions.od243
+      s.directions.od243,
     );
     expect(s.o.assignDirections()).toEqual([0, 1, 2, 3]);
   });
@@ -155,7 +155,7 @@ describe("assignDirections() on own examples", function () {
       s.directions.od153,
       s.directions.od166,
       s.directions.od180,
-      s.directions.od243
+      s.directions.od243,
     );
     expect(s.o.assignDirections()).toEqual([0, 1, 2, 3]);
   });
@@ -165,7 +165,7 @@ describe("assignDirections() on own examples", function () {
       s.directions.od153,
       s.directions.od166,
       s.directions.od180,
-      s.directions.od243
+      s.directions.od243,
     );
     s.dcel.config = { ...config, c: new CRegular(3) };
     expect(s.o.assignDirections()).toEqual([1, 2, 3, 4]);
@@ -181,7 +181,7 @@ describe("assignDirections() on own examples", function () {
       s.directions.od14,
       s.directions.od104,
       s.directions.od243,
-      s.directions.od333
+      s.directions.od333,
     );
     expect(s.o.assignDirections()).toEqual([0, 1, 2, 3]);
   });
