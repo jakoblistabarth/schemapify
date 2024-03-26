@@ -252,7 +252,7 @@ class Dcel {
 
     polygons.forEach((polygon) =>
       polygon.forEach((ring) => {
-        ring.slice(0, -1).forEach((tail, idx) => {
+        ring.forEach((tail, idx) => {
           const head: Vertex = ring[(idx + 1) % ring.length];
           const halfEdge = subdivision.makeHalfEdge(tail, head);
           const twinHalfEdge = subdivision.makeHalfEdge(head, tail);
@@ -285,6 +285,7 @@ class Dcel {
         polygon.rings.forEach((ring, idx) => {
           const [firstPoint, secondPoint] = ring.points;
 
+          // find first edge of the ring
           const edge = subdivision.getHalfEdges().find((e) => {
             return (
               e.tail.x === firstPoint.x &&
@@ -295,7 +296,15 @@ class Dcel {
           });
           if (!edge) return;
 
+          // check whether there's already a face related to this edge
           const existingFace = subdivision.faces.find((f) => f.edge === edge);
+          // console.log({ existingFace, featureId, idx, edge: edge.toString() });
+          // console.log({
+          //   props: multiPolygon.properties,
+          //   featureId,
+          //   idx,
+          //   existingFace,
+          // });
           if (existingFace?.associatedFeatures) {
             existingFace.associatedFeatures.push(featureId);
           } else {

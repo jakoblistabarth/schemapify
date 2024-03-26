@@ -24,15 +24,18 @@ class Ring {
   }
 
   get isClockwise() {
-    const sum = this.points.slice(1).reduce((acc: number, point, i) => {
-      const previous = this.points[i];
-      const current = point;
-      return (acc += (current.x - previous.x) * (current.y + previous.y));
+    const sum = this.points.reduce((acc: number, point, i, points) => {
+      const next = points[i + 1] ?? points[0];
+      return (acc += (point.x + next.x) * (point.y - next.y));
     }, 0);
 
     return sum > 0;
   }
 
+  /**
+   * Reverses the order of the {@link Ring}'s points.
+   * @returns The reversed {@link Ring}.
+   */
   reverse() {
     this.points.reverse();
     return this;

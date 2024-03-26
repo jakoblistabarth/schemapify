@@ -32,10 +32,13 @@ class MultiPolygon {
     );
   }
 
-  makeClockwise() {
+  /**
+   * Sort all rings counterclockwise.
+   */
+  makeCounterclockwise() {
     this.polygons.forEach((polygon) => {
       polygon.rings.forEach((ring) => {
-        if (!ring.isClockwise) ring.reverse();
+        if (ring.isClockwise) ring.reverse();
       });
     });
   }
