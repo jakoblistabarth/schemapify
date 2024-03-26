@@ -31,6 +31,14 @@ class MultiPolygon {
       coordinates.map((polygon) => Polygon.fromCoordinates(polygon)),
     );
   }
+
+  makeClockwise() {
+    this.polygons.forEach((polygon) => {
+      polygon.rings.forEach((ring) => {
+        if (!ring.isClockwise) ring.reverse();
+      });
+    });
+  }
 }
 
 export default MultiPolygon;

@@ -98,8 +98,10 @@ export const geoJsonToGeometry = (
         : feature.geometry.coordinates;
 
     const multipolygon = MultiPolygon.fromCoordinates(
-      geometry as [number, number][][],
+      geometry as [number, number][][][],
     );
+    // make all rings clockwise (geojson multipolygons should have counter-clockwise interior rings)
+    multipolygon.makeClockwise();
     multipolygon.id = idx.toString();
     multipolygon.properties = feature.properties;
     return multipolygon;

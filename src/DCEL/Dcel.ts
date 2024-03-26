@@ -212,11 +212,12 @@ class Dcel {
 
   /**
    * Creates a Doubly Connected Edge List (DCEL) data structure from a geoJSON.
-   * @credits adapted from [cs.stackexchange.com](https://cs.stackexchange.com/questions/2450/how-do-i-construct-a-doubly-connected-edge-list-given-a-set-of-line-segments)
-   * @param geoJSON a valid geojson with features of type 'Polygon' or 'Multipolyon'
+   * @param geoJSON a valid geojson with features of type 'Polygon' or 'Multipolygon'
    * @returns A {@link Dcel}.
    */
-  static fromGeoJSON(geoJSON: geojson.FeatureCollection): Dcel {
+  static fromGeoJSON(
+    geoJSON: geojson.FeatureCollection<geojson.Polygon | geojson.MultiPolygon>,
+  ): Dcel {
     if (!validateGeoJSON(geoJSON)) throw new Error("invalid input");
     const geometry = geoJsonToGeometry(geoJSON);
     return Dcel.fromMultiPolygons(geometry);
@@ -225,7 +226,7 @@ class Dcel {
   /**
    * Creates a Doubly Connected Edge List (DCEL) data structure from a geoJSON.
    * @credits adapted from [cs.stackexchange.com](https://cs.stackexchange.com/questions/2450/how-do-i-construct-a-doubly-connected-edge-list-given-a-set-of-line-segments)
-   * @param geoJSON a valid geojson with features of type 'Polygon' or 'Multipolyon'
+   * @param multiPolygons an array of {@link MultiPolygon}s.
    * @returns A {@link Dcel}.
    */
   static fromMultiPolygons(multiPolygons: MultiPolygon[]): Dcel {
@@ -233,14 +234,15 @@ class Dcel {
 
     subdivision.featureProperties = multiPolygons.map((d) => d.properties);
 
+    // convert Multipolygons to nested array of vertices (polygons)
     const polygons = multiPolygons.reduce((acc: Vertex[][][], multiPolygon) => {
       acc.push(
-        ...multiPolygons.map((polygon) =>
-          polygon.map((ring: number[][]) =>
-            ring.map(
-              (point: number[]) =>
-                subdivision.findVertex(point[0], point[1]) ||
-                subdivision.makeVertex(point[0], point[1]),
+        ...multiPolygon.polygons.map((polygon) =>
+          polygon.rings.map((ring) =>
+            ring.points.map(
+              (point) =>
+                subdivision.findVertex(point.x, point.y) ||
+                subdivision.makeVertex(point.x, point.y),
             ),
           ),
         ),
@@ -248,13 +250,10 @@ class Dcel {
       return acc;
     }, []);
 
-    multiPolygons.forEach((multiPolygon) =>
-      polygon.forEach((ring: Vertex[], idx: number) => {
-        ring = idx > 0 ? ring.reverse() : ring; // sort clockwise ordered vertices of inner rings (geojson spec) counterclockwise
-        const points = ring.slice(0, -1);
-
-        points.forEach((tail: Vertex, idx: number) => {
-          const head: Vertex = points[(idx + 1) % points.length];
+    polygons.forEach((polygon) =>
+      polygon.forEach((ring) => {
+        ring.slice(0, -1).forEach((tail, idx) => {
+          const head: Vertex = ring[(idx + 1) % ring.length];
           const halfEdge = subdivision.makeHalfEdge(tail, head);
           const twinHalfEdge = subdivision.makeHalfEdge(head, tail);
           halfEdge.twin = twinHalfEdge;
@@ -278,33 +277,20 @@ class Dcel {
     });
 
     // For every cycle, allocate and assign a face structure.
-    geoJSON.features.forEach((feature: geojson.Feature, idx: number) => {
-      if (
-        feature.geometry.type !== "Polygon" &&
-        feature.geometry.type !== "MultiPolygon"
-      )
-        return;
-      // TODO: check in e.g, parseGeoJSON()? if only polygons or  multipolygons in geojson
-      // TODO: add error handling
-
+    multiPolygons.forEach((multiPolygon, idx) => {
       const featureId = idx;
-      const multiPolygons =
-        feature.geometry.type !== "MultiPolygon"
-          ? [feature.geometry.coordinates]
-          : feature.geometry.coordinates;
 
       let outerRingFace: Face;
-      multiPolygons.forEach((polygon) =>
-        polygon.forEach((ring: number[][], idx: number) => {
-          ring = idx > 0 ? ring.reverse() : ring;
-          const [firstPoint, secondPoint] = ring;
+      multiPolygon.polygons.forEach((polygon) =>
+        polygon.rings.forEach((ring, idx) => {
+          const [firstPoint, secondPoint] = ring.points;
 
           const edge = subdivision.getHalfEdges().find((e) => {
             return (
-              e.tail.x === firstPoint[0] &&
-              e.tail.y === firstPoint[1] &&
-              e.twin?.tail.x === secondPoint[0] &&
-              e.twin?.tail.y === secondPoint[1]
+              e.tail.x === firstPoint.x &&
+              e.tail.y === firstPoint.y &&
+              e.twin?.tail.x === secondPoint.x &&
+              e.twin?.tail.y === secondPoint.y
             );
           });
           if (!edge) return;
