@@ -4,8 +4,114 @@ import { hint } from "@mapbox/geojsonhint";
 import { getTestFiles } from "./test-setup";
 import Dcel from "../../src/DCEL/Dcel";
 import Face from "../../src/DCEL/Face";
+import MultiPolygon from "../../src/geometry/MultiPolygon";
+import * as geojson from "geojson";
 
-describe("A Dcel of 2 adjacent squares", function () {
+describe("A Dcel from multipolygons", function () {
+  it("forming a square is parsed correctly.", function () {
+    const m = MultiPolygon.fromCoordinates([
+      [
+        [
+          [0, 0],
+          [2, 0],
+          [2, 2],
+          [0, 2],
+        ],
+      ],
+    ]);
+    const dcel = Dcel.fromMultiPolygons([m]);
+
+    expect(dcel.faces.length).toBe(2);
+    expect(dcel.vertices.size).toBe(4);
+    expect(dcel.halfEdges.size).toBe(8);
+  });
+
+  it("forming 2 adjacent squares is parsed correctly.", function () {
+    const m = MultiPolygon.fromCoordinates([
+      [
+        [
+          [0, 0],
+          [2, 0],
+          [2, 2],
+          [0, 2],
+        ],
+      ],
+      [
+        [
+          [2, 0],
+          [4, 0],
+          [4, 2],
+          [2, 2],
+        ],
+      ],
+    ]);
+    const dcel = Dcel.fromMultiPolygons([m]);
+
+    expect(dcel.faces.length).toBe(3);
+    expect(dcel.vertices.size).toBe(6);
+    expect(dcel.halfEdges.size).toBe(14);
+  });
+
+  it("forming 2 separate squares is parsed correctly.", function () {
+    const m = MultiPolygon.fromCoordinates([
+      [
+        [
+          [0, 0],
+          [2, 0],
+          [2, 2],
+          [0, 2],
+        ],
+      ],
+      [
+        [
+          [3, 0],
+          [5, 0],
+          [5, 2],
+          [3, 2],
+        ],
+      ],
+    ]);
+    const dcel = Dcel.fromMultiPolygons([m]);
+
+    expect(dcel.faces.length).toBe(3);
+    expect(dcel.vertices.size).toBe(8);
+    expect(dcel.halfEdges.size).toBe(16);
+  });
+
+  it("forming 2 separate squares with one hole is parsed correctly.", function () {
+    const m = MultiPolygon.fromCoordinates([
+      [
+        [
+          [0, 0],
+          [4, 0],
+          [4, 4],
+          [0, 4],
+        ],
+        [
+          [1, 1],
+          [3, 1],
+          [3, 3],
+          [1, 3],
+        ],
+      ],
+      [
+        [
+          [5, 0],
+          [9, 0],
+          [9, 4],
+          [5, 4],
+        ],
+      ],
+    ]);
+    const dcel = Dcel.fromMultiPolygons([m]);
+
+    expect(dcel.faces.length).toBe(4);
+    expect(dcel.vertices.size).toBe(12);
+    expect(dcel.halfEdges.size).toBe(24);
+  });
+});
+
+describe("A Dcel from a geojson feature collection of 2 adjacent squares", function () {
   const json = JSON.parse(
     fs.readFileSync(
       path.resolve("test/data/shapes/2plgn-adjacent.json"),
@@ -41,7 +147,7 @@ describe("A Dcel of 2 adjacent squares", function () {
   });
 });
 
-describe("A Dcel of 3 adjacent squares", function () {
+describe("A Dcel from a geojson feature collection of 3 adjacent squares", function () {
   const json = JSON.parse(
     fs.readFileSync(
       path.resolve("test/data/shapes/3plgn-adjacent.json"),
@@ -74,6 +180,62 @@ describe("A Dcel of 3 adjacent squares", function () {
         return counter;
       }, []);
     expect(edgeCount.sort()).toEqual([4, 4, 4]);
+  });
+});
+
+describe("A Dcel from a geojson feature of 3 adjacent squares", function () {
+  const json = JSON.parse(
+    fs.readFileSync(
+      path.resolve("test/data/shapes/3plgn-adjacent.json"),
+      "utf8",
+    ),
+  );
+  const dcel = Dcel.fromGeoJSON(json);
+
+  it("has 1 unbounded face", function () {
+    expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
+  });
+
+  it("has 4 faces", function () {
+    expect(dcel.faces.length).toBe(4);
+  });
+
+  it("has 8 vertices", function () {
+    expect(dcel.vertices.size).toBe(8);
+  });
+
+  it("has 20 edges", function () {
+    expect(dcel.halfEdges.size).toBe(20);
+  });
+
+  it("has inner faces with the right amount of edges", function () {
+    const edgeCount = dcel
+      .getBoundedFaces()
+      .reduce((counter: number[], f: Face) => {
+        counter.push(f.getEdges().length);
+        return counter;
+      }, []);
+    expect(edgeCount.sort()).toEqual([4, 4, 4]);
+  });
+});
+
+describe("A Dcel fom a geojson feature collection with the simplified boundaries of Austria's states", function () {
+  it("can be converted", function () {
+    const inputJson = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/geodata/AUT_adm1-simple.json"),
+        "utf8",
+      ),
+    );
+
+    const input: geojson.FeatureCollection<
+      geojson.MultiPolygon | geojson.Polygon
+    > = {
+      type: "FeatureCollection",
+      features: [inputJson.features[0], inputJson.features[2]],
+    };
+    const dcel = Dcel.fromGeoJSON(input);
+    expect(dcel).toBeInstanceOf(Dcel);
   });
 });
 
@@ -198,7 +360,7 @@ describe("getArea()", function () {
 });
 
 describe("schematize() returns a result which can be turned into a valid geojson", function () {
-  it("for simplied boundaries of Austria.", function () {
+  it("for simplified boundaries of Austria.", function () {
     const inputJson = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/geodata/AUT_adm1-simple.json"),
@@ -215,7 +377,7 @@ describe("schematize() returns a result which can be turned into a valid geojson
   });
 });
 
-xdescribe("schematize() returns a result which can be turned into a valid geojson", function () {
+describe("schematize() returns a result which can be turned into a valid geojson", function () {
   const dir = "test/data/shapes";
   const testFiles = getTestFiles(dir);
 

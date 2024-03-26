@@ -1,6 +1,8 @@
 import * as geojson from "geojson";
 import Vector2D from "./geometry/Vector2D";
 import MultiPolygon from "./geometry/MultiPolygon";
+import Ring from "./geometry/Ring";
+import Polygon from "./geometry/Polygon";
 
 export async function getJSON(path: string) {
   const response = await fetch(path);
@@ -92,18 +94,23 @@ export const geoJsonToGeometry = (
   geoJson: geojson.FeatureCollection<geojson.Polygon | geojson.MultiPolygon>,
 ) => {
   return geoJson.features.map((feature, idx) => {
-    const geometry =
+    const multipolygons =
       feature.geometry.type !== "MultiPolygon"
         ? [feature.geometry.coordinates]
         : feature.geometry.coordinates;
 
-    const multipolygon = MultiPolygon.fromCoordinates(
-      geometry as [number, number][][][],
-    );
-    // make all rings clockwise (geojson multipolygons should have counter-clockwise interior rings)
-    multipolygon.makeClockwise();
-    multipolygon.id = idx.toString();
-    multipolygon.properties = feature.properties;
-    return multipolygon;
+    const polygons = multipolygons.map((polygon) => {
+      const rings = polygon.map((ringPositions) => {
+        const ring = Ring.fromCoordinates(ringPositions as [number, number][]);
+        // ensure all rings are sorted counterclockwise
+        // (geojson multipolygons should have clockwise interior rings)
+        if (ring.isClockwise) ring.reverse();
+        // remove redundant last point from geojson rings
+        return new Ring(ring.points.slice(0, -1));
+      });
+      return new Polygon(rings);
+    });
+
+    return new MultiPolygon(polygons, idx.toString(), feature.properties);
   });
 };
