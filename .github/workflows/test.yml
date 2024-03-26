@@ -1,5 +1,7 @@
 name: test
-on: push
+on:
+  push:
+    branches-ignore: "wip/*"
 jobs:
   test:
     runs-on: ubuntu-latest
