@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "../../src/DCEL/Dcel";
-import FaceFaceBoundaryList from "../../src/c-oriented-schematization/FaceFaceBoundaryList";
-import ConfigurationPair from "../../src/c-oriented-schematization/ConfigurationPair";
+import Dcel from "@/src/DCEL/Dcel";
+import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
+import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
 
 describe("create()", function () {
   it("on a dcel of 2 adjacent squares returns FaceFaceBoundaryList with 3 entries and the correct number of Edges", function () {

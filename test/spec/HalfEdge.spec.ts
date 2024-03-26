@@ -1,13 +1,13 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "../../src/DCEL/Dcel";
-import HalfEdge from "../../src/DCEL/HalfEdge";
-import Vertex from "../../src/DCEL/Vertex";
-import Point from "../../src/geometry/Point";
-import { config } from "../../src/c-oriented-schematization/schematization.config";
-import CRegular from "../../src/c-oriented-schematization/CRegular";
+import Dcel from "@/src/DCEL/Dcel";
+import HalfEdge from "@/src/DCEL/HalfEdge";
+import Vertex from "@/src/DCEL/Vertex";
+import Point from "@/src/geometry/Point";
+import { config } from "@/src/c-oriented-schematization/schematization.config";
+import CRegular from "@/src/c-oriented-schematization/CRegular";
 import { createEdgeVertexSetup, TestSetup, getTestFiles } from "./test-setup";
-import Line from "../../src/geometry/Line";
+import Line from "@/src/geometry/Line";
 
 describe("getLength()", function () {
   it("returns the correct length for a single halfEdge", function () {

@@ -1,7 +1,7 @@
-import Polygon from "../../src/geometry/Polygon";
-import Point from "../../src/geometry/Point";
-import LineSegment from "../../src/geometry/LineSegment";
-import Ring from "../../src/geometry/Ring";
+import Polygon from "@/src/geometry/Polygon";
+import Point from "@/src/geometry/Point";
+import LineSegment from "@/src/geometry/LineSegment";
+import Ring from "@/src/geometry/Ring";
 
 describe("The Polygon's area getter", function () {
   it("gets the correct area of simple squares", function () {

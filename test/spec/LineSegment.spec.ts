@@ -1,6 +1,6 @@
-import Point from "../../src/geometry/Point";
-import LineSegment from "../../src/geometry/LineSegment";
-import Polygon from "../../src/geometry/Polygon";
+import Point from "@/src/geometry/Point";
+import LineSegment from "@/src/geometry/LineSegment";
+import Polygon from "@/src/geometry/Polygon";
 
 describe("intersectsLineSegment()", function () {
   it("returns intersection point if two line segments share an endpoint (no matter whether or not collinearity is considered).", function () {

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "../../src/DCEL/Dcel";
-import FaceFaceBoundaryList from "../../src/c-oriented-schematization/FaceFaceBoundaryList";
+import Dcel from "@/src/DCEL/Dcel";
+import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
 
 describe("getMinimalConfigurationPair() finds the expected pair", function () {
   xit("for the test case 'smallest-contraction", function () {

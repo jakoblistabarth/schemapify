@@ -1,6 +1,6 @@
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
-import { config } from "../../src/c-oriented-schematization/schematization.config";
-import CRegular from "../../src/c-oriented-schematization/CRegular";
+import { config } from "@/src/c-oriented-schematization/schematization.config";
+import CRegular from "@/src/c-oriented-schematization/CRegular";
 
 describe("Given the examples in the paper of buchin et al., directions are assigned, correctly on example", function () {
   let s: TestSetup;

@@ -1,4 +1,4 @@
-import Ring from "../../src/geometry/Ring";
+import Ring from "@/src/geometry/Ring";
 
 describe("isClockwise() returns the correct boolean", function () {
   it("for simple squares", function () {

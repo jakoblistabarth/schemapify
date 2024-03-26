@@ -2,9 +2,9 @@ import fs from "fs";
 import path from "path";
 import { hint } from "@mapbox/geojsonhint";
 import { getTestFiles } from "./test-setup";
-import Dcel from "../../src/DCEL/Dcel";
-import Face from "../../src/DCEL/Face";
-import MultiPolygon from "../../src/geometry/MultiPolygon";
+import Dcel from "@/src/DCEL/Dcel";
+import Face from "@/src/DCEL/Face";
+import MultiPolygon from "@/src/geometry/MultiPolygon";
 import * as geojson from "geojson";
 
 describe("A Dcel from multipolygons", function () {

@@ -1,7 +1,7 @@
-import Polygon from "../../src/geometry/Polygon";
-import Point from "../../src/geometry/Point";
-import MultiPolygon from "../../src/geometry/MultiPolygon";
-import Ring from "../../src/geometry/Ring";
+import Polygon from "@/src/geometry/Polygon";
+import Point from "@/src/geometry/Point";
+import MultiPolygon from "@/src/geometry/MultiPolygon";
+import Ring from "@/src/geometry/Ring";
 
 describe("The MultiPolygon's area getter", function () {
   it("gets the correct area of simple shapes", function () {
