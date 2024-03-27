@@ -2,16 +2,17 @@ import Point from "./Point";
 
 /**
  * Class representing a ring.
- * It is defined by its Points.
+ * It is defined by its Points
+ * Its points are always returned in counterclockwise order.
  */
 class Ring {
   /**
    * A ring is an array of {@link Point}s.
    */
-  points: Point[];
+  _points: Point[];
 
   constructor(points: Point[]) {
-    this.points = points;
+    this._points = points;
   }
 
   static fromCoordinates(coordinates: [number, number][]) {
@@ -19,26 +20,21 @@ class Ring {
     return new Ring(points);
   }
 
+  get points(): Point[] {
+    return this.isClockwise ? [...this._points].reverse() : this._points;
+  }
+
   get length() {
     return this.points.length;
   }
 
   get isClockwise() {
-    const sum = this.points.reduce((acc: number, point, i, points) => {
+    const sum = this._points.reduce((acc: number, point, i, points) => {
       const next = points[i + 1] ?? points[0];
       return (acc += (point.x + next.x) * (point.y - next.y));
     }, 0);
 
     return sum > 0;
-  }
-
-  /**
-   * Reverses the order of the {@link Ring}'s points.
-   * @returns The reversed {@link Ring}.
-   */
-  reverse() {
-    this.points.reverse();
-    return this;
   }
 }
 

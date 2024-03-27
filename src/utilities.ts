@@ -102,9 +102,7 @@ export const geoJsonToGeometry = (
     const polygons = multipolygons.map((polygon) => {
       const rings = polygon.map((ringPositions) => {
         const ring = Ring.fromCoordinates(ringPositions as [number, number][]);
-        // ensure all rings are sorted counterclockwise
-        // (geojson multipolygons should have clockwise interior rings)
-        if (ring.isClockwise) ring.reverse();
+        // the rings points are already by definition sorted counterclockwise
         // remove redundant last point from geojson rings
         return new Ring(ring.points.slice(0, -1));
       });
