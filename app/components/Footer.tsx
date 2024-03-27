@@ -8,11 +8,10 @@ const Footer = () => {
         className="bg-white p-3"
         // gridarea footer
       >
-        <div className="grid grid-cols-2">
-          <div>
-            <Link href={"/about"}>About</Link>
-          </div>
-          <div className="flex justify-end">
+        <div className="flex gap-5">
+          <Link href={"/about"}>About</Link>
+          <Link href={"/implementation/configuration"}>Algorithm</Link>
+          <div className="flex flex-grow justify-end">
             <Link
               className="flex items-center"
               href={"https://github.com/jakoblistabarth/schemapify"}
