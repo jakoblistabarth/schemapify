@@ -31,17 +31,6 @@ class MultiPolygon {
       coordinates.map((polygon) => Polygon.fromCoordinates(polygon)),
     );
   }
-
-  /**
-   * Sort all rings counterclockwise.
-   */
-  makeCounterclockwise() {
-    this.polygons.forEach((polygon) => {
-      polygon.rings.forEach((ring) => {
-        if (ring.isClockwise) ring.reverse();
-      });
-    });
-  }
 }
 
 export default MultiPolygon;
