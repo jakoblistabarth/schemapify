@@ -261,9 +261,9 @@ describe("getBbox()", function () {
     const bboxPlgn2 = Dcel.fromGeoJSON(plgn2).getBbox();
     const bboxPlgn3 = Dcel.fromGeoJSON(plgn3).getBbox();
 
-    expect(bboxPlgn1).toEqual([0, 0, 20, 20]);
-    expect(bboxPlgn2).toEqual([0, 0, 4, 2]);
-    expect(bboxPlgn3).toEqual([0, 0, 2, 2]);
+    expect(bboxPlgn1).toEqual([0, 20, 0, 20]);
+    expect(bboxPlgn2).toEqual([0, 4, 0, 2]);
+    expect(bboxPlgn3).toEqual([0, 2, 0, 2]);
   });
 });
 
