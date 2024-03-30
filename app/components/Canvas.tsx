@@ -1,31 +1,53 @@
 "use client";
 
 import Dcel from "@/src/DCEL/Dcel";
-import { OrthographicView } from "@deck.gl/core/typed";
-import { LineLayer, ScatterplotLayer } from "@deck.gl/layers/typed";
-import { DeckGL } from "@deck.gl/react/typed";
-import { FC } from "react";
 import HalfEdge from "@/src/DCEL/HalfEdge";
+import shape from "@/test/data/shapes/unaligned-deviating-2";
 import { range } from "d3";
-import { TwoPlgnIslandsHoles } from "@/test/data/shapes/2plg-islands-holes";
+import {
+  DeckGL,
+  LineLayer,
+  OrthographicView,
+  OrthographicViewState,
+  ScatterplotLayer,
+} from "deck.gl";
+import { FC } from "react";
+import ConfigurationLayer from "../helpers/ConfigurationLayer";
+import Vector2D from "@/src/geometry/Vector2D";
+import Vertex from "@/src/DCEL/Vertex";
 
 const Canvas: FC = () => {
-  const dcel = Dcel.fromMultiPolygons(TwoPlgnIslandsHoles);
+  const dcel = Dcel.fromMultiPolygons(shape);
   dcel.schematize();
 
-  const vertices = Array.from(dcel.getVertices());
+  const configurations =
+    dcel.faceFaceBoundaryList?.getMinimalConfigurationPair();
+  console.log({ configurations });
+
+  const contractions = new ConfigurationLayer({
+    data: configurations?.contraction.configuration,
+  });
+
+  const shiftPoint = (edge: HalfEdge, vertex?: Vertex, scale = 0.02) => {
+    if (!vertex)
+      throw "Error drawing halfEdge: vertex for offset is not defined";
+    const shift =
+      edge.getVector()?.getNormal(false).getUnitVector().times(scale) ??
+      new Vector2D(0, 0);
+    return vertex?.toVector().plus(shift).toArray();
+  };
 
   const edges = new LineLayer({
     data: Array.from(dcel.getHalfEdges()),
-    getSourcePosition: (e: HalfEdge) => e.tail.toVector().toArray(),
-    getTargetPosition: (e: HalfEdge) =>
-      e.getHead()?.toVector().toArray() ?? [0, 0],
+    getSourcePosition: (e: HalfEdge) => shiftPoint(e, e.tail),
+    getTargetPosition: (e: HalfEdge) => shiftPoint(e, e.getHead()),
   });
   const points = new ScatterplotLayer({
-    data: vertices,
+    id: "vertices",
+    data: Array.from(dcel.getVertices()),
     getPosition: (d) => [d.x, d.y],
     radiusMinPixels: 1,
-    radiusMaxPixels: 4,
+    radiusMaxPixels: 3,
     stroked: true,
     lineWidthUnits: "pixels",
     lineWidthMinPixels: 1,
@@ -38,6 +60,7 @@ const Canvas: FC = () => {
     .flat();
 
   const grid = new ScatterplotLayer({
+    id: "grid",
     data: gridPoints,
     getPosition: (d) => d,
     radiusMinPixels: 1,
@@ -45,16 +68,18 @@ const Canvas: FC = () => {
     getFillColor: [0, 0, 0, 50],
   });
 
+  const initialViewState: OrthographicViewState = {
+    target: dcel.center,
+    zoom: 6,
+    minZoom: 5,
+    maxZoom: 7,
+  };
+
   return (
     <DeckGL
       views={new OrthographicView({ flipY: false })}
-      layers={[grid, edges, points]}
-      initialViewState={{
-        target: dcel.center,
-        zoom: 6,
-        minZoom: 5,
-        maxZoom: 7,
-      }}
+      layers={[grid, edges, contractions, points]}
+      initialViewState={initialViewState}
       controller={true}
     />
   );

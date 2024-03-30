@@ -365,7 +365,7 @@ class Dcel {
    * Get the center of the polygon.
    * Defined as the center of it's Boundingbox
    */
-  get center() {
+  get center(): [number, number] {
     const [minX, maxX, minY, maxY] = this.getBbox();
     return [(minX + maxX) / 2, (minY + maxY) / 2];
   }

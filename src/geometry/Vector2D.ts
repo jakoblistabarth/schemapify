@@ -13,6 +13,11 @@ class Vector2D {
     return Math.sqrt(Math.pow(this.dx, 2) + Math.pow(this.dy, 2));
   }
 
+  /**
+   * Get the vectors normal vector.
+   * @param counterclockwise boolean, indicating in which of the two halfspaces the normal vector should be situated.
+   * @returns
+   */
   getNormal(counterclockwise = true): Vector2D {
     return counterclockwise
       ? new Vector2D(-this.dy, this.dx)
