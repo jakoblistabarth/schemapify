@@ -4,7 +4,7 @@ import Math from "@/app/components/Math";
 
 export default function Page() {
   return (
-    <div className="py-10">
+    <div className="flex flex-col gap-10 py-10">
       <section>
         <h2>
           Configuration <Math>X</Math>
@@ -52,8 +52,7 @@ export default function Page() {
           <Math>X</Math> to reach length zero.
         </p>
       </section>
-
-      <div className="relative my-5 min-h-[500px] overflow-hidden rounded bg-gray-200/25">
+      <div className="relative min-h-[500px] overflow-hidden rounded bg-gray-200/25">
         <Canvas />
       </div>
     </div>
