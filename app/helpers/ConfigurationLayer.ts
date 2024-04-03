@@ -1,5 +1,6 @@
 import HalfEdge from "@/src/DCEL/HalfEdge";
-import Configuration from "@/src/c-oriented-schematization/Configuration";
+import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
+import Contraction from "@/src/c-oriented-schematization/Contraction";
 import {
   CompositeLayer,
   LayersList,
@@ -7,7 +8,7 @@ import {
   SolidPolygonLayer,
 } from "deck.gl";
 
-type LayerData = Configuration;
+type LayerData = ConfigurationPair;
 
 type ConfigurationLayerProps = {
   id: string;
@@ -18,18 +19,30 @@ type ConfigurationLayerProps = {
 export default class ConfigurationLayer extends CompositeLayer<ConfigurationLayerProps> {
   static layerName = "ConfigurationLayer";
 
+  get contractions() {
+    return Object.entries(this.props.data).filter(
+      ([, d]) => d != undefined,
+    ) as [string, Contraction][];
+  }
+
   renderLayers(): LayersList | null {
     return [
       new SolidPolygonLayer(
         this.getSubLayerProps({
           id: "contraction-area-layer",
-          data: this.props.data,
+          data: this.contractions.map(([, contraction]) => ({
+            polygon: contraction.areaPoints.map((d) => d.toVector().toArray()),
+          })),
+          getFillColor: (d, { index }) =>
+            index > 0 ? [0, 0, 255, 100] : [0, 0, 255, 25],
         }),
       ),
       new LineLayer(
         this.getSubLayerProps({
           id: `x-layer`,
-          data: this.props.data?.getX(),
+          data: this.contractions
+            .map(([, contraction]) => contraction.configuration.getX())
+            .flat(),
           getSourcePosition: (e: HalfEdge) => e.tail.toVector().toArray(),
           getTargetPosition: (e: HalfEdge) =>
             e.getHead()?.toVector().toArray() ?? [0, 0],
@@ -40,7 +53,9 @@ export default class ConfigurationLayer extends CompositeLayer<ConfigurationLaye
       new LineLayer(
         this.getSubLayerProps({
           id: `en-layer`,
-          data: [this.props.data?.innerEdge],
+          data: this.contractions
+            .map(([, contraction]) => contraction.configuration.innerEdge)
+            .flat(),
           getSourcePosition: (e: HalfEdge) => e.tail.toVector().toArray(),
           getTargetPosition: (e: HalfEdge) =>
             e.getHead()?.toVector().toArray() ?? [0, 0],
