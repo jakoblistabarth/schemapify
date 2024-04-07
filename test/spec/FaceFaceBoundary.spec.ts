@@ -3,6 +3,7 @@ import path from "path";
 import Dcel from "@/src/DCEL/Dcel";
 import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
 import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
+import MultiPolygon from "@/src/geometry/MultiPolygon";
 
 describe("create()", function () {
   it("on a dcel of 2 adjacent squares returns FaceFaceBoundaryList with 3 entries and the correct number of Edges", function () {
@@ -37,6 +38,28 @@ describe("create()", function () {
 
     expect(ffb.boundaries.size).toBe(5);
     expect(lengths).toEqual([1, 1, 2, 3, 3]);
+  });
+});
+
+describe("The Face-Face-Boundary", function () {
+  it("consists of edges which all belong to the same face", function () {
+    const dcel = Dcel.fromMultiPolygons([
+      MultiPolygon.fromCoordinates([
+        [
+          [
+            [-3, 3],
+            [0, -2],
+            [3, 2],
+          ],
+        ],
+      ]),
+    ]);
+    dcel.schematize();
+    const ffbl = new FaceFaceBoundaryList(dcel);
+    const faces = ffbl
+      .getBoundaries()
+      .map((ffb) => new Set(ffb.edges.map((e) => e.face?.uuid)));
+    expect(faces.every((face) => face.size === 1)).toBeTruthy();
   });
 });
 
