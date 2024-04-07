@@ -13,10 +13,13 @@ class FaceFaceBoundaryList {
     this.boundaries = this.create(dcel);
   }
 
+  static sortFaces(faceA: Face, faceB: Face) {
+    return [faceA, faceB].sort((a, b) => a.uuid.localeCompare(b.uuid));
+  }
+
   static getKey(faceA: Face, faceB: Face): string {
-    return [faceA, faceB]
-      .map((d) => d.getUuid(10))
-      .sort()
+    return FaceFaceBoundaryList.sortFaces(faceA, faceB)
+      .map((d) => d.uuid)
       .join("|");
   }
 
@@ -25,13 +28,14 @@ class FaceFaceBoundaryList {
 
     dcel.getHalfEdges(undefined, true).forEach((edge) => {
       if (!edge.face || !edge.twin?.face) return;
-      const key = FaceFaceBoundaryList.getKey(edge.face, edge.twin.face);
-      if (boundaries.has(key)) boundaries.get(key)?.edges.push(edge);
-      else
-        boundaries.set(
-          key,
-          new FaceFaceBoundary(edge.face, edge.twin.face, edge),
-        );
+      const faces = [edge.face, edge.twin?.face] as [Face, Face];
+      const key = FaceFaceBoundaryList.getKey(...faces);
+      const sortedFaces = FaceFaceBoundaryList.sortFaces(...faces);
+      const edgeToAdd =
+        edge.face.uuid === sortedFaces[0].uuid ? edge : edge.twin;
+      if (!edgeToAdd) return;
+      if (boundaries.has(key)) boundaries.get(key)?.edges.push(edgeToAdd);
+      else boundaries.set(key, new FaceFaceBoundary(...faces, edgeToAdd));
     });
 
     return boundaries;
