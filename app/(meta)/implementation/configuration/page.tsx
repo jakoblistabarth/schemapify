@@ -1,4 +1,4 @@
-import Canvas from "@/app/components/Canvas";
+import DcelViewer from "@/app/components/DcelViewer";
 import DescriptionList from "@/app/components/DescriptionList";
 import Math from "@/app/components/Math";
 
@@ -52,9 +52,7 @@ export default function Page() {
           <Math>X</Math> to reach length zero.
         </p>
       </section>
-      <div className="relative min-h-[500px] overflow-hidden rounded bg-gray-200/25">
-        <Canvas />
-      </div>
+      <DcelViewer />
     </div>
   );
 }

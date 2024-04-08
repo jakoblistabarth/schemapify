@@ -33,7 +33,7 @@ export default class ConfigurationLayer extends CompositeLayer<ConfigurationLaye
           data: this.contractions.map(([, contraction]) => ({
             polygon: contraction.areaPoints.map((d) => d.toVector().toArray()),
           })),
-          getFillColor: (d, { index }) =>
+          getFillColor: (_: [number, number], { index }: { index: number }) =>
             index > 0 ? [0, 0, 255, 100] : [0, 0, 255, 25],
         }),
       ),
