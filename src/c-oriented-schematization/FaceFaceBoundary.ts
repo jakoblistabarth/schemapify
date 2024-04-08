@@ -20,7 +20,7 @@ class FaceFaceBoundary {
     const pContractions = this.edges
       .reduce((contractions: Contraction[], edge) => {
         const pContraction = edge.configuration?.[ContractionType.P];
-        if (pContraction && pContraction.isFeasible()) contractions.push(pContraction);
+        if (pContraction?.isFeasible()) contractions.push(pContraction);
         return contractions;
       }, [])
       .sort((a, b) => a.area - b.area);
@@ -28,23 +28,24 @@ class FaceFaceBoundary {
     const nContractions = this.edges
       .reduce((contractions: Contraction[], edge) => {
         const nContraction = edge.configuration?.[ContractionType.N];
-        if (nContraction && nContraction.isFeasible()) contractions.push(nContraction);
+        if (nContraction?.isFeasible()) contractions.push(nContraction);
         return contractions;
       }, [])
       .sort((a, b) => a.area - b.area);
 
-    const contractionCandidates = [...pContractions.slice(0, 6), ...nContractions.slice(0, 6)].sort(
-      (a, b) => a.area - b.area
-    );
-
-    // console.log("candidates", contractionCandidates);
+    const contractionCandidates = [
+      ...pContractions.slice(0, 6),
+      ...nContractions.slice(0, 6),
+    ].sort((a, b) => a.area - b.area);
 
     type CompensationCandidate = { contraction: Contraction; distance: number };
     let contraction: Contraction | undefined;
     let compensation: Contraction | undefined;
     for (const contractionCandidate of contractionCandidates) {
       const compensationCandidates =
-        contractionCandidate.type === ContractionType.N ? pContractions : nContractions;
+        contractionCandidate.type === ContractionType.N
+          ? pContractions
+          : nContractions;
       const compensationCandidate = compensationCandidates
         .reduce((solutions: CompensationCandidate[], candidate) => {
           // console.log(
@@ -65,9 +66,10 @@ class FaceFaceBoundary {
           )
             solutions.push({
               contraction: candidate,
-              distance: contractionCandidate.configuration.innerEdge.getMinimalCycleDistance(
-                candidate.configuration.innerEdge
-              ),
+              distance:
+                contractionCandidate.configuration.innerEdge.getMinimalCycleDistance(
+                  candidate.configuration.innerEdge,
+                ),
             });
           return solutions;
         }, [])
@@ -75,12 +77,15 @@ class FaceFaceBoundary {
       if (contractionCandidate.area === 0 || compensationCandidate) {
         contraction = contractionCandidate;
         compensation =
-          contractionCandidate.area > 0 ? compensationCandidate.contraction : undefined;
+          contractionCandidate.area > 0
+            ? compensationCandidate.contraction
+            : undefined;
         break;
       }
     }
 
-    if (contraction && compensation) return new ConfigurationPair(contraction, compensation);
+    if (contraction && compensation)
+      return new ConfigurationPair(contraction, compensation);
     if (contraction) return new ConfigurationPair(contraction);
   }
 }

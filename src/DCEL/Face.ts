@@ -42,7 +42,7 @@ class Face {
 
   /**
    *
-   * @param stop defines how many strings of the uuid are returned
+   * @param length defines how many strings of the uuid are returned
    * @returns the edge's uuid
    */
   getUuid(length?: number) {
