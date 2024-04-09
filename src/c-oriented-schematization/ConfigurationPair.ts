@@ -3,6 +3,10 @@ import Configuration from "./Configuration";
 import HalfEdge from "../DCEL/HalfEdge";
 import Point from "../geometry/Point";
 
+/**
+ * A pair of {@link Contraction}s, which are complementary and non-conflicting.
+ * The {@link ConfigurationPair} is used to perform an edge move.
+ */
 class ConfigurationPair {
   contraction: Contraction;
   compensation?: Contraction;
@@ -13,7 +17,7 @@ class ConfigurationPair {
   }
 
   /**
-   * Get all edges of the configurations involved in the edge move (contraction and a possible and the compensation).
+   * Get all edges of the configurations involved in the edge move (contraction and compensation).
    * @returns An array of {@link HalfEdge}s.
    */
   getX1X2(): HalfEdge[] {

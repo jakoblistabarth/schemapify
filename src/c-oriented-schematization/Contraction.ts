@@ -86,7 +86,7 @@ class Contraction {
 
   /**
    * Gets the point which is a possible and valid contraction point for an edge move.
-   * @param outerEdge The edge which should be used as track for the edge move.
+   * @param configuration The {@link Configuration} to be used for the edge move.
    * @returns A {@link Point}, posing a configuration's contraction point.
    */
   static getPoint(

@@ -187,12 +187,22 @@ class Dcel {
     });
   }
 
+  /**
+   * Removes the {@link Vertex} from the DCEL.
+   * @param vertex The {@link Vertex} to remove.
+   * @returns The remaining {@link Vertex|Vertices} in the DCEL.
+   */
   removeVertex(vertex: Vertex): Map<string, Vertex> {
     const key = Vertex.getKey(vertex.x, vertex.y);
     this.vertices.delete(key);
     return this.vertices;
   }
 
+  /**
+   * Removes the {@link HalfEdge} from the DCEL.
+   * @param edge The {@link HalfEdge} to remove.
+   * @returns The remaining {@link HalfEdge}s in the DCEL.
+   */
   removeHalfEdge(edge: HalfEdge): Map<string, HalfEdge> {
     const head = edge.getHead();
     if (!head) return this.halfEdges;
@@ -672,8 +682,8 @@ class Dcel {
   }
 
   /**
-   * Removes all vertices of the DCEL which are superfluous in the sense of
-   * that they can be removed without changing the visual geometry of the DCEL.
+   * Removes all vertices of the DCEL which are collinear, hence superfluous:
+   * they can be removed without changing the visual geometry of the DCEL.
    */
   removeSuperfluousVertices(): void {
     const superfluousVertices = this.getVertices().filter((v) => {
