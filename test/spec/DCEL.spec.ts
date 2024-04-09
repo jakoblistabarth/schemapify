@@ -240,7 +240,7 @@ describe("A Dcel fom a geojson feature collection with the simplified boundaries
 });
 
 describe("getBbox()", function () {
-  it("returns the correct boundingbox of a given dcel", function () {
+  it("returns the correct bounding box of a given dcel", function () {
     const plgn1 = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -261,9 +261,9 @@ describe("getBbox()", function () {
     const bboxPlgn2 = Dcel.fromGeoJSON(plgn2).getBbox();
     const bboxPlgn3 = Dcel.fromGeoJSON(plgn3).getBbox();
 
-    expect(bboxPlgn1).toEqual([0, 20, 0, 20]);
-    expect(bboxPlgn2).toEqual([0, 4, 0, 2]);
-    expect(bboxPlgn3).toEqual([0, 2, 0, 2]);
+    expect(bboxPlgn1.bounds).toEqual([0, 20, 0, 20]);
+    expect(bboxPlgn2.bounds).toEqual([0, 4, 0, 2]);
+    expect(bboxPlgn3.bounds).toEqual([0, 2, 0, 2]);
   });
 });
 

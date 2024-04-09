@@ -19,7 +19,7 @@ import HalfEdge, { OrientationClasses } from "./HalfEdge";
 import Vertex from "./Vertex";
 import SnapshotList from "../Snapshot/SnapshotList";
 import MultiPolygon from "../geometry/MultiPolygon";
-import { boundingBox } from "../helpers/BoundingBox";
+import BoundingBox from "../helpers/BoundingBox";
 
 export enum STEP {
   LOAD = "loadData",
@@ -358,7 +358,7 @@ class Dcel {
     const points = Array.from(this.vertices.values()).map(
       (v) => [v.x, v.y] as [number, number],
     );
-    return boundingBox(points);
+    return new BoundingBox(points);
   }
 
   /**
@@ -366,8 +366,7 @@ class Dcel {
    * Defined as the center of it's Boundingbox
    */
   get center(): [number, number] {
-    const [minX, maxX, minY, maxY] = this.getBbox();
-    return [(minX + maxX) / 2, (minY + maxY) / 2];
+    return this.getBbox().center;
   }
 
   /**
@@ -375,9 +374,7 @@ class Dcel {
    * @returns The diameter of the {@link Dcel}.
    */
   getDiameter(): number {
-    const [minX, maxX, minY, maxY] = this.getBbox();
-    const [a, c] = [new Point(minX, minY), new Point(maxX, maxY)];
-    return a.distanceToPoint(c);
+    return this.getBbox().diameter;
   }
 
   /**
