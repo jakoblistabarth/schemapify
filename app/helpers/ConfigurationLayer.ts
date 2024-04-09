@@ -1,11 +1,13 @@
 import HalfEdge from "@/src/DCEL/HalfEdge";
 import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
 import Contraction from "@/src/c-oriented-schematization/Contraction";
+import Ring from "@/src/geometry/Ring";
 import {
   CompositeLayer,
   LayersList,
   LineLayer,
   SolidPolygonLayer,
+  TextLayer,
 } from "deck.gl";
 
 type LayerData = ConfigurationPair;
@@ -27,6 +29,18 @@ export default class ConfigurationLayer extends CompositeLayer<ConfigurationLaye
 
   renderLayers(): LayersList | null {
     return [
+      new TextLayer(
+        this.getSubLayerProps({
+          id: "contraction-type-layer",
+          data: this.contractions.map(([type, contraction]) => ({
+            position: new Ring(contraction.areaPoints).centroid,
+            text: type,
+          })),
+          getColor: [0, 0, 255],
+          getSize: 12,
+          fontFamily: "Inter Variable",
+        }),
+      ),
       new SolidPolygonLayer(
         this.getSubLayerProps({
           id: "contraction-area-layer",

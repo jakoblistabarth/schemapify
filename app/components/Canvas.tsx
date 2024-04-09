@@ -10,10 +10,14 @@ import {
   OrthographicViewState,
   PickingInfo,
   ScatterplotLayer,
+  SolidPolygonLayer,
   TripsLayer,
 } from "deck.gl";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import ConfigurationLayer from "../helpers/ConfigurationLayer";
+import Contraction, {
+  ContractionType,
+} from "@/src/c-oriented-schematization/Contraction";
 
 const step = 0.005;
 const intervalMS = 24;
@@ -87,6 +91,21 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       },
     });
 
+    const contractions = new SolidPolygonLayer({
+      id: "contractions",
+      data: dcel
+        .getContractions()
+        .filter((c) => c.configuration.innerEdge.face?.edge)
+        .filter((c) => c.isFeasible())
+        // .filter((c) => c.type === ContractionType.N)
+        .map((c) => ({
+          polygon: c.areaPoints.map((p) => p.toVector().toArray()),
+          type: c.type,
+        })),
+      getFillColor: (c: Contraction) =>
+        c.type === ContractionType.N ? [255, 0, 0, 10] : [0, 255, 0, 10],
+    });
+
     const edgesAnimated = new TripsLayer({
       id: "edges-animated",
       data: halfedges,
@@ -129,7 +148,14 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       data: dcel.faceFaceBoundaryList?.getMinimalConfigurationPair(),
     });
 
-    const layers = [grid, configurations, edges, edgesAnimated, points];
+    const layers = [
+      grid,
+      configurations,
+      contractions,
+      edges,
+      edgesAnimated,
+      points,
+    ];
 
     const initialViewState: OrthographicViewState = {
       target: dcel.center,
