@@ -104,21 +104,21 @@ describe("remove() on a vertex", function () {
   it("generates a correct triangle dcel when removing one vertex of a square shape with 4 collinear vertices", function () {
     const json = JSON.parse(
       fs.readFileSync(
-        path.resolve("test/data/shapes/square-contraction-zero.json"),
+        path.resolve("test/data/shapes/square-with-collinear-vertices.json"),
         "utf8",
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
 
     const squareFace = dcel.getBoundedFaces()[0];
-    const vertex = dcel.findVertex(0, 50);
+    const vertex = dcel.findVertex(0, 5);
     const newEdge = vertex?.remove(squareFace);
 
     expect(squareFace.getEdges().length).toBe(5);
     expect(squareFace.getEdges(false).length).toBe(5);
     expect(dcel.halfEdges.size).toBe(10);
     expect(dcel.vertices.size).toBe(5);
-    expect(newEdge?.tail.xy()).toEqual([50, 50]);
+    expect(newEdge?.tail.xy()).toEqual([5, 5]);
     expect(newEdge?.getHead()?.xy()).toEqual([0, 0]);
   });
 

@@ -27,16 +27,10 @@ class ConfigurationPair {
     const contractionHead = contractionEdge.getHead();
     if (!contractionHead) return;
     const dcel = contractionEdge.dcel;
-    const compensationEdge =
-      this.contraction.area > 0
-        ? this.compensation?.configuration.innerEdge
-        : undefined;
+    const compensationEdge = this.compensation?.configuration.innerEdge;
 
-    // 0. Do a simple vertex deletion, in case of a contraction with area 0
-    if (!compensationEdge) {
-      this.doSimpleEdgeMove();
-      return; // TODO: remove this return
-    }
+    if (!compensationEdge)
+      return console.warn("compensation contraction is not defined");
 
     // 1. Update (decrement) blocking edges
     dcel.getContractions().forEach((contraction) => {

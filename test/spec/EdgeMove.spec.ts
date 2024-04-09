@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
 import Dcel from "@/src/DCEL/Dcel";
 import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
 
@@ -34,30 +33,6 @@ describe("createConfigurations()", function () {
     expect(configurationCount).toBe(
       dcel.getHalfEdges().length - edgesDegree4.length,
     );
-  });
-});
-
-describe("doEdgeMove() removes first all collinear points (contraction area 0)", function () {
-  it("on a square shape", function () {
-    const json = JSON.parse(
-      fs.readFileSync(
-        path.resolve("test/data/shapes/smallest-contraction-1a.json"),
-        "utf8",
-      ),
-    );
-    const dcel = Dcel.fromGeoJSON(json);
-    dcel.splitEdges(5);
-    dcel.createConfigurations();
-    dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
-    let contractionArea = 0;
-
-    for (let index = 0; index < 9; index++) {
-      const pair = dcel.faceFaceBoundaryList.getMinimalConfigurationPair();
-      const area = pair?.contraction.area;
-      if (area && area > contractionArea) contractionArea = area;
-      pair?.doEdgeMove();
-    }
-    expect(contractionArea).toEqual(0);
   });
 });
 
@@ -146,41 +121,5 @@ describe("doEdgeMove()", function () {
     expect(edges[6]).toBe("0/4->0/0");
     expect(pair?.contraction.area).toEqual(1);
     expect(originalArea).toEqual(newArea);
-  });
-
-  it("for contractions with area 0 (3 collinear points)", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
-    );
-    const dcel = Dcel.fromGeoJSON(json);
-    dcel.getBoundedFaces()[0].getEdges()[0].subdivide();
-
-    dcel.createConfigurations();
-    const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
-    const boundary = ffb.boundaries.values().next().value;
-    const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
-    pair.doEdgeMove();
-
-    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
-    expect(dcel.getHalfEdges().length).toBe(8);
-    expect(dcel.getVertices().length).toBe(4);
-  });
-
-  it("for contractions with area 0 (4 collinear points)", function () {
-    const json = JSON.parse(
-      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
-    );
-    const dcel = Dcel.fromGeoJSON(json);
-    dcel.getBoundedFaces()[0].getEdges()[0].subdivide()?.subdivide();
-
-    dcel.createConfigurations();
-    const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
-    const boundary = ffb.boundaries.values().next().value;
-    const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
-    pair.doEdgeMove();
-
-    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(5);
-    expect(dcel.getHalfEdges().length).toBe(10);
-    expect(dcel.getVertices().length).toBe(5);
   });
 });
