@@ -1,7 +1,6 @@
 import { v4 as uuid } from "uuid";
 import Polygon from "../geometry/Polygon";
 import HalfEdge from "./HalfEdge";
-import Ring from "../geometry/Ring";
 
 class Face {
   /**
@@ -11,6 +10,7 @@ class Face {
 
   /**
    * Pointer to an arbitrary edge of the outer connected component (boundary).
+   * The edge is undefined for the unbounded face.
    */
   edge?: HalfEdge;
 
@@ -28,7 +28,7 @@ class Face {
 
   /**
    * List of IDs of the associated features.
-   * A face can be associated with multiple features:
+   * A face can be associated with up to 2 features:
    * it can server as an inner ring (hole) for one feature
    * and as an exterior ring for another.
    */
@@ -41,7 +41,23 @@ class Face {
   }
 
   /**
-   *
+   * Check if the face is a hole.
+   * @returns A boolean, indicating whether the face is a hole.
+   */
+  get isHole() {
+    return !!this.outerRing;
+  }
+
+  /**
+   * Check if the face is unbounded.
+   * @returns A boolean, indicating whether the face is unbounded.
+   */
+  get isUnbounded() {
+    return !this.edge;
+  }
+
+  /**
+   * Get the face's uuid.
    * @param length defines how many strings of the uuid are returned
    * @returns the edge's uuid
    */
@@ -87,8 +103,8 @@ class Face {
   getArea(): number | undefined {
     const edges = this.getEdges();
     if (!edges) return;
-    const vertices = edges.map((edge) => edge.tail);
-    return new Polygon([new Ring(vertices)]).area;
+    const vertices = edges.map((edge) => edge.tail.toVector().toArray());
+    return Polygon.fromCoordinates([vertices]).area;
   }
 }
 

@@ -1,11 +1,12 @@
-import fs from "fs";
-import path from "path";
-import { hint } from "@mapbox/geojsonhint";
-import { getTestFiles } from "./test-setup";
 import Dcel from "@/src/DCEL/Dcel";
 import Face from "@/src/DCEL/Face";
 import MultiPolygon from "@/src/geometry/MultiPolygon";
+import { hint } from "@mapbox/geojsonhint";
+import fs from "fs";
 import * as geojson from "geojson";
+import path from "path";
+import shape from "../data/geodata/AUT_adm0-s1_epsg31287";
+import { getTestFiles } from "./test-setup";
 
 describe("A Dcel from multipolygons", function () {
   it("forming a square is parsed correctly.", function () {
@@ -338,8 +339,7 @@ describe("getArea()", function () {
     expect(dcel.getArea()).toBe(4);
   });
 
-  //TODO: use geojson of dcel for area calculation to get correct values for DCELs with lakes and enclaves.
-  xit("returns the correct area of the enclave test case", function () {
+  it("returns the correct area of the enclave test case", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/enclave.json"), "utf8"),
     );
@@ -347,15 +347,89 @@ describe("getArea()", function () {
     expect(dcel.getArea()).toBe(2 * 2);
   });
 
-  xit("returns the correct area of Austria.", function () {
-    const json = JSON.parse(
-      fs.readFileSync(
-        path.resolve("test/data/geodata/AUT_adm0-s1.json"),
-        "utf8",
-      ),
-    );
-    const dcel = Dcel.fromGeoJSON(json);
-    expect(dcel.getArea()).toBe(83738962592.38892);
+  it("returns the correct area for a polygon with 1 hole and 1 island", function () {
+    const dcel = Dcel.fromMultiPolygons([
+      MultiPolygon.fromCoordinates([
+        [
+          [
+            [0, 0],
+            [4, 0],
+            [4, 4],
+            [0, 4],
+          ],
+          [
+            [1, 1],
+            [3, 1],
+            [3, 3],
+            [1, 3],
+          ],
+        ],
+        [
+          [
+            [1.5, 1.5],
+            [2.5, 1.5],
+            [2.5, 2.5],
+            [1.5, 2.5],
+          ],
+        ],
+      ]),
+    ]);
+    expect(dcel.getArea()).toBe(12 + 1);
+  });
+
+  it("returns the correct area for two polygons, one with multiple holes", function () {
+    const dcel = Dcel.fromMultiPolygons([
+      MultiPolygon.fromCoordinates([
+        [
+          [
+            [0, 0],
+            [5, 0],
+            [5, 5],
+            [0, 5],
+          ],
+          [
+            [1, 1],
+            [2, 1],
+            [2, 2],
+            [1, 2],
+          ],
+          [
+            [3, 1],
+            [4, 1],
+            [4, 2],
+            [3, 2],
+          ],
+          [
+            [3, 3],
+            [4, 3],
+            [4, 4],
+            [3, 4],
+          ],
+          [
+            [1, 3],
+            [2, 3],
+            [2, 4],
+            [1, 4],
+          ],
+        ],
+      ]),
+      MultiPolygon.fromCoordinates([
+        [
+          [
+            [-2, 1],
+            [-1, 1],
+            [-1, 5],
+            [-2, 5],
+          ],
+        ],
+      ]),
+    ]);
+    expect(dcel.getArea()).toBe(21 + 4);
+  });
+
+  it("returns the correct area of Austria.", function () {
+    const dcel = Dcel.fromMultiPolygons([shape]);
+    expect(dcel.getArea()).toBeCloseTo(83688201106.428);
   });
 });
 

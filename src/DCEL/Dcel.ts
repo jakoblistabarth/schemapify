@@ -108,7 +108,7 @@ class Dcel {
    * @returns An array of {@link Face}s.
    */
   getBoundedFaces(): Face[] {
-    return this.faces.filter((f) => f.edge);
+    return this.faces.filter((f) => !f.isUnbounded);
   }
 
   /**
@@ -116,7 +116,7 @@ class Dcel {
    * @returns The unbounded {@link Face}.
    */
   getUnboundedFace(): Face | undefined {
-    return this.faces.find((f) => !f.edge);
+    return this.faces.find((f) => f.isUnbounded);
   }
 
   /**
@@ -155,9 +155,14 @@ class Dcel {
   }
 
   getArea(): number {
-    return this.getBoundedFaces().reduce((acc, face) => {
+    return this.getFaces().reduce((acc, face) => {
+      // do only consider faces associated with one feature
+      // the unbounded faces (no associated features) need to be ignored
+      // and faces which are holes and boundary (two associated features) can be ignored
+      // as the area of the hole and the boundary cancel each other out
+      if (face.associatedFeatures.length !== 1) return acc;
       const faceArea = face.getArea();
-      if (faceArea) acc = acc + faceArea;
+      if (faceArea) acc += faceArea * (face.isHole ? -1 : 1);
       return acc;
     }, 0);
   }
