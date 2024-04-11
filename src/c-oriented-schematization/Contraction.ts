@@ -143,7 +143,8 @@ class Contraction {
     // find closest contraction point in respect to the configurations inner edge
     pointCandidates.sort((a, b) => a.dist - b.dist);
     return type === ContractionType.P
-      ? pointCandidates.filter((candidate) => candidate.dist >= 0)[0]?.point
+      ? pointCandidates.filter((candidate) => candidate.dist >= 0).shift()
+          ?.point
       : pointCandidates.filter((candidate) => candidate.dist <= 0).pop()?.point;
   }
 
@@ -291,7 +292,7 @@ class Contraction {
     if (!a.face || !aLength) return;
     const alpha1 = a.tail.getExteriorAngle(a.face);
     const alpha2 = a.getHead()?.getExteriorAngle(a.face);
-    if (typeof alpha1 !== "number" || typeof alpha2 !== "number") return;
+    if (alpha1 === undefined || alpha2 === undefined) return;
     const alpha1_ = -Math.abs(alpha1) + Math.PI * 0.5;
     const alpha2_ = -Math.abs(alpha2) + Math.PI * 0.5;
     if (alpha1_ === 0 && alpha2_ === 0) {
