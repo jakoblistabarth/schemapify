@@ -41,27 +41,24 @@ class Ring {
    * Returns the centroid of the ring.
    */
   get centroid() {
-    let area = 0;
-    const centroid = this.points.reduce(
-      (acc, point, i, arr) => {
-        const xi = point.x,
-          yi = point.y;
-        const xj = arr[(i - 1 + arr.length) % arr.length].x,
-          yj = arr[(i - 1 + arr.length) % arr.length].y;
-        const a = xi * yj - xj * yi;
-        area += a;
-        acc[0] += (xi + xj) * a;
-        acc[1] += (yi + yj) * a;
+    const areaWeightedSums = this.points.reduce(
+      (acc, point, i) => {
+        const prevPoint =
+          this.points[(i - 1 + this.points.length) % this.points.length];
+        const areaSegment = point.x * prevPoint.y - prevPoint.x * point.y;
+        acc.sumX += (point.x + prevPoint.x) * areaSegment;
+        acc.sumY += (point.y + prevPoint.y) * areaSegment;
+        acc.totalArea += areaSegment;
         return acc;
       },
-      [0, 0],
+      { sumX: 0, sumY: 0, totalArea: 0 },
     );
 
-    area *= 0.5;
-    centroid[0] /= 6 * area;
-    centroid[1] /= 6 * area;
+    areaWeightedSums.totalArea *= 0.5;
+    areaWeightedSums.sumX /= 6 * areaWeightedSums.totalArea;
+    areaWeightedSums.sumY /= 6 * areaWeightedSums.totalArea;
 
-    return centroid;
+    return [areaWeightedSums.sumX, areaWeightedSums.sumY];
   }
 }
 
