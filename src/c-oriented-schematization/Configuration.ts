@@ -56,6 +56,11 @@ class Configuration {
       : [];
   }
 
+  /**
+   * Get the track of the configuration for the indicated outer edge.
+   * @param outerEdge The outer edge for which to get the track.
+   * @returns A {@link Line} representing the track of the configuration.
+   */
   getTrack(outerEdge: OuterEdge): Line | undefined {
     const [prev, next] = [
       this.getOuterEdge(OuterEdge.PREV),
@@ -77,6 +82,28 @@ class Configuration {
     else return new Line(head, nextAngle);
   }
 
+  /**
+   * Get the two tracks of the configuration.
+   * @returns An array of {@link Line}s representing the two tracks of the configuration.
+   */
+  get tracks() {
+    return [this.getTrack(OuterEdge.PREV), this.getTrack(OuterEdge.NEXT)];
+  }
+
+  /**
+   * Get the intersection point of the two tracks of the configuration.
+   * @returns A {@link Point} representing the intersection point of the two tracks of the configuration.
+   */
+  get trackIntersection() {
+    const [prev, next] = this.tracks;
+    if (!prev || !next) return;
+    return prev?.intersectsLine(next);
+  }
+
+  /**
+   * Checks if the configuration has a junction.
+   * @returns A boolean indicating if the configuration has a junction.
+   */
   hasJunction(): boolean {
     return this.innerEdge.getEndpoints().some((p) => p.edges.length > 2);
   }
