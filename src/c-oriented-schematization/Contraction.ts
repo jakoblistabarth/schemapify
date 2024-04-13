@@ -6,11 +6,7 @@ import Polygon from "../geometry/Polygon";
 import Vector2D from "../geometry/Vector2D";
 import Configuration, { OuterEdge } from "./Configuration";
 import Ring from "../geometry/Ring";
-
-export enum ContractionType {
-  P = "positive",
-  N = "negative",
-}
+import { ContractionType } from "./ContractionType";
 
 class Contraction {
   type: ContractionType;

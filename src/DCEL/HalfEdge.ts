@@ -10,6 +10,7 @@ import { getUnitVector } from "../utilities";
 import Dcel from "./Dcel";
 import Face from "./Face";
 import Vertex from "./Vertex";
+import C from "../c-oriented-schematization/C";
 
 export enum OrientationClasses {
   AB = "alignedBasic",
@@ -203,10 +204,10 @@ class HalfEdge {
     if (!a || !b || !c || !d) return;
 
     const [x, y] = newPoint.xy();
-    const N = this.dcel.makeVertex(x, y);
+    const N = this.dcel.addVertex(x, y);
 
-    const et_ = this.dcel.makeHalfEdge(N, e.tail);
-    const et__ = this.dcel.makeHalfEdge(et.tail, N);
+    const et_ = this.dcel.addHalfEdge(N, e.tail);
+    const et__ = this.dcel.addHalfEdge(et.tail, N);
     N.edges.sort();
     et_.next = c;
     et_.prev = et__;
@@ -237,8 +238,8 @@ class HalfEdge {
 
     et.remove();
 
-    const e_ = this.dcel.makeHalfEdge(e.tail, N);
-    const e__ = this.dcel.makeHalfEdge(N, a.tail);
+    const e_ = this.dcel.addHalfEdge(e.tail, N);
+    const e__ = this.dcel.addHalfEdge(N, a.tail);
     N.edges.sort();
     e_.next = e__;
     e_.prev = b;
@@ -341,10 +342,9 @@ class HalfEdge {
    * sector bounds of the sector enclosing the HalfEdge.
    * @returns An Array of angles in radians. It has length one if the {@link HalfEdge} is aligned.
    */
-  getAssociatedAngles(): number[] {
+  getAssociatedAngles(sectors: Sector[]): number[] {
     const angle = this.getAngle();
     if (typeof angle !== "number") return [];
-    const sectors = this.dcel.config.c.getSectors();
     const directions: number[] = [];
     sectors.some(function (sector) {
       if (angle === sector.lower) {
@@ -363,9 +363,8 @@ class HalfEdge {
    * Gets the angle of the HalfEdge's assigned direction.
    * @returns The angle in radians.
    */
-  getAssignedAngle(): number | undefined {
+  getAssignedAngle(sectors: Sector[]): number | undefined {
     if (typeof this.assignedDirection !== "number") return;
-    const sectors = this.dcel.config.c.getSectors();
     return Math.PI * 2 * (this.assignedDirection / sectors.length);
   }
 
@@ -373,9 +372,8 @@ class HalfEdge {
    * Gets the sector(s) the HalfEdge is enclosed by.
    * @returns An array of Sectors. It has length 2 if the {@link HalfEdge} is aligned.
    */
-  getAssociatedSector(): Sector[] {
-    const associatedAngles = this.getAssociatedAngles();
-    const sectors = this.dcel.config.c.getSectors();
+  getAssociatedSector(sectors: Sector[]): Sector[] {
+    const associatedAngles = this.getAssociatedAngles(sectors);
     const direction = associatedAngles;
 
     return sectors.reduce((acc: Sector[], sector) => {
@@ -400,42 +398,39 @@ class HalfEdge {
 
   // TODO: Where does such function live?
   // within the HalfEdge class or rather within Staircase??
-  getClosestAssociatedAngle(): number | undefined {
-    const associatedSector = this.getAssociatedSector();
+  getClosestAssociatedAngle(c: C): number | undefined {
+    const sectors = c.getSectors();
+    const associatedSector = this.getAssociatedSector(sectors);
     if (this.class !== OrientationClasses.UD || !associatedSector) return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges
     const sector = associatedSector[0];
 
     // TODO: refactor: find better solution for last sector and it's upper bound
     // set upperbound of last to Math.PI * 2 ?
-    const upper =
-      sector.idx === this.dcel.config.c.getSectors().length - 1
-        ? 0
-        : sector.upper;
+    const upper = sector.idx === sectors.length - 1 ? 0 : sector.upper;
     const lower = sector.lower;
     const angle =
-      this.getAssignedAngle() === 0 ? Math.PI * 2 : this.getAssignedAngle();
+      this.getAssignedAngle(sectors) === 0
+        ? Math.PI * 2
+        : this.getAssignedAngle(sectors);
 
-    return upper + this.dcel.config.c.getSectorAngle() === angle
-      ? upper
-      : lower;
+    return upper + c.getSectorAngle() === angle ? upper : lower;
   }
 
   /**
    * Determines whether the HalfEdge's assigned Direction is adjacent to its associated sector.
    * @returns A boolean, indicating whether or not the {@link HalfEdge} is deviating.
    */
-  isDeviating(): boolean {
-    let assignedAngle = this.getAssignedAngle();
+  isDeviating(sectors: Sector[]): boolean {
+    let assignedAngle = this.getAssignedAngle(sectors);
     if (typeof assignedAngle !== "number") return false;
-    if (this.isAligned()) {
-      return this.getAssociatedAngles()[0] !== this.getAssignedAngle();
+    if (this.isAligned(sectors)) {
+      return (
+        this.getAssociatedAngles(sectors)[0] !== this.getAssignedAngle(sectors)
+      );
     } else {
-      const sector = this.getAssociatedSector()[0];
+      const sector = this.getAssociatedSector(sectors)[0];
       //TODO: refactor find better solution for last sector (idx=0)
-      if (
-        sector.idx === this.dcel.config.c.getSectors().length - 1 &&
-        assignedAngle === 0
-      )
+      if (sector.idx === sectors.length - 1 && assignedAngle === 0)
         assignedAngle = Math.PI * 2;
       return !sector.encloses(assignedAngle);
     }
@@ -452,8 +447,8 @@ class HalfEdge {
    * Determines whether the HalfEdge is aligned to one of the orientations of C.
    * @returns A boolean, indicating whether or not the {@link HalfEdge} is aligned.
    */
-  isAligned(): boolean {
-    const isAligned = this.getAssociatedAngles().length === 1;
+  isAligned(sectors: Sector[]): boolean {
+    const isAligned = this.getAssociatedAngles(sectors).length === 1;
     return (this.isAligning = isAligned);
   }
 
@@ -488,27 +483,28 @@ class HalfEdge {
    * Classifies a HalfEdge and its twin, based on its orientation.
    * The classes depend on the defined set of orientations, the setup of {@link C}.
    */
-  classify(): void {
-    this.tail.assignDirections();
+  classify(c: C): void {
+    this.tail.assignDirections(c);
 
     if (this.class) return; // do not overwrite classification
     const head = this.getHead();
 
     if (head && head.significant) return; // do not classify a HalfEdge which has a significant head
 
-    const associatedSector = this.getAssociatedSector();
+    const sectors = c.getSectors();
+    const associatedSector = this.getAssociatedSector(sectors);
     const sector = associatedSector[0];
     const significantVertex = this.getSignificantVertex() || this.tail;
     const edges = significantVertex
       .getEdgesInSector(sector)
-      .filter((edge) => !edge.isAligned() && !edge.isDeviating());
+      .filter((edge) => !edge.isAligned(sectors) && !edge.isDeviating(sectors));
 
     let classification: OrientationClasses;
-    if (this.isAligned()) {
-      classification = this.isDeviating()
+    if (this.isAligned(sectors)) {
+      classification = this.isDeviating(sectors)
         ? OrientationClasses.AD
         : OrientationClasses.AB;
-    } else if (this.isDeviating()) {
+    } else if (this.isDeviating(sectors)) {
       classification = OrientationClasses.UD;
     } else if (edges.length == 2) {
       classification = OrientationClasses.E;
@@ -520,9 +516,9 @@ class HalfEdge {
     if (this.twin) this.twin.class = classification;
   }
 
-  getStepLengths(se: number, d1: number): number[] {
+  getStepLengths(se: number, d1: number, sectors: Sector[]): number[] {
     //TODO: move getStepLengths() to staircase ??
-    const associatedAngles = this.getAssociatedAngles();
+    const associatedAngles = this.getAssociatedAngles(sectors);
     if (!associatedAngles) return [];
     const d2 = associatedAngles.find((angle) => angle !== d1);
     if (typeof d2 !== "number") return [];

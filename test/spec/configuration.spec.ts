@@ -5,9 +5,7 @@ import Configuration, {
   OuterEdge,
   Junction,
 } from "@/src/c-oriented-schematization/Configuration";
-import Contraction, {
-  ContractionType,
-} from "@/src/c-oriented-schematization/Contraction";
+import Contraction from "@/src/c-oriented-schematization/Contraction";
 import Dcel from "@/src/DCEL/Dcel";
 import Point from "@/src/geometry/Point";
 import Vertex from "@/src/DCEL/Vertex";
@@ -16,6 +14,7 @@ import {
   ConfigurationSetup,
   createConfigurationSetup,
 } from "./test-setup";
+import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
 
 describe("getTrack()", function () {
   it("return the correct angles for the reflex point for a square shape", function () {

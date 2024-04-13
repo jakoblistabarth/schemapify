@@ -4,6 +4,7 @@ import Dcel from "@/src/DCEL/Dcel";
 import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
 import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
 import MultiPolygon from "@/src/geometry/MultiPolygon";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("create()", function () {
   it("on a dcel of 2 adjacent squares returns FaceFaceBoundaryList with 3 entries and the correct number of Edges", function () {
@@ -54,7 +55,8 @@ describe("The Face-Face-Boundary", function () {
         ],
       ]),
     ]);
-    dcel.schematize();
+    const schematization = new CSchematization(dcel);
+    schematization.schematize();
     const ffbl = new FaceFaceBoundaryList(dcel);
     const faces = ffbl
       .getBoundaries()
@@ -72,7 +74,8 @@ describe("getMinimalConfigurationPair()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.createConfigurations();
+    const schematization = new CSchematization(dcel);
+    schematization.createConfigurations();
     const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
     const boundary = ffb.boundaries.values().next().value;
     const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
@@ -95,7 +98,8 @@ describe("getMinimalConfigurationPair()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.createConfigurations();
+    const schematization = new CSchematization(dcel);
+    schematization.createConfigurations();
     const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
     const boundary = ffb.boundaries.values().next().value;
     const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;

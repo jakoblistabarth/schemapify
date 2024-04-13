@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import Dcel from "@/src/DCEL/Dcel";
 import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("getMinimalConfigurationPair() finds the expected pair", function () {
   xit("for the test case 'smallest-contraction", function () {
@@ -12,7 +13,8 @@ describe("getMinimalConfigurationPair() finds the expected pair", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.createConfigurations();
+    const schematization = new CSchematization(dcel);
+    schematization.createConfigurations();
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
     const pair = dcel.faceFaceBoundaryList.getMinimalConfigurationPair();
     const contractionEdge =
@@ -33,7 +35,8 @@ describe("getMinimalConfigurationPair() finds the expected pair", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.createConfigurations();
+    const schematization = new CSchematization(dcel);
+    schematization.createConfigurations();
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
     const pair = dcel.faceFaceBoundaryList.getMinimalConfigurationPair();
     const contractionEdge =
@@ -56,7 +59,8 @@ describe("recursive doEdgeMove() on minimal configuration pairs", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.createConfigurations();
+    const schematization = new CSchematization(dcel);
+    schematization.createConfigurations();
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
     const contractionEdges: string[] = [];
 

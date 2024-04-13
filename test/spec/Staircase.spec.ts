@@ -6,24 +6,24 @@ import { OrientationClasses } from "@/src/DCEL/HalfEdge";
 import Vertex from "@/src/DCEL/Vertex";
 import Staircase from "@/src/c-oriented-schematization/Staircase";
 import Polygon from "@/src/geometry/Polygon";
-import config from "@/src/c-oriented-schematization/schematization.config";
+import { config } from "@/src/c-oriented-schematization/schematization.config";
 import Ring from "@/src/geometry/Ring";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("The staircase class", function () {
   it("returns a staircase region for a HalfEdge of class UB", function () {
     const dcel = new Dcel();
-    dcel.config = config;
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(2, 2, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    const twin = dcel.addHalfEdge(d, o);
     edge.twin = twin;
     twin.twin = edge;
     edge.class = OrientationClasses.UB;
     edge.assignedDirection = 0;
 
-    const staircase = new Staircase(edge);
+    const staircase = new Staircase(edge, config);
     expect(staircase.region).toEqual(
       Polygon.fromCoordinates([
         [
@@ -38,18 +38,17 @@ describe("The staircase class", function () {
 
   it("returns a staircase region for a HalfEdge of class UB", function () {
     const dcel = new Dcel();
-    dcel.config = config;
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-2, -2, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    const twin = dcel.addHalfEdge(d, o);
     edge.twin = twin;
     twin.twin = edge;
     edge.class = OrientationClasses.UB;
     edge.assignedDirection = 2;
 
-    const staircase = new Staircase(edge);
+    const staircase = new Staircase(edge, config);
 
     expect(staircase.region).toEqual(
       Polygon.fromCoordinates([
@@ -65,18 +64,17 @@ describe("The staircase class", function () {
 
   it("returns a staircase region for a HalfEdge of class UB", function () {
     const dcel = new Dcel();
-    dcel.config = config;
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, 2, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    const twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    const twin = dcel.addHalfEdge(d, o);
     edge.twin = twin;
     twin.twin = edge;
     edge.class = OrientationClasses.UB;
     edge.assignedDirection = 2;
 
-    const staircase = new Staircase(edge);
+    const staircase = new Staircase(edge, config);
     expect(staircase.region).toEqual(
       Polygon.fromCoordinates([
         [
@@ -93,17 +91,16 @@ describe("The staircase class", function () {
 describe("Build staircase for a HalfEdge of class AD", function () {
   it("returns a staircase containing 7 Points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(4) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 10, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.AD;
     edge.assignedDirection = 0;
 
-    edge.staircase = new Staircase(edge);
+    edge.staircase = new Staircase(edge, { ...config, c: new CRegular(4) });
     edge.staircase.points = edge.staircase.getStaircasePoints();
     expect(edge.staircase.points?.length).toBe(7);
     expect(edge.staircase.region?.exteriorRing.length).toBeLessThanOrEqual(
@@ -116,17 +113,16 @@ describe("Build staircase for a HalfEdge of class AD", function () {
 describe("Build staircase for a HalfEdge of class UB", function () {
   it("returns a staircase containing a minimum of 5 Points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(1, 1, dcel);
     const d = new Vertex(7, 5, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UB;
     edge.assignedDirection = 0;
 
-    const staircase = new Staircase(edge);
+    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
     const points = staircase.getStaircasePointsUB();
     expect(points?.length).toBeGreaterThanOrEqual(5);
   });
@@ -135,17 +131,16 @@ describe("Build staircase for a HalfEdge of class UB", function () {
 describe("Build staircase for a HalfEdge of class UD", function () {
   it("returns a staircase with a minimum of 9 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(7, 5, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 3;
 
-    const staircase = new Staircase(edge);
+    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
     const d2 = staircase.points[staircase.points.length - 1];
 
     expect(staircase.points?.length).toBeGreaterThanOrEqual(9);
@@ -155,17 +150,16 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
   it("returns a staircase where the area spanned between the first 4 points equals the area of the second last and the last 3 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 2;
 
-    const staircase = new Staircase(edge);
+    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
 
     const appendedArea = new Polygon([new Ring(staircase.points.slice(0, 4))])
       .area;
@@ -181,17 +175,16 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
   it("returns a staircase where the area spanned between the first 4 points equals the area of the second last and the last 3 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(30, 12, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 3;
 
-    const staircase = new Staircase(edge);
+    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
 
     const appendedArea = new Polygon([new Ring(staircase.points.slice(0, 4))])
       .area;
@@ -207,17 +200,16 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
   it("returns a staircase where the area spanned between the first 4 points equals the area of the second last and the last 3 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-7, 5, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 3;
 
-    const staircase = new Staircase(edge);
+    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
 
     const appendedArea = new Polygon([new Ring(staircase.points.slice(0, 4))])
       .area;
@@ -233,17 +225,16 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
   it("returns a staircase where the area spanned between the first 4 points equals the area of the second last and the last 3 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-7, 5, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 0;
 
-    const staircase = new Staircase(edge);
+    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
 
     const appendedArea = new Polygon([new Ring(staircase.points.slice(0, 4))])
       .area;
@@ -259,17 +250,16 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
   it("returns a staircase with a minimum of 9 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-7, -5, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 0;
 
-    const staircase = new Staircase(edge);
+    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
     const d2 = staircase.points[staircase.points.length - 1];
 
     expect(staircase.points?.length).toBeGreaterThanOrEqual(9);
@@ -279,17 +269,16 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 
   it("returns a staircase with a minimum of 9 points", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(2.5, 1, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 2;
 
-    const staircase = new Staircase(edge);
+    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
     const d2 = staircase.points[staircase.points.length - 1];
 
     expect(staircase.points?.length).toBeGreaterThanOrEqual(9);
@@ -301,30 +290,28 @@ describe("Build staircase for a HalfEdge of class UD", function () {
 describe("getStepArea(),", function () {
   it("returns the correct area a step adds/subtracts in C(2) ", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
 
-    const staircase = new Staircase(edge);
+    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
     const stepArea = staircase.getStepArea(3, 1);
     expect(stepArea).toBe(1.5);
   });
 
   it("returns the correct area a step adds/subtracts in C(4)", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(4) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
 
-    const staircase = new Staircase(edge);
+    const staircase = new Staircase(edge, { ...config, c: new CRegular(4) });
     const stepArea = staircase.getStepArea(3, 1);
     expect(stepArea).toBeCloseTo(1.0607, 3);
   });
@@ -333,108 +320,101 @@ describe("getStepArea(),", function () {
 describe("getClosestAssociatedAngle() returns closest associated angle for an edge", function () {
   it("when edge is in sector 0 and the assigned Direction is 3", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 3;
 
-    expect(edge.getClosestAssociatedAngle()).toBe(0);
+    expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(0);
   });
 
   it("when edge is in sector 0 and the assigned direction is 2", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, 4, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 2;
 
-    expect(edge.getClosestAssociatedAngle()).toBe(Math.PI * 0.5);
+    expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(Math.PI * 0.5);
   });
 
   it("when edge is in sector 1 and the assigned direction is 0", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, 4, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 0;
 
-    expect(edge.getClosestAssociatedAngle()).toBe(Math.PI * 0.5);
+    expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(Math.PI * 0.5);
   });
 
   it("when edge is in sector 1 and the assigned direction is 3", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, 4, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 3;
 
-    expect(edge.getClosestAssociatedAngle()).toBe(Math.PI);
+    expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(Math.PI);
   });
 
   it("when edge is in sector 2 and the assigned direction is 1", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, -4, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 1;
 
-    expect(edge.getClosestAssociatedAngle()).toBe(Math.PI);
+    expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(Math.PI);
   });
 
   it("when edge is in sector 2 and the assigned direction is 0", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(-10, -4, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 0;
 
-    expect(edge.getClosestAssociatedAngle()).toBe(Math.PI * 1.5);
+    expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(Math.PI * 1.5);
   });
 
   it("when edge is in sector 3 and the assigned direction is 2", function () {
     const dcel = new Dcel();
-    dcel.config = { ...config, c: new CRegular(2) };
 
     const o = new Vertex(0, 0, dcel);
     const d = new Vertex(10, -4, dcel);
-    const edge = dcel.makeHalfEdge(o, d);
-    edge.twin = dcel.makeHalfEdge(d, o);
+    const edge = dcel.addHalfEdge(o, d);
+    edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 2;
 
-    expect(edge.getClosestAssociatedAngle()).toBe(
-      ((Math.PI * 2) / edge.dcel.config.c.getDirections().length) * 3,
+    expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(
+      ((Math.PI * 2) / new CRegular(2).getDirections().length) * 3,
     );
   });
 });
@@ -449,10 +429,11 @@ describe("Staircaseregions incident to a certain vertex are always interfering w
       ),
     );
     const dcel = Dcel.fromGeoJSON(input);
-    dcel.preProcess();
-    dcel.classify();
-    dcel.addStaircases();
-    dcel.calculateStaircases();
+    const schematization = new CSchematization(dcel);
+    schematization.preProcess();
+    schematization.classify();
+    schematization.addStaircases();
+    schematization.calculateStaircases();
     const v = dcel.findVertex(0, 11);
     expect(v?.edges[0].staircase?.interferesWith.length).toBeGreaterThan(0);
     expect(v?.edges[1].staircase?.interferesWith.length).toBeGreaterThan(0);

@@ -6,6 +6,7 @@ import { FC, useMemo, useState } from "react";
 import { RxLayers, RxPause, RxResume } from "react-icons/rx";
 import Button from "./Button";
 import Canvas from "./Canvas";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 const DcelViewer: FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
@@ -23,7 +24,8 @@ const DcelViewer: FC = () => {
         ],
       ]),
     ]);
-    dcel.schematize();
+    const schematization = new CSchematization(dcel);
+    schematization.schematize();
     return { dcel };
   }, []);
   return (

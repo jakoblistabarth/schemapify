@@ -15,9 +15,8 @@ import {
 } from "deck.gl";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import ConfigurationLayer from "../helpers/ConfigurationLayer";
-import Contraction, {
-  ContractionType,
-} from "@/src/c-oriented-schematization/Contraction";
+import Contraction from "@/src/c-oriented-schematization/Contraction";
+import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
 
 const step = 0.005;
 const intervalMS = 24;

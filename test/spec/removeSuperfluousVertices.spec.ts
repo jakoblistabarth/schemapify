@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import Dcel from "@/src/DCEL/Dcel";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("removeSuperfluousVertices()", function () {
   it("on a square-shaped DCEL of with superfluous vertices, results in a DCEL of 4 vertices", function () {
@@ -11,7 +12,8 @@ describe("removeSuperfluousVertices()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.removeSuperfluousVertices();
+    const schematization = new CSchematization(dcel);
+    schematization.removeSuperfluousVertices();
 
     expect(dcel.getVertices().length).toBe(4);
   });
@@ -24,7 +26,8 @@ describe("removeSuperfluousVertices()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.removeSuperfluousVertices();
+    const schematization = new CSchematization(dcel);
+    schematization.removeSuperfluousVertices();
 
     expect(dcel.getVertices().length).toBe(3);
   });

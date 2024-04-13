@@ -7,6 +7,7 @@ import * as geojson from "geojson";
 import path from "path";
 import shape from "../data/geodata/AUT_adm0-s1_epsg31287";
 import { getTestFiles } from "./test-setup";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("A Dcel from multipolygons", function () {
   it("forming a square is parsed correctly.", function () {
@@ -276,8 +277,6 @@ describe("getVertices()", function () {
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     dcel = Dcel.fromGeoJSON(polygon);
-    dcel.preProcess();
-    dcel.classify();
   });
 
   it("returns vertices of type insignificant if specified", function () {
@@ -442,7 +441,8 @@ describe("schematize() returns a result which can be turned into a valid geojson
       ),
     );
     const dcel = Dcel.fromGeoJSON(inputJson);
-    dcel.schematize();
+    const schematization = new CSchematization(dcel);
+    schematization.schematize();
     const outputJson = dcel.toGeoJSON();
     const outputJsonPretty = JSON.stringify(outputJson, null, 4);
     const errors = hint(outputJsonPretty);
@@ -462,7 +462,8 @@ describe("schematize() returns a result which can be turned into a valid geojson
         fs.readFileSync(path.resolve(dir + "/" + file), "utf8"),
       );
       const dcel = Dcel.fromGeoJSON(inputJson);
-      dcel.schematize();
+      const schematization = new CSchematization(dcel);
+      schematization.schematize();
       const outputJson = dcel.toGeoJSON();
       const outputJsonPretty = JSON.stringify(outputJson, null, 4);
       const errors = hint(outputJsonPretty);

@@ -2,7 +2,8 @@ import HalfEdge from "../DCEL/HalfEdge";
 import Vertex from "../DCEL/Vertex";
 import Line from "../geometry/Line";
 import { crawlArray } from "../utilities";
-import Contraction, { ContractionType } from "./Contraction";
+import Contraction from "./Contraction";
+import { ContractionType } from "./ContractionType";
 
 export enum OuterEdge {
   PREV = "prev",

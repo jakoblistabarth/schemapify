@@ -13,14 +13,14 @@ type Props = {
 };
 
 const SnapshotTimeline: FC<Props> = ({ snapshots, colorScale }) => {
-  const { setActiveSnapshot, activeSnapshot, dcel } = useAppStore();
+  const { setActiveSnapshot, activeSnapshot } = useAppStore();
   const width = 10;
   const height = 25;
   const baseStrokeWidth = 2;
   const grow = 5;
   const gap = 2;
 
-  return !dcel?.snapshotList ? (
+  return !snapshots.length ? (
     <></>
   ) : (
     <svg
@@ -46,9 +46,9 @@ const SnapshotTimeline: FC<Props> = ({ snapshots, colorScale }) => {
                   fill={colorScale(d.duration)}
                   className={clsx(
                     "cursor-pointer stroke-transparent stroke-1 transition-all duration-100 hover:stroke-blue-600",
-                    isActive && "stroke-blue-900 !stroke-2"
+                    isActive && "stroke-blue-900 !stroke-2",
                   )}
-                  onClick={() => setActiveSnapshot(d.id, dcel?.snapshotList)}
+                  onClick={() => setActiveSnapshot(d.id)}
                 />
               </Tooltip.Trigger>
               <Tooltip.Portal>

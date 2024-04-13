@@ -1,4 +1,5 @@
 import Dcel from "@/src/DCEL/Dcel";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import MultiPolygon from "@/src/geometry/MultiPolygon";
 import { readFileSync } from "fs";
 import path from "path";
@@ -13,7 +14,8 @@ describe("removeSuperfluousVertices()", function () {
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].getEdges()[0].subdivide();
 
-    dcel.removeSuperfluousVertices();
+    const schematization = new CSchematization(dcel);
+    schematization.removeSuperfluousVertices();
 
     expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
     expect(dcel.getHalfEdges().length).toBe(8);
@@ -27,7 +29,8 @@ describe("removeSuperfluousVertices()", function () {
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].getEdges()[0].subdivide()?.subdivide();
 
-    dcel.removeSuperfluousVertices();
+    const schematization = new CSchematization(dcel);
+    schematization.removeSuperfluousVertices();
 
     expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
     expect(dcel.getHalfEdges().length).toBe(8);
@@ -57,7 +60,9 @@ describe("removeSuperfluousVertices()", function () {
         ],
       ]),
     ]);
-    dcel.removeSuperfluousVertices();
+
+    const schematization = new CSchematization(dcel);
+    schematization.removeSuperfluousVertices();
 
     expect(dcel.getVertices().length).toBe(4);
     expect(dcel.getHalfEdges().length).toBe(8);

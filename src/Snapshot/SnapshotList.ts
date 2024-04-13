@@ -1,4 +1,4 @@
-import Dcel, { STEP } from "../DCEL/Dcel";
+import { STEP } from "../c-oriented-schematization/CSchematization";
 import Snapshot from "./Snapshot";
 
 /**
@@ -6,38 +6,14 @@ import Snapshot from "./Snapshot";
  * associated with a certain {@link Dcel}.
  */
 class SnapshotList {
-  dcel: Dcel;
-  createdAt: Date;
   snapshots: Snapshot[];
 
-  constructor(dcel: Dcel) {
-    this.dcel = dcel;
-    this.createdAt = new Date();
-    this.snapshots = [];
-  }
-
-  takeSnapshot(step: STEP, startTime?: Date): Snapshot {
-    const snapshot = new Snapshot(
-      this,
-      {
-        vertices: this.dcel.verticesToGeoJSON(),
-        edges: this.dcel.edgesToGeoJSON(),
-        faces: this.dcel.facesToGeoJSON(),
-        features: this.dcel.toGeoJSON(),
-      },
-      step,
-      startTime
-    );
-    if (step === STEP.STAIRCASEREGIONS)
-      snapshot.layers.staircaseRegions = this.dcel.staircaseRegionsToGeoJSON();
-    this.snapshots.push(snapshot);
-    return snapshot;
+  constructor(snapshots?: Snapshot[]) {
+    this.snapshots = snapshots ?? [];
   }
 
   getMostRecentSnapshot(): Snapshot | undefined {
-    const length = this.snapshots.length;
-    if (length < 1) return undefined;
-    return this.snapshots[length - 1];
+    return this.snapshots.at(-1);
   }
 
   getTotalDuration(): number | undefined {
@@ -62,7 +38,7 @@ class SnapshotList {
       .map((d) =>
         d != undefined && d >= 0 && d < this.snapshots.length
           ? this.snapshots[d]
-          : undefined
+          : undefined,
       );
     return [prevId, nextId];
   }
