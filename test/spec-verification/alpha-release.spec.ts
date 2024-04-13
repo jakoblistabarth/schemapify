@@ -3,6 +3,7 @@ import path from "path";
 import { hint } from "@mapbox/geojsonhint";
 import Dcel from "@/src/DCEL/Dcel";
 import Face from "@/src/DCEL/Face";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("2-a. The system shall be able to parse geoJSON as input data.", function () {
   const json = JSON.parse(
@@ -85,7 +86,8 @@ describe("6-a. If the input data holds attributes attached to its features, the 
     ),
   );
   const dcel = Dcel.fromGeoJSON(json);
-  dcel.schematize();
+  const schematization = new CSchematization(dcel);
+  schematization.schematize();
   const output = dcel.toGeoJSON();
 
   const inputFeatureProperties = json.features.map(
@@ -113,7 +115,8 @@ describe("7-a. The system shall preserve the number of features of the input in 
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.schematize();
+    const schematization = new CSchematization(dcel);
+    schematization.schematize();
     const output = dcel.toGeoJSON();
 
     const inputFeatures = json.features.length;

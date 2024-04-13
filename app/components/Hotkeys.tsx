@@ -12,20 +12,23 @@ const Hotkeys = () => {
     setActiveSnapshot,
     prevSnapshot,
     nextSnapshot,
+    snapshotList,
   } = useAppStore();
 
-  useHotkeys(["ctrl+s"], () => handleSimplify(setActiveSnapshot, dcel));
+  useHotkeys(
+    ["ctrl+s"],
+    () =>
+      dcel &&
+      snapshotList &&
+      handleSimplify(dcel, snapshotList, setActiveSnapshot),
+  );
   useHotkeys(["ctrl+c"], () => removeSource());
   useHotkeys(["ctrl+1"], () => setSource("AUT_adm0-s0_5.json"));
   useHotkeys(["left"], () =>
-    prevSnapshot && dcel?.snapshotList
-      ? setActiveSnapshot(prevSnapshot.id, dcel?.snapshotList)
-      : undefined
+    prevSnapshot ? setActiveSnapshot(prevSnapshot.id) : undefined,
   );
   useHotkeys(["right"], () =>
-    nextSnapshot && dcel?.snapshotList
-      ? setActiveSnapshot(nextSnapshot.id, dcel?.snapshotList)
-      : undefined
+    nextSnapshot ? setActiveSnapshot(nextSnapshot.id) : undefined,
   );
   return <></>;
 };

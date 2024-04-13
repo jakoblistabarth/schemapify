@@ -1,7 +1,8 @@
-import Contraction, { ContractionType } from "./Contraction";
+import Contraction from "./Contraction";
 import Configuration from "./Configuration";
 import HalfEdge from "../DCEL/HalfEdge";
 import Point from "../geometry/Point";
+import { ContractionType } from "./ContractionType";
 
 /**
  * A pair of {@link Contraction}s, which are complementary and non-conflicting.

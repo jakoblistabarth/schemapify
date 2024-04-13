@@ -1,7 +1,10 @@
 import * as geoJson from "geojson";
-import SnapshotList from "./SnapshotList";
 import { v4 as uuid } from "uuid";
-import { STEP } from "../DCEL/Dcel";
+import Dcel from "../DCEL/Dcel";
+import CSchematization, {
+  STEP,
+} from "../c-oriented-schematization/CSchematization";
+import { Config } from "../c-oriented-schematization/schematization.config";
 
 export type SnapshotLayers = {
   vertices: geoJson.FeatureCollection<geoJson.Point>;
@@ -17,31 +20,52 @@ export type SnapshotLayers = {
 class Snapshot {
   id: string;
   step: STEP;
-  snapshotList: SnapshotList;
   createdAt: Date;
   duration: number;
   layers: SnapshotLayers;
 
-  constructor(
-    snapshotList: SnapshotList,
-    layers: SnapshotLayers,
-    step: STEP,
-    startTime?: Date
-  ) {
+  constructor(layers: SnapshotLayers, step: STEP, duration: number) {
     this.id = uuid();
     this.step = step;
-    this.snapshotList = snapshotList;
     this.createdAt = new Date();
     this.layers = layers;
-    this.duration = this.getDuration(startTime);
+    this.duration = duration;
   }
 
-  getDuration(startTime?: Date) {
-    const now = Number(new Date());
-    if (startTime) return now - Number(startTime);
-    const mostRecentSnapshot = this.snapshotList.getMostRecentSnapshot();
-    if (mostRecentSnapshot) return now - Number(mostRecentSnapshot.createdAt);
-    return now - Number(this.snapshotList.createdAt);
+  getDuration() {
+    return this.duration;
+  }
+
+  static fromDCEL(
+    dcel: Dcel,
+    {
+      step,
+      duration,
+      config,
+      staircaseRegions,
+    }: {
+      step: STEP;
+      duration: number;
+      config: Config;
+      staircaseRegions?: ReturnType<
+        CSchematization["staircaseRegionsToGeoJSON"]
+      >;
+    },
+  ) {
+    return new this(
+      {
+        vertices: dcel.verticesToGeoJSON(),
+        edges: dcel.edgesToGeoJSON(config.c.getSectors()),
+        faces: dcel.facesToGeoJSON(),
+        features: dcel.toGeoJSON(),
+        staircaseRegions:
+          step === STEP.STAIRCASEREGIONS && staircaseRegions
+            ? staircaseRegions
+            : undefined,
+      },
+      step,
+      duration,
+    );
   }
 }
 

@@ -2,11 +2,10 @@ import fs from "fs";
 import path from "path";
 import Point from "@/src/geometry/Point";
 import Configuration from "@/src/c-oriented-schematization/Configuration";
-import Contraction, {
-  ContractionType,
-} from "@/src/c-oriented-schematization/Contraction";
+import Contraction from "@/src/c-oriented-schematization/Contraction";
 import Dcel from "@/src/DCEL/Dcel";
 import { configurationCases, createConfigurationSetup } from "./test-setup";
+import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
 
 describe("isConflicting() returns", function () {
   let dcel: Dcel;

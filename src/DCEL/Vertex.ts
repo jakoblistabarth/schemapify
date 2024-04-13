@@ -4,6 +4,7 @@ import Point from "../geometry/Point";
 import Dcel from "./Dcel";
 import Face from "./Face";
 import HalfEdge from "./HalfEdge";
+import C from "../c-oriented-schematization/C";
 
 class Vertex extends Point {
   dcel: Dcel;
@@ -84,7 +85,7 @@ class Vertex extends Point {
     if (!this.dcel) return;
     else if (this.edges.length > 2)
       throw new Error(
-        "only vertices of degree 2 or less can be removed, otherwise the topology would be corrupted"
+        "only vertices of degree 2 or less can be removed, otherwise the topology would be corrupted",
       );
     else if (this.dcel.vertices.size === 3)
       throw new Error("a dcel must not have less than 3 vertices");
@@ -116,8 +117,8 @@ class Vertex extends Point {
       !d
     )
       return;
-    const e = this.dcel.makeHalfEdge(eTail, eHead);
-    e.twin = this.dcel.makeHalfEdge(eHead, eTail);
+    const e = this.dcel.addHalfEdge(eTail, eHead);
+    e.twin = this.dcel.addHalfEdge(eHead, eTail);
     e.twin.twin = e;
 
     if (f1?.edge === ex__ || f1.edge === ex_) f1.edge = e;
@@ -172,25 +173,25 @@ class Vertex extends Point {
    * Determines whether all incident Edges to the Vertex are aligned (to C).
    * @returns A Boolean indicating whether or not all {@link HalfEdge}s are aligned.
    */
-  allEdgesAligned(): boolean {
-    return this.edges.every((edge) => edge.isAligned());
+  allEdgesAligned(sectors: Sector[]): boolean {
+    return this.edges.every((edge) => edge.isAligned(sectors));
   }
 
   /**
    * Determines the significance of the Vertex..
    * @returns A Boolean indicating whether or not the {@link Vertex} is significant.
    */
-  isSignificant(): boolean {
+  isSignificant(sectors: Sector[]): boolean {
     // TODO: move to another class? to not mix dcel and schematization?
 
     // classify as insignificant if all edges are already aligned
-    if (this.allEdgesAligned()) {
+    if (this.allEdgesAligned(sectors)) {
       return (this.significant = false);
     }
 
     // classify as significant if one sector occurs multiple times
     const occupiedSectors = this.edges
-      .map((edge) => edge.getAssociatedSector())
+      .map((edge) => edge.getAssociatedSector(sectors))
       .flat();
 
     const uniqueSectors: Sector[] = occupiedSectors.reduce(
@@ -199,7 +200,7 @@ class Vertex extends Point {
           acc.push(sector);
         return acc;
       },
-      []
+      [],
     );
 
     if (occupiedSectors.length !== uniqueSectors.length) {
@@ -233,9 +234,9 @@ class Vertex extends Point {
    * Assigns directions to all incident HalfEdges of the Vertex.
    * @returns An Array, holding the assigned directions starting with the direction of the {@link HalfEge} with the smallest angle on the unit circle.
    */
-  assignDirections(): number[] | undefined {
+  assignDirections(c: C): number[] | undefined {
     const edges = this.sortEdges(false);
-    const sectors = this.dcel.config.c.getSectors();
+    const sectors = c.getSectors();
 
     function getDeviation(edges: HalfEdge[], directions: number[]): number {
       return edges.reduce((deviation, edge, index) => {
@@ -246,7 +247,7 @@ class Vertex extends Point {
       }, 0);
     }
 
-    const validDirections = this.dcel.config.c.getValidDirections(edges.length);
+    const validDirections = c.getValidDirections(edges.length);
 
     let minmalDeviation = Infinity;
     let solution: number[] = [];
@@ -298,7 +299,7 @@ class Vertex extends Point {
       : Math.PI -
           Math.atan2(
             vIncoming.dx * vOutgoing.dy - vOutgoing.dx * vIncoming.dy,
-            vIncoming.dx * vOutgoing.dx + vIncoming.dy * vOutgoing.dy
+            vIncoming.dx * vOutgoing.dx + vIncoming.dy * vOutgoing.dy,
           );
   }
 

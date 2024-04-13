@@ -1,14 +1,22 @@
-import Dcel, { STEP } from "@/src/DCEL/Dcel";
+import Dcel from "@/src/DCEL/Dcel";
+import Snapshot from "@/src/Snapshot/Snapshot";
 import SnapshotList from "@/src/Snapshot/SnapshotList";
+import { STEP } from "@/src/c-oriented-schematization/CSchematization";
+import { config } from "@/src/c-oriented-schematization/schematization.config";
 
 export const handleSimplify = (
-  setActiveSnapshot: (id: string, snapshotList: SnapshotList) => void,
-  dcel?: Dcel
+  dcel: Dcel,
+  snapshotList: SnapshotList,
+  setActiveSnapshot: (id: string) => void,
 ) => {
-  const startTime = new Date();
   if (!dcel) return;
   const pair = dcel?.faceFaceBoundaryList?.getMinimalConfigurationPair();
   pair?.doEdgeMove();
-  const newSnapshot = dcel.snapshotList.takeSnapshot(STEP.SIMPLIFY, startTime);
-  setActiveSnapshot(newSnapshot.id, dcel.snapshotList);
+  const snapshot = Snapshot.fromDCEL(dcel, {
+    step: STEP.SIMPLIFY,
+    duration: 0,
+    config,
+  });
+  snapshotList?.snapshots.push(snapshot);
+  setActiveSnapshot(snapshot.id);
 };

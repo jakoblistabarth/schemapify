@@ -3,69 +3,78 @@ import path from "path";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
 import Dcel from "@/src/DCEL/Dcel";
 import { OrientationClasses } from "@/src/DCEL/HalfEdge";
-import { config } from "@/src/c-oriented-schematization/schematization.config";
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
+import { config } from "@/src/c-oriented-schematization/schematization.config";
+import C from "@/src/c-oriented-schematization/C";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("isDeviating()", function () {
   let s: TestSetup;
+  let c: C;
 
   beforeEach(function () {
     s = createEdgeVertexSetup();
+    ({ c } = config);
   });
 
   it("returns true for an deviating edge", function () {
     s.directions.od53.assignedDirection = 2;
-    expect(s.directions.od53.isDeviating()).toBe(true);
+    expect(s.directions.od53.isDeviating(c.getSectors())).toBe(true);
   });
 
   it("returns true for an deviating edge", function () {
     s.directions.od53.assignedDirection = 3;
-    expect(s.directions.od53.isDeviating()).toBe(true);
-    s.dcel.config = { ...config, c: new CRegular(4) };
-    expect(s.directions.od53.isDeviating()).toBe(true);
+    expect(s.directions.od53.isDeviating(c.getSectors())).toBe(true);
+    expect(s.directions.od53.isDeviating(new CRegular(4).getSectors())).toBe(
+      true,
+    );
   });
 
   it("returns false for a basic edge", function () {
     s.directions.od53.assignedDirection = 1;
-    expect(s.directions.od53.isDeviating()).toBe(false);
-    s.dcel.config = { ...config, c: new CRegular(4) };
-    expect(s.directions.od53.isDeviating()).toBe(false);
+    expect(s.directions.od53.isDeviating(c.getSectors())).toBe(false);
+    expect(s.directions.od53.isDeviating(new CRegular(4).getSectors())).toBe(
+      false,
+    );
   });
 
   it("returns false for a basic edge", function () {
     s.directions.od333.assignedDirection = 0;
-    expect(s.directions.od333.isDeviating()).toBe(false);
-    s.dcel.config = { ...config, c: new CRegular(4) };
-    expect(s.directions.od333.isDeviating()).toBe(false);
+    expect(s.directions.od333.isDeviating(c.getSectors())).toBe(false);
+    expect(s.directions.od333.isDeviating(new CRegular(4).getSectors())).toBe(
+      false,
+    );
   });
 
   it("returns false for a basic edge", function () {
     s.directions.od53.assignedDirection = 0;
-    expect(s.directions.od53.isDeviating()).toBe(false);
+    expect(s.directions.od53.isDeviating(c.getSectors())).toBe(false);
   });
 
   it("returns false for a for a basic aligned edge", function () {
     s.directions.od90.assignedDirection = 1;
-    expect(s.directions.od90.isDeviating()).toBe(false);
+    expect(s.directions.od90.isDeviating(c.getSectors())).toBe(false);
   });
 
   it("returns true for a for a deviating aligned edge", function () {
     s.directions.od90.assignedDirection = 2;
-    expect(s.directions.od90.isDeviating()).toBe(true);
+    expect(s.directions.od90.isDeviating(c.getSectors())).toBe(true);
   });
 
   it("returns false for a for a basic aligned edge", function () {
     s.directions.od90.assignedDirection = 2;
-    s.dcel.config = { ...config, c: new CRegular(4) };
 
-    expect(s.directions.od90.isDeviating()).toBe(false);
+    expect(s.directions.od90.isDeviating(new CRegular(4).getSectors())).toBe(
+      false,
+    );
   });
 
   it("returns false for a for a basic aligned edge", function () {
     s.directions.od315.assignedDirection = 7;
-    s.dcel.config = { ...config, c: new CRegular(4) };
 
-    expect(s.directions.od315.isDeviating()).toBe(false);
+    expect(s.directions.od315.isDeviating(new CRegular(4).getSectors())).toBe(
+      false,
+    );
   });
 });
 
@@ -87,14 +96,17 @@ describe("getSignificantVertex()", function () {
 
 describe("Given the examples in the paper of buchin et al., classify() works as expected on example", function () {
   let s: TestSetup;
+  let c: C;
+
   beforeEach(function () {
     s = createEdgeVertexSetup();
+    ({ c } = config);
   });
 
   it("a", function () {
     s.o.edges.push(s.directions.od53, s.directions.od217);
-    s.directions.od53.classify();
-    s.directions.od217.classify();
+    s.directions.od53.classify(c);
+    s.directions.od217.classify(c);
 
     expect(s.directions.od53.class).toBe(OrientationClasses.UB);
     expect(s.directions.od217.class).toBe(OrientationClasses.UB);
@@ -102,9 +114,9 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("b", function () {
     s.o.edges.push(s.directions.od53, s.directions.od180, s.directions.od270);
-    s.directions.od53.classify();
-    s.directions.od180.classify();
-    s.directions.od270.classify();
+    s.directions.od53.classify(c);
+    s.directions.od180.classify(c);
+    s.directions.od270.classify(c);
 
     expect(s.directions.od53.class).toBe(OrientationClasses.UB);
     expect(s.directions.od180.class).toBe(OrientationClasses.AB);
@@ -113,9 +125,9 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("c", function () {
     s.o.edges.push(s.directions.od37, s.directions.od90, s.directions.od104);
-    s.directions.od37.classify();
-    s.directions.od90.classify();
-    s.directions.od104.classify();
+    s.directions.od37.classify(c);
+    s.directions.od90.classify(c);
+    s.directions.od104.classify(c);
 
     expect(s.directions.od37.class).toBe(OrientationClasses.UB);
     expect(s.directions.od90.class).toBe(OrientationClasses.AB);
@@ -124,8 +136,8 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("d", function () {
     s.o.edges.push(s.directions.od37, s.directions.od53);
-    s.directions.od37.classify();
-    s.directions.od53.classify();
+    s.directions.od37.classify(c);
+    s.directions.od53.classify(c);
 
     expect(s.directions.od37.class).toBe(OrientationClasses.E);
     expect(s.directions.od53.class).toBe(OrientationClasses.E);
@@ -133,9 +145,9 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("e", function () {
     s.o.edges.push(s.directions.od37, s.directions.od53, s.directions.od76);
-    s.directions.od37.classify();
-    s.directions.od53.classify();
-    s.directions.od76.classify();
+    s.directions.od37.classify(c);
+    s.directions.od53.classify(c);
+    s.directions.od76.classify(c);
 
     expect(s.directions.od37.class).toBe(OrientationClasses.E);
     expect(s.directions.od53.class).toBe(OrientationClasses.E);
@@ -149,10 +161,10 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
       s.directions.od53,
       s.directions.od76,
     );
-    s.directions.od0.classify();
-    s.directions.od37.classify();
-    s.directions.od53.classify();
-    s.directions.od76.classify();
+    s.directions.od0.classify(c);
+    s.directions.od37.classify(c);
+    s.directions.od53.classify(c);
+    s.directions.od76.classify(c);
 
     expect(s.directions.od0.class).toBe(OrientationClasses.AD);
     expect(s.directions.od37.class).toBe(OrientationClasses.E);
@@ -167,10 +179,10 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
       s.directions.od53,
       s.directions.od76,
     );
-    s.directions.od315.classify();
-    s.directions.od333.classify();
-    s.directions.od53.classify();
-    s.directions.od76.classify();
+    s.directions.od315.classify(c);
+    s.directions.od333.classify(c);
+    s.directions.od53.classify(c);
+    s.directions.od76.classify(c);
 
     expect(s.directions.od315.class).toBe(OrientationClasses.E);
     expect(s.directions.od333.class).toBe(OrientationClasses.E);
@@ -180,9 +192,8 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("h", function () {
     s.o.edges.push(s.directions.od53, s.directions.od217);
-    s.dcel.config = { ...config, c: new CRegular(4) };
-    s.directions.od53.classify();
-    s.directions.od217.classify();
+    s.directions.od53.classify(new CRegular(4));
+    s.directions.od217.classify(new CRegular(4));
 
     expect(s.directions.od53.class).toBe(OrientationClasses.UB);
     expect(s.directions.od217.class).toBe(OrientationClasses.UB);
@@ -190,10 +201,9 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("i", function () {
     s.o.edges.push(s.directions.od53, s.directions.od180, s.directions.od270);
-    s.dcel.config = { ...config, c: new CRegular(4) };
-    s.directions.od53.classify();
-    s.directions.od180.classify();
-    s.directions.od270.classify();
+    s.directions.od53.classify(new CRegular(4));
+    s.directions.od180.classify(new CRegular(4));
+    s.directions.od270.classify(new CRegular(4));
 
     expect(s.directions.od53.class).toBe(OrientationClasses.UB);
     expect(s.directions.od180.class).toBe(OrientationClasses.AB);
@@ -202,10 +212,9 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("j", function () {
     s.o.edges.push(s.directions.od53, s.directions.od90, s.directions.od104);
-    s.dcel.config = { ...config, c: new CRegular(4) };
-    s.directions.od53.classify();
-    s.directions.od90.classify();
-    s.directions.od104.classify();
+    s.directions.od53.classify(new CRegular(4));
+    s.directions.od90.classify(new CRegular(4));
+    s.directions.od104.classify(new CRegular(4));
 
     expect(s.directions.od53.class).toBe(OrientationClasses.UB);
     expect(s.directions.od90.class).toBe(OrientationClasses.AB);
@@ -214,9 +223,8 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("k", function () {
     s.o.edges.push(s.directions.od37, s.directions.od53);
-    s.dcel.config = { ...config, c: new CRegular(4) };
-    s.directions.od37.classify();
-    s.directions.od53.classify();
+    s.directions.od37.classify(new CRegular(4));
+    s.directions.od53.classify(new CRegular(4));
 
     expect(s.directions.od37.class).toBe(OrientationClasses.UB);
     expect(s.directions.od53.class).toBe(OrientationClasses.UB);
@@ -224,10 +232,9 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   it("l", function () {
     s.o.edges.push(s.directions.od37, s.directions.od53, s.directions.od76);
-    s.dcel.config = { ...config, c: new CRegular(4) };
-    s.directions.od37.classify();
-    s.directions.od53.classify();
-    s.directions.od76.classify();
+    s.directions.od37.classify(new CRegular(4));
+    s.directions.od53.classify(new CRegular(4));
+    s.directions.od76.classify(new CRegular(4));
 
     expect(s.directions.od37.class).toBe(OrientationClasses.UB);
     expect(s.directions.od53.class).toBe(OrientationClasses.E);
@@ -241,11 +248,10 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
       s.directions.od53,
       s.directions.od76,
     );
-    s.dcel.config = { ...config, c: new CRegular(4) };
-    s.directions.od0.classify();
-    s.directions.od14.classify();
-    s.directions.od53.classify();
-    s.directions.od76.classify();
+    s.directions.od0.classify(new CRegular(4));
+    s.directions.od14.classify(new CRegular(4));
+    s.directions.od53.classify(new CRegular(4));
+    s.directions.od76.classify(new CRegular(4));
 
     expect(s.directions.od0.class).toBe(OrientationClasses.AD);
     expect(s.directions.od14.class).toBe(OrientationClasses.UB);
@@ -260,11 +266,10 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
       s.directions.od53,
       s.directions.od76,
     );
-    s.dcel.config = { ...config, c: new CRegular(4) };
-    s.directions.od315.classify();
-    s.directions.od333.classify();
-    s.directions.od53.classify();
-    s.directions.od76.classify();
+    s.directions.od315.classify(new CRegular(4));
+    s.directions.od333.classify(new CRegular(4));
+    s.directions.od53.classify(new CRegular(4));
+    s.directions.od76.classify(new CRegular(4));
 
     expect(s.directions.od315.class).toBe(OrientationClasses.AB);
     expect(s.directions.od333.class).toBe(OrientationClasses.UB);
@@ -279,8 +284,9 @@ describe("classifyEdges() in a classification where all edges are classified and
       fs.readFileSync(path.resolve("test/data/shapes/edge-cases.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.preProcess();
-    dcel.classify();
+    const schematization = new CSchematization(dcel);
+    schematization.preProcess();
+    schematization.classify();
     const edgesWithoutAssignedAngles = dcel
       .getHalfEdges()
       .filter((edge) => edge.assignedDirection === undefined);
@@ -304,8 +310,9 @@ describe("classifyEdges() in a classification where all edges are classified and
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.preProcess();
-    dcel.classify();
+    const schematization = new CSchematization(dcel);
+    schematization.preProcess();
+    schematization.classify();
     const edgesWithoutAssignedAngles = dcel
       .getHalfEdges()
       .filter((edge) => edge.assignedDirection === undefined);

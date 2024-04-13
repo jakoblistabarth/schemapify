@@ -12,18 +12,19 @@ import Button from "./Button";
 import { extent, scaleLinear } from "d3";
 
 const SnapshotList: FC = () => {
-  const { dcel, nextSnapshot, prevSnapshot, setActiveSnapshot } = useAppStore();
+  const { snapshotList, nextSnapshot, prevSnapshot, setActiveSnapshot } =
+    useAppStore();
 
-  if (!dcel?.snapshotList.hasSnapshots()) return <></>;
+  if (!snapshotList?.hasSnapshots()) return <></>;
 
   const [durationMin, durationMax] = extent(
-    dcel.snapshotList.snapshots.map((d) => d.duration)
+    snapshotList?.snapshots.map((d) => d.duration) ?? [],
   );
   const colorScale = scaleLinear<string, string>()
     .domain([durationMin ?? 0, durationMax ?? 1])
     .range(["rgb(200, 215, 255)", "rgb(0,0,150)"]);
 
-  const snapshotsByStep = dcel.snapshotList.getSnapshotByStep();
+  const snapshotsByStep = snapshotList?.getSnapshotByStep();
 
   return (
     <div className="self-align-middle relative z-above-map mx-auto mb-5 flex items-center justify-between gap-2 rounded-md bg-white p-1 px-2">
@@ -31,7 +32,7 @@ const SnapshotList: FC = () => {
         <RiCamera3Line size={15} />
         Snapshots
       </h2>
-      {snapshotsByStep.map(([step, snapshots]) => (
+      {snapshotsByStep?.map(([step, snapshots]) => (
         <div key={step}>
           <SnapshotTimeline colorScale={colorScale} snapshots={snapshots} />
         </div>
@@ -40,9 +41,7 @@ const SnapshotList: FC = () => {
         <Button
           className="p-2 transition-opacity duration-500 disabled:pointer-events-none disabled:opacity-20"
           onClick={() =>
-            prevSnapshot
-              ? setActiveSnapshot(prevSnapshot.id, dcel.snapshotList)
-              : undefined
+            prevSnapshot ? setActiveSnapshot(prevSnapshot.id) : undefined
           }
           disabled={!!!prevSnapshot}
         >
@@ -51,9 +50,7 @@ const SnapshotList: FC = () => {
         <Button
           className="p-2 transition-opacity duration-500 disabled:pointer-events-none disabled:opacity-20"
           onClick={() =>
-            nextSnapshot
-              ? setActiveSnapshot(nextSnapshot.id, dcel.snapshotList)
-              : undefined
+            nextSnapshot ? setActiveSnapshot(nextSnapshot.id) : undefined
           }
           disabled={!!!nextSnapshot}
         >

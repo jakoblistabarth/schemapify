@@ -4,7 +4,6 @@ import Vertex from "@/src/DCEL/Vertex";
 import HalfEdge from "@/src/DCEL/HalfEdge";
 import Face from "@/src/DCEL/Face";
 import Dcel from "@/src/DCEL/Dcel";
-import config from "@/src/c-oriented-schematization/schematization.config";
 import { crawlArray } from "@/src/utilities";
 
 export function getTestFiles(dir: string) {
@@ -24,7 +23,6 @@ export type TestSetup = {
 
 export function createEdgeVertexSetup() {
   const dcel = new Dcel();
-  dcel.config = config;
   const o = new Vertex(0, 0, dcel);
   o.significant = true;
 

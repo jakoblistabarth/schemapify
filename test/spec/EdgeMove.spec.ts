@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import Dcel from "@/src/DCEL/Dcel";
 import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("createConfigurations()", function () {
   it("adds configuration to all edges which are possible candidates for edge moves (which endpoints are of degree 3 or less).", function () {
@@ -12,9 +13,8 @@ describe("createConfigurations()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel.preProcess();
-    dcel.constrainAngles();
-    dcel.createConfigurations();
+    const schematization = new CSchematization(dcel);
+    schematization.schematize();
 
     const verticesDegree4 = dcel
       .getVertices()
@@ -47,7 +47,8 @@ describe("doEdgeMove()", function () {
     const dcel = Dcel.fromGeoJSON(json);
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
     const originalArea = dcel.getArea();
-    dcel.createConfigurations();
+    const schematization = new CSchematization(dcel);
+    schematization.createConfigurations();
     const pair = dcel.faceFaceBoundaryList
       .getBoundaries()[0]
       .getMinimalConfigurationPair();
@@ -79,7 +80,8 @@ describe("doEdgeMove()", function () {
     );
     const dcel = Dcel.fromGeoJSON(json);
     const originalArea = dcel.getArea();
-    dcel.createConfigurations();
+    const schematization = new CSchematization(dcel);
+    schematization.createConfigurations();
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
     const pair = dcel.faceFaceBoundaryList.getMinimalConfigurationPair();
     pair?.doEdgeMove();
@@ -100,7 +102,8 @@ describe("doEdgeMove()", function () {
     const dcel = Dcel.fromGeoJSON(json);
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
     const originalArea = dcel.getArea();
-    dcel.createConfigurations();
+    const schematization = new CSchematization(dcel);
+    schematization.createConfigurations();
     const pair = dcel.faceFaceBoundaryList
       .getBoundaries()[0]
       .getMinimalConfigurationPair();

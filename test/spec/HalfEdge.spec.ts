@@ -4,10 +4,10 @@ import Dcel from "@/src/DCEL/Dcel";
 import HalfEdge from "@/src/DCEL/HalfEdge";
 import Vertex from "@/src/DCEL/Vertex";
 import Point from "@/src/geometry/Point";
-import { config } from "@/src/c-oriented-schematization/schematization.config";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
 import { createEdgeVertexSetup, TestSetup, getTestFiles } from "./test-setup";
 import Line from "@/src/geometry/Line";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("getLength()", function () {
   it("returns the correct length for a single halfEdge", function () {
@@ -126,24 +126,17 @@ describe("getAssignedDirection()", function () {
   });
 
   it("returns the correct angle", function () {
-    s.dcel.config = { ...config, c: new CRegular(2) };
+    const c = new CRegular(2);
+    const sectors = c.getSectors();
     s.directions.od53.assignedDirection = 1;
     s.directions.od104.assignedDirection = 2;
     s.directions.od217.assignedDirection = 3;
     s.directions.od315.assignedDirection = 0;
 
-    expect(s.directions.od53.getAssignedAngle()).toBe(
-      s.dcel.config.c.angles[1],
-    );
-    expect(s.directions.od104.getAssignedAngle()).toBe(
-      s.dcel.config.c.angles[2],
-    );
-    expect(s.directions.od217.getAssignedAngle()).toBe(
-      s.dcel.config.c.angles[3],
-    );
-    expect(s.directions.od315.getAssignedAngle()).toBe(
-      s.dcel.config.c.angles[0],
-    );
+    expect(s.directions.od53.getAssignedAngle(sectors)).toBe(c.angles[1]);
+    expect(s.directions.od104.getAssignedAngle(sectors)).toBe(c.angles[2]);
+    expect(s.directions.od217.getAssignedAngle(sectors)).toBe(c.angles[3]);
+    expect(s.directions.od315.getAssignedAngle(sectors)).toBe(c.angles[0]);
   });
 });
 
@@ -187,7 +180,6 @@ describe("subdivide() on geodata results in a Dcel", function () {
           fs.readFileSync(path.resolve(dir + "/" + file), "utf8"),
         );
         const dcel = Dcel.fromGeoJSON(json);
-        dcel.preProcess();
 
         const cycles: HalfEdge[][] = [];
         dcel.getBoundedFaces().forEach((f) => {
@@ -372,8 +364,8 @@ describe("subdivideToThreshold()", function () {
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
-
-    dcel.splitEdges(5);
+    const schematization = new CSchematization(dcel);
+    schematization.splitEdges(5);
 
     expect(dcel.halfEdges.size).toBe(64);
   });
