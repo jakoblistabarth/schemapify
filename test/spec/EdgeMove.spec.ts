@@ -46,13 +46,13 @@ describe("doEdgeMove()", function () {
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
-    const originalArea = dcel.getArea();
+    const originalArea = dcel.area;
     dcel.createConfigurations();
     const pair = dcel.faceFaceBoundaryList
       .getBoundaries()[0]
       .getMinimalConfigurationPair();
     pair?.doEdgeMove();
-    const newArea = dcel.getArea();
+    const newArea = dcel.area;
 
     expect(dcel.getBoundedFaces()[0].getEdges()[2].toString()).toBe(
       "10.5/1->10/1",
@@ -78,12 +78,12 @@ describe("doEdgeMove()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const originalArea = dcel.getArea();
+    const originalArea = dcel.area;
     dcel.createConfigurations();
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
     const pair = dcel.faceFaceBoundaryList.getMinimalConfigurationPair();
     pair?.doEdgeMove();
-    const newArea = dcel.getArea();
+    const newArea = dcel.area;
 
     expect(dcel.halfEdges.size / 2).toEqual(10);
     expect(dcel.vertices.size).toEqual(10);
@@ -99,13 +99,13 @@ describe("doEdgeMove()", function () {
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
-    const originalArea = dcel.getArea();
+    const originalArea = dcel.area;
     dcel.createConfigurations();
     const pair = dcel.faceFaceBoundaryList
       .getBoundaries()[0]
       .getMinimalConfigurationPair();
     pair?.doEdgeMove();
-    const newArea = dcel.getArea();
+    const newArea = dcel.area;
 
     const edges = dcel
       .getBoundedFaces()[0]

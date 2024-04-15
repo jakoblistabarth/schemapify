@@ -258,9 +258,9 @@ describe("getBbox()", function () {
       ),
     );
 
-    const bboxPlgn1 = Dcel.fromGeoJSON(plgn1).getBbox();
-    const bboxPlgn2 = Dcel.fromGeoJSON(plgn2).getBbox();
-    const bboxPlgn3 = Dcel.fromGeoJSON(plgn3).getBbox();
+    const bboxPlgn1 = Dcel.fromGeoJSON(plgn1).bBox;
+    const bboxPlgn2 = Dcel.fromGeoJSON(plgn2).bBox;
+    const bboxPlgn3 = Dcel.fromGeoJSON(plgn3).bBox;
 
     expect(bboxPlgn1.bounds).toEqual([0, 20, 0, 20]);
     expect(bboxPlgn2.bounds).toEqual([0, 4, 0, 2]);
@@ -303,22 +303,22 @@ describe("getDiameter()", function () {
       ),
     );
 
-    expect(Dcel.fromGeoJSON(plgn1).getDiameter()).toBe(
+    expect(Dcel.fromGeoJSON(plgn1).diameter).toBe(
       Math.sqrt(Math.pow(20, 2) + Math.pow(20, 2)),
     );
-    expect(Dcel.fromGeoJSON(plgn3).getDiameter()).toBe(
+    expect(Dcel.fromGeoJSON(plgn3).diameter).toBe(
       Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)),
     );
   });
 });
 
-describe("getArea()", function () {
+describe("The getter area", function () {
   it("returns the correct area of a square", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    expect(dcel.getArea()).toBe(20 * 20);
+    expect(dcel.area).toBe(20 * 20);
   });
   it("returns the correct area of 3 adjacent squares", function () {
     const json = JSON.parse(
@@ -328,7 +328,7 @@ describe("getArea()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    expect(dcel.getArea()).toBe(1 * 1 * 3);
+    expect(dcel.area).toBe(1 * 1 * 3);
   });
 
   it("returns the correct area of a square with negative coordinates.", function () {
@@ -336,7 +336,7 @@ describe("getArea()", function () {
       fs.readFileSync(path.resolve("test/data/shapes/square-neg.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    expect(dcel.getArea()).toBe(4);
+    expect(dcel.area).toBe(4);
   });
 
   it("returns the correct area of the enclave test case", function () {
@@ -344,7 +344,7 @@ describe("getArea()", function () {
       fs.readFileSync(path.resolve("test/data/shapes/enclave.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    expect(dcel.getArea()).toBe(2 * 2);
+    expect(dcel.area).toBe(2 * 2);
   });
 
   it("returns the correct area for a polygon with 1 hole and 1 island", function () {
@@ -374,7 +374,7 @@ describe("getArea()", function () {
         ],
       ]),
     ]);
-    expect(dcel.getArea()).toBe(12 + 1);
+    expect(dcel.area).toBe(12 + 1);
   });
 
   it("returns the correct area for two polygons, one with multiple holes", function () {
@@ -424,12 +424,12 @@ describe("getArea()", function () {
         ],
       ]),
     ]);
-    expect(dcel.getArea()).toBe(21 + 4);
+    expect(dcel.area).toBe(21 + 4);
   });
 
   it("returns the correct area of Austria.", function () {
     const dcel = Dcel.fromMultiPolygons([shape]);
-    expect(dcel.getArea()).toBeCloseTo(83688201106.428);
+    expect(dcel.area).toBeCloseTo(83688201106.428);
   });
 });
 

@@ -154,7 +154,13 @@ class Dcel {
     return Array.from(this.vertices.values());
   }
 
-  getArea(): number {
+  /**
+   * Get the area of the DCEL.
+   * Takes into account the area of all bounded faces and holes.
+   * @returns The area of the DCEL.
+
+   */
+  get area(): number {
     return this.getFaces().reduce((acc, face) => {
       // do only consider faces associated with one feature
       // the unbounded faces (no associated features) need to be ignored
@@ -369,7 +375,7 @@ class Dcel {
    * As seen from [turf.js](https://github.com/Turfjs/turf/blob/master/packages/turf-bbox/index.ts).
    * @returns The bounding box of the {@link Dcel} as [minX, minY, maxX, maxY].
    */
-  getBbox() {
+  get bBox() {
     const points = Array.from(this.vertices.values()).map(
       (v) => [v.x, v.y] as [number, number],
     );
@@ -381,15 +387,15 @@ class Dcel {
    * Defined as the center of it's Boundingbox
    */
   get center(): [number, number] {
-    return this.getBbox().center;
+    return this.bBox.center;
   }
 
   /**
    * Calculates the diameter of the DCEL (as the diameter of its bounding box).
    * @returns The diameter of the {@link Dcel}.
    */
-  getDiameter(): number {
-    return this.getBbox().diameter;
+  get diameter(): number {
+    return this.bBox.diameter;
   }
 
   /**
@@ -399,7 +405,7 @@ class Dcel {
    */
   setEpsilon(lambda: number): number | undefined {
     return this.config
-      ? (this.config.epsilon = this.getDiameter() * lambda)
+      ? (this.config.epsilon = this.diameter * lambda)
       : undefined;
   }
 
