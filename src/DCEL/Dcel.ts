@@ -131,21 +131,30 @@ class Dcel {
     let edges = edgeClass
       ? halfEdges.filter((e) => e.class === edgeClass)
       : halfEdges;
-    edges = simple ? this.getSimpleEdges(edges) : edges;
+    edges = simple ? this.getSimpleEdges() : edges;
     return edges;
   }
 
-  getSimpleEdges(edges: HalfEdge[]) {
-    // FIXME: confusing for map output: sometimes clockwise/counterclockwise assignment in map output wrong
-    const simpleEdges: HalfEdge[] = [];
-    edges.forEach((e) => {
-      if (!e.twin) return;
-      const idx = simpleEdges.indexOf(e.twin);
-      if (idx < 0) simpleEdges.push(e);
-    });
-    return simpleEdges;
+  /**
+   * Returns one {@link HalfEdge} of each pair of HalfEdges.
+   */
+  getSimpleEdges() {
+    return Array.from(this.halfEdges.values()).reduce<HalfEdge[]>(
+      (acc, edge) => {
+        if (!edge.twin) return acc;
+        const idx = acc.indexOf(edge.twin);
+        if (idx < 0) acc.push(edge);
+        return acc;
+      },
+      [],
+    );
   }
 
+  /**
+   * Get all vertices of the DCEL.
+   * @param significant A boolean indicating whether to return only significant vertices.
+   * @returns An array of {@link Vertex|Vertices}.
+   */
   getVertices(significant?: boolean) {
     if (significant)
       return Array.from(this.vertices.values()).filter(
@@ -158,7 +167,6 @@ class Dcel {
    * Get the area of the DCEL.
    * Takes into account the area of all bounded faces and holes.
    * @returns The area of the DCEL.
-
    */
   get area(): number {
     return this.getFaces().reduce((acc, face) => {
@@ -174,7 +182,7 @@ class Dcel {
   }
 
   /**
-   * Find a Vertex within a DCEL, based on x and y coordinates.
+   * Find a {@link Vertex} within a DCEL, based on x and y coordinates.
    * @param x x Position
    * @param y y Position
    * @returns A {@link Vertex} if one exists on this position, otherwise undefined.
@@ -184,7 +192,7 @@ class Dcel {
   }
 
   /**
-   * Find a HalfEdge within a DCEL, based on Points representing the tail and the head's position.
+   * Find a {@link HalfEdge} within a DCEL, based on {@link Points} representing the tail and the head's position.
    * @param tailPos {@link Point} representing the position of the {@link HalfEdge}'s tail {@link Vertex}.
    * @param headPos {@link Point} representing the position of the {@link HalfEdge}'s head {@link Vertex}.
    * @returns A {@link HalfEdge}, inf one exists with this endpoint positions, otherwise undefined.
@@ -199,9 +207,9 @@ class Dcel {
   }
 
   /**
-   * Removes the {@link Vertex} from the DCEL.
+   * Removes a {@link Vertex} from the DCEL.
    * @param vertex The {@link Vertex} to remove.
-   * @returns The remaining {@link Vertex|Vertices} in the DCEL.
+   * @returns The updated {@link Map} of the remaining {@link Vertex|Vertices}.
    */
   removeVertex(vertex: Vertex): Map<string, Vertex> {
     const key = Vertex.getKey(vertex.x, vertex.y);
@@ -210,9 +218,9 @@ class Dcel {
   }
 
   /**
-   * Removes the {@link HalfEdge} from the DCEL.
+   * Removes a {@link HalfEdge} from the DCEL.
    * @param edge The {@link HalfEdge} to remove.
-   * @returns The remaining {@link HalfEdge}s in the DCEL.
+   * @returns The updated {@link Map} of the remaining {@link HalfEdge}s.
    */
   removeHalfEdge(edge: HalfEdge): Map<string, HalfEdge> {
     const head = edge.getHead();
@@ -433,7 +441,7 @@ class Dcel {
   }
 
   /**
-   * Classifies all Vertices in the DCEL, adds new Vertices on an HalfEdge which has two significant Vertices.
+   * Classifies all Vertices in the DCEL, adds a new {@link Vertex} on an {@link HalfEdge} which has two significant Vertices.
    * By doing so it is guaranteed that every HalfEdge has at most one significant Vertex.
    */
   classifyVertices(): void {
@@ -450,6 +458,9 @@ class Dcel {
     });
   }
 
+  /**
+   * Classifies all {@link Halfedge|HalfEdges} in the DCEL.
+   */
   classify(): void {
     this.classifyVertices();
     this.halfEdges.forEach((e) => e.classify());
@@ -466,10 +477,15 @@ class Dcel {
       .filter((staircase): staircase is Staircase => !!staircase);
   }
 
+  /**
+   * Creates {@link Staircase|Staircases} for all {@link HalfEdge}s in the DCEL.
+   */
   addStaircases() {
-    // create staircase for every pair of edges
+    // for every pair of edges
     this.getHalfEdges(undefined, true).forEach((edge) => {
+      // skip if they are already aligned
       if (edge.class === OrientationClasses.AB) return;
+      //
       if (
         edge.getSignificantVertex() &&
         edge.getSignificantVertex() !== edge.tail &&
@@ -623,6 +639,9 @@ class Dcel {
     }
   }
 
+  /**
+   * Replaces all {@link HalfEdge|Halfedges} of the DCEL with {@link Staircase|Staircases}.
+   */
   replaceEdgesWithStaircases() {
     this.getHalfEdges().forEach((edge) => {
       if (!edge.staircase) return;
@@ -639,6 +658,9 @@ class Dcel {
     this.getHalfEdges().forEach((edge) => (edge.class = OrientationClasses.AB));
   }
 
+  /**
+   * Turn all {@link HalfEdge|Halfedges} of the DCEL into C-oriented {@link Staircase|Staircases}.
+   */
   constrainAngles(): void {
     this.classify();
     this.addStaircases();
@@ -648,6 +670,10 @@ class Dcel {
     this.snapshotList.takeSnapshot(STEP.STAIRCASE);
   }
 
+  /**
+   * Iteratively simplifies the DCEL by complementary edge moves.
+   * @returns The simplified DCEL.
+   */
   simplify(): Dcel {
     this.removeSuperfluousVertices();
     const faceFaceBoundaryList = new FaceFaceBoundaryList(this);
@@ -709,12 +735,19 @@ class Dcel {
     superfluousVertices.forEach((v) => v.remove());
   }
 
+  /**
+   * Schematizes the DCEL by first preprocessing it, then constraining angles and simplifying it.
+   */
   schematize(): void {
     this.preProcess();
     this.constrainAngles();
     this.simplify();
   }
 
+  /**
+   * Prints the DCEL to the console.
+   * @param verbose Boolean indicating whether to print the DCEL in a more detailed way.
+   */
   toConsole(verbose: boolean = false): void {
     if (!verbose) console.log("DCEL " + this.name, this);
     else {
@@ -733,6 +766,10 @@ class Dcel {
     }
   }
 
+  /**
+   * Transforms the DCEL into a geoJSON.
+   * @returns A geoJSON FeatureCollection of MultiPolygons.
+   */
   toGeoJSON(): geojson.FeatureCollection<geojson.MultiPolygon> {
     const outerRingsByFID = this.getBoundedFaces().reduce(
       (groupedFaces: { [key: number]: Face[] }, face) => {
@@ -788,6 +825,10 @@ class Dcel {
     return createGeoJSON(features);
   }
 
+  /**
+   * Transforms the DCELs {@link Vertex|Vertices} into geoJSON.
+   * @returns A geoJSON FeatureCollection of Points.
+   */
   verticesToGeoJSON(): geojson.FeatureCollection<geojson.Point> {
     const vertexFeatures = Array.from(this.vertices.values()).map(
       (v): geojson.Feature<geojson.Point> => {
@@ -809,6 +850,10 @@ class Dcel {
     return createGeoJSON(vertexFeatures);
   }
 
+  /**
+   * Transforms the DCELs {@link Face|Faces} into geoJSON.
+   * @returns A geoJSON FeatureCollection of Polygons.
+   */
   facesToGeoJSON(): geojson.FeatureCollection<geojson.Polygon> {
     const faceFeatures = this.getBoundedFaces().map(
       (f): geojson.Feature<geojson.Polygon> => {
@@ -833,6 +878,10 @@ class Dcel {
     return createGeoJSON(faceFeatures);
   }
 
+  /**
+   * Transforms the DCELs {@link HalfEdge|HalfEdges} into geoJSON.
+   * @returns A geoJSON FeatureCollection of LineStrings.
+   */
   staircasesToGeoJSON(): geojson.FeatureCollection<geojson.Polygon> {
     const staircaseFeatures = this.getHalfEdges(undefined, true).map(
       (edge): geojson.Feature<geojson.Polygon> => {
@@ -855,6 +904,10 @@ class Dcel {
     return createGeoJSON(staircaseFeatures);
   }
 
+  /**
+   * Transforms the DCELs {@link HalfEdge|HalfEdges} into geoJSON.
+   * @returns A geoJSON FeatureCollection of LineStrings.
+   */
   edgesToGeoJSON(): geojson.FeatureCollection<geojson.LineString> {
     const edgeFeatures = this.getHalfEdges(undefined, true).map(
       (e): geojson.Feature<geojson.LineString> => {
@@ -912,7 +965,10 @@ class Dcel {
 
     return createGeoJSON(edgeFeatures);
   }
-
+  /**
+   * Transforms the DCELs {@link Staircase}'s regions into geoJSON.
+   * @returns A geoJSON FeatureCollection of Polygons.
+   */
   staircaseRegionsToGeoJSON(): geojson.FeatureCollection<geojson.Polygon> {
     const regionFeatures = this.getStaircases().map(
       (staircase): geojson.Feature<geojson.Polygon> => {
