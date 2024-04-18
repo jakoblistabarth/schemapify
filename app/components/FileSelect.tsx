@@ -1,16 +1,16 @@
 "use client";
 
-import { FC, Fragment } from "react";
-import useAppStore from "../helpers/store";
 import * as Select from "@radix-ui/react-select";
+import { FC, Fragment } from "react";
 import { GoChevronDown, GoChevronUp } from "react-icons/go";
-import SelectItem from "./SelectItem";
 import { GroupedTestFiles } from "../helpers/getGroupedTestFiles";
+import { useDcelStore } from "../providers/dcel-store-provider";
+import SelectItem from "./SelectItem";
 
 type Props = { files: GroupedTestFiles };
 
 const FileSelect: FC<Props> = ({ files }) => {
-  const { setSource, source } = useAppStore();
+  const { setSource, source } = useDcelStore((state) => state);
 
   return (
     <Select.Root

@@ -1,11 +1,11 @@
 "use client";
 
 import Snapshot from "@/src/Snapshot/Snapshot";
-import { FC } from "react";
-import useAppStore from "../helpers/store";
-import clsx from "clsx";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import clsx from "clsx";
 import { ScaleLinear } from "d3";
+import { FC } from "react";
+import { useDcelStore } from "../providers/dcel-store-provider";
 
 type Props = {
   snapshots: Snapshot[];
@@ -13,7 +13,9 @@ type Props = {
 };
 
 const SnapshotTimeline: FC<Props> = ({ snapshots, colorScale }) => {
-  const { setActiveSnapshot, activeSnapshot, dcel } = useAppStore();
+  const { setActiveSnapshot, activeSnapshot, dcel } = useDcelStore(
+    (state) => state,
+  );
   const width = 10;
   const height = 25;
   const baseStrokeWidth = 2;
@@ -46,7 +48,7 @@ const SnapshotTimeline: FC<Props> = ({ snapshots, colorScale }) => {
                   fill={colorScale(d.duration)}
                   className={clsx(
                     "cursor-pointer stroke-transparent stroke-1 transition-all duration-100 hover:stroke-blue-600",
-                    isActive && "stroke-blue-900 !stroke-2"
+                    isActive && "stroke-blue-900 !stroke-2",
                   )}
                   onClick={() => setActiveSnapshot(d.id, dcel?.snapshotList)}
                 />

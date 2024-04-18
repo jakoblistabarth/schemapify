@@ -1,13 +1,13 @@
 import dynamic from "next/dynamic";
-import Brand from "./components/Brand";
-import Configurator from "./components/Configurator";
-import Footer from "./components/Footer";
-import Hotkeys from "./components/Hotkeys";
-import SnapshotNavigator from "./components/SnapshotNavigator";
-import Teaser from "./components/Teaser";
-import getGroupedTestFiles from "./helpers/getGroupedTestFiles";
+import Brand from "../components/Brand";
+import Configurator from "../components/Configurator";
+import Footer from "../components/Footer";
+import Hotkeys from "../components/Hotkeys";
+import SnapshotNavigator from "../components/SnapshotNavigator";
+import Teaser from "../components/Teaser";
+import getGroupedTestFiles from "../helpers/getGroupedTestFiles";
 
-const DynamicMap = dynamic(() => import("./components/Map/Map"), {
+const DynamicMap = dynamic(() => import("../components/Map/Map"), {
   ssr: false,
 });
 
@@ -33,7 +33,9 @@ const Home = async () => {
               <Teaser />
             </div>
             <div className="self-end justify-self-center grid-in-[bottom-nav]">
-              <SnapshotNavigator />
+              <div className="mb-5">
+                <SnapshotNavigator />
+              </div>
             </div>
           </div>
         </main>

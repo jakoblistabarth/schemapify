@@ -1,24 +1,24 @@
+import { useDcelStore } from "@/app/providers/dcel-store-provider";
+import clsx from "clsx";
+import {
+  RiAddLine,
+  RiBug2Line,
+  RiFlag2Line,
+  RiMagicLine,
+  RiStackLine,
+  RiSubtractLine,
+} from "react-icons/ri";
 import { useMap } from "react-leaflet";
 import Button from "../Button";
-import {
-  RiFlag2Line,
-  RiAddLine,
-  RiSubtractLine,
-  RiStackLine,
-  RiBug2Line,
-  RiMagicLine,
-} from "react-icons/ri";
-import useAppStore from "@/app/helpers/store";
-import clsx from "clsx";
 
 const MapControl = () => {
   const map = useMap();
-  const { toggleMapMode, mapMode, source } = useAppStore();
+  const { toggleMapMode, mapMode, source } = useDcelStore((state) => state);
   return (
     <div
       className={clsx(
         "relative z-above-map float-right mr-3 mt-10 flex flex-col items-center",
-        !source && "pointer-events-none opacity-30"
+        !source && "pointer-events-none opacity-30",
       )}
     >
       <div className="flex flex-col">

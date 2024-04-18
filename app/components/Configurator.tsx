@@ -1,17 +1,17 @@
 "use client";
 
 import { FC } from "react";
-import useAppStore from "../helpers/store";
 import { MdClose } from "react-icons/md";
-import FileSelect from "./FileSelect";
 import { GroupedTestFiles } from "../helpers/getGroupedTestFiles";
+import { useDcelStore } from "../providers/dcel-store-provider";
+import FileSelect from "./FileSelect";
 
 type Props = {
   files: GroupedTestFiles;
 };
 
 const Configurator: FC<Props> = ({ files }) => {
-  const { source, removeSource } = useAppStore();
+  const { source, removeSource } = useDcelStore((state) => state);
 
   return (
     <>

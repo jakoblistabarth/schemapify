@@ -1,6 +1,7 @@
 import DcelViewer from "@/app/components/DcelViewer";
 import DescriptionList from "@/app/components/DescriptionList";
 import Math from "@/app/components/Math";
+import { DcelStoreProvider } from "@/app/providers/dcel-store-provider";
 
 export default function Page() {
   return (
@@ -52,7 +53,9 @@ export default function Page() {
           <Math>X</Math> to reach length zero.
         </p>
       </section>
-      <DcelViewer />
+      <DcelStoreProvider>
+        <DcelViewer />
+      </DcelStoreProvider>
     </div>
   );
 }

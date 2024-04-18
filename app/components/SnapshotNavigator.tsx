@@ -1,23 +1,25 @@
 "use client";
 
+import { extent, scaleLinear } from "d3";
 import { FC } from "react";
-import useAppStore from "../helpers/store";
-import SnapshotTimeline from "./SnapshotTimeline";
 import {
   RiCamera3Line,
   RiSkipBackLine,
   RiSkipForwardLine,
 } from "react-icons/ri";
+import { useDcelStore } from "../providers/dcel-store-provider";
 import Button from "./Button";
-import { extent, scaleLinear } from "d3";
+import SnapshotTimeline from "./SnapshotTimeline";
 
 const SnapshotList: FC = () => {
-  const { dcel, nextSnapshot, prevSnapshot, setActiveSnapshot } = useAppStore();
+  const { dcel, nextSnapshot, prevSnapshot, setActiveSnapshot } = useDcelStore(
+    (state) => state,
+  );
 
   if (!dcel?.snapshotList.hasSnapshots()) return <></>;
 
   const [durationMin, durationMax] = extent(
-    dcel.snapshotList.snapshots.map((d) => d.duration)
+    dcel.snapshotList.snapshots.map((d) => d.duration),
   );
   const colorScale = scaleLinear<string, string>()
     .domain([durationMin ?? 0, durationMax ?? 1])
@@ -26,7 +28,7 @@ const SnapshotList: FC = () => {
   const snapshotsByStep = dcel.snapshotList.getSnapshotByStep();
 
   return (
-    <div className="self-align-middle relative z-above-map mx-auto mb-5 flex items-center justify-between gap-2 rounded-md bg-white p-1 px-2">
+    <div className="relative z-above-map mx-auto flex items-center justify-between gap-2 rounded-md bg-white p-1 px-2">
       <h2 className="flex justify-between gap-1 text-xs font-bold">
         <RiCamera3Line size={15} />
         Snapshots
@@ -46,7 +48,7 @@ const SnapshotList: FC = () => {
           }
           disabled={!!!prevSnapshot}
         >
-          <RiSkipBackLine size={15} />
+          <RiSkipBackLine />
         </Button>
         <Button
           className="p-2 transition-opacity duration-500 disabled:pointer-events-none disabled:opacity-20"
@@ -57,7 +59,7 @@ const SnapshotList: FC = () => {
           }
           disabled={!!!nextSnapshot}
         >
-          <RiSkipForwardLine size={15} />
+          <RiSkipForwardLine />
         </Button>
       </div>
     </div>

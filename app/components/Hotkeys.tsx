@@ -2,7 +2,7 @@
 
 import { useHotkeys } from "react-hotkeys-hook";
 import { handleSimplify } from "../helpers/handleSimplify";
-import useAppStore from "../helpers/store";
+import { useDcelStore } from "../providers/dcel-store-provider";
 
 const Hotkeys = () => {
   const {
@@ -12,7 +12,7 @@ const Hotkeys = () => {
     setActiveSnapshot,
     prevSnapshot,
     nextSnapshot,
-  } = useAppStore();
+  } = useDcelStore((state) => state);
 
   useHotkeys(["ctrl+s"], () => handleSimplify(setActiveSnapshot, dcel));
   useHotkeys(["ctrl+c"], () => removeSource());
@@ -20,12 +20,12 @@ const Hotkeys = () => {
   useHotkeys(["left"], () =>
     prevSnapshot && dcel?.snapshotList
       ? setActiveSnapshot(prevSnapshot.id, dcel?.snapshotList)
-      : undefined
+      : undefined,
   );
   useHotkeys(["right"], () =>
     nextSnapshot && dcel?.snapshotList
       ? setActiveSnapshot(nextSnapshot.id, dcel?.snapshotList)
-      : undefined
+      : undefined,
   );
   return <></>;
 };

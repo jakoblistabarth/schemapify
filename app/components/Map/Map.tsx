@@ -1,6 +1,6 @@
 "use client";
 
-import useAppStore from "@/app/helpers/store";
+import { useDcelStore } from "@/app/providers/dcel-store-provider";
 import { GeoJSON as LGeoJSON } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { FC, useMemo } from "react";
@@ -14,7 +14,7 @@ import MapControl from "./MapControl";
 import SetBounds from "./SetBounds";
 
 const Map: FC = ({ ...rest }) => {
-  const { source, activeSnapshot, mapMode } = useAppStore();
+  const { source, activeSnapshot, mapMode } = useDcelStore((state) => state);
 
   const regionBounds = useMemo(() => {
     return new LGeoJSON(source?.data).getBounds();

@@ -1,6 +1,8 @@
-import Dcel from "@/src/DCEL/Dcel";
 import HalfEdge from "@/src/DCEL/HalfEdge";
 import Vertex from "@/src/DCEL/Vertex";
+import Contraction, {
+  ContractionType,
+} from "@/src/c-oriented-schematization/Contraction";
 import Vector2D from "@/src/geometry/Vector2D";
 import { range } from "d3";
 import {
@@ -15,24 +17,23 @@ import {
 } from "deck.gl";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import ConfigurationLayer from "../helpers/ConfigurationLayer";
-import Contraction, {
-  ContractionType,
-} from "@/src/c-oriented-schematization/Contraction";
+import { useDcelStore } from "../providers/dcel-store-provider";
 
 const step = 0.005;
 const intervalMS = 24;
 const loopLength = 1;
 
 type Props = {
-  dcel: Dcel;
   isAnimating?: boolean;
 };
 
 type HoverInfo = PickingInfo<Vertex | HalfEdge>;
 
-const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
+const Canvas: FC<Props> = ({ isAnimating = false }) => {
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | undefined>(undefined);
   const [time, setTime] = useState(0);
+
+  const { dcel } = useDcelStore((state) => state);
 
   const animate = useCallback(() => {
     // increment time by "step" on each loop
@@ -68,11 +69,32 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
   );
 
   const { layers, view, initialViewState } = useMemo(() => {
-    const halfedges = Array.from(dcel.getHalfEdges());
-    const vertices = Array.from(dcel.getVertices());
+    const initialViewState: OrthographicViewState = {
+      target: dcel?.center,
+      zoom: 6,
+      minZoom: 5,
+      maxZoom: 10,
+    };
+
+    const view = new OrthographicView({ flipY: false });
+
     const gridPoints = range(-50, 50, 0.5)
       .map((i) => range(-50, 50, 0.5).map((j) => [i, j]))
       .flat();
+
+    const grid = new ScatterplotLayer({
+      id: "grid",
+      data: gridPoints,
+      getPosition: (d) => d,
+      radiusMinPixels: 1,
+      radiusMaxPixels: 1,
+      getFillColor: [0, 0, 0, 50],
+    });
+
+    if (!dcel) return { layers: [grid], view, initialViewState };
+
+    const halfedges = Array.from(dcel.getHalfEdges());
+    const vertices = Array.from(dcel.getVertices());
 
     const edges = new LineLayer({
       id: "edges",
@@ -135,17 +157,8 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
         hoverInfo?.object?.uuid === d.uuid ? [0, 255, 0] : [255, 255, 255],
     });
 
-    const grid = new ScatterplotLayer({
-      id: "grid",
-      data: gridPoints,
-      getPosition: (d) => d,
-      radiusMinPixels: 1,
-      radiusMaxPixels: 1,
-      getFillColor: [0, 0, 0, 50],
-    });
-
     const configurations = new ConfigurationLayer({
-      data: dcel.faceFaceBoundaryList?.getMinimalConfigurationPair(),
+      data: dcel?.faceFaceBoundaryList?.getMinimalConfigurationPair(),
     });
 
     const layers = [
@@ -156,15 +169,6 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       edgesAnimated,
       points,
     ];
-
-    const initialViewState: OrthographicViewState = {
-      target: dcel.center,
-      zoom: 6,
-      minZoom: 5,
-      maxZoom: 10,
-    };
-
-    const view = new OrthographicView({ flipY: false });
 
     return {
       layers,
