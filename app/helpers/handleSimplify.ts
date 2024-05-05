@@ -1,4 +1,4 @@
-import Dcel from "@/src/DCEL/Dcel";
+import Dcel from "@/src/Dcel/Dcel";
 import Snapshot from "@/src/Snapshot/Snapshot";
 import SnapshotList from "@/src/Snapshot/SnapshotList";
 import { STEP } from "@/src/c-oriented-schematization/CSchematization";
@@ -12,7 +12,7 @@ export const handleSimplify = (
   if (!dcel) return;
   const pair = dcel?.faceFaceBoundaryList?.getMinimalConfigurationPair();
   pair?.doEdgeMove();
-  const snapshot = Snapshot.fromDCEL(dcel, {
+  const snapshot = Snapshot.fromDcel(dcel, {
     step: STEP.SIMPLIFY,
     duration: 0,
     config,

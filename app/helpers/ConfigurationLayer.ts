@@ -1,4 +1,4 @@
-import HalfEdge from "@/src/DCEL/HalfEdge";
+import HalfEdge from "@/src/Dcel/HalfEdge";
 import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
 import Contraction from "@/src/c-oriented-schematization/Contraction";
 import Ring from "@/src/geometry/Ring";

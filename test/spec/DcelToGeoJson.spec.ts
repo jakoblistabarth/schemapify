@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { hint } from "@mapbox/geojsonhint";
 import { getTestFiles } from "./test-setup";
-import Dcel from "@/src/DCEL/Dcel";
+import Dcel from "@/src/Dcel/Dcel";
 
 describe("DCELtoGeoJSON creates a valid geoJSON of a square with a hole", function () {
   it("despite converting it to a multipolygon, the number of outer and inner rings stays the same.", function () {

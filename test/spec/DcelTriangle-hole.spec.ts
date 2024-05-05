@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "@/src/DCEL/Dcel";
-import Face from "@/src/DCEL/Face";
+import Dcel from "@/src/Dcel/Dcel";
+import Face from "@/src/Dcel/Face";
 
 describe("A Dcel of a single triangle with one triangular hole", function () {
   let dcel: Dcel;

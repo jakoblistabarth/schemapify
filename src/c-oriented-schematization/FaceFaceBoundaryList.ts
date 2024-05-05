@@ -1,6 +1,6 @@
-import HalfEdge from "../DCEL/HalfEdge";
-import Face from "../DCEL/Face";
-import Dcel from "../DCEL/Dcel";
+import HalfEdge from "../Dcel/HalfEdge";
+import Face from "../Dcel/Face";
+import Dcel from "../Dcel/Dcel";
 import FaceFaceBoundary from "./FaceFaceBoundary";
 import ConfigurationPair from "./ConfigurationPair";
 

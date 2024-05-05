@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "@/src/DCEL/Dcel";
+import Dcel from "@/src/Dcel/Dcel";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("removeSuperfluousVertices()", function () {

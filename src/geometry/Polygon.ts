@@ -1,5 +1,5 @@
 import Point from "./Point";
-import HalfEdge from "../DCEL/HalfEdge";
+import HalfEdge from "../Dcel/HalfEdge";
 import LineSegment from "./LineSegment";
 import { crawlArray } from "../utilities";
 import Ring from "./Ring";

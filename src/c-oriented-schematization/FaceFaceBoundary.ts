@@ -1,5 +1,5 @@
-import HalfEdge from "../DCEL/HalfEdge";
-import Face from "../DCEL/Face";
+import HalfEdge from "../Dcel/HalfEdge";
+import Face from "../Dcel/Face";
 import Contraction from "./Contraction";
 import ConfigurationPair from "./ConfigurationPair";
 import { ContractionType } from "./ContractionType";

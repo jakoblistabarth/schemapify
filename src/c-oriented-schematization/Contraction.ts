@@ -1,4 +1,4 @@
-import HalfEdge, { InflectionType } from "../DCEL/HalfEdge";
+import HalfEdge, { InflectionType } from "../Dcel/HalfEdge";
 import Point from "../geometry/Point";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";

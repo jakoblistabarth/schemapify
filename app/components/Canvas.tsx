@@ -1,6 +1,6 @@
-import Dcel from "@/src/DCEL/Dcel";
-import HalfEdge from "@/src/DCEL/HalfEdge";
-import Vertex from "@/src/DCEL/Vertex";
+import Dcel from "@/src/Dcel/Dcel";
+import HalfEdge from "@/src/Dcel/HalfEdge";
+import Vertex from "@/src/Dcel/Vertex";
 import Vector2D from "@/src/geometry/Vector2D";
 import { range } from "d3";
 import {

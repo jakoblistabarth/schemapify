@@ -1,6 +1,6 @@
 "use client";
 
-import Dcel from "@/src/DCEL/Dcel";
+import Dcel from "@/src/Dcel/Dcel";
 import MultiPolygon from "@/src/geometry/MultiPolygon";
 import { FC, useMemo, useState } from "react";
 import { RxLayers, RxPause, RxResume } from "react-icons/rx";

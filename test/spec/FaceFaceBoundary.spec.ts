@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "@/src/DCEL/Dcel";
+import Dcel from "@/src/Dcel/Dcel";
 import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
 import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
 import MultiPolygon from "@/src/geometry/MultiPolygon";
