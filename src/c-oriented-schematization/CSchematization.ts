@@ -1,6 +1,6 @@
 import * as geojson from "geojson";
-import Dcel from "../DCEL/Dcel";
-import { OrientationClasses } from "../DCEL/HalfEdge";
+import Dcel from "../Dcel/Dcel";
+import { OrientationClasses } from "../Dcel/HalfEdge";
 import Snapshot from "../Snapshot/Snapshot";
 import Point from "../geometry/Point";
 import { createGeoJSON } from "../utilities";
@@ -49,7 +49,7 @@ class CSchematization {
   classify() {
     this.classifyVertices();
     this.#dcel.halfEdges.forEach((e) => e.classify(this.#config.c));
-    return Snapshot.fromDCEL(this.#dcel, {
+    return Snapshot.fromDcel(this.#dcel, {
       step: STEP.CLASSIFY,
       config: this.#config,
       duration: 0,
@@ -261,13 +261,13 @@ class CSchematization {
   }
 
   preProcess() {
-    const loaded = Snapshot.fromDCEL(this.#dcel, {
+    const loaded = Snapshot.fromDcel(this.#dcel, {
       step: STEP.LOAD,
       config: this.#config,
       duration: 0,
     });
     this.splitEdges();
-    const subdivided = Snapshot.fromDCEL(this.#dcel, {
+    const subdivided = Snapshot.fromDcel(this.#dcel, {
       step: STEP.SUBDIVIDE,
       config: this.#config,
       duration: 0,
@@ -279,14 +279,14 @@ class CSchematization {
     this.classify();
     this.addStaircases();
     this.calculateStaircases();
-    const staircaseRegions = Snapshot.fromDCEL(this.#dcel, {
+    const staircaseRegions = Snapshot.fromDcel(this.#dcel, {
       step: STEP.STAIRCASEREGIONS,
       config: this.#config,
       duration: 0,
       staircaseRegions: this.staircaseRegionsToGeoJSON(),
     });
     this.replaceEdgesWithStaircases();
-    const staircases = Snapshot.fromDCEL(this.#dcel, {
+    const staircases = Snapshot.fromDcel(this.#dcel, {
       step: STEP.STAIRCASE,
       config: this.#config,
       duration: 0,
@@ -306,7 +306,7 @@ class CSchematization {
       pair?.doEdgeMove();
     }
 
-    return Snapshot.fromDCEL(this.#dcel, {
+    return Snapshot.fromDcel(this.#dcel, {
       step: STEP.SIMPLIFY,
       config: this.#config,
       duration: 0,

@@ -1,5 +1,5 @@
-import HalfEdge from "../DCEL/HalfEdge";
-import Vertex from "../DCEL/Vertex";
+import HalfEdge from "../Dcel/HalfEdge";
+import Vertex from "../Dcel/Vertex";
 import Line from "../geometry/Line";
 import { crawlArray } from "../utilities";
 import Contraction from "./Contraction";

@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "@/src/DCEL/Dcel";
-import HalfEdge from "@/src/DCEL/HalfEdge";
-import Vertex from "@/src/DCEL/Vertex";
+import Dcel from "@/src/Dcel/Dcel";
+import HalfEdge from "@/src/Dcel/HalfEdge";
+import Vertex from "@/src/Dcel/Vertex";
 import Point from "@/src/geometry/Point";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
 import { createEdgeVertexSetup, TestSetup, getTestFiles } from "./test-setup";

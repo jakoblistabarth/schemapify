@@ -1,9 +1,9 @@
 import fs from "fs";
 import path from "path";
-import HalfEdge from "@/src/DCEL/HalfEdge";
-import Vertex from "@/src/DCEL/Vertex";
-import Dcel from "@/src/DCEL/Dcel";
-import Face from "@/src/DCEL/Face";
+import HalfEdge from "@/src/Dcel/HalfEdge";
+import Vertex from "@/src/Dcel/Vertex";
+import Dcel from "@/src/Dcel/Dcel";
+import Face from "@/src/Dcel/Face";
 
 describe("replaceOuterRingEdge()", function () {
   let innerRing: Face;

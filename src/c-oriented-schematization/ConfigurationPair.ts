@@ -1,6 +1,6 @@
 import Contraction from "./Contraction";
 import Configuration from "./Configuration";
-import HalfEdge from "../DCEL/HalfEdge";
+import HalfEdge from "../Dcel/HalfEdge";
 import Point from "../geometry/Point";
 import { ContractionType } from "./ContractionType";
 

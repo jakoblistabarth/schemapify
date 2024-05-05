@@ -1,6 +1,6 @@
 import * as geoJson from "geojson";
 import { v4 as uuid } from "uuid";
-import Dcel from "../DCEL/Dcel";
+import Dcel from "../Dcel/Dcel";
 import CSchematization, {
   STEP,
 } from "../c-oriented-schematization/CSchematization";
@@ -36,7 +36,7 @@ class Snapshot {
     return this.duration;
   }
 
-  static fromDCEL(
+  static fromDcel(
     dcel: Dcel,
     {
       step,

@@ -3,7 +3,7 @@ import path from "path";
 import Point from "@/src/geometry/Point";
 import Configuration from "@/src/c-oriented-schematization/Configuration";
 import Contraction from "@/src/c-oriented-schematization/Contraction";
-import Dcel from "@/src/DCEL/Dcel";
+import Dcel from "@/src/Dcel/Dcel";
 import { configurationCases, createConfigurationSetup } from "./test-setup";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
 

@@ -1,10 +1,10 @@
 import fs from "fs";
 import path from "path";
 import Point from "@/src/geometry/Point";
-import Face from "@/src/DCEL/Face";
-import Dcel from "@/src/DCEL/Dcel";
-import HalfEdge, { InflectionType } from "@/src/DCEL/HalfEdge";
-import Vertex from "@/src/DCEL/Vertex";
+import Face from "@/src/Dcel/Face";
+import Dcel from "@/src/Dcel/Dcel";
+import HalfEdge, { InflectionType } from "@/src/Dcel/HalfEdge";
+import Vertex from "@/src/Dcel/Vertex";
 import { createConfigurationSetup } from "./test-setup";
 
 describe("getInteriorAngle() and getExteriorAngle()", function () {

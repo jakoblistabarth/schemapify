@@ -1,5 +1,5 @@
-import Dcel from "@/src/DCEL/Dcel";
-import Face from "@/src/DCEL/Face";
+import Dcel from "@/src/Dcel/Dcel";
+import Face from "@/src/Dcel/Face";
 import MultiPolygon from "@/src/geometry/MultiPolygon";
 import { hint } from "@mapbox/geojsonhint";
 import fs from "fs";

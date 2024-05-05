@@ -1,7 +1,7 @@
 import ConvexHullGrahamScan from "graham_scan";
-import Dcel from "../DCEL/Dcel";
-import HalfEdge, { OrientationClasses } from "../DCEL/HalfEdge";
-import Vertex from "../DCEL/Vertex";
+import Dcel from "../Dcel/Dcel";
+import HalfEdge, { OrientationClasses } from "../Dcel/HalfEdge";
+import Vertex from "../Dcel/Vertex";
 import Line from "../geometry/Line";
 import Point from "../geometry/Point";
 import Polygon from "../geometry/Polygon";

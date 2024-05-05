@@ -1,14 +1,14 @@
 import fs from "fs";
 import path from "path";
-import HalfEdge from "@/src/DCEL/HalfEdge";
+import HalfEdge from "@/src/Dcel/HalfEdge";
 import Configuration, {
   OuterEdge,
   Junction,
 } from "@/src/c-oriented-schematization/Configuration";
 import Contraction from "@/src/c-oriented-schematization/Contraction";
-import Dcel from "@/src/DCEL/Dcel";
+import Dcel from "@/src/Dcel/Dcel";
 import Point from "@/src/geometry/Point";
-import Vertex from "@/src/DCEL/Vertex";
+import Vertex from "@/src/Dcel/Vertex";
 import {
   configurationCases,
   ConfigurationSetup,

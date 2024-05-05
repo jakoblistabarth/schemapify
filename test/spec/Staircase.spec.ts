@@ -1,9 +1,9 @@
 import fs from "fs";
 import path from "path";
-import Dcel from "@/src/DCEL/Dcel";
+import Dcel from "@/src/Dcel/Dcel";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
-import { OrientationClasses } from "@/src/DCEL/HalfEdge";
-import Vertex from "@/src/DCEL/Vertex";
+import { OrientationClasses } from "@/src/Dcel/HalfEdge";
+import Vertex from "@/src/Dcel/Vertex";
 import Staircase from "@/src/c-oriented-schematization/Staircase";
 import Polygon from "@/src/geometry/Polygon";
 import { config } from "@/src/c-oriented-schematization/schematization.config";

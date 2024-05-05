@@ -1,4 +1,4 @@
-import Dcel from "@/src/DCEL/Dcel";
+import Dcel from "@/src/Dcel/Dcel";
 import MultiPolygon from "@/src/geometry/MultiPolygon";
 
 describe("center()", function () {

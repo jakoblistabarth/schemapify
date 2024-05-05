@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { FeatureCollection, Polygon, MultiPolygon } from "geojson";
-import Dcel from "@/src/DCEL/Dcel";
+import Dcel from "@/src/Dcel/Dcel";
 import Snapshot from "@/src/Snapshot/Snapshot";
 import SnapshotList from "@/src/Snapshot/SnapshotList";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";

@@ -1,9 +1,9 @@
 import fs from "fs";
 import Point from "@/src/geometry/Point";
-import Vertex from "@/src/DCEL/Vertex";
-import HalfEdge from "@/src/DCEL/HalfEdge";
-import Face from "@/src/DCEL/Face";
-import Dcel from "@/src/DCEL/Dcel";
+import Vertex from "@/src/Dcel/Vertex";
+import HalfEdge from "@/src/Dcel/HalfEdge";
+import Face from "@/src/Dcel/Face";
+import Dcel from "@/src/Dcel/Dcel";
 import { crawlArray } from "@/src/utilities";
 
 export function getTestFiles(dir: string) {
