@@ -1,8 +1,8 @@
-import fs from "fs";
-import path from "path";
 import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
-import MultiPolygon from "@/src/geometry/MultiPolygon";
+import Subdivision from "@/src/geometry/Subdivision";
+import fs from "fs";
+import path from "path";
 
 describe("A Dcel from a geojson feature collection of a single square with one square hole", function () {
   let dcel: Dcel;
@@ -38,23 +38,25 @@ describe("A Dcel from a list of MultiPolygons of a single square with one square
   let dcel: Dcel;
 
   beforeEach(function () {
-    const m = MultiPolygon.fromCoordinates([
+    const s = Subdivision.fromCoordinates([
       [
         [
-          [0, 0],
-          [2, 0],
-          [2, 2],
-          [0, 2],
-        ],
-        [
-          [1.25, 1.25],
-          [1.25, 1.5],
-          [1.5, 1.5],
-          [1.5, 1.25],
+          [
+            [0, 0],
+            [2, 0],
+            [2, 2],
+            [0, 2],
+          ],
+          [
+            [1.25, 1.25],
+            [1.25, 1.5],
+            [1.5, 1.5],
+            [1.5, 1.25],
+          ],
         ],
       ],
     ]);
-    dcel = Dcel.fromMultiPolygons([m]);
+    dcel = Dcel.fromSubdivision(s);
   });
 
   it("has 1 unbounded face", function () {

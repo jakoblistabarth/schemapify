@@ -1,8 +1,9 @@
 import * as geojson from "geojson";
-import Vector2D from "./geometry/Vector2D";
 import MultiPolygon from "./geometry/MultiPolygon";
-import Ring from "./geometry/Ring";
 import Polygon from "./geometry/Polygon";
+import Ring from "./geometry/Ring";
+import Subdivision from "./geometry/Subdivision";
+import Vector2D from "./geometry/Vector2D";
 
 export async function getJSON(path: string) {
   const response = await fetch(path);
@@ -93,7 +94,7 @@ export function copyInstance<T>(original: T): T {
 export const geoJsonToGeometry = (
   geoJson: geojson.FeatureCollection<geojson.Polygon | geojson.MultiPolygon>,
 ) => {
-  return geoJson.features.map((feature, idx) => {
+  const multiPolygons = geoJson.features.map((feature, idx) => {
     const multipolygons =
       feature.geometry.type !== "MultiPolygon"
         ? [feature.geometry.coordinates]
@@ -111,4 +112,6 @@ export const geoJsonToGeometry = (
 
     return new MultiPolygon(polygons, idx.toString(), feature.properties);
   });
+
+  return new Subdivision(multiPolygons);
 };

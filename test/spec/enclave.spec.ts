@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
-import MultiPolygon from "@/src/geometry/MultiPolygon";
+import Subdivision from "@/src/geometry/Subdivision";
 
 describe("A Dcel from a geojson with a simplified enclave model", function () {
   let dcel: Dcel;
@@ -32,33 +32,35 @@ describe("A Dcel from multipolygons of a simplified enclave model", function () 
   let dcel: Dcel;
 
   beforeEach(function () {
-    const a = MultiPolygon.fromCoordinates([
+    const s = Subdivision.fromCoordinates([
       [
         [
-          [0, 0],
-          [2, 0],
-          [2, 2],
-          [0, 2],
+          [
+            [0, 0],
+            [2, 0],
+            [2, 2],
+            [0, 2],
+          ],
+          [
+            [0.5, 0.5],
+            [1.5, 0.5],
+            [1.5, 1.5],
+            [0.5, 1.5],
+          ],
         ],
+      ],
+      [
         [
-          [0.5, 0.5],
-          [1.5, 0.5],
-          [1.5, 1.5],
-          [0.5, 1.5],
+          [
+            [0.5, 0.5],
+            [1.5, 0.5],
+            [1.5, 1.5],
+            [0.5, 1.5],
+          ],
         ],
       ],
     ]);
-    const b = MultiPolygon.fromCoordinates([
-      [
-        [
-          [0.5, 0.5],
-          [1.5, 0.5],
-          [1.5, 1.5],
-          [0.5, 1.5],
-        ],
-      ],
-    ]);
-    dcel = Dcel.fromMultiPolygons([a, b]);
+    dcel = Dcel.fromSubdivision(s);
   });
 
   it("has 1 unbounded face", function () {

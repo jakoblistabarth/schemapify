@@ -1,11 +1,11 @@
-import MultiPolygon from "@/src/geometry/MultiPolygon";
 import Polygon from "@/src/geometry/Polygon";
+import Subdivision from "@/src/geometry/Subdivision";
 import { geoJsonToGeometry } from "@/src/utilities";
 import fs from "fs";
 import path from "path";
 
 describe("geojsonToGeometry parses a geojson feature collection of Austria into a geometry", function () {
-  let geometry: MultiPolygon[];
+  let subdivision: Subdivision;
 
   beforeEach(function () {
     const geojson = JSON.parse(
@@ -14,35 +14,35 @@ describe("geojsonToGeometry parses a geojson feature collection of Austria into 
         "utf8",
       ),
     );
-    geometry = geoJsonToGeometry(geojson);
+    subdivision = geoJsonToGeometry(geojson);
   });
 
   it("with 9 multipolygons", function () {
-    expect(geometry.length).toBe(9);
+    expect(subdivision.multiPolygons.length).toBe(9);
   });
 
   it("with the first multipolygon (Burgenland), being a Polygon, with a single ring with 3 vertices", function () {
-    const burgenland = geometry[0];
+    const burgenland = subdivision.multiPolygons[0];
     expect(burgenland.polygons.length).toBe(1);
     expect(burgenland.polygons[0].rings.length).toBe(1);
     expect(burgenland.polygons[0].rings[0].length).toBe(3);
   });
 
   it("with the 3rd multipolygon (Lower Austria) consisting of 1 polygon, with a hole", function () {
-    const lowerAustria = geometry[2];
+    const lowerAustria = subdivision.multiPolygons[2];
     expect(lowerAustria.polygons.length).toBe(1);
     expect(lowerAustria.polygons[0].rings.length).toBe(2);
   });
 
   it("with the 7th multipolygon (Tyrol) consisting of 2 polygons", function () {
-    const tyrol = geometry[6];
+    const tyrol = subdivision.multiPolygons[6];
     expect(tyrol.polygons.length).toBe(2);
     expect(tyrol.polygons[0].rings[0].length).toBe(3);
     expect(tyrol.polygons[1].rings[0].length).toBe(4);
   });
 
   it("with only counterclockwise ordered Rings", function () {
-    const rings = geometry
+    const rings = subdivision.multiPolygons
       .map((multipolygons) =>
         multipolygons.polygons.map((polygon) => polygon.rings),
       )
@@ -57,13 +57,13 @@ describe("geojsonToGeometry parses a geojson feature collection of Austria into 
 });
 
 describe("geojsonToGeometry parses a geojson feature collection of a simple enclave into a geometry", function () {
-  let geometry: MultiPolygon[];
+  let subdivision: Subdivision;
 
   beforeEach(function () {
     const geojson = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/enclave.json"), "utf8"),
     );
-    geometry = geoJsonToGeometry(geojson);
+    subdivision = geoJsonToGeometry(geojson);
   });
 
   it("with 2 multipolygons", function () {
@@ -76,11 +76,11 @@ describe("geojsonToGeometry parses a geojson feature collection of a simple encl
     //     )
     //     .flat(3),
     // );
-    expect(geometry.length).toBe(2);
+    expect(subdivision.multiPolygons.length).toBe(2);
   });
 
   it("with the correctly ordered rings", function () {
-    expect(geometry[0].polygons[0]).toEqual(
+    expect(subdivision.multiPolygons[0].polygons[0]).toEqual(
       Polygon.fromCoordinates([
         [
           [0, 0],
