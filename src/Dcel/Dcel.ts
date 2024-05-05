@@ -1,8 +1,12 @@
 import * as geojson from "geojson";
+import Contraction from "../c-oriented-schematization/Contraction";
+import { ContractionType } from "../c-oriented-schematization/ContractionType";
 import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
+import Sector from "../c-oriented-schematization/Sector";
 import Staircase from "../c-oriented-schematization/Staircase";
-import MultiPolygon from "../geometry/MultiPolygon";
+import { Config } from "../c-oriented-schematization/schematization.config";
 import Point from "../geometry/Point";
+import Subdivision from "../geometry/Subdivision";
 import BoundingBox from "../helpers/BoundingBox";
 import {
   createGeoJSON,
@@ -12,10 +16,6 @@ import {
 import Face from "./Face";
 import HalfEdge, { OrientationClasses } from "./HalfEdge";
 import Vertex from "./Vertex";
-import Sector from "../c-oriented-schematization/Sector";
-import Contraction from "../c-oriented-schematization/Contraction";
-import { Config } from "../c-oriented-schematization/schematization.config";
-import { ContractionType } from "../c-oriented-schematization/ContractionType";
 
 class Dcel {
   name?: string;
@@ -217,7 +217,7 @@ class Dcel {
   ): Dcel {
     if (!validateGeoJSON(geoJSON)) throw new Error("invalid input");
     const geometry = geoJsonToGeometry(geoJSON);
-    return this.fromMultiPolygons(geometry);
+    return this.fromSubdivision(geometry);
   }
 
   /**
@@ -226,33 +226,36 @@ class Dcel {
    * @param multiPolygons an array of {@link MultiPolygon}s.
    * @returns A {@link Dcel}.
    */
-  static fromMultiPolygons(multiPolygons: MultiPolygon[]): Dcel {
-    const subdivision = new Dcel();
+  static fromSubdivision(subdivision: Subdivision): Dcel {
+    const dcel = new Dcel();
 
-    subdivision.featureProperties = multiPolygons.map((d) => d.properties);
+    dcel.featureProperties = subdivision.multiPolygons.map((d) => d.properties);
 
     // convert Multipolygons to nested array of vertices (polygons)
-    const polygons = multiPolygons.reduce((acc: Vertex[][][], multiPolygon) => {
-      acc.push(
-        ...multiPolygon.polygons.map((polygon) =>
-          polygon.rings.map((ring) =>
-            ring.points.map(
-              (point) =>
-                subdivision.findVertex(point.x, point.y) ||
-                subdivision.addVertex(point.x, point.y),
+    const polygons = subdivision.multiPolygons.reduce(
+      (acc: Vertex[][][], multiPolygon) => {
+        acc.push(
+          ...multiPolygon.polygons.map((polygon) =>
+            polygon.rings.map((ring) =>
+              ring.points.map(
+                (point) =>
+                  dcel.findVertex(point.x, point.y) ||
+                  dcel.addVertex(point.x, point.y),
+              ),
             ),
           ),
-        ),
-      );
-      return acc;
-    }, []);
+        );
+        return acc;
+      },
+      [],
+    );
 
     polygons.forEach((polygon) =>
       polygon.forEach((ring) => {
         ring.forEach((tail, idx) => {
           const head: Vertex = ring[(idx + 1) % ring.length];
-          const halfEdge = subdivision.addHalfEdge(tail, head);
-          const twinHalfEdge = subdivision.addHalfEdge(head, tail);
+          const halfEdge = dcel.addHalfEdge(tail, head);
+          const twinHalfEdge = dcel.addHalfEdge(head, tail);
           halfEdge.twin = twinHalfEdge;
           twinHalfEdge.twin = halfEdge;
         });
@@ -260,7 +263,7 @@ class Dcel {
     );
 
     // TODO: sort edges everytime a new edge is pushed to vertex.edges
-    subdivision.vertices.forEach((vertex) => {
+    dcel.vertices.forEach((vertex) => {
       // sort the half-edges whose tail vertex is that endpoint in clockwise order.
       vertex.sortEdges();
 
@@ -274,7 +277,7 @@ class Dcel {
     });
 
     // For every cycle, allocate and assign a face structure.
-    multiPolygons.forEach((multiPolygon, idx) => {
+    subdivision.multiPolygons.forEach((multiPolygon, idx) => {
       const featureId = idx;
 
       let outerRingFace: Face;
@@ -283,7 +286,7 @@ class Dcel {
           const [firstPoint, secondPoint] = ring.points;
 
           // find first edge of the ring
-          const edge = subdivision.getHalfEdges().find((e) => {
+          const edge = dcel.getHalfEdges().find((e) => {
             return (
               e.tail.x === firstPoint.x &&
               e.tail.y === firstPoint.y &&
@@ -294,7 +297,7 @@ class Dcel {
           if (!edge) return;
 
           // check whether there's already a face related to this edge
-          const existingFace = subdivision.faces.find((f) => f.edge === edge);
+          const existingFace = dcel.faces.find((f) => f.edge === edge);
           // console.log({ existingFace, featureId, idx, edge: edge.toString() });
           // console.log({
           //   props: multiPolygon.properties,
@@ -307,12 +310,12 @@ class Dcel {
           } else {
             if (idx === 0) {
               // only for outer ring
-              outerRingFace = subdivision.addFace();
+              outerRingFace = dcel.addFace();
               outerRingFace.associatedFeatures.push(featureId);
               edge?.getCycle().forEach((e) => (e.face = outerRingFace));
               outerRingFace.edge = edge;
             } else {
-              const innerRingFace = subdivision.addFace();
+              const innerRingFace = dcel.addFace();
               innerRingFace.associatedFeatures.push(featureId);
               innerRingFace.outerRing = outerRingFace;
 
@@ -331,9 +334,9 @@ class Dcel {
     });
 
     // create unbounded Face (infinite outerFace) and assign it to edges which do not have a face yet
-    const unboundedFace = subdivision.addFace();
-    while (subdivision.getHalfEdges().find((edge) => !edge.face)) {
-      const outerEdge = subdivision.getHalfEdges().find((edge) => !edge.face);
+    const unboundedFace = dcel.addFace();
+    while (dcel.getHalfEdges().find((edge) => !edge.face)) {
+      const outerEdge = dcel.getHalfEdges().find((edge) => !edge.face);
       if (outerEdge) {
         outerEdge.getCycle().forEach((edge) => {
           edge.face = unboundedFace;
@@ -341,7 +344,7 @@ class Dcel {
       }
     }
 
-    return subdivision;
+    return dcel;
   }
 
   /**
@@ -403,6 +406,11 @@ class Dcel {
       });
       console.log("🡐 DCEL END");
     }
+  }
+
+  toSubdivision() {
+    //TODO: implement
+    return new Subdivision([]);
   }
 
   toGeoJSON(): geojson.FeatureCollection<geojson.MultiPolygon> {

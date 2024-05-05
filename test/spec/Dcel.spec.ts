@@ -1,27 +1,29 @@
 import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
-import MultiPolygon from "@/src/geometry/MultiPolygon";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import Subdivision from "@/src/geometry/Subdivision";
 import { hint } from "@mapbox/geojsonhint";
 import fs from "fs";
 import * as geojson from "geojson";
 import path from "path";
 import shape from "../data/geodata/AUT_adm0-s1_epsg31287";
 import { getTestFiles } from "./test-setup";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("A Dcel from multipolygons", function () {
   it("forming a square is parsed correctly.", function () {
-    const m = MultiPolygon.fromCoordinates([
+    const s = Subdivision.fromCoordinates([
       [
         [
-          [0, 0],
-          [2, 0],
-          [2, 2],
-          [0, 2],
+          [
+            [0, 0],
+            [2, 0],
+            [2, 2],
+            [0, 2],
+          ],
         ],
       ],
     ]);
-    const dcel = Dcel.fromMultiPolygons([m]);
+    const dcel = Dcel.fromSubdivision(s);
 
     expect(dcel.faces.length).toBe(2);
     expect(dcel.vertices.size).toBe(4);
@@ -29,25 +31,27 @@ describe("A Dcel from multipolygons", function () {
   });
 
   it("forming 2 adjacent squares is parsed correctly.", function () {
-    const m = MultiPolygon.fromCoordinates([
+    const s = Subdivision.fromCoordinates([
       [
         [
-          [0, 0],
-          [2, 0],
-          [2, 2],
-          [0, 2],
+          [
+            [0, 0],
+            [2, 0],
+            [2, 2],
+            [0, 2],
+          ],
         ],
-      ],
-      [
         [
-          [2, 0],
-          [4, 0],
-          [4, 2],
-          [2, 2],
+          [
+            [2, 0],
+            [4, 0],
+            [4, 2],
+            [2, 2],
+          ],
         ],
       ],
     ]);
-    const dcel = Dcel.fromMultiPolygons([m]);
+    const dcel = Dcel.fromSubdivision(s);
 
     expect(dcel.faces.length).toBe(3);
     expect(dcel.vertices.size).toBe(6);
@@ -55,25 +59,27 @@ describe("A Dcel from multipolygons", function () {
   });
 
   it("forming 2 separate squares is parsed correctly.", function () {
-    const m = MultiPolygon.fromCoordinates([
+    const s = Subdivision.fromCoordinates([
       [
         [
-          [0, 0],
-          [2, 0],
-          [2, 2],
-          [0, 2],
+          [
+            [0, 0],
+            [2, 0],
+            [2, 2],
+            [0, 2],
+          ],
         ],
-      ],
-      [
         [
-          [3, 0],
-          [5, 0],
-          [5, 2],
-          [3, 2],
+          [
+            [3, 0],
+            [5, 0],
+            [5, 2],
+            [3, 2],
+          ],
         ],
       ],
     ]);
-    const dcel = Dcel.fromMultiPolygons([m]);
+    const dcel = Dcel.fromSubdivision(s);
 
     expect(dcel.faces.length).toBe(3);
     expect(dcel.vertices.size).toBe(8);
@@ -81,31 +87,33 @@ describe("A Dcel from multipolygons", function () {
   });
 
   it("forming 2 separate squares with one hole is parsed correctly.", function () {
-    const m = MultiPolygon.fromCoordinates([
+    const m = Subdivision.fromCoordinates([
       [
         [
-          [0, 0],
-          [4, 0],
-          [4, 4],
-          [0, 4],
+          [
+            [0, 0],
+            [4, 0],
+            [4, 4],
+            [0, 4],
+          ],
+          [
+            [1, 1],
+            [3, 1],
+            [3, 3],
+            [1, 3],
+          ],
         ],
         [
-          [1, 1],
-          [3, 1],
-          [3, 3],
-          [1, 3],
-        ],
-      ],
-      [
-        [
-          [5, 0],
-          [9, 0],
-          [9, 4],
-          [5, 4],
+          [
+            [5, 0],
+            [9, 0],
+            [9, 4],
+            [5, 4],
+          ],
         ],
       ],
     ]);
-    const dcel = Dcel.fromMultiPolygons([m]);
+    const dcel = Dcel.fromSubdivision(m);
 
     expect(dcel.faces.length).toBe(4);
     expect(dcel.vertices.size).toBe(12);
@@ -347,87 +355,91 @@ describe("getArea()", function () {
   });
 
   it("returns the correct area for a polygon with 1 hole and 1 island", function () {
-    const dcel = Dcel.fromMultiPolygons([
-      MultiPolygon.fromCoordinates([
+    const dcel = Dcel.fromSubdivision(
+      Subdivision.fromCoordinates([
         [
           [
-            [0, 0],
-            [4, 0],
-            [4, 4],
-            [0, 4],
+            [
+              [0, 0],
+              [4, 0],
+              [4, 4],
+              [0, 4],
+            ],
+            [
+              [1, 1],
+              [3, 1],
+              [3, 3],
+              [1, 3],
+            ],
           ],
           [
-            [1, 1],
-            [3, 1],
-            [3, 3],
-            [1, 3],
-          ],
-        ],
-        [
-          [
-            [1.5, 1.5],
-            [2.5, 1.5],
-            [2.5, 2.5],
-            [1.5, 2.5],
+            [
+              [1.5, 1.5],
+              [2.5, 1.5],
+              [2.5, 2.5],
+              [1.5, 2.5],
+            ],
           ],
         ],
       ]),
-    ]);
+    );
     expect(dcel.getArea()).toBe(12 + 1);
   });
 
   it("returns the correct area for two polygons, one with multiple holes", function () {
-    const dcel = Dcel.fromMultiPolygons([
-      MultiPolygon.fromCoordinates([
+    const dcel = Dcel.fromSubdivision(
+      Subdivision.fromCoordinates([
         [
           [
-            [0, 0],
-            [5, 0],
-            [5, 5],
-            [0, 5],
+            [
+              [0, 0],
+              [5, 0],
+              [5, 5],
+              [0, 5],
+            ],
+            [
+              [1, 1],
+              [2, 1],
+              [2, 2],
+              [1, 2],
+            ],
+            [
+              [3, 1],
+              [4, 1],
+              [4, 2],
+              [3, 2],
+            ],
+            [
+              [3, 3],
+              [4, 3],
+              [4, 4],
+              [3, 4],
+            ],
+            [
+              [1, 3],
+              [2, 3],
+              [2, 4],
+              [1, 4],
+            ],
           ],
+        ],
+        [
           [
-            [1, 1],
-            [2, 1],
-            [2, 2],
-            [1, 2],
-          ],
-          [
-            [3, 1],
-            [4, 1],
-            [4, 2],
-            [3, 2],
-          ],
-          [
-            [3, 3],
-            [4, 3],
-            [4, 4],
-            [3, 4],
-          ],
-          [
-            [1, 3],
-            [2, 3],
-            [2, 4],
-            [1, 4],
+            [
+              [-2, 1],
+              [-1, 1],
+              [-1, 5],
+              [-2, 5],
+            ],
           ],
         ],
       ]),
-      MultiPolygon.fromCoordinates([
-        [
-          [
-            [-2, 1],
-            [-1, 1],
-            [-1, 5],
-            [-2, 5],
-          ],
-        ],
-      ]),
-    ]);
+    );
     expect(dcel.getArea()).toBe(21 + 4);
   });
 
   it("returns the correct area of Austria.", function () {
-    const dcel = Dcel.fromMultiPolygons([shape]);
+    const dcel = Dcel.fromSubdivision(new Subdivision([shape]));
     expect(dcel.getArea()).toBeCloseTo(83688201106.428);
   });
 });

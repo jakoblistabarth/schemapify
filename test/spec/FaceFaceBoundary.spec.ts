@@ -1,10 +1,10 @@
+import Dcel from "@/src/Dcel/Dcel";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
+import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
+import Subdivision from "@/src/geometry/Subdivision";
 import fs from "fs";
 import path from "path";
-import Dcel from "@/src/Dcel/Dcel";
-import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
-import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
-import MultiPolygon from "@/src/geometry/MultiPolygon";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("create()", function () {
   it("on a dcel of 2 adjacent squares returns FaceFaceBoundaryList with 3 entries and the correct number of Edges", function () {
@@ -44,17 +44,19 @@ describe("create()", function () {
 
 describe("The Face-Face-Boundary", function () {
   it("consists of edges which all belong to the same face", function () {
-    const dcel = Dcel.fromMultiPolygons([
-      MultiPolygon.fromCoordinates([
+    const dcel = Dcel.fromSubdivision(
+      Subdivision.fromCoordinates([
         [
           [
-            [-3, 3],
-            [0, -2],
-            [3, 2],
+            [
+              [-3, 3],
+              [0, -2],
+              [3, 2],
+            ],
           ],
         ],
       ]),
-    ]);
+    );
     const schematization = new CSchematization(dcel);
     schematization.schematize();
     const ffbl = new FaceFaceBoundaryList(dcel);

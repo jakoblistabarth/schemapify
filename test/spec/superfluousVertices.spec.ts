@@ -1,6 +1,6 @@
 import Dcel from "@/src/Dcel/Dcel";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
-import MultiPolygon from "@/src/geometry/MultiPolygon";
+import Subdivision from "@/src/geometry/Subdivision";
 import { readFileSync } from "fs";
 import path from "path";
 
@@ -38,28 +38,30 @@ describe("removeSuperfluousVertices()", function () {
   });
 
   it("removes any collinear points on a simples square", function () {
-    const dcel = Dcel.fromMultiPolygons([
-      MultiPolygon.fromCoordinates([
+    const dcel = Dcel.fromSubdivision(
+      Subdivision.fromCoordinates([
         [
           [
-            [-2, -2],
-            [-1, -2],
-            [0, -2],
-            [1, -2],
-            [2, -2],
-            [2, -1.9],
-            [2, -1.8],
-            [2, -1.7],
-            [2, 1.9],
-            [2, 2],
-            [1.9, 2],
-            [0, 2],
-            [-1.9, 2],
-            [-2, 2],
+            [
+              [-2, -2],
+              [-1, -2],
+              [0, -2],
+              [1, -2],
+              [2, -2],
+              [2, -1.9],
+              [2, -1.8],
+              [2, -1.7],
+              [2, 1.9],
+              [2, 2],
+              [1.9, 2],
+              [0, 2],
+              [-1.9, 2],
+              [-2, 2],
+            ],
           ],
         ],
       ]),
-    ]);
+    );
 
     const schematization = new CSchematization(dcel);
     schematization.removeSuperfluousVertices();

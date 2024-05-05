@@ -1,29 +1,31 @@
 "use client";
 
 import Dcel from "@/src/Dcel/Dcel";
-import MultiPolygon from "@/src/geometry/MultiPolygon";
 import { FC, useMemo, useState } from "react";
 import { RxLayers, RxPause, RxResume } from "react-icons/rx";
 import Button from "./Button";
 import Canvas from "./Canvas";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import Subdivision from "@/src/geometry/Subdivision";
 
 const DcelViewer: FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
 
   const { dcel } = useMemo(() => {
-    const dcel = Dcel.fromMultiPolygons([
-      MultiPolygon.fromCoordinates([
+    const dcel = Dcel.fromSubdivision(
+      Subdivision.fromCoordinates([
         [
           [
-            [0, 1],
-            [-1, 0],
-            [0, -1],
-            [1, 0],
+            [
+              [0, 1],
+              [-1, 0],
+              [0, -1],
+              [1, 0],
+            ],
           ],
         ],
       ]),
-    ]);
+    );
     const schematization = new CSchematization(dcel);
     schematization.schematize();
     return { dcel };
