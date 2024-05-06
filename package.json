@@ -4,7 +4,6 @@
   "description": "Implementation of the area-preserving simplification and schematization of polygonal subdivisions, proposed by Buchin et al. (2016)",
   "repository": "https://github.com/jakoblistabarth/area-preserving-polygon-schematization",
   "private": true,
-  "packageManager": "pnpm@8.15.4",
   "scripts": {
     "test": "jest",
     "tsc": "tsc",
