@@ -1,70 +1,59 @@
-import * as geoJson from "geojson";
 import { v4 as uuid } from "uuid";
 import Dcel from "../Dcel/Dcel";
-import CSchematization, {
-  STEP,
-} from "../c-oriented-schematization/CSchematization";
-import { Config } from "../c-oriented-schematization/schematization.config";
-
-export type SnapshotLayers = {
-  vertices: geoJson.FeatureCollection<geoJson.Point>;
-  edges: geoJson.FeatureCollection<geoJson.LineString>;
-  faces: geoJson.FeatureCollection<geoJson.Polygon>;
-  features: geoJson.FeatureCollection<geoJson.Polygon | geoJson.MultiPolygon>;
-  staircaseRegions?: geoJson.FeatureCollection<geoJson.Polygon>;
-};
+import Subdivision from "../geometry/Subdivision";
+import { LABEL } from "../c-oriented-schematization/CSchematization";
+import MultiPolygon from "../geometry/MultiPolygon";
 
 /**
  * Holds the current state of the schematized data as an array of GeoJSON Feature Collections.
  */
 class Snapshot {
   id: string;
-  step: STEP;
-  createdAt: Date;
-  duration: number;
-  layers: SnapshotLayers;
+  label: LABEL;
+  triggeredAt: number;
+  recordedAt: number;
+  subdivision: Subdivision;
+  additionalData?: Record<string, MultiPolygon[]>;
 
-  constructor(layers: SnapshotLayers, step: STEP, duration: number) {
+  constructor(
+    subdivision: Subdivision,
+    triggeredAt: number,
+    recordedAt: number,
+    label = LABEL.DEFAULT,
+    additionalData: Record<string, MultiPolygon[]> = {},
+  ) {
     this.id = uuid();
-    this.step = step;
-    this.createdAt = new Date();
-    this.layers = layers;
-    this.duration = duration;
+    this.subdivision = subdivision;
+    this.label = label;
+    this.triggeredAt = triggeredAt;
+    this.recordedAt = recordedAt;
+    this.additionalData = additionalData;
   }
 
-  getDuration() {
-    return this.duration;
+  get duration() {
+    return this.recordedAt - this.triggeredAt;
   }
 
   static fromDcel(
     dcel: Dcel,
     {
-      step,
-      duration,
-      config,
-      staircaseRegions,
+      label,
+      triggeredAt,
+      recordedAt,
+      additionalData,
     }: {
-      step: STEP;
-      duration: number;
-      config: Config;
-      staircaseRegions?: ReturnType<
-        CSchematization["staircaseRegionsToGeoJSON"]
-      >;
+      label: LABEL;
+      triggeredAt: number;
+      recordedAt: number;
+      additionalData?: Record<string, MultiPolygon[]>;
     },
   ) {
     return new this(
-      {
-        vertices: dcel.verticesToGeoJSON(),
-        edges: dcel.edgesToGeoJSON(config.c.getSectors()),
-        faces: dcel.facesToGeoJSON(),
-        features: dcel.toGeoJSON(),
-        staircaseRegions:
-          step === STEP.STAIRCASEREGIONS && staircaseRegions
-            ? staircaseRegions
-            : undefined,
-      },
-      step,
-      duration,
+      dcel.toSubdivision(),
+      triggeredAt,
+      recordedAt,
+      label,
+      additionalData,
     );
   }
 }
