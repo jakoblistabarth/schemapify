@@ -1,4 +1,4 @@
-import { STEP } from "../c-oriented-schematization/CSchematization";
+import { LABEL } from "../c-oriented-schematization/CSchematization";
 import Snapshot from "./Snapshot";
 
 /**
@@ -48,10 +48,13 @@ class SnapshotList {
   }
 
   getSnapshotByStep() {
-    const mapByStep = this.snapshots.reduce<Map<STEP, Snapshot[]>>((acc, d) => {
-      const snapShots = acc.get(d.step) ?? [];
-      return acc.set(d.step, [...snapShots, d]);
-    }, new Map<STEP, Snapshot[]>());
+    const mapByStep = this.snapshots.reduce<Map<LABEL, Snapshot[]>>(
+      (acc, d) => {
+        const snapShots = acc.get(d.label) ?? [];
+        return acc.set(d.label, [...snapShots, d]);
+      },
+      new Map<LABEL, Snapshot[]>(),
+    );
 
     return Array.from(mapByStep.entries());
   }

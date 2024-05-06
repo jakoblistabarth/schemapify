@@ -1,7 +1,5 @@
-import { SnapshotLayers } from "@/src/Snapshot/Snapshot";
-import { Feature, FeatureCollection } from "geojson";
-import { PathOptions, Path, CircleMarker, LatLng } from "leaflet";
-import { MapMode } from "./store";
+import { Feature } from "geojson";
+import { CircleMarker, LatLng, Path, PathOptions } from "leaflet";
 
 const baseStyle = (feature: Feature): PathOptions => ({
   fillOpacity: 0.2,
@@ -17,7 +15,7 @@ export const onEachFeature = (feature: Feature, layer: Path) => {
             .map(([k, v]) => `<div>${k}: ${v}</div>`)
             .join("")}</div>`
         : "no properties",
-      { sticky: true, opacity: 1 }
+      { sticky: true, opacity: 1 },
     );
   layer.on({
     mouseover: (e) => {
@@ -36,18 +34,4 @@ export const pointToLayer = (feature: Feature, latlng: LatLng) => {
     opacity: isSignificant ? 0.8 : undefined,
     fillOpacity: isSignificant ? 0.8 : undefined,
   });
-};
-
-export const getMapLayers = (
-  layers: SnapshotLayers,
-  mapMode: MapMode
-): [string, FeatureCollection][] => {
-  if (mapMode === "polygon") return [["polygons", layers.features]];
-
-  const sortOrder = ["faces", "staircaseRegions", "edges", "vertices"];
-  const ordering = new Map(sortOrder.map((d, i) => [d, i]));
-
-  return Object.entries(layers)
-    .filter(([k]) => k !== "features")
-    .sort(([a], [b]) => (ordering.get(a) ?? 0) - (ordering.get(b) ?? 0));
 };

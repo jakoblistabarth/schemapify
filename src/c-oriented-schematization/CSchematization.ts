@@ -1,16 +1,18 @@
-import * as geojson from "geojson";
 import Dcel from "../Dcel/Dcel";
 import { OrientationClasses } from "../Dcel/HalfEdge";
 import Snapshot from "../Snapshot/Snapshot";
+import MultiPolygon from "../geometry/MultiPolygon";
 import Point from "../geometry/Point";
-import { createGeoJSON } from "../utilities";
+import Polygon from "../geometry/Polygon";
 import Configuration from "./Configuration";
 import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
 import Staircase from "./Staircase";
 import type { Config } from "./schematization.config";
 import { config as defaultConfig } from "./schematization.config";
 
-export enum STEP {
+export enum LABEL {
+  // TODO: is a default label needed?
+  DEFAULT = "default",
   LOAD = "loadData",
   SUBDIVIDE = "subdivide",
   CLASSIFY = "classify",
@@ -47,12 +49,13 @@ class CSchematization {
   }
 
   classify() {
+    const timeStart = performance.now();
     this.classifyVertices();
     this.#dcel.halfEdges.forEach((e) => e.classify(this.#config.c));
     return Snapshot.fromDcel(this.#dcel, {
-      step: STEP.CLASSIFY,
-      config: this.#config,
-      duration: 0,
+      label: LABEL.CLASSIFY,
+      triggeredAt: timeStart,
+      recordedAt: performance.now(),
     });
   }
 
@@ -261,41 +264,56 @@ class CSchematization {
   }
 
   preProcess() {
+    const timeStart = performance.now();
     const loaded = Snapshot.fromDcel(this.#dcel, {
-      step: STEP.LOAD,
-      config: this.#config,
-      duration: 0,
+      label: LABEL.LOAD,
+      triggeredAt: timeStart,
+      recordedAt: performance.now(),
     });
+    const time1 = performance.now();
     this.splitEdges();
     const subdivided = Snapshot.fromDcel(this.#dcel, {
-      step: STEP.SUBDIVIDE,
-      config: this.#config,
-      duration: 0,
+      label: LABEL.SUBDIVIDE,
+      triggeredAt: time1,
+      recordedAt: performance.now(),
     });
     return [loaded, subdivided];
   }
 
   constrainAngles() {
+    const t0 = performance.now();
     this.classify();
     this.addStaircases();
     this.calculateStaircases();
     const staircaseRegions = Snapshot.fromDcel(this.#dcel, {
-      step: STEP.STAIRCASEREGIONS,
-      config: this.#config,
-      duration: 0,
-      staircaseRegions: this.staircaseRegionsToGeoJSON(),
+      label: LABEL.STAIRCASEREGIONS,
+      triggeredAt: t0,
+      recordedAt: performance.now(),
+      additionalData: { staircaseRegions: this.staircaseRegionsToGeometry() },
     });
+    const t1 = performance.now();
     this.replaceEdgesWithStaircases();
     const staircases = Snapshot.fromDcel(this.#dcel, {
-      step: STEP.STAIRCASE,
-      config: this.#config,
-      duration: 0,
+      label: LABEL.STAIRCASE,
+      triggeredAt: t1,
+      recordedAt: performance.now(),
     });
     return [staircaseRegions, staircases];
   }
 
   simplify() {
+    const t0 = performance.now();
+
     this.removeSuperfluousVertices();
+
+    // TODO: is not yet returned
+    Snapshot.fromDcel(this.#dcel, {
+      label: LABEL.SIMPLIFY,
+      triggeredAt: t0,
+      recordedAt: performance.now(),
+    });
+
+    const t1 = performance.now();
     const faceFaceBoundaryList = new FaceFaceBoundaryList(this.#dcel);
     this.#dcel.faceFaceBoundaryList = faceFaceBoundaryList;
     this.createConfigurations();
@@ -307,9 +325,9 @@ class CSchematization {
     }
 
     return Snapshot.fromDcel(this.#dcel, {
-      step: STEP.SIMPLIFY,
-      config: this.#config,
-      duration: 0,
+      label: LABEL.SIMPLIFY,
+      triggeredAt: t1,
+      recordedAt: performance.now(),
     });
   }
 
@@ -355,30 +373,24 @@ class CSchematization {
     });
   }
 
-  staircaseRegionsToGeoJSON(): geojson.FeatureCollection<geojson.Polygon> {
-    const regionFeatures = this.getStaircases().map(
-      (staircase): geojson.Feature<geojson.Polygon> => {
-        const region = staircase.region.exteriorRing;
-        // add first Point to close geoJSON polygon
-        region.points.push(region.points[0]);
+  staircaseRegionsToGeometry(): MultiPolygon[] {
+    return this.getStaircases().map((staircase): MultiPolygon => {
+      const region = staircase.region.exteriorRing;
 
-        return {
-          type: "Feature",
-          properties: {
-            uuid: staircase.edge.uuid,
-            class: staircase.edge.class,
-            interferesWith: staircase.interferesWith
-              .map((e) => e.getUuid(5))
-              .join(" ,"),
-          },
-          geometry: {
-            type: "Polygon",
-            coordinates: [region.points.map((p) => [p.x, p.y])],
-          },
-        };
-      },
-    );
-    return createGeoJSON(regionFeatures);
+      const properties = {
+        uuid: staircase.edge.uuid,
+        class: staircase.edge.class,
+        interferesWith: staircase.interferesWith
+          .map((e) => e.getUuid(5))
+          .join(" ,"),
+      };
+
+      return new MultiPolygon(
+        [new Polygon([region])],
+        properties.uuid,
+        properties,
+      );
+    });
   }
 }
 
