@@ -15,7 +15,6 @@ export const handleSimplify = (
   const snapshot = Snapshot.fromDcel(dcel, {
     label: LABEL.SIMPLIFY,
     triggeredAt: timeStart,
-    recordedAt: performance.now(),
   });
   snapshotList?.snapshots.push(snapshot);
   setActiveSnapshot(snapshot.id);

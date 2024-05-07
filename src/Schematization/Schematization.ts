@@ -1,8 +1,14 @@
 import Dcel from "@/src/Dcel/Dcel";
+import SnapshotList from "../Snapshot/SnapshotList";
+import { LABEL } from "../c-oriented-schematization/CSchematization";
 
-export type Callback = (args: { dcel: Dcel; label: string }) => void;
+export type Callback = (args: {
+  dcel: Dcel;
+  label: LABEL;
+  forSnapshots?: { snapshotList: SnapshotList; triggeredAt: number };
+}) => void;
 export type LogLevel = "debug" | "visualize";
-export type Callbacks = { [key in TypeLogLevel]?: TypeCallback };
+export type Callbacks = { [key in LogLevel]?: Callback };
 
 /**
  * Abstract class for a schematization process.
@@ -13,6 +19,7 @@ abstract class Schematization {
   // Does not seem to be possible with abstract classes
   callbacks: Callbacks;
   style: object;
+  snapshots: SnapshotList;
 
   constructor({
     style,
@@ -21,21 +28,22 @@ abstract class Schematization {
     style: object;
     options: { callbacks: Callbacks };
   }) {
+    this.snapshots = new SnapshotList();
     this.callbacks = options.callbacks;
     this.style = style;
   }
 
-  //TODO: Add docstring
-  doAction({
+  //TODO: Improve JsDocstring
+  /**
+   * Perform an action based on the defined callbacks.
+   * @param args An object containing the arguments for the action.
+   */
+  abstract doAction({
     level,
     ...rest
   }: {
-    label: string;
-    dcel: Dcel;
     level: "debug" | "visualize";
-  }) {
-    this.callbacks[level]?.(rest);
-  }
+  } & Parameters<Callback>[0]): void;
 
   abstract preProcess(input: Dcel): Dcel;
 

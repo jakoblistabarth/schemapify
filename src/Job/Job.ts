@@ -1,6 +1,5 @@
 import Input from "@/src/Input/";
 import Schematization from "@/src/Schematization/Schematization";
-import SnapshotList from "@/src/Snapshot/SnapshotList";
 
 /**
  * Represents a job.
@@ -8,12 +7,10 @@ import SnapshotList from "@/src/Snapshot/SnapshotList";
  */
 class Job {
   #input: Input;
-  snapshots: SnapshotList;
   #schematization: Schematization;
 
   constructor(input: Input, schematization: Schematization) {
     this.#input = input;
-    this.snapshots = new SnapshotList();
     this.#schematization = schematization;
   }
 
@@ -23,6 +20,10 @@ class Job {
    */
   run() {
     return this.#schematization.run(this.#input.getDcel());
+  }
+
+  get snapshots() {
+    return this.#schematization.snapshots;
   }
 }
 
