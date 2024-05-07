@@ -8,13 +8,13 @@ import SnapshotList from "@/src/Snapshot/SnapshotList";
  */
 class Job {
   #input: Input;
-  #schematization: Schematization;
   snapshots: SnapshotList;
+  #schematization: Schematization;
 
   constructor(input: Input, schematization: Schematization) {
     this.#input = input;
-    this.#schematization = schematization;
     this.snapshots = new SnapshotList();
+    this.#schematization = schematization;
   }
 
   /**

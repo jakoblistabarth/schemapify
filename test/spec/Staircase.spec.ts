@@ -6,7 +6,7 @@ import { OrientationClasses } from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
 import Staircase from "@/src/c-oriented-schematization/Staircase";
 import Polygon from "@/src/geometry/Polygon";
-import { config } from "@/src/c-oriented-schematization/schematization.config";
+import { style } from "@/src/c-oriented-schematization/schematization.style";
 import Ring from "@/src/geometry/Ring";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
@@ -23,7 +23,7 @@ describe("The staircase class", function () {
     edge.class = OrientationClasses.UB;
     edge.assignedDirection = 0;
 
-    const staircase = new Staircase(edge, config);
+    const staircase = new Staircase(edge, style);
     expect(staircase.region).toEqual(
       Polygon.fromCoordinates([
         [
@@ -48,7 +48,7 @@ describe("The staircase class", function () {
     edge.class = OrientationClasses.UB;
     edge.assignedDirection = 2;
 
-    const staircase = new Staircase(edge, config);
+    const staircase = new Staircase(edge, style);
 
     expect(staircase.region).toEqual(
       Polygon.fromCoordinates([
@@ -74,7 +74,7 @@ describe("The staircase class", function () {
     edge.class = OrientationClasses.UB;
     edge.assignedDirection = 2;
 
-    const staircase = new Staircase(edge, config);
+    const staircase = new Staircase(edge, style);
     expect(staircase.region).toEqual(
       Polygon.fromCoordinates([
         [
@@ -100,7 +100,7 @@ describe("Build staircase for a HalfEdge of class AD", function () {
     edge.class = OrientationClasses.AD;
     edge.assignedDirection = 0;
 
-    edge.staircase = new Staircase(edge, { ...config, c: new CRegular(4) });
+    edge.staircase = new Staircase(edge, { ...style, c: new CRegular(4) });
     edge.staircase.points = edge.staircase.getStaircasePoints();
     expect(edge.staircase.points?.length).toBe(7);
     expect(edge.staircase.region?.exteriorRing.length).toBeLessThanOrEqual(
@@ -122,7 +122,7 @@ describe("Build staircase for a HalfEdge of class UB", function () {
     edge.class = OrientationClasses.UB;
     edge.assignedDirection = 0;
 
-    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
+    const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
     const points = staircase.getStaircasePointsUB();
     expect(points?.length).toBeGreaterThanOrEqual(5);
   });
@@ -140,7 +140,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 3;
 
-    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
+    const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
     const d2 = staircase.points[staircase.points.length - 1];
 
     expect(staircase.points?.length).toBeGreaterThanOrEqual(9);
@@ -159,7 +159,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 2;
 
-    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
+    const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
 
     const appendedArea = new Polygon([new Ring(staircase.points.slice(0, 4))])
       .area;
@@ -184,7 +184,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 3;
 
-    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
+    const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
 
     const appendedArea = new Polygon([new Ring(staircase.points.slice(0, 4))])
       .area;
@@ -209,7 +209,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 3;
 
-    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
+    const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
 
     const appendedArea = new Polygon([new Ring(staircase.points.slice(0, 4))])
       .area;
@@ -234,7 +234,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 0;
 
-    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
+    const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
 
     const appendedArea = new Polygon([new Ring(staircase.points.slice(0, 4))])
       .area;
@@ -259,7 +259,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 0;
 
-    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
+    const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
     const d2 = staircase.points[staircase.points.length - 1];
 
     expect(staircase.points?.length).toBeGreaterThanOrEqual(9);
@@ -278,7 +278,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     edge.class = OrientationClasses.UD;
     edge.assignedDirection = 2;
 
-    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
+    const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
     const d2 = staircase.points[staircase.points.length - 1];
 
     expect(staircase.points?.length).toBeGreaterThanOrEqual(9);
@@ -297,7 +297,7 @@ describe("getStepArea(),", function () {
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
 
-    const staircase = new Staircase(edge, { ...config, c: new CRegular(2) });
+    const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
     const stepArea = staircase.getStepArea(3, 1);
     expect(stepArea).toBe(1.5);
   });
@@ -311,7 +311,7 @@ describe("getStepArea(),", function () {
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
 
-    const staircase = new Staircase(edge, { ...config, c: new CRegular(4) });
+    const staircase = new Staircase(edge, { ...style, c: new CRegular(4) });
     const stepArea = staircase.getStepArea(3, 1);
     expect(stepArea).toBeCloseTo(1.0607, 3);
   });

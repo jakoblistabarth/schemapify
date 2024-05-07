@@ -4,7 +4,7 @@ import CRegular from "@/src/c-oriented-schematization/CRegular";
 import Dcel from "@/src/Dcel/Dcel";
 import { OrientationClasses } from "@/src/Dcel/HalfEdge";
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
-import { config } from "@/src/c-oriented-schematization/schematization.config";
+import { style } from "@/src/c-oriented-schematization/schematization.style";
 import C from "@/src/c-oriented-schematization/C";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
@@ -14,7 +14,7 @@ describe("isDeviating()", function () {
 
   beforeEach(function () {
     s = createEdgeVertexSetup();
-    ({ c } = config);
+    ({ c } = style);
   });
 
   it("returns true for an deviating edge", function () {
@@ -100,7 +100,7 @@ describe("Given the examples in the paper of buchin et al., classify() works as 
 
   beforeEach(function () {
     s = createEdgeVertexSetup();
-    ({ c } = config);
+    ({ c } = style);
   });
 
   it("a", function () {

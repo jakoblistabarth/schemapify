@@ -8,8 +8,8 @@ import Polygon from "../geometry/Polygon";
 import Configuration from "./Configuration";
 import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
 import Staircase from "./Staircase";
-import type { Config } from "./schematization.config";
-import { config as defaultConfig } from "./schematization.config";
+import type { CStyle } from "./schematization.style";
+import { style as defaultStyle } from "./schematization.style";
 
 export enum LABEL {
   // TODO: is a default label needed?
@@ -26,14 +26,12 @@ export enum LABEL {
  * A C-oriented schematization process.
  */
 class CSchematization implements Schematization {
-  #config: Config;
+  style: CStyle;
   callbacks: Callbacks;
-  style: object;
 
-  constructor(config: Config = defaultConfig, callbacks: Callbacks = {}) {
-    this.#config = config;
+  constructor(style: CStyle = defaultStyle, callbacks: Callbacks = {}) {
+    this.style = style;
     this.callbacks = callbacks;
-    this.style = {};
   }
 
   doAction({
@@ -53,7 +51,7 @@ class CSchematization implements Schematization {
    */
   classifyVertices(input: Dcel): void {
     input.getVertices().forEach((v) => {
-      v.isSignificant(this.#config.c.getSectors());
+      v.isSignificant(this.style.c.getSectors());
     });
 
     input.getHalfEdges(undefined, true).forEach((edge) => {
@@ -68,7 +66,7 @@ class CSchematization implements Schematization {
   classify(input: Dcel) {
     const timeStart = performance.now();
     this.classifyVertices(input);
-    input.halfEdges.forEach((e) => e.classify(this.#config.c));
+    input.halfEdges.forEach((e) => e.classify(this.style.c));
     return Snapshot.fromDcel(input, {
       label: LABEL.CLASSIFY,
       triggeredAt: timeStart,
@@ -96,7 +94,7 @@ class CSchematization implements Schematization {
         edge.twin
       )
         edge = edge.twin;
-      edge.staircase = new Staircase(edge, this.#config);
+      edge.staircase = new Staircase(edge, this.style);
     });
   }
 
@@ -146,7 +144,7 @@ class CSchematization implements Schematization {
 
         let e = staircase.edge;
         let e_ = staircase_.edge;
-        const eStaircaseEpsilon = this.#config.staircaseEpsilon;
+        const eStaircaseEpsilon = this.style.staircaseEpsilon;
         const e_staircaseSe = e_.staircase?.se;
         const eLength = e.getLength();
         if (
@@ -173,7 +171,7 @@ class CSchematization implements Schematization {
           if (
             typeof e_angle !== "number" ||
             !e
-              .getAssociatedSector(this.#config.c.getSectors())
+              .getAssociatedSector(this.style.c.getSectors())
               .some((sector) => sector.encloses(e_angle))
           )
             return;
@@ -241,7 +239,7 @@ class CSchematization implements Schematization {
    */
   setSes(staircases: Staircase[]) {
     for (const staircase of staircases) {
-      staircase.setSe(this.#config.c.getSectors());
+      staircase.setSe(this.style.c.getSectors());
     }
   }
 
@@ -361,8 +359,8 @@ class CSchematization implements Schematization {
    * @returns Epsilon. The maximum length of a {@link HalfEdge}.
    */
   setEpsilon(input: Dcel, lambda: number): number | undefined {
-    return this.#config
-      ? (this.#config.epsilon = input.getDiameter() * lambda)
+    return this.style
+      ? (this.style.epsilon = input.getDiameter() * lambda)
       : undefined;
   }
 
@@ -371,7 +369,7 @@ class CSchematization implements Schematization {
    * @param threshold
    * @returns A subdivided {@link Dcel}.
    */
-  splitEdges(input: Dcel, threshold = this.#config?.epsilon): Dcel | undefined {
+  splitEdges(input: Dcel, threshold = this.style?.epsilon): Dcel | undefined {
     if (!threshold) return;
     input.getBoundedFaces().forEach((f) => {
       const edges = f.getEdges();
