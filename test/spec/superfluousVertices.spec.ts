@@ -5,7 +5,33 @@ import { readFileSync } from "fs";
 import path from "path";
 
 describe("removeSuperfluousVertices()", function () {
-  it("should remove superfluous vertices", function () {});
+  it("on a triangle-shaped DCEL of with superfluous vertices, results in a DCEL of 3 vertices", function () {
+    const json = JSON.parse(
+      readFileSync(
+        path.resolve("test/data/shapes/superfluous-vertices-triangle.json"),
+        "utf8",
+      ),
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    const schematization = new CSchematization();
+    schematization.removeSuperfluousVertices(dcel);
+
+    expect(dcel.getVertices().length).toBe(3);
+  });
+
+  it("on a square-shaped DCEL of with superfluous vertices, results in a DCEL of 4 vertices", function () {
+    const json = JSON.parse(
+      readFileSync(
+        path.resolve("test/data/shapes/superfluous-vertices-square.json"),
+        "utf8",
+      ),
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    const schematization = new CSchematization();
+    schematization.removeSuperfluousVertices(dcel);
+
+    expect(dcel.getVertices().length).toBe(4);
+  });
 
   it("removes 3 collinear points", function () {
     const json = JSON.parse(
@@ -14,8 +40,8 @@ describe("removeSuperfluousVertices()", function () {
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].getEdges()[0].subdivide();
 
-    const schematization = new CSchematization(dcel);
-    schematization.removeSuperfluousVertices();
+    const schematization = new CSchematization();
+    schematization.removeSuperfluousVertices(dcel);
 
     expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
     expect(dcel.getHalfEdges().length).toBe(8);
@@ -29,8 +55,8 @@ describe("removeSuperfluousVertices()", function () {
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].getEdges()[0].subdivide()?.subdivide();
 
-    const schematization = new CSchematization(dcel);
-    schematization.removeSuperfluousVertices();
+    const schematization = new CSchematization();
+    schematization.removeSuperfluousVertices(dcel);
 
     expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
     expect(dcel.getHalfEdges().length).toBe(8);
@@ -63,8 +89,8 @@ describe("removeSuperfluousVertices()", function () {
       ]),
     );
 
-    const schematization = new CSchematization(dcel);
-    schematization.removeSuperfluousVertices();
+    const schematization = new CSchematization();
+    schematization.removeSuperfluousVertices(dcel);
 
     expect(dcel.getVertices().length).toBe(4);
     expect(dcel.getHalfEdges().length).toBe(8);

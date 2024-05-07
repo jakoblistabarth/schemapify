@@ -83,8 +83,6 @@ type TypeCallbacks = { [key in TypeLogLevel]?: TypeCallback };
 abstract class Schematization {
   #callbacks: TypeCallbacks;
   #style: object;
-  #paused: boolean = false;
-  #snapshots: Snapshot[] = [];
 
   constructor({
     style,

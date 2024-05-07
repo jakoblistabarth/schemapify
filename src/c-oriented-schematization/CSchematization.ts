@@ -1,5 +1,6 @@
 import Dcel from "../Dcel/Dcel";
 import { OrientationClasses } from "../Dcel/HalfEdge";
+import Schematization, { Callbacks } from "../Schematization/Schematization";
 import Snapshot from "../Snapshot/Snapshot";
 import MultiPolygon from "../geometry/MultiPolygon";
 import Point from "../geometry/Point";
@@ -21,25 +22,41 @@ export enum LABEL {
   SIMPLIFY = "simplify",
 }
 
-class CSchematization {
-  #dcel: Dcel;
+/**
+ * A C-oriented schematization process.
+ */
+class CSchematization implements Schematization {
   #config: Config;
+  callbacks: Callbacks;
+  style: object;
 
-  constructor(dcel: Dcel, config: Config = defaultConfig) {
-    this.#dcel = dcel;
+  constructor(config: Config = defaultConfig, callbacks: Callbacks = {}) {
     this.#config = config;
+    this.callbacks = callbacks;
+    this.style = {};
+  }
+
+  doAction({
+    level,
+    ...rest
+  }: {
+    label: string;
+    dcel: globalThis.Dcel;
+    level: "debug" | "visualize";
+  }): void {
+    this.callbacks[level]?.(rest);
   }
 
   /**
    * Classifies all Vertices in the DCEL, adds new Vertices on an HalfEdge which has two significant Vertices.
    * By doing so it is guaranteed that every HalfEdge has at most one significant Vertex.
    */
-  classifyVertices(): void {
-    this.#dcel.getVertices().forEach((v) => {
+  classifyVertices(input: Dcel): void {
+    input.getVertices().forEach((v) => {
       v.isSignificant(this.#config.c.getSectors());
     });
 
-    this.#dcel.getHalfEdges(undefined, true).forEach((edge) => {
+    input.getHalfEdges(undefined, true).forEach((edge) => {
       const [tail, head] = edge.getEndpoints();
       if (tail.significant && head.significant) {
         const newPoint = edge.subdivide()?.getHead();
@@ -48,11 +65,11 @@ class CSchematization {
     });
   }
 
-  classify() {
+  classify(input: Dcel) {
     const timeStart = performance.now();
-    this.classifyVertices();
-    this.#dcel.halfEdges.forEach((e) => e.classify(this.#config.c));
-    return Snapshot.fromDcel(this.#dcel, {
+    this.classifyVertices(input);
+    input.halfEdges.forEach((e) => e.classify(this.#config.c));
+    return Snapshot.fromDcel(input, {
       label: LABEL.CLASSIFY,
       triggeredAt: timeStart,
       recordedAt: performance.now(),
@@ -62,16 +79,16 @@ class CSchematization {
   /**
    * Returns all Staircases of an DCEL.
    */
-  getStaircases(): Staircase[] {
-    return this.#dcel
+  getStaircases(input: Dcel): Staircase[] {
+    return input
       .getHalfEdges()
       .map((edge) => edge.staircase)
       .filter((staircase): staircase is Staircase => !!staircase);
   }
 
-  addStaircases() {
+  addStaircases(input: Dcel) {
     // create staircase for every pair of edges
-    this.#dcel.getHalfEdges(undefined, true).forEach((edge) => {
+    input.getHalfEdges(undefined, true).forEach((edge) => {
       if (edge.class === OrientationClasses.AB) return;
       if (
         edge.getSignificantVertex() &&
@@ -83,9 +100,9 @@ class CSchematization {
     });
   }
 
-  calculateStaircases() {
+  calculateStaircases(input: Dcel) {
     // calculate edgedistance and stepnumber for deviating edges first (p. 18)
-    const staircasesOfDeviatingEdges = this.getStaircases().filter(
+    const staircasesOfDeviatingEdges = this.getStaircases(input).filter(
       (staircase) =>
         staircase.edge.class === OrientationClasses.AD ||
         staircase.edge.class === OrientationClasses.UD,
@@ -98,7 +115,7 @@ class CSchematization {
     );
 
     // calculate edgedistance and stepnumber for remaining edges
-    const staircasesOther = this.getStaircases().filter(
+    const staircasesOther = this.getStaircases(input).filter(
       (staircase) =>
         staircase.edge.class !== OrientationClasses.AD &&
         staircase.edge.class !== OrientationClasses.UD,
@@ -228,8 +245,8 @@ class CSchematization {
     }
   }
 
-  replaceEdgesWithStaircases() {
-    this.#dcel.getHalfEdges().forEach((edge) => {
+  replaceEdgesWithStaircases(input: Dcel) {
+    input.getHalfEdges().forEach((edge) => {
       if (!edge.staircase) return;
       const stepPoints = edge.staircase.getStaircasePoints().slice(1, -1); // TODO: use .points instead
       let edgeToSubdivide = edge;
@@ -241,7 +258,7 @@ class CSchematization {
     });
 
     // assign class AB to all edges of just created staircases
-    this.#dcel
+    input
       .getHalfEdges()
       .forEach((edge) => (edge.class = OrientationClasses.AB));
   }
@@ -250,8 +267,8 @@ class CSchematization {
    * Removes all vertices of the DCEL which are collinear, hence superfluous:
    * they can be removed without changing the visual geometry of the DCEL.
    */
-  removeSuperfluousVertices(): void {
-    const superfluousVertices = this.#dcel.getVertices().filter((v) => {
+  removeSuperfluousVertices(input: Dcel): void {
+    const superfluousVertices = input.getVertices().filter((v) => {
       if (v.edges.length != 2) return false;
       const angle = v.edges
         .map((h) => h.getAngle() ?? Infinity)
@@ -263,76 +280,79 @@ class CSchematization {
     superfluousVertices.forEach((v) => v.remove());
   }
 
-  preProcess() {
-    const timeStart = performance.now();
-    const loaded = Snapshot.fromDcel(this.#dcel, {
-      label: LABEL.LOAD,
-      triggeredAt: timeStart,
-      recordedAt: performance.now(),
-    });
-    const time1 = performance.now();
-    this.splitEdges();
-    const subdivided = Snapshot.fromDcel(this.#dcel, {
-      label: LABEL.SUBDIVIDE,
-      triggeredAt: time1,
-      recordedAt: performance.now(),
-    });
-    return [loaded, subdivided];
+  preProcess(input: Dcel) {
+    // const timeStart = performance.now();
+    // const loaded = Snapshot.fromDcel(input, {
+    //   label: LABEL.LOAD,
+    //   triggeredAt: timeStart,
+    //   recordedAt: performance.now(),
+    // });
+    // const time1 = performance.now();
+    this.splitEdges(input);
+    // const subdivided = Snapshot.fromDcel(input, {
+    //   label: LABEL.SUBDIVIDE,
+    //   triggeredAt: time1,
+    //   recordedAt: performance.now(),
+    // });
+    return input;
   }
 
-  constrainAngles() {
-    const t0 = performance.now();
-    this.classify();
-    this.addStaircases();
-    this.calculateStaircases();
-    const staircaseRegions = Snapshot.fromDcel(this.#dcel, {
-      label: LABEL.STAIRCASEREGIONS,
-      triggeredAt: t0,
-      recordedAt: performance.now(),
-      additionalData: { staircaseRegions: this.staircaseRegionsToGeometry() },
-    });
-    const t1 = performance.now();
-    this.replaceEdgesWithStaircases();
-    const staircases = Snapshot.fromDcel(this.#dcel, {
-      label: LABEL.STAIRCASE,
-      triggeredAt: t1,
-      recordedAt: performance.now(),
-    });
-    return [staircaseRegions, staircases];
+  constrainAngles(input: Dcel) {
+    // const t0 = performance.now();
+    this.classify(input);
+    this.addStaircases(input);
+    this.calculateStaircases(input);
+    // const staircaseRegions = Snapshot.fromDcel(input, {
+    //   label: LABEL.STAIRCASEREGIONS,
+    //   triggeredAt: t0,
+    //   recordedAt: performance.now(),
+    //   additionalData: { staircaseRegions: this.staircaseRegionsToGeometry() },
+    // });
+    // const t1 = performance.now();
+    this.replaceEdgesWithStaircases(input);
+    // const staircases = Snapshot.fromDcel(input, {
+    //   label: LABEL.STAIRCASE,
+    //   triggeredAt: t1,
+    //   recordedAt: performance.now(),
+    // });
+    return input;
   }
 
-  simplify() {
+  simplify(input: Dcel) {
     const t0 = performance.now();
 
-    this.removeSuperfluousVertices();
+    this.removeSuperfluousVertices(input);
 
     // TODO: is not yet returned
-    Snapshot.fromDcel(this.#dcel, {
+    Snapshot.fromDcel(input, {
       label: LABEL.SIMPLIFY,
       triggeredAt: t0,
       recordedAt: performance.now(),
     });
 
-    const t1 = performance.now();
-    const faceFaceBoundaryList = new FaceFaceBoundaryList(this.#dcel);
-    this.#dcel.faceFaceBoundaryList = faceFaceBoundaryList;
-    this.createConfigurations();
+    // const t1 = performance.now();
+    const faceFaceBoundaryList = new FaceFaceBoundaryList(input);
+    input.faceFaceBoundaryList = faceFaceBoundaryList;
+    this.createConfigurations(input);
 
     for (let index = 0; index < 0; index++) {
-      const pair =
-        this.#dcel.faceFaceBoundaryList.getMinimalConfigurationPair();
+      const pair = input.faceFaceBoundaryList.getMinimalConfigurationPair();
       pair?.doEdgeMove();
     }
 
-    return Snapshot.fromDcel(this.#dcel, {
-      label: LABEL.SIMPLIFY,
-      triggeredAt: t1,
-      recordedAt: performance.now(),
-    });
+    // Snapshot.fromDcel(input, {
+    //   label: LABEL.SIMPLIFY,
+    //   triggeredAt: t1,
+    //   recordedAt: performance.now(),
+    // });
+    return input;
   }
 
-  schematize() {
-    return [this.preProcess(), this.constrainAngles(), this.simplify()].flat();
+  run(input: Dcel) {
+    this.preProcess(input);
+    this.constrainAngles(input);
+    this.simplify(input);
+    return input;
   }
 
   /**
@@ -340,9 +360,9 @@ class CSchematization {
    * @param lambda A constant factor.
    * @returns Epsilon. The maximum length of a {@link HalfEdge}.
    */
-  setEpsilon(lambda: number): number | undefined {
+  setEpsilon(input: Dcel, lambda: number): number | undefined {
     return this.#config
-      ? (this.#config.epsilon = this.#dcel.getDiameter() * lambda)
+      ? (this.#config.epsilon = input.getDiameter() * lambda)
       : undefined;
   }
 
@@ -351,30 +371,30 @@ class CSchematization {
    * @param threshold
    * @returns A subdivided {@link Dcel}.
    */
-  splitEdges(threshold = this.#config?.epsilon): Dcel | undefined {
+  splitEdges(input: Dcel, threshold = this.#config?.epsilon): Dcel | undefined {
     if (!threshold) return;
-    this.#dcel.getBoundedFaces().forEach((f) => {
+    input.getBoundedFaces().forEach((f) => {
       const edges = f.getEdges();
       if (!edges) return;
       edges.forEach((e) => {
         e.subdivideToThreshold(threshold);
       });
     });
-    return this.#dcel;
+    return input;
   }
 
   /**
    * Creates Configurations for all valid edges.
    */
-  createConfigurations() {
-    this.#dcel.getHalfEdges().forEach((edge) => {
+  createConfigurations(input: Dcel) {
+    input.getHalfEdges().forEach((edge) => {
       if (edge.getEndpoints().every((vertex) => vertex.edges.length <= 3))
         edge.configuration = new Configuration(edge);
     });
   }
 
-  staircaseRegionsToGeometry(): MultiPolygon[] {
-    return this.getStaircases().map((staircase): MultiPolygon => {
+  staircaseRegionsToGeometry(input: Dcel): MultiPolygon[] {
+    return this.getStaircases(input).map((staircase): MultiPolygon => {
       const region = staircase.region.exteriorRing;
 
       const properties = {

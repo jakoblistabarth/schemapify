@@ -57,8 +57,8 @@ describe("The Face-Face-Boundary", function () {
         ],
       ]),
     );
-    const schematization = new CSchematization(dcel);
-    schematization.schematize();
+    const schematization = new CSchematization();
+    schematization.run(dcel);
     const ffbl = new FaceFaceBoundaryList(dcel);
     const faces = ffbl
       .getBoundaries()
@@ -76,8 +76,8 @@ describe("getMinimalConfigurationPair()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const schematization = new CSchematization(dcel);
-    schematization.createConfigurations();
+    const schematization = new CSchematization();
+    schematization.createConfigurations(dcel);
     const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
     const boundary = ffb.boundaries.values().next().value;
     const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
@@ -100,8 +100,8 @@ describe("getMinimalConfigurationPair()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const schematization = new CSchematization(dcel);
-    schematization.createConfigurations();
+    const schematization = new CSchematization();
+    schematization.createConfigurations(dcel);
     const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
     const boundary = ffb.boundaries.values().next().value;
     const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
