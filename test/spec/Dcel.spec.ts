@@ -453,8 +453,8 @@ describe("schematize() returns a result which can be turned into a valid geojson
       ),
     );
     const dcel = Dcel.fromGeoJSON(inputJson);
-    const schematization = new CSchematization(dcel);
-    schematization.schematize();
+    const schematization = new CSchematization();
+    schematization.run(dcel);
     const outputJson = dcel.toGeoJSON();
     const outputJsonPretty = JSON.stringify(outputJson, null, 4);
     const errors = hint(outputJsonPretty);
@@ -463,7 +463,7 @@ describe("schematize() returns a result which can be turned into a valid geojson
   });
 });
 
-describe("schematize() returns a result which can be turned into a valid geojson", function () {
+describe("run() returns a result which can be turned into a valid geojson", function () {
   const dir = "test/data/shapes";
   const testFiles = getTestFiles(dir);
 
@@ -474,8 +474,8 @@ describe("schematize() returns a result which can be turned into a valid geojson
         fs.readFileSync(path.resolve(dir + "/" + file), "utf8"),
       );
       const dcel = Dcel.fromGeoJSON(inputJson);
-      const schematization = new CSchematization(dcel);
-      schematization.schematize();
+      const schematization = new CSchematization();
+      schematization.run(dcel);
       const outputJson = dcel.toGeoJSON();
       const outputJsonPretty = JSON.stringify(outputJson, null, 4);
       const errors = hint(outputJsonPretty);

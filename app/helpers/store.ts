@@ -1,9 +1,11 @@
-import { create } from "zustand";
-import { FeatureCollection, Polygon, MultiPolygon } from "geojson";
 import Dcel from "@/src/Dcel/Dcel";
+import Input from "@/src/Input/";
+import Job from "@/src/Job/";
 import Snapshot from "@/src/Snapshot/Snapshot";
 import SnapshotList from "@/src/Snapshot/SnapshotList";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import { FeatureCollection, MultiPolygon, Polygon } from "geojson";
+import { create } from "zustand";
 
 export type MapMode = "dcel" | "polygon";
 
@@ -30,12 +32,13 @@ const useAppStore = create<AppState>((set) => ({
   setSource: async (name: string) => {
     const response = await fetch(`/api/data/shapes/${name}`);
     const data = await response.json();
-    const dcel = Dcel.fromGeoJSON(data);
-    const schematization = new CSchematization(dcel);
-    const snapshots = schematization.schematize();
-    const snapshotList = new SnapshotList(snapshots);
-    const activeSnapshot = snapshots[0];
-    const [, nextSnapshot] = snapshotList.getPrevNext(activeSnapshot.id);
+    const input = Input.fromGeoJSON(data);
+    const schematization = new CSchematization();
+    const job = new Job(input, schematization);
+    const dcel = job.run();
+    const activeSnapshot = job.snapshots.snapshots[0];
+    const snapshotList = job.snapshots;
+    const [, nextSnapshot] = job.snapshots.getPrevNext(activeSnapshot.id);
     set(() => {
       return {
         source: { name, data },

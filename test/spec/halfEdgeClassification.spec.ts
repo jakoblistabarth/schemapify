@@ -284,9 +284,9 @@ describe("classifyEdges() in a classification where all edges are classified and
       fs.readFileSync(path.resolve("test/data/shapes/edge-cases.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const schematization = new CSchematization(dcel);
-    schematization.preProcess();
-    schematization.classify();
+    const schematization = new CSchematization();
+    schematization.preProcess(dcel);
+    schematization.classify(dcel);
     const edgesWithoutAssignedAngles = dcel
       .getHalfEdges()
       .filter((edge) => edge.assignedDirection === undefined);
@@ -310,9 +310,9 @@ describe("classifyEdges() in a classification where all edges are classified and
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const schematization = new CSchematization(dcel);
-    schematization.preProcess();
-    schematization.classify();
+    const schematization = new CSchematization();
+    schematization.preProcess(dcel);
+    schematization.classify(dcel);
     const edgesWithoutAssignedAngles = dcel
       .getHalfEdges()
       .filter((edge) => edge.assignedDirection === undefined);

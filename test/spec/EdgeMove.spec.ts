@@ -13,8 +13,8 @@ describe("createConfigurations()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const schematization = new CSchematization(dcel);
-    schematization.schematize();
+    const schematization = new CSchematization();
+    schematization.run(dcel);
 
     const verticesDegree4 = dcel
       .getVertices()
@@ -47,8 +47,8 @@ describe("doEdgeMove()", function () {
     const dcel = Dcel.fromGeoJSON(json);
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
     const originalArea = dcel.getArea();
-    const schematization = new CSchematization(dcel);
-    schematization.createConfigurations();
+    const schematization = new CSchematization();
+    schematization.createConfigurations(dcel);
     const pair = dcel.faceFaceBoundaryList
       .getBoundaries()[0]
       .getMinimalConfigurationPair();
@@ -80,8 +80,8 @@ describe("doEdgeMove()", function () {
     );
     const dcel = Dcel.fromGeoJSON(json);
     const originalArea = dcel.getArea();
-    const schematization = new CSchematization(dcel);
-    schematization.createConfigurations();
+    const schematization = new CSchematization();
+    schematization.createConfigurations(dcel);
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
     const pair = dcel.faceFaceBoundaryList.getMinimalConfigurationPair();
     pair?.doEdgeMove();
@@ -102,8 +102,8 @@ describe("doEdgeMove()", function () {
     const dcel = Dcel.fromGeoJSON(json);
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
     const originalArea = dcel.getArea();
-    const schematization = new CSchematization(dcel);
-    schematization.createConfigurations();
+    const schematization = new CSchematization();
+    schematization.createConfigurations(dcel);
     const pair = dcel.faceFaceBoundaryList
       .getBoundaries()[0]
       .getMinimalConfigurationPair();

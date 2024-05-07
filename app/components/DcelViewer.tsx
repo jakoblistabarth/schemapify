@@ -26,8 +26,8 @@ const DcelViewer: FC = () => {
         ],
       ]),
     );
-    const schematization = new CSchematization(dcel);
-    schematization.schematize();
+    const schematization = new CSchematization();
+    schematization.run(dcel);
     return { dcel };
   }, []);
   return (

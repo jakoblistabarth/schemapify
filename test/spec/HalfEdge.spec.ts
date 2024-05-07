@@ -364,8 +364,8 @@ describe("subdivideToThreshold()", function () {
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const schematization = new CSchematization(dcel);
-    schematization.splitEdges(5);
+    const schematization = new CSchematization();
+    schematization.splitEdges(dcel, 5);
 
     expect(dcel.halfEdges.size).toBe(64);
   });

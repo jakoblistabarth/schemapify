@@ -429,11 +429,11 @@ describe("Staircaseregions incident to a certain vertex are always interfering w
       ),
     );
     const dcel = Dcel.fromGeoJSON(input);
-    const schematization = new CSchematization(dcel);
-    schematization.preProcess();
-    schematization.classify();
-    schematization.addStaircases();
-    schematization.calculateStaircases();
+    const schematization = new CSchematization();
+    schematization.preProcess(dcel);
+    schematization.classify(dcel);
+    schematization.addStaircases(dcel);
+    schematization.calculateStaircases(dcel);
     const v = dcel.findVertex(0, 11);
     expect(v?.edges[0].staircase?.interferesWith.length).toBeGreaterThan(0);
     expect(v?.edges[1].staircase?.interferesWith.length).toBeGreaterThan(0);

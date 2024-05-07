@@ -86,8 +86,8 @@ describe("6-a. If the input data holds attributes attached to its features, the 
     ),
   );
   const dcel = Dcel.fromGeoJSON(json);
-  const schematization = new CSchematization(dcel);
-  schematization.schematize();
+  const schematization = new CSchematization();
+  schematization.run(dcel);
   const output = dcel.toGeoJSON();
 
   const inputFeatureProperties = json.features.map(
@@ -115,8 +115,8 @@ describe("7-a. The system shall preserve the number of features of the input in 
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const schematization = new CSchematization(dcel);
-    schematization.schematize();
+    const schematization = new CSchematization();
+    schematization.run(dcel);
     const output = dcel.toGeoJSON();
 
     const inputFeatures = json.features.length;
