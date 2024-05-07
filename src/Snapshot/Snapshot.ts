@@ -18,7 +18,6 @@ class Snapshot {
   constructor(
     subdivision: Subdivision,
     triggeredAt: number,
-    recordedAt: number,
     label = LABEL.DEFAULT,
     additionalData: Record<string, MultiPolygon[]> = {},
   ) {
@@ -26,7 +25,7 @@ class Snapshot {
     this.subdivision = subdivision;
     this.label = label;
     this.triggeredAt = triggeredAt;
-    this.recordedAt = recordedAt;
+    this.recordedAt = performance.now();
     this.additionalData = additionalData;
   }
 
@@ -39,22 +38,14 @@ class Snapshot {
     {
       label,
       triggeredAt,
-      recordedAt,
       additionalData,
     }: {
       label: LABEL;
       triggeredAt: number;
-      recordedAt: number;
       additionalData?: Record<string, MultiPolygon[]>;
     },
   ) {
-    return new this(
-      dcel.toSubdivision(),
-      triggeredAt,
-      recordedAt,
-      label,
-      additionalData,
-    );
+    return new this(dcel.toSubdivision(), triggeredAt, label, additionalData);
   }
 }
 

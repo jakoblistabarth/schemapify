@@ -1,10 +1,13 @@
-import Dcel from "../Dcel/Dcel";
-import { OrientationClasses } from "../Dcel/HalfEdge";
-import Schematization, { Callbacks } from "../Schematization/Schematization";
-import Snapshot from "../Snapshot/Snapshot";
-import MultiPolygon from "../geometry/MultiPolygon";
-import Point from "../geometry/Point";
-import Polygon from "../geometry/Polygon";
+import Dcel from "@/src/Dcel/Dcel";
+import { OrientationClasses } from "@/src/Dcel/HalfEdge";
+import Schematization, {
+  Callback,
+  Callbacks,
+} from "@/src/Schematization/Schematization";
+import SnapshotList from "@/src/Snapshot/SnapshotList";
+import MultiPolygon from "@/src/geometry/MultiPolygon";
+import Point from "@/src/geometry/Point";
+import Polygon from "@/src/geometry/Polygon";
 import Configuration from "./Configuration";
 import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
 import Staircase from "./Staircase";
@@ -28,25 +31,27 @@ export enum LABEL {
 class CSchematization implements Schematization {
   style: CStyle;
   callbacks: Callbacks;
+  snapshots: SnapshotList;
 
   constructor(style: CStyle = defaultStyle, callbacks: Callbacks = {}) {
     this.style = style;
     this.callbacks = callbacks;
+    this.snapshots = new SnapshotList();
   }
 
   doAction({
     level,
     ...rest
   }: {
-    label: string;
-    dcel: globalThis.Dcel;
+    //TODO: Why is the typing not inferred as for preProcess?
     level: "debug" | "visualize";
-  }): void {
+  } & Parameters<Callback>[0]): void {
     this.callbacks[level]?.(rest);
   }
 
   /**
-   * Classifies all Vertices in the DCEL, adds new Vertices on an HalfEdge which has two significant Vertices.
+   * Classifies all Vertices in the DCEL.
+   * This also adds new Vertices on every HalfEdge which has two significant Vertices.
    * By doing so it is guaranteed that every HalfEdge has at most one significant Vertex.
    */
   classifyVertices(input: Dcel): void {
@@ -64,13 +69,17 @@ class CSchematization implements Schematization {
   }
 
   classify(input: Dcel) {
-    const timeStart = performance.now();
+    const t0 = performance.now();
     this.classifyVertices(input);
     input.halfEdges.forEach((e) => e.classify(this.style.c));
-    return Snapshot.fromDcel(input, {
+    this.doAction({
+      level: "visualize",
+      dcel: input,
       label: LABEL.CLASSIFY,
-      triggeredAt: timeStart,
-      recordedAt: performance.now(),
+      forSnapshots: {
+        snapshotList: this.snapshots,
+        triggeredAt: t0,
+      },
     });
   }
 
@@ -279,56 +288,60 @@ class CSchematization implements Schematization {
   }
 
   preProcess(input: Dcel) {
-    // const timeStart = performance.now();
-    // const loaded = Snapshot.fromDcel(input, {
-    //   label: LABEL.LOAD,
-    //   triggeredAt: timeStart,
-    //   recordedAt: performance.now(),
-    // });
-    // const time1 = performance.now();
+    const t0 = performance.now();
+    this.doAction({
+      level: "visualize",
+      dcel: input,
+      label: LABEL.LOAD,
+      forSnapshots: { snapshotList: this.snapshots, triggeredAt: t0 },
+    });
+
+    const t1 = performance.now();
     this.splitEdges(input);
-    // const subdivided = Snapshot.fromDcel(input, {
-    //   label: LABEL.SUBDIVIDE,
-    //   triggeredAt: time1,
-    //   recordedAt: performance.now(),
-    // });
+    this.doAction({
+      level: "visualize",
+      dcel: input,
+      label: LABEL.SUBDIVIDE,
+      forSnapshots: { snapshotList: this.snapshots, triggeredAt: t1 },
+    });
     return input;
   }
 
   constrainAngles(input: Dcel) {
-    // const t0 = performance.now();
+    const t0 = performance.now();
     this.classify(input);
     this.addStaircases(input);
     this.calculateStaircases(input);
-    // const staircaseRegions = Snapshot.fromDcel(input, {
-    //   label: LABEL.STAIRCASEREGIONS,
-    //   triggeredAt: t0,
-    //   recordedAt: performance.now(),
+    //TODO: add additional data to Snapshot: staircaseRegions as geometry
     //   additionalData: { staircaseRegions: this.staircaseRegionsToGeometry() },
-    // });
-    // const t1 = performance.now();
+    this.doAction({
+      level: "visualize",
+      dcel: input,
+      label: LABEL.STAIRCASEREGIONS,
+      forSnapshots: { snapshotList: this.snapshots, triggeredAt: t0 },
+    });
+    const t1 = performance.now();
     this.replaceEdgesWithStaircases(input);
-    // const staircases = Snapshot.fromDcel(input, {
-    //   label: LABEL.STAIRCASE,
-    //   triggeredAt: t1,
-    //   recordedAt: performance.now(),
-    // });
+    this.doAction({
+      level: "visualize",
+      dcel: input,
+      label: LABEL.STAIRCASE,
+      forSnapshots: { snapshotList: this.snapshots, triggeredAt: t1 },
+    });
     return input;
   }
 
   simplify(input: Dcel) {
     const t0 = performance.now();
-
     this.removeSuperfluousVertices(input);
-
-    // TODO: is not yet returned
-    Snapshot.fromDcel(input, {
+    this.doAction({
+      level: "visualize",
+      dcel: input,
       label: LABEL.SIMPLIFY,
-      triggeredAt: t0,
-      recordedAt: performance.now(),
+      forSnapshots: { snapshotList: this.snapshots, triggeredAt: t0 },
     });
 
-    // const t1 = performance.now();
+    const t1 = performance.now();
     const faceFaceBoundaryList = new FaceFaceBoundaryList(input);
     input.faceFaceBoundaryList = faceFaceBoundaryList;
     this.createConfigurations(input);
@@ -338,11 +351,12 @@ class CSchematization implements Schematization {
       pair?.doEdgeMove();
     }
 
-    // Snapshot.fromDcel(input, {
-    //   label: LABEL.SIMPLIFY,
-    //   triggeredAt: t1,
-    //   recordedAt: performance.now(),
-    // });
+    this.doAction({
+      level: "visualize",
+      dcel: input,
+      label: LABEL.SIMPLIFY,
+      forSnapshots: { snapshotList: this.snapshots, triggeredAt: t1 },
+    });
     return input;
   }
 

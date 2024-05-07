@@ -33,11 +33,21 @@ const useAppStore = create<AppState>((set) => ({
     const response = await fetch(`/api/data/shapes/${name}`);
     const data = await response.json();
     const input = Input.fromGeoJSON(data);
-    const schematization = new CSchematization();
+    const schematization = new CSchematization(undefined, {
+      visualize: (args) => {
+        args.forSnapshots?.snapshotList.add(
+          new Snapshot(
+            args.dcel.toSubdivision(),
+            args.forSnapshots.triggeredAt,
+            args.label,
+          ),
+        );
+      },
+    });
     const job = new Job(input, schematization);
     const dcel = job.run();
-    const activeSnapshot = job.snapshots.snapshots[0];
     const snapshotList = job.snapshots;
+    const activeSnapshot = snapshotList.snapshots[0];
     const [, nextSnapshot] = job.snapshots.getPrevNext(activeSnapshot.id);
     set(() => {
       return {
