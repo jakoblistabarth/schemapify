@@ -1,7 +1,7 @@
 import CRegular from "@/src/c-oriented-schematization/CRegular";
 import Sector from "@/src/c-oriented-schematization/Sector";
 import { crawlArray } from "@/src/utilities";
-import { config } from "@/src/c-oriented-schematization/schematization.config";
+import { style } from "@/src/c-oriented-schematization/schematization.style";
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
 import C from "@/src/c-oriented-schematization/C";
 
@@ -10,7 +10,7 @@ describe("isAligned() works properly", function () {
   let c: C;
   beforeEach(function () {
     s = createEdgeVertexSetup();
-    ({ c } = config);
+    ({ c } = style);
   });
 
   it("for an aligned edge in a rectilinear schematization.", function () {
@@ -110,7 +110,7 @@ describe("isSignficant()", function () {
   let c: C;
   beforeEach(function () {
     s = createEdgeVertexSetup();
-    ({ c } = config);
+    ({ c } = style);
   });
 
   it("classifies a vertex correctly", function () {
@@ -149,7 +149,7 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
   let c: C;
   beforeEach(function () {
     s = createEdgeVertexSetup();
-    ({ c } = config);
+    ({ c } = style);
   });
 
   it("using getAssociatedSector() for C2", function () {

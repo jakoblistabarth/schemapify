@@ -1,15 +1,15 @@
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
-import { config } from "@/src/c-oriented-schematization/schematization.config";
+import { style } from "@/src/c-oriented-schematization/schematization.style";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
 import C from "@/src/c-oriented-schematization/C";
 
-describe("Given the examples in the paper of buchin et al., directions are assigned, correctly on example", function () {
+describe("Given the examples in the paper of Buchin et al., directions are assigned, correctly on example", function () {
   let s: TestSetup;
   let c: C;
 
   beforeEach(function () {
     s = createEdgeVertexSetup();
-    ({ c } = config);
+    ({ c } = style);
   });
 
   it("a", function () {
@@ -116,7 +116,7 @@ describe("assignDirections(config.c) on own examples", function () {
 
   beforeEach(function () {
     s = createEdgeVertexSetup();
-    ({ c } = config);
+    ({ c } = style);
   });
 
   it("with 4 edges (A) in C(2)", function () {

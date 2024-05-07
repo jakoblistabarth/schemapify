@@ -7,7 +7,7 @@ import Point from "../geometry/Point";
 import Polygon from "../geometry/Polygon";
 import Ring from "../geometry/Ring";
 import Sector from "./Sector";
-import { Config } from "./schematization.config";
+import { CStyle } from "./schematization.style";
 
 class Staircase {
   /** The {@link HalfEdge} the staircase belongs to. */
@@ -24,11 +24,11 @@ class Staircase {
   se?: number;
   /** A list of {@link HalfEdge}s whose staircase regions interfer with this staircase region.  */
   interferesWith: HalfEdge[];
-  #config: Config;
+  #cStyle: CStyle;
 
-  constructor(edge: HalfEdge, config: Config) {
+  constructor(edge: HalfEdge, cStyle: CStyle) {
     this.edge = edge;
-    this.#config = config;
+    this.#cStyle = cStyle;
     this.deltaE = this.getDeltaE();
     this.points = [];
     this.region = this.getRegion();
@@ -124,7 +124,7 @@ class Staircase {
         ? this.edge
         : this.edge.twin;
     const head = edge?.getHead();
-    const sectors = this.#config.c.getSectors();
+    const sectors = this.#cStyle.c.getSectors();
     const assignedAngle = edge?.getAssignedAngle(sectors);
     if (!edge || !head || typeof assignedAngle !== "number")
       return new Polygon([]);
@@ -152,7 +152,7 @@ class Staircase {
         if (typeof lower !== "number" || typeof upper !== "number")
           return new Polygon([]);
         const smallestAssociatedAngle = edge.getClosestAssociatedAngle(
-          this.#config.c,
+          this.#cStyle.c,
         );
         const largestAssociatedAngle = edge
           .getAssociatedAngles(sectors)
@@ -210,7 +210,7 @@ class Staircase {
     associatedEdge: number,
   ): number | undefined {
     const enclosingAngle =
-      (Math.PI * 2) / this.#config.c.getDirections().length;
+      (Math.PI * 2) / this.#cStyle.c.getDirections().length;
     return (assignedEdge * associatedEdge * Math.sin(enclosingAngle)) / 2;
   }
 
@@ -236,8 +236,8 @@ class Staircase {
   getStaircasePointsAD(): Point[] {
     const edge = this.edge;
     if (!this.deltaE) return [];
-    const epsilon = this.#config.staircaseEpsilon;
-    const d1 = edge.getAssignedAngle(this.#config.c.getSectors());
+    const epsilon = this.#cStyle.staircaseEpsilon;
+    const d1 = edge.getAssignedAngle(this.#cStyle.c.getSectors());
     if (typeof d1 !== "number") return [];
     const d2 = edge.getAngle();
     if (typeof d2 !== "number") return [];
@@ -271,7 +271,7 @@ class Staircase {
     if (!head) return new Polygon([]);
 
     const associatedSector = edge.getAssociatedSector(
-      this.#config.c.getSectors(),
+      this.#cStyle.c.getSectors(),
     );
     if (!associatedSector) return new Polygon([]);
     const [lower, upper] = associatedSector[0].getBounds();
@@ -295,7 +295,7 @@ class Staircase {
     const se = this.se || 2;
     const edge = this.edge;
 
-    const sectors = this.#config.c.getSectors();
+    const sectors = this.#cStyle.c.getSectors();
     const d1 = edge.getAssignedAngle(sectors);
     const associatedAngles = edge.getAssociatedAngles(sectors);
     if (typeof d1 !== "number" || !associatedAngles) return [];
@@ -329,7 +329,7 @@ class Staircase {
     const se = this.se || 4;
     const edge = this.edge;
 
-    const sectors = this.#config.c.getSectors();
+    const sectors = this.#cStyle.c.getSectors();
     const d1 = edge.getAssignedAngle(sectors);
     const associatedAngles = edge.getAssociatedAngles(sectors);
     if (typeof d1 !== "number" || !associatedAngles) return [];
@@ -369,7 +369,7 @@ class Staircase {
     d1: number,
   ): Point[] {
     const stepArea = this.getStepArea(l1, l2);
-    const sectors = this.#config.c.getSectors();
+    const sectors = this.#cStyle.c.getSectors();
     const assignedAngle = this.edge.getAssignedAngle(sectors);
     if (typeof stepArea !== "number" || typeof assignedAngle !== "number")
       return [];
@@ -391,8 +391,8 @@ class Staircase {
     const se = this.se || 4;
     const edge = this.edge;
 
-    const sectors = this.#config.c.getSectors();
-    const d1 = edge.getClosestAssociatedAngle(this.#config.c);
+    const sectors = this.#cStyle.c.getSectors();
+    const d1 = edge.getClosestAssociatedAngle(this.#cStyle.c);
     const associatedAngles = edge.getAssociatedAngles(sectors);
     if (typeof d1 !== "number" || !associatedAngles) return [];
     const d2 = associatedAngles.find((angle) => angle !== d1);

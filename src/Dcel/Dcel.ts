@@ -4,7 +4,7 @@ import { ContractionType } from "../c-oriented-schematization/ContractionType";
 import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
 import Sector from "../c-oriented-schematization/Sector";
 import Staircase from "../c-oriented-schematization/Staircase";
-import { Config } from "../c-oriented-schematization/schematization.config";
+import { CStyle } from "../c-oriented-schematization/schematization.style";
 import Point from "../geometry/Point";
 import Subdivision from "../geometry/Subdivision";
 import BoundingBox from "../helpers/BoundingBox";
@@ -514,11 +514,11 @@ class Dcel {
   }
 
   staircasesToGeoJSON(
-    config: Config,
+    cStyle: CStyle,
   ): geojson.FeatureCollection<geojson.Polygon> {
     const staircaseFeatures = this.getHalfEdges(undefined, true).map(
       (edge): geojson.Feature<geojson.Polygon> => {
-        const staircase: Staircase = new Staircase(edge, config);
+        const staircase: Staircase = new Staircase(edge, cStyle);
         const coordinates: number[][] =
           staircase.region.exteriorRing.points.map((p) => [p.x, p.y]);
         return {

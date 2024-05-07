@@ -1,6 +1,5 @@
 import C from "./C";
 import CRegular from "./CRegular";
-// import CIrregular from "./CIrregular";
 
 /**
  * @property lambda. A constant factor of the DCEL's diameter (0.05 suggested by buchin et al.).
@@ -10,7 +9,7 @@ import CRegular from "./CRegular";
  * @property staircaseEpsilon. The small constant ε ensures that the edge e (of class AD) = (u, v) adheres to its direction at the insignificant vertex w.
  */
 
-export interface Config {
+export interface CStyle {
   lambda: number;
   epsilon?: number;
   k: number;
@@ -18,7 +17,7 @@ export interface Config {
   staircaseEpsilon: number;
 }
 
-export const config = {
+export const style = {
   lambda: 1,
   k: 100, // TODO: set meaningful value
   c: new CRegular(2),
@@ -26,4 +25,4 @@ export const config = {
   staircaseEpsilon: 0.1,
 };
 
-export default config;
+export default style;
