@@ -5,10 +5,31 @@ import Subdivision from "../geometry/Subdivision";
 import BoundingBox from "../helpers/BoundingBox";
 import { geoJsonToGeometry, validateGeoJSON } from "../utilities";
 import Face from "./Face";
-import HalfEdge from "./HalfEdge";
-import Vertex from "./Vertex";
+import HalfEdge, { TypeHalfEdge } from "./HalfEdge";
+import Vertex, { TypeVertex } from "./Vertex";
 
-class Dcel {
+export abstract class GenericDcel<
+  H extends TypeHalfEdge,
+  V extends TypeVertex,
+> {
+  halfEdges: Map<string, H>;
+  vertices: Map<string, V>;
+  faces: Face[];
+  featureProperties: geojson.GeoJsonProperties;
+  faceFaceBoundaryList?: FaceFaceBoundaryList;
+
+  constructor() {
+    this.vertices = new Map();
+    this.halfEdges = new Map();
+    this.faces = [];
+    this.featureProperties = {};
+  }
+
+  abstract getHalfEdges(simple?: boolean): H[];
+  abstract getBoundedFaces(): Face[];
+}
+
+class Dcel<H extends HalfEdge, V extends Vertex> implements GenericDcel<H extends HalfEdge, V extends Vertex> {
   name?: string;
   vertices: Map<string, Vertex>;
   halfEdges: Map<string, HalfEdge>;
@@ -29,7 +50,7 @@ class Dcel {
    * @param y y coordinate of the new {@link Vertex}.
    * @returns The created {@link Vertex}.
    */
-  addVertex(x: number, y: number): Vertex {
+  addVertex(x: number, y: number) {
     const key = Vertex.getKey(x, y);
     const existingVertex = this.vertices.get(key);
     if (existingVertex) return existingVertex;
@@ -45,7 +66,7 @@ class Dcel {
    * @param head head {@link Vertex} of the new {@link HalfEdge}.
    * @returns The created HalfEdge.
    */
-  addHalfEdge(tail: Vertex, head: Vertex): HalfEdge {
+  addHalfEdge(tail: Vertex, head: Vertex) {
     const key = HalfEdge.getKey(tail, head);
     const existingHalfEdge = this.halfEdges.get(key);
     if (existingHalfEdge) return existingHalfEdge;
@@ -71,7 +92,7 @@ class Dcel {
    * Gets all Faces of the DCEL.
    * @returns An array of {@link Face}s.
    */
-  getFaces(): Face[] {
+  getFaces() {
     return this.faces;
   }
 
@@ -79,7 +100,7 @@ class Dcel {
    * Returns only the bounded Faces of the DCEL (the unbounded outer Face is not returned).
    * @returns An array of {@link Face}s.
    */
-  getBoundedFaces(): Face[] {
+  getBoundedFaces(){
     return this.faces.filter((f) => !f.isUnbounded);
   }
 
@@ -87,7 +108,7 @@ class Dcel {
    * Returns the unbounded Face of the DCEL.
    * @returns The unbounded {@link Face}.
    */
-  getUnboundedFace(): Face | undefined {
+  getUnboundedFace() {
     return this.faces.find((f) => f.isUnbounded);
   }
 
@@ -98,7 +119,7 @@ class Dcel {
    * @param significantTail If true, for a pair of {@link HalfEdge}s which do have a significant {@link Vertex}, the one where the significant {@link Vertex} is the tail will be returned, default = false
    * @returns A (sub)set of {@link HalfEdge}s.
    */
-  getHalfEdges(simple = false): HalfEdge[] {
+  getHalfEdges(simple = false) {
     const halfEdges = Array.from(this.halfEdges.values());
     return simple ? this.getSimpleEdges(halfEdges) : halfEdges;
   }
@@ -114,11 +135,7 @@ class Dcel {
     return simpleEdges;
   }
 
-  getVertices(significant?: boolean) {
-    if (significant)
-      return Array.from(this.vertices.values()).filter(
-        (v) => v.significant === significant,
-      );
+  getVertices() {
     return Array.from(this.vertices.values());
   }
 
@@ -201,7 +218,7 @@ class Dcel {
    */
   static fromGeoJSON(
     geoJSON: geojson.FeatureCollection<geojson.Polygon | geojson.MultiPolygon>,
-  ): Dcel {
+  ) {
     if (!validateGeoJSON(geoJSON)) throw new Error("invalid input");
     const geometry = geoJsonToGeometry(geoJSON);
     return this.fromSubdivision(geometry);
@@ -213,7 +230,7 @@ class Dcel {
    * @param The {@link subdivision} to be converted to a {@link Dcel}.
    * @returns A {@link Dcel}.
    */
-  static fromSubdivision(subdivision: Subdivision): Dcel {
+  static fromSubdivision(subdivision: Subdivision) {
     const dcel = new Dcel();
 
     dcel.featureProperties = subdivision.multiPolygons.map((d) => d.properties);

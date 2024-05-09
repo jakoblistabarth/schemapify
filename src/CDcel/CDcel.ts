@@ -1,6 +1,15 @@
+import CHalfEdge from "@/src/CDcel/CHalfEdge";
+import CVertex from "@/src/CDcel/CVertex";
 import Dcel from "@/src/Dcel/Dcel";
+import Face from "@/src/Dcel/Face";
+import HalfEdge from "@/src/Dcel/HalfEdge";
 import Contraction from "@/src/c-oriented-schematization/Contraction";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
+import Sector from "@/src/c-oriented-schematization/Sector";
+import Staircase from "@/src/c-oriented-schematization/Staircase";
+import { CStyle } from "@/src/c-oriented-schematization/schematization.style";
+import Subdivision from "@/src/geometry/Subdivision";
+import { createGeoJSON } from "@/src/utilities";
 import type {
   Feature,
   FeatureCollection,
@@ -10,23 +19,25 @@ import type {
   Point,
   Polygon,
 } from "geojson";
-import Face from "@/src/Dcel/Face";
-import HalfEdge from "@/src/Dcel/HalfEdge";
-import { createGeoJSON } from "@/src/utilities";
-import { CStyle } from "@/src/c-oriented-schematization/schematization.style";
-import Staircase from "@/src/c-oriented-schematization/Staircase";
-import Sector from "@/src/c-oriented-schematization/Sector";
-import CVertex from "@/src/Dcel/Vertex";
-import CHalfEdge from "@/src/CDcel/CHalfEdge";
 
-class CDcel extends Dcel {
-  vertices: Map<string, CVertex>;
-  halfEdges: Map<string, CHalfEdge>;
-
+class CDcel extends Dcel<CHalfEdge, CVertex> {
   constructor() {
     super();
     this.vertices = new Map();
     this.halfEdges = new Map();
+  }
+
+  /**
+   * Gets all vertices within a DCEL.
+   * @param significant A boolean value to filter significant vertices.
+   * @returns An array of {@link Vertex}s.
+   */
+  getVertices(significant?: boolean) {
+    if (significant)
+      return Array.from(this.vertices.values()).filter(
+        (v) => v.significant === significant,
+      );
+    return Array.from(this.vertices.values());
   }
 
   /**
@@ -42,6 +53,24 @@ class CDcel extends Dcel {
       if (p) acc.push(p);
       return acc;
     }, []);
+  }
+
+  // create a static method fromSubdivision
+  // it should reuse the method fromSubdivision from Dcel base class but it should return a CDcel
+  static fromSubdivision(subdivision: Subdivision): CDcel {
+    const dcel = Dcel.fromSubdivision(subdivision);
+    const cdcel = new CDcel();
+    cdcel.vertices = dcel.vertices;
+    cdcel.faces = dcel.faces;
+
+    // Convert HalfEdges to CHalfEdges
+    cdcel.halfEdges = new Map(
+      Array.from(dcel.halfEdges.entries()).map(([key, halfEdge]) => [
+        key,
+        new CHalfEdge(halfEdge.tail, cdcel),
+      ]),
+    );
+    return cdcel;
   }
 
   toGeoJSON(): FeatureCollection<MultiPolygon> {
@@ -143,7 +172,7 @@ class CDcel extends Dcel {
   }
 
   staircasesToGeoJSON(cStyle: CStyle): FeatureCollection<Polygon> {
-    const staircaseFeatures = this.getHalfEdges(undefined, true).map(
+    const staircaseFeatures = this.getHalfEdges(true).map(
       (edge): Feature<Polygon> => {
         const staircase: Staircase = new Staircase(edge, cStyle);
         const coordinates: number[][] =
@@ -165,7 +194,7 @@ class CDcel extends Dcel {
   }
 
   edgesToGeoJSON(sectors: Sector[]): FeatureCollection<LineString> {
-    const edgeFeatures = this.getHalfEdges(undefined, true).map(
+    const edgeFeatures = this.getHalfEdges(true).map(
       (e): Feature<LineString> => {
         const a = e.tail;
         const b = e.twin?.tail;

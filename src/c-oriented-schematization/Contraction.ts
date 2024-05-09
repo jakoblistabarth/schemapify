@@ -1,4 +1,4 @@
-import HalfEdge, { InflectionType } from "../Dcel/HalfEdge";
+import HalfEdge from "../Dcel/HalfEdge";
 import Point from "../geometry/Point";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
@@ -7,6 +7,7 @@ import Vector2D from "../geometry/Vector2D";
 import Configuration, { OuterEdge } from "./Configuration";
 import Ring from "../geometry/Ring";
 import { ContractionType } from "./ContractionType";
+import CHalfEdge, { InflectionType } from "../CDcel/CHalfEdge";
 
 class Contraction {
   type: ContractionType;
@@ -50,7 +51,7 @@ class Contraction {
     return this.type !== other.type;
   }
 
-  getOverlappingEdges(other: Contraction): HalfEdge[] {
+  getOverlappingEdges(other: Contraction): CHalfEdge[] {
     return this.configuration
       .getX()
       .filter((edge) => other.configuration.getX().includes(edge));
@@ -202,7 +203,7 @@ class Contraction {
    * @param edge The {@link HalfEdge}
    * @returns A boolean, indicating whether or not the {@link Contraction} is blocked by the specified {@link HalfEdge}.
    */
-  isBlockedBy(edge: HalfEdge): boolean | undefined {
+  isBlockedBy(edge: CHalfEdge): boolean | undefined {
     const x = this.configuration.getX();
     const x_ = this.configuration.innerEdge.twin?.configuration?.getX();
     if (x_) x.push(...x_);
@@ -256,7 +257,7 @@ class Contraction {
    * Discards the contribution that the edges of X1 and X2 made to the blocking numbers, as a preliminary step for an edge-move.
    * @param x1x2 An array of {@link Halfedge}s involved in the edge-move.
    */
-  decrementBlockingNumber(x1x2: HalfEdge[]) {
+  decrementBlockingNumber(x1x2: CHalfEdge[]) {
     if (this.blockingNumber === 0) return; // skip check for interference when no blocking point exists
     const decrement = x1x2.reduce((acc: number, edge) => {
       if (this.isBlockedBy(edge)) ++acc;
@@ -269,7 +270,7 @@ class Contraction {
    * Adds the contribution to the blocking numbers for the edges that changed during the contraction (i.e., the remaining edges of X1 and X2) edge-move.
    * @param x1x2 An array of {@link HalfEdges} that changed during the contraction.
    */
-  incrementBlockingNumber(x1x2: HalfEdge[]) {
+  incrementBlockingNumber(x1x2: CHalfEdge[]) {
     const increment = x1x2.reduce((acc: number, edge) => {
       // console.log("---->", this.configuration.innerEdge.toString());
 
