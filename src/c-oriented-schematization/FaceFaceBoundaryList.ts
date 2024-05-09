@@ -26,7 +26,7 @@ class FaceFaceBoundaryList {
   create(dcel: Dcel) {
     const boundaries: Map<string, FaceFaceBoundary> = new Map();
 
-    dcel.getHalfEdges(undefined, true).forEach((edge) => {
+    dcel.getHalfEdges(true).forEach((edge) => {
       if (!edge.face || !edge.twin?.face) return;
       const faces = [edge.face, edge.twin?.face] as [Face, Face];
       const key = FaceFaceBoundaryList.getKey(...faces);

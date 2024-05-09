@@ -1,7 +1,7 @@
-import Contraction from "./Contraction";
-import Configuration from "./Configuration";
-import HalfEdge from "../Dcel/HalfEdge";
+import { CHalfEdge } from "../CDcel";
 import Point from "../geometry/Point";
+import Configuration from "./Configuration";
+import Contraction from "./Contraction";
 import { ContractionType } from "./ContractionType";
 
 /**
@@ -19,9 +19,9 @@ class ConfigurationPair {
 
   /**
    * Get all edges of the configurations involved in the edge move (contraction and compensation).
-   * @returns An array of {@link HalfEdge}s.
+   * @returns An array of {@link CHalfEdge}s.
    */
-  getX1X2(): HalfEdge[] {
+  getX1X2(): CHalfEdge[] {
     const x1x2 = this.contraction.configuration.getX();
     if (this.compensation) x1x2.push(...this.compensation.configuration.getX());
     return x1x2;
@@ -116,7 +116,7 @@ class ConfigurationPair {
     // console.log(Array.from(dcel.vertices.keys()));
 
     const remainingEdges = movedPositions.reduce(
-      (acc: HalfEdge[], pos: Point) => {
+      (acc: CHalfEdge[], pos: Point) => {
         const key = `${pos.x}/${pos.y}`;
         const vertex = dcel.vertices.get(key);
         if (!vertex) return acc;
@@ -220,7 +220,7 @@ class ConfigurationPair {
    * @param involvedEdges An array of {@link HalfEdges} which are left from the {@link ConfigurationPair}.
    * @returns void, if the {@link Dcel}'s links are not complete.
    */
-  updateConfigurations(involvedEdges: HalfEdge[]) {
+  updateConfigurations(involvedEdges: CHalfEdge[]) {
     involvedEdges.forEach((edge) => {
       if (edge.getEndpoints().every((vertex) => vertex.edges.length <= 3))
         edge.configuration = new Configuration(edge);

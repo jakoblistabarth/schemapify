@@ -3,12 +3,12 @@ import path from "path";
 import Point from "@/src/geometry/Point";
 import Configuration from "@/src/c-oriented-schematization/Configuration";
 import Contraction from "@/src/c-oriented-schematization/Contraction";
-import Dcel from "@/src/Dcel/Dcel";
+import CDcel from "@/src/CDcel";
 import { configurationCases, createConfigurationSetup } from "./test-setup";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
 
 describe("isConflicting() returns", function () {
-  let dcel: Dcel;
+  let dcel: CDcel;
   beforeEach(function () {
     const json = JSON.parse(
       fs.readFileSync(
@@ -16,7 +16,7 @@ describe("isConflicting() returns", function () {
         "utf8",
       ),
     );
-    dcel = Dcel.fromGeoJSON(json);
+    dcel = CDcel.fromGeoJSON(json);
   });
 
   it("false for 2 non-conflicting contractions.", function () {

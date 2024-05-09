@@ -1,5 +1,5 @@
-import Dcel from "@/src/Dcel/Dcel";
 import { OrientationClasses } from "@/src/CDcel/CHalfEdge";
+import Dcel from "@/src/Dcel/Dcel";
 import Schematization, {
   Callback,
   Callbacks,
@@ -8,12 +8,12 @@ import SnapshotList from "@/src/Snapshot/SnapshotList";
 import MultiPolygon from "@/src/geometry/MultiPolygon";
 import Point from "@/src/geometry/Point";
 import Polygon from "@/src/geometry/Polygon";
+import CDcel from "../CDcel";
 import Configuration from "./Configuration";
 import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
 import Staircase from "./Staircase";
 import type { CStyle } from "./schematization.style";
 import { style as defaultStyle } from "./schematization.style";
-import CDcel from "../CDcel";
 
 export enum LABEL {
   // TODO: is a default label needed?
@@ -60,7 +60,7 @@ class CSchematization implements Schematization {
       v.isSignificant(this.style.c.getSectors());
     });
 
-    input.getHalfEdges(undefined, true).forEach((edge) => {
+    input.getHalfEdges(true).forEach((edge) => {
       const [tail, head] = edge.getEndpoints();
       if (tail.significant && head.significant) {
         const newPoint = edge.subdivide()?.getHead();
@@ -96,7 +96,7 @@ class CSchematization implements Schematization {
 
   addStaircases(input: Dcel) {
     // create staircase for every pair of edges
-    input.getHalfEdges(undefined, true).forEach((edge) => {
+    input.getHalfEdges(true).forEach((edge) => {
       if (edge.class === OrientationClasses.AB) return;
       if (
         edge.getSignificantVertex() &&

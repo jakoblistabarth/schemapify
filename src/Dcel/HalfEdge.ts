@@ -4,26 +4,36 @@ import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
 import Point from "../geometry/Point";
 import Vector2D from "../geometry/Vector2D";
-import Dcel from "./Dcel";
+import Dcel, { GenericDcel } from "./Dcel";
 import Face from "./Face";
-import Vertex from "./Vertex";
+import Vertex, { TypeVertex } from "./Vertex";
 
-class HalfEdge {
+export interface TypeHalfEdge {
+  uuid: string;
+  tail: TypeVertex;
+  dcel: GenericDcel<TypeHalfEdge, TypeVertex>;
+  twin?: TypeHalfEdge;
+  face?: Face;
+  prev?: TypeHalfEdge;
+  next?: TypeHalfEdge;
+}
+
+class HalfEdge implements TypeHalfEdge {
   uuid: string;
   tail: Vertex;
-  dcel: Dcel;
+  dcel: Dcel<HalfEdge, Vertex>;
   twin?: HalfEdge;
   face?: Face;
   prev?: HalfEdge;
   next?: HalfEdge;
 
-  constructor(tail: Vertex, dcel: Dcel) {
+  constructor(tail: Vertex, dcel: Dcel<HalfEdge, Vertex>) {
     this.uuid = uuid();
     this.tail = tail;
     this.dcel = dcel;
   }
 
-  static getKey(tail: Vertex, head: Vertex): string {
+  static getKey(tail: Vertex, head: Vertex) {
     return `${tail.getUuid(10)}/${head.getUuid(10)}`;
   }
 
@@ -59,11 +69,11 @@ class HalfEdge {
    * or backwards (clockwise). Default: true.
    * @returns An array of {@link HalfEdge}s.
    */
-  getCycle(forwards: boolean = true): HalfEdge[] {
+  getCycle(forwards: boolean = true) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let currentEdge: HalfEdge = this;
     const initialEdge: HalfEdge = currentEdge;
-    const halfEdges: HalfEdge[] = [];
+    const halfEdges: TypeHalfEdge[] = [];
 
     do {
       halfEdges.push(currentEdge);
@@ -80,13 +90,13 @@ class HalfEdge {
    * @param other {@link HalfEdge} to which the distance in steps is measured.
    * @returns An integer, indicating the minimum step distance to the {@link Halfedge}.
    */
-  getMinimalCycleDistance(other: HalfEdge): number {
+  getMinimalCycleDistance(other: TypeHalfEdge) {
     const forwards = this.getCycle().indexOf(other);
     const backwards = this.getCycle(false).indexOf(other);
     return Math.min(forwards, backwards);
   }
 
-  getVector(): Vector2D | undefined {
+  getVector() {
     const [tail, head] = this.getEndpoints();
     if (tail && head) return new Vector2D(head.x - tail.x, head.y - tail.y);
   }
@@ -95,7 +105,7 @@ class HalfEdge {
    * Returns an infinite Line going through the HalfEdge.
    * @returns A Line which includes the {@link HalfEdge}.
    */
-  toLine(): Line | undefined {
+  toLine() {
     const angle = this.getAngle();
     if (typeof angle !== "number") return;
     return new Line(this.tail, angle);
@@ -105,7 +115,7 @@ class HalfEdge {
    * Gets the angle of an HalfEdge in respect to the unit circle.
    * @returns The angle in radians.
    */
-  getAngle(): number | undefined {
+  getAngle() {
     const vector = this.getVector();
     if (!vector) return;
     const angle = Math.atan2(vector.dy, vector.dx);
@@ -116,7 +126,7 @@ class HalfEdge {
    * Gets the length of the Halfedge.
    * @returns The Length.
    */
-  getLength(): number | undefined {
+  getLength() {
     const head = this.getHead();
     if (head) return this.tail.distanceToVertex(head);
   }
@@ -125,7 +135,7 @@ class HalfEdge {
    * Gets the midpoint of the HalfEdge.
    * @returns A {@link Point}, indicating the midpoint of the {@link HalfEdge}.
    */
-  getMidpoint(): Point | undefined {
+  getMidpoint() {
     const head = this.getHead();
     if (!head) return;
     const [x1, y1] = this.tail.xy();
@@ -140,7 +150,7 @@ class HalfEdge {
   /**
    * Remove links of the halfEdge within the DCEL linkages.
    */
-  remove(): void {
+  remove() {
     this.tail.removeIncidentEdge(this);
     if (this.face?.outerRing) this.face.outerRing.removeInnerEdge(this);
     this.dcel?.removeHalfEdge(this);
@@ -154,7 +164,7 @@ class HalfEdge {
    */
   subdivide(
     newPoint: Point | undefined = this.getMidpoint(),
-  ): HalfEdge | undefined {
+  ): TypeHalfEdge | undefined {
     if (!newPoint) return;
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const e = this;
@@ -241,6 +251,7 @@ class HalfEdge {
     return e_;
   }
 
+  //TODO: needs refactor: the configuration should only be updated in the CHalfEdge class.
   /**
    * Moves an Halfedge to the specified tail's and head's position.
    * @param newTail {@link} A {@link Point}, indicating the new position of the {@link HalfEdge}'s tail.
@@ -270,7 +281,7 @@ class HalfEdge {
    * @param line The infinite {@link Line} the {@link HalfEdge} is intersected with.
    * @returns
    */
-  intersectsLine(line: Line): Point | undefined {
+  intersectsLine(line: Line) {
     const head = this.getHead();
     const P = this.toLine()?.intersectsLine(line);
     //TODO: check if the fact that intersectsLine returns undefined for parallel line
@@ -283,7 +294,7 @@ class HalfEdge {
    * Subdivides the HalfEdge into smaller Edges, using a threshold.
    * @param threshold The value determining the maximum length of a subdivision of the original {@link HalfEdge}.
    */
-  subdivideToThreshold(threshold: number): void {
+  subdivideToThreshold(threshold: number) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const initialHalfEdge: HalfEdge = this;
     let currentHalfEdge: HalfEdge = initialHalfEdge;
@@ -309,7 +320,7 @@ class HalfEdge {
    * @param otherEdge The {@link HalfEdge} the distance to is calculated.
    * @returns A number, indicating the minimum distance.
    */
-  distanceToEdge(otherEdge: HalfEdge): number | undefined {
+  distanceToEdge(otherEdge: TypeHalfEdge) {
     const head = this.getHead();
     const otherHead = otherEdge.getHead();
     if (!head || !otherHead) return;
@@ -326,7 +337,7 @@ class HalfEdge {
    * Converts the HalfEdge into its equivalent LineSegment.
    * @returns A {@link LineSegment}.
    */
-  toLineSegment(): LineSegment | undefined {
+  toLineSegment() {
     const head = this.getHead();
     if (head) return new LineSegment(this.tail, head);
   }
