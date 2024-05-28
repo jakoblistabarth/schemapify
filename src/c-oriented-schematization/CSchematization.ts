@@ -1,5 +1,5 @@
 import Dcel from "@/src/Dcel/Dcel";
-import { OrientationClasses } from "@/src/CDcel/CHalfEdge";
+import { OrientationClasses } from "@/src/Dcel/HalfEdge";
 import Schematization, {
   Callback,
   Callbacks,
@@ -13,7 +13,6 @@ import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
 import Staircase from "./Staircase";
 import type { CStyle } from "./schematization.style";
 import { style as defaultStyle } from "./schematization.style";
-import CDcel from "../CDcel";
 
 export enum LABEL {
   // TODO: is a default label needed?
@@ -55,7 +54,7 @@ class CSchematization implements Schematization {
    * This also adds new Vertices on every HalfEdge which has two significant Vertices.
    * By doing so it is guaranteed that every HalfEdge has at most one significant Vertex.
    */
-  classifyVertices(input: CDcel): void {
+  classifyVertices(input: Dcel): void {
     input.getVertices().forEach((v) => {
       v.isSignificant(this.style.c.getSectors());
     });
