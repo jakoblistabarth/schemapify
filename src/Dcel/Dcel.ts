@@ -1,11 +1,20 @@
 import * as geojson from "geojson";
+import Contraction from "../c-oriented-schematization/Contraction";
+import { ContractionType } from "../c-oriented-schematization/ContractionType";
 import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
+import Sector from "../c-oriented-schematization/Sector";
+import Staircase from "../c-oriented-schematization/Staircase";
+import { CStyle } from "../c-oriented-schematization/schematization.style";
 import Point from "../geometry/Point";
 import Subdivision from "../geometry/Subdivision";
 import BoundingBox from "../helpers/BoundingBox";
-import { geoJsonToGeometry, validateGeoJSON } from "../utilities";
+import {
+  createGeoJSON,
+  geoJsonToGeometry,
+  validateGeoJSON,
+} from "../utilities";
 import Face from "./Face";
-import HalfEdge from "./HalfEdge";
+import HalfEdge, { OrientationClasses } from "./HalfEdge";
 import Vertex from "./Vertex";
 
 class Dcel {
@@ -98,9 +107,13 @@ class Dcel {
    * @param significantTail If true, for a pair of {@link HalfEdge}s which do have a significant {@link Vertex}, the one where the significant {@link Vertex} is the tail will be returned, default = false
    * @returns A (sub)set of {@link HalfEdge}s.
    */
-  getHalfEdges(simple = false): HalfEdge[] {
+  getHalfEdges(edgeClass?: OrientationClasses, simple = false): HalfEdge[] {
     const halfEdges = Array.from(this.halfEdges.values());
-    return simple ? this.getSimpleEdges(halfEdges) : halfEdges;
+    let edges = edgeClass
+      ? halfEdges.filter((e) => e.class === edgeClass)
+      : halfEdges;
+    edges = simple ? this.getSimpleEdges(edges) : edges;
+    return edges;
   }
 
   getSimpleEdges(edges: HalfEdge[]) {
@@ -208,9 +221,9 @@ class Dcel {
   }
 
   /**
-   * Creates a Doubly Connected Edge List (DCEL) data structure from a {@link Subdivision}.
+   * Creates a Doubly Connected Edge List (DCEL) data structure from a geoJSON.
    * @credits adapted from [cs.stackexchange.com](https://cs.stackexchange.com/questions/2450/how-do-i-construct-a-doubly-connected-edge-list-given-a-set-of-line-segments)
-   * @param The {@link subdivision} to be converted to a {@link Dcel}.
+   * @param multiPolygons an array of {@link MultiPolygon}s.
    * @returns A {@link Dcel}.
    */
   static fromSubdivision(subdivision: Subdivision): Dcel {
@@ -362,6 +375,21 @@ class Dcel {
     return this.getBbox().diameter;
   }
 
+  /**
+   * Gets all contractions within a DCEL.
+   * @returns An array of {@link Contraction}s.
+   */
+  getContractions(): Contraction[] {
+    return this.getHalfEdges().reduce((acc: Contraction[], edge) => {
+      if (!edge.configuration) return acc;
+      const n = edge.configuration[ContractionType.N];
+      const p = edge.configuration[ContractionType.P];
+      if (n) acc.push(n);
+      if (p) acc.push(p);
+      return acc;
+    }, []);
+  }
+
   toConsole(verbose: boolean = false): void {
     if (!verbose) console.log("DCEL " + this.name, this);
     else {
@@ -370,6 +398,7 @@ class Dcel {
       this.getFaces().forEach((f) => {
         console.log("→ new face", f.uuid);
         if (f.getEdges() != undefined) {
+          //QUESTION: chris???
           f.getEdges().forEach((e) => {
             console.log(e, `(${e.tail.x},${e.tail.y})`);
           });
@@ -382,6 +411,190 @@ class Dcel {
   toSubdivision() {
     //TODO: implement
     return new Subdivision([]);
+  }
+
+  toGeoJSON(): geojson.FeatureCollection<geojson.MultiPolygon> {
+    const outerRingsByFID = this.getBoundedFaces().reduce(
+      (groupedFaces: { [key: number]: Face[] }, face) => {
+        face.associatedFeatures.forEach((featureId, idx) => {
+          if (face.outerRing && idx === 0) return groupedFaces; // TODO: why do we need this 0? for cases like vienna within noe
+          if (groupedFaces[featureId]) groupedFaces[featureId].push(face);
+          else groupedFaces[featureId] = [face];
+        });
+        return groupedFaces;
+      },
+      {},
+    );
+
+    const features = Object.values(outerRingsByFID).map(
+      (feature: Face[], idx: number): geojson.Feature<geojson.MultiPolygon> => {
+        let featureProperties: geojson.GeoJsonProperties = {};
+        if (this.featureProperties)
+          featureProperties =
+            this.featureProperties[Object.keys(outerRingsByFID)[idx]];
+        const featureCoordinates: number[][][][] = [];
+        let ringIdx = 0;
+        feature.forEach((ring: Face) => {
+          const halfEdges = ring.getEdges();
+          const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
+          coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
+          featureCoordinates.push([coordinates]);
+          if (ring.innerEdges.length) {
+            const ringCoordinates: number[][][] = [];
+            ring.innerEdges.forEach((innerEdge: HalfEdge) => {
+              const halfEdges: HalfEdge[] = innerEdge.getCycle(false); // go backwards to go counterclockwise also for holes
+              const coordinates: number[][] = halfEdges.map((e) => [
+                e.tail.x,
+                e.tail.y,
+              ]);
+              coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
+              ringCoordinates.push(coordinates);
+            });
+            featureCoordinates[ringIdx].push(...ringCoordinates);
+          }
+          ringIdx++;
+        });
+        return {
+          type: "Feature",
+          geometry: {
+            type: "MultiPolygon",
+            coordinates: featureCoordinates,
+          },
+          properties: featureProperties,
+        };
+      },
+    );
+
+    return createGeoJSON(features);
+  }
+
+  verticesToGeoJSON(): geojson.FeatureCollection<geojson.Point> {
+    const vertexFeatures = Array.from(this.vertices.values()).map(
+      (v): geojson.Feature<geojson.Point> => {
+        return {
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [v.x, v.y],
+          },
+          properties: {
+            uuid: v.uuid,
+            significant: v.significant,
+            edges: v.edges,
+          },
+        };
+      },
+    );
+
+    return createGeoJSON(vertexFeatures);
+  }
+
+  facesToGeoJSON(): geojson.FeatureCollection<geojson.Polygon> {
+    const faceFeatures = this.getBoundedFaces().map(
+      (f): geojson.Feature<geojson.Polygon> => {
+        const halfEdges = f.getEdges();
+        const coordinates = halfEdges.map((e) => [e.tail.x, e.tail.y]);
+        coordinates.push([halfEdges[0].tail.x, halfEdges[0].tail.y]);
+        return {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [coordinates],
+          },
+          properties: {
+            uuid: f.uuid,
+            featureId: f.associatedFeatures,
+            ringType: f.outerRing ? "inner" : "outer",
+          },
+        };
+      },
+    );
+
+    return createGeoJSON(faceFeatures);
+  }
+
+  staircasesToGeoJSON(
+    cStyle: CStyle,
+  ): geojson.FeatureCollection<geojson.Polygon> {
+    const staircaseFeatures = this.getHalfEdges(undefined, true).map(
+      (edge): geojson.Feature<geojson.Polygon> => {
+        const staircase: Staircase = new Staircase(edge, cStyle);
+        const coordinates: number[][] =
+          staircase.region.exteriorRing.points.map((p) => [p.x, p.y]);
+        return {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [coordinates],
+          },
+          properties: {
+            edge: edge.uuid,
+            edgeClass: edge.class,
+          },
+        };
+      },
+    );
+    return createGeoJSON(staircaseFeatures);
+  }
+
+  edgesToGeoJSON(
+    sectors: Sector[],
+  ): geojson.FeatureCollection<geojson.LineString> {
+    const edgeFeatures = this.getHalfEdges(undefined, true).map(
+      (e): geojson.Feature<geojson.LineString> => {
+        const a = e.tail;
+        const b = e.twin?.tail;
+        const coordinates = // QUESTION: does it make sense to return an empty set of coordinates if head is not defined?
+          a && b
+            ? [
+                [a.x, a.y],
+                [b.x, b.y],
+              ]
+            : [];
+
+        return {
+          type: "Feature",
+          geometry: {
+            type: "LineString",
+            coordinates: coordinates,
+          },
+          properties: {
+            incidentFaceType: e.face?.outerRing ? "inner" : "outer",
+            length: e.getLength(),
+            sector: e.getAssociatedSector(sectors),
+            class: e.class,
+            assignedDirection: e.assignedDirection,
+            configuration: e.configuration,
+            twinClass: e.twin?.class,
+            // TODO: move this to mapoutput!
+            edge: `
+              <span class="material-icons">rotate_left</span>
+              ${e.getUuid(5)} (${e.tail.x}/${e.tail.y})
+              <span class="material-icons">arrow_forward</span>
+              (${e.twin?.tail.x}/${e.twin?.tail.y})
+              <span class="material-icons">highlight_alt</span> ${e.face?.getUuid(
+                5,
+              )}
+              ${e.class}
+              ${e.assignedDirection}
+              `,
+            twin: `
+              <span class="material-icons">rotate_right</span>
+              ${e.twin?.getUuid(5)} (${e.twin?.tail.x}/${e.twin?.tail.y})
+              <span class="material-icons">arrow_back</span>
+              (${e.tail.x}/${e.tail.y})
+              <span class="material-icons">highlight_alt</span> ${e.twin?.face?.getUuid(
+                5,
+              )}
+              ${e.twin?.class}
+              ${e.twin?.assignedDirection}
+              `,
+          },
+        };
+      },
+    );
+
+    return createGeoJSON(edgeFeatures);
   }
 }
 
