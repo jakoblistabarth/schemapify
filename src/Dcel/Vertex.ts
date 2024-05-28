@@ -1,38 +1,16 @@
 import { v4 as uuid } from "uuid";
 import Point from "../geometry/Point";
-import Dcel, { GenericDcel } from "./Dcel";
+import Dcel from "./Dcel";
 import Face from "./Face";
-import HalfEdge, { TypeHalfEdge } from "./HalfEdge";
+import HalfEdge from "./HalfEdge";
 
-export interface TypeVertex extends Point {
+class Vertex extends Point {
+  dcel: Dcel;
   uuid: string;
-  dcel: GenericDcel<TypeHalfEdge, TypeVertex>;
-  edges: TypeHalfEdge[];
-}
-
-abstract class GenericVertex<D extends GenericDcel<TypeHalfEdge, TypeVertex>>
-  extends Point
-  implements TypeVertex
-{
-  uuid: string;
-  dcel: D;
-  edges: TypeHalfEdge[];
-
-  constructor(x: number, y: number, dcel: D) {
-    super(x, y);
-    this.dcel = dcel;
-    this.uuid = uuid();
-    this.edges = [];
-  }
-}
-
-class Vertex extends GenericVertex<Dcel<HalfEdge, Vertex>> {
-  uuid: string;
-  dcel: Dcel<HalfEdge, Vertex>;
   edges: HalfEdge[];
 
-  constructor(x: number, y: number, dcel: Dcel<HalfEdge, Vertex>) {
-    super(x, y, dcel);
+  constructor(x: number, y: number, dcel: Dcel) {
+    super(x, y);
     this.dcel = dcel;
     this.uuid = uuid();
     this.edges = [];
@@ -44,7 +22,7 @@ class Vertex extends GenericVertex<Dcel<HalfEdge, Vertex>> {
    * @param y The y coordinate of the {@link Vertex}.
    * @returns A string, holding the {@link Vertex}'s key.
    */
-  static getKey(x: number, y: number) {
+  static getKey(x: number, y: number): string {
     return `${x}/${y}`;
   }
 
@@ -63,7 +41,7 @@ class Vertex extends GenericVertex<Dcel<HalfEdge, Vertex>> {
    * @param p The other {@link Vertex}.
    * @returns The distance.
    */
-  distanceToVertex(vertex: TypeVertex) {
+  distanceToVertex(vertex: Vertex): number {
     return this.distanceToPoint(vertex);
   }
 
@@ -73,7 +51,7 @@ class Vertex extends GenericVertex<Dcel<HalfEdge, Vertex>> {
    * @param edge An {@link HalfEdge} to which the distance is measured.
    * @returns The distance.
    */
-  distanceToEdge(edge: HalfEdge) {
+  distanceToEdge(edge: HalfEdge): number | undefined {
     const linesegment = edge.toLineSegment();
     if (!linesegment) return;
     return this.distanceToLineSegment(linesegment);
@@ -84,7 +62,7 @@ class Vertex extends GenericVertex<Dcel<HalfEdge, Vertex>> {
    * @param clockwise If set to true (default), the {@link HalfEdge}s a sorted clockwise, if set to false they are sorted counter-clockwise.
    * @returns An array containing the sorted {@link HalfEdge}s.
    */
-  sortEdges(clockwise: boolean = true) {
+  sortEdges(clockwise: boolean = true): HalfEdge[] {
     this.edges.sort((a, b) => {
       const [angleA, angleB] = [a.getAngle(), b.getAngle()];
       if (typeof angleA !== "number" || typeof angleB !== "number") return 0;
@@ -180,7 +158,7 @@ class Vertex extends GenericVertex<Dcel<HalfEdge, Vertex>> {
    * @param edge The {@link HalfEdge} to be removed.
    * @returns An Array containing the remaining incident {@link HalfEdge}s.
    */
-  removeIncidentEdge(edge: HalfEdge) {
+  removeIncidentEdge(edge: HalfEdge): HalfEdge[] {
     const idx = this.edges.indexOf(edge);
     if (idx > -1) {
       this.edges.splice(idx, 1);

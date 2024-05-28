@@ -1,7 +1,6 @@
 import ConvexHullGrahamScan from "graham_scan";
-import { CHalfEdge } from "../CDcel";
-import { OrientationClasses } from "../CDcel/CHalfEdge";
 import Dcel from "../Dcel/Dcel";
+import HalfEdge, { OrientationClasses } from "../Dcel/HalfEdge";
 import Vertex from "../Dcel/Vertex";
 import Line from "../geometry/Line";
 import Point from "../geometry/Point";
@@ -11,8 +10,8 @@ import Sector from "./Sector";
 import { CStyle } from "./schematization.style";
 
 class Staircase {
-  /** The {@link CHalfEdge} the staircase belongs to. */
-  edge: CHalfEdge;
+  /** The {@link HalfEdge} the staircase belongs to. */
+  edge: HalfEdge;
   /** A {@link Polygon} encompassing the staircase. */
   region: Polygon;
   /** Upper bound on the maximal distance between the staircase of e and e itself. */
@@ -23,11 +22,11 @@ class Staircase {
   _de?: number;
   /** The number of steps the staircase the must use.  */
   se?: number;
-  /** A list of {@link CHalfEdge}s whose staircase regions interfer with this staircase region.  */
-  interferesWith: CHalfEdge[];
+  /** A list of {@link HalfEdge}s whose staircase regions interfer with this staircase region.  */
+  interferesWith: HalfEdge[];
   #cStyle: CStyle;
 
-  constructor(edge: CHalfEdge, cStyle: CStyle) {
+  constructor(edge: HalfEdge, cStyle: CStyle) {
     this.edge = edge;
     this.#cStyle = cStyle;
     this.deltaE = this.getDeltaE();

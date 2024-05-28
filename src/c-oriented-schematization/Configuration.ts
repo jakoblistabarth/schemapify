@@ -1,4 +1,4 @@
-import { CHalfEdge } from "../CDcel";
+import HalfEdge from "../Dcel/HalfEdge";
 import Vertex from "../Dcel/Vertex";
 import Line from "../geometry/Line";
 import { crawlArray } from "../utilities";
@@ -17,17 +17,17 @@ export enum Junction {
 }
 
 class Configuration {
-  innerEdge: CHalfEdge;
+  innerEdge: HalfEdge;
   [ContractionType.N]?: Contraction;
   [ContractionType.P]?: Contraction;
 
-  constructor(edge: CHalfEdge) {
+  constructor(edge: HalfEdge) {
     this.innerEdge = edge;
     this[ContractionType.N] = Contraction.initialize(this, ContractionType.N);
     this[ContractionType.P] = Contraction.initialize(this, ContractionType.P);
   }
 
-  getOuterEdge(position: OuterEdge): CHalfEdge | undefined {
+  getOuterEdge(position: OuterEdge): HalfEdge | undefined {
     return position === OuterEdge.PREV
       ? this.innerEdge.prev
       : this.innerEdge.next;
@@ -35,9 +35,9 @@ class Configuration {
 
   /**
    * Gets all 3 edges forming the configuration.
-   * @returns An array of {@link CHalfEdge}s.
+   * @returns An array of {@link HalfEdge}s.
    */
-  getX(): CHalfEdge[] {
+  getX(): HalfEdge[] {
     const [prev, next] = [
       this.getOuterEdge(OuterEdge.PREV),
       this.getOuterEdge(OuterEdge.NEXT),
@@ -48,9 +48,9 @@ class Configuration {
   /**
    * Gets all edges of the polygon's boundary to which the configuration belongs, unless the 3 edges forming the configuration.
    * Kind of the inverse to getX().
-   * @returns An array of {@link CHalfEdge}s.
+   * @returns An array of {@link HalfEdge}s.
    */
-  getX_(): CHalfEdge[] {
+  getX_(): HalfEdge[] {
     const x = this.getX();
     return x
       ? this.innerEdge.getCycle().filter((edge) => !x.includes(edge))

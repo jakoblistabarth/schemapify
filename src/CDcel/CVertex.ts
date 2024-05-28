@@ -1,19 +1,17 @@
-import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
-import C from "@/src/c-oriented-schematization/C";
+import Dcel from "@/src/Dcel/Dcel";
 import Sector from "@/src/c-oriented-schematization/Sector";
-import CDcel from "./CDcel";
+import HalfEdge from "@/src/Dcel/HalfEdge";
+import C from "@/src/c-oriented-schematization/C";
 import CHalfEdge from "./CHalfEdge";
 
 class CVertex extends Vertex {
   significant?: boolean;
   edges: CHalfEdge[];
-  dcel: CDcel;
 
-  constructor(x: number, y: number, dcel: CDcel) {
+  constructor(x: number, y: number, dcel: Dcel) {
     super(x, y, dcel);
     this.edges = [];
-    this.dcel = dcel;
   }
 
   /**
@@ -25,7 +23,7 @@ class CVertex extends Vertex {
   }
 
   /**
-   * Determines the significance of the Vertex.
+   * Determines the significance of the Vertex..
    * @returns A Boolean indicating whether or not the {@link Vertex} is significant.
    */
   isSignificant(sectors: Sector[]): boolean {
