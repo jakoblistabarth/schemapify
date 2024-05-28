@@ -12,7 +12,7 @@ export type Callbacks = { [key in LogLevel]?: Callback };
 
 /**
  * Abstract class for a schematization process.
- * It takes a {@link Dcel} as input and returns a schematized {@link Dcel} as output.
+ * A schematization process is a process that takes a {@link Dcel} as input and returns a schematized {@link Dcel} as output.
  */
 abstract class Schematization {
   // TODO: Make these properties private, again?

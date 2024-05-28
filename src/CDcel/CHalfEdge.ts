@@ -1,4 +1,3 @@
-import CDcel, { CVertex } from "@/src/CDcel/";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
 import C from "@/src/c-oriented-schematization/C";
@@ -6,6 +5,7 @@ import Configuration from "@/src/c-oriented-schematization/Configuration";
 import Sector from "@/src/c-oriented-schematization/Sector";
 import Staircase from "@/src/c-oriented-schematization/Staircase";
 import { getUnitVector } from "@/src/utilities";
+import CDcel, { CVertex } from "@/src/CDcel/";
 
 export enum OrientationClasses {
   AB = "alignedBasic",
@@ -23,7 +23,6 @@ export enum InflectionType {
 
 class CHalfEdge extends HalfEdge {
   tail: CVertex;
-  dcel: CDcel;
   twin?: CHalfEdge;
   prev?: CHalfEdge;
   next?: CHalfEdge;
@@ -36,7 +35,6 @@ class CHalfEdge extends HalfEdge {
   constructor(tail: CVertex, dcel: CDcel) {
     super(tail, dcel);
     this.tail = tail;
-    this.dcel = dcel;
   }
 
   /**
