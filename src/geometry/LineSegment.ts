@@ -15,7 +15,7 @@ class LineSegment {
     this.endPoint2 = endPoint2;
   }
 
-  get length(): number {
+  get length() {
     return this.endPoint1.distanceToPoint(this.endPoint2);
   }
 
@@ -29,7 +29,7 @@ class LineSegment {
   intersectsLineSegment(
     lineSegment: LineSegment,
     considerCollinearOverlap: boolean = false,
-  ): Point | undefined {
+  ) {
     const p1 = new Vector2D(this.endPoint1.x, this.endPoint1.y);
     const p2 = new Vector2D(this.endPoint2.x, this.endPoint2.y);
     const q1 = new Vector2D(lineSegment.endPoint1.x, lineSegment.endPoint1.y);
@@ -80,7 +80,7 @@ class LineSegment {
    * @param polygon The {@link Polygon} to check for intersections.
    * @returns
    */
-  intersectsPolygon(polygon: Polygon): Point[] {
+  intersectsPolygon(polygon: Polygon) {
     const boundary = polygon.exteriorLineSegments;
     return boundary.reduce((acc: Point[], boundaryEdge) => {
       const intersection = this.intersectsLineSegment(boundaryEdge);

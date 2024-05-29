@@ -13,15 +13,15 @@ class Sector {
     this.upper = upper;
   }
 
-  getBounds(): number[] {
+  getBounds() {
     return [this.lower, this.upper];
   }
 
-  getIdx(): number {
+  getIdx() {
     return this.idx;
   }
 
-  getNeighbors(): Sector[] {
+  getNeighbors() {
     const sectors = this.c.getSectors();
     const idx = this.getIdx();
     const prev = idx == 0 ? sectors.length - 1 : idx - 1;
@@ -29,7 +29,7 @@ class Sector {
     return [sectors[prev], sectors[next]];
   }
 
-  encloses(angle: number): boolean {
+  encloses(angle: number) {
     const [lowerBound, upperBound] = this.getBounds();
     return angle >= lowerBound && angle <= upperBound;
   }

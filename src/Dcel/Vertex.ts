@@ -25,7 +25,7 @@ class Vertex extends Point {
    * @param y The y coordinate of the {@link Vertex}.
    * @returns A string, holding the {@link Vertex}'s key.
    */
-  static getKey(x: number, y: number): string {
+  static getKey(x: number, y: number) {
     return `${x}/${y}`;
   }
 
@@ -44,7 +44,7 @@ class Vertex extends Point {
    * @param p The other {@link Vertex}.
    * @returns The distance.
    */
-  distanceToVertex(vertex: Vertex): number {
+  distanceToVertex(vertex: Vertex) {
     return this.distanceToPoint(vertex);
   }
 
@@ -54,7 +54,7 @@ class Vertex extends Point {
    * @param edge An {@link HalfEdge} to which the distance is measured.
    * @returns The distance.
    */
-  distanceToEdge(edge: HalfEdge): number | undefined {
+  distanceToEdge(edge: HalfEdge) {
     const linesegment = edge.toLineSegment();
     if (!linesegment) return;
     return this.distanceToLineSegment(linesegment);
@@ -65,7 +65,7 @@ class Vertex extends Point {
    * @param clockwise If set to true (default), the {@link HalfEdge}s a sorted clockwise, if set to false they are sorted counter-clockwise.
    * @returns An array containing the sorted {@link HalfEdge}s.
    */
-  sortEdges(clockwise: boolean = true): HalfEdge[] {
+  sortEdges(clockwise: boolean = true) {
     this.edges.sort((a, b) => {
       const [angleA, angleB] = [a.getAngle(), b.getAngle()];
       if (typeof angleA !== "number" || typeof angleB !== "number") return 0;
@@ -81,7 +81,7 @@ class Vertex extends Point {
    * @param face The face to which the new, returned {@link HalfEdge} should be incident to.
    * @returns The new ("merged") {@link HalfEdge}.
    */
-  remove(face?: Face): HalfEdge | undefined {
+  remove(face?: Face) {
     if (!this.dcel) return;
     else if (this.edges.length > 2)
       throw new Error(
@@ -161,7 +161,7 @@ class Vertex extends Point {
    * @param edge The {@link HalfEdge} to be removed.
    * @returns An Array containing the remaining incident {@link HalfEdge}s.
    */
-  removeIncidentEdge(edge: HalfEdge): HalfEdge[] {
+  removeIncidentEdge(edge: HalfEdge) {
     const idx = this.edges.indexOf(edge);
     if (idx > -1) {
       this.edges.splice(idx, 1);
@@ -173,7 +173,7 @@ class Vertex extends Point {
    * Determines whether all incident Edges to the Vertex are aligned (to C).
    * @returns A Boolean indicating whether or not all {@link HalfEdge}s are aligned.
    */
-  allEdgesAligned(sectors: Sector[]): boolean {
+  allEdgesAligned(sectors: Sector[]) {
     return this.edges.every((edge) => edge.isAligned(sectors));
   }
 
@@ -181,7 +181,7 @@ class Vertex extends Point {
    * Determines the significance of the Vertex..
    * @returns A Boolean indicating whether or not the {@link Vertex} is significant.
    */
-  isSignificant(sectors: Sector[]): boolean {
+  isSignificant(sectors: Sector[]) {
     // TODO: move to another class? to not mix dcel and schematization?
 
     // classify as insignificant if all edges are already aligned
@@ -223,7 +223,7 @@ class Vertex extends Point {
    * @param sector A sector, against which the {@link HalfEdge}s are checked.
    * @returns An array, containing all {@link HalfEdge}s lying in the sector.
    */
-  getEdgesInSector(sector: Sector): HalfEdge[] {
+  getEdgesInSector(sector: Sector) {
     return this.edges.filter((edge) => {
       const angle = edge.getAngle();
       if (typeof angle === "number") return sector.encloses(angle);
@@ -234,7 +234,7 @@ class Vertex extends Point {
    * Assigns directions to all incident HalfEdges of the Vertex.
    * @returns An Array, holding the assigned directions starting with the direction of the {@link HalfEge} with the smallest angle on the unit circle.
    */
-  assignDirections(c: C): number[] | undefined {
+  assignDirections(c: C) {
     const edges = this.sortEdges(false);
     const sectors = c.getSectors();
 
@@ -275,7 +275,7 @@ class Vertex extends Point {
    * @param face A {@link Face} the angle is exterior to.
    * @returns An angle in radians.
    */
-  getExteriorAngle(face: Face): number | undefined {
+  getExteriorAngle(face: Face) {
     const interiorAngle = this.getInteriorAngle(face);
     if (interiorAngle) return Math.PI - interiorAngle;
   }
@@ -287,7 +287,7 @@ class Vertex extends Point {
    * @param face A {@link Face} the angle is interior to.
    * @returns An angle in radians.
    */
-  getInteriorAngle(face: Face): number | undefined {
+  getInteriorAngle(face: Face) {
     const outgoing = this.edges.find((edges) => edges.face === face);
     if (!outgoing?.prev) return;
     const incoming = outgoing.prev;
@@ -309,7 +309,7 @@ class Vertex extends Point {
    * @param y A number, indicating the new y position of the {@link Vertex}.
    * @returns The moved {@link Vertex}.
    */
-  moveTo(x: number, y: number): Vertex {
+  moveTo(x: number, y: number) {
     if (this.x === x && this.y === y) return this;
     this.dcel.vertices.set(Vertex.getKey(x, y), this);
     this.dcel.vertices.delete(Vertex.getKey(this.x, this.y));
@@ -322,7 +322,7 @@ class Vertex extends Point {
    * Converts a Vertex to a Point.
    * @returns A {@link Point}.
    */
-  toPoint(): Point {
+  toPoint() {
     return new Point(this.x, this.y);
   }
 }

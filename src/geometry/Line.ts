@@ -13,11 +13,11 @@ class Line {
     this.angle = angle;
   }
 
-  getPointOnLine(distance: number = 1): Point {
+  getPointOnLine(distance: number = 1) {
     return this.point.getNewPoint(distance, this.angle);
   }
 
-  getABC(): number[] {
+  getABC() {
     const [x2, y2] = this.getPointOnLine().xy();
     const A = y2 - this.point.y;
     const B = this.point.x - x2;
@@ -31,7 +31,7 @@ class Line {
    * @param line The other {@link Line} to intersect with.
    * @returns The {@link Point} of intersection, or nothing if {@link Line}s are parallel.
    */
-  intersectsLine(line: Line): Point | undefined {
+  intersectsLine(line: Line) {
     const [A1, B1, C1] = this.getABC();
     const [A2, B2, C2] = line.getABC();
     const det = A1 * B2 - A2 * B1;

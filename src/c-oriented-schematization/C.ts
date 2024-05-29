@@ -9,16 +9,16 @@ export default abstract class C {
   abstract getSectorAngle(): number;
   abstract getSectors(): Sector[];
 
-  getDirections(): number[] {
+  getDirections() {
     const n = this.angles.length;
     return Array.from(Array(n).keys());
   }
 
-  getSector(idx: number): Sector | undefined {
+  getSector(idx: number) {
     return this.getSectors().find((sector) => sector.idx == idx);
   }
 
-  getValidDirections(numberOfEdges: number): number[][] {
+  getValidDirections(numberOfEdges: number) {
     const calculateCombinations = function (
       combination: number[],
       directions: number[],

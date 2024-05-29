@@ -17,7 +17,7 @@ class Subdivision {
    * @param dcel A {@link Dcel} representing the subdivision.
    * @returns A {@link Subdivision}.
    */
-  static fromDcel(dcel: Dcel): Subdivision {
+  static fromDcel(dcel: Dcel) {
     return dcel.toSubdivision();
   }
 
@@ -26,7 +26,7 @@ class Subdivision {
    * @param coordinates A list of coordinates representing the subdivision.
    * @returns A {@link Subdivision}.
    */
-  static fromCoordinates(coordinates: [number, number][][][][]): Subdivision {
+  static fromCoordinates(coordinates: [number, number][][][][]) {
     const multiPolygons = coordinates.map((multiPolygon) =>
       MultiPolygon.fromCoordinates(multiPolygon),
     );
@@ -37,7 +37,7 @@ class Subdivision {
    * Transform the subdivision into a {@link Dcel}.
    * @returns {@link Dcel} representation of the subdivision.
    */
-  toDcel(): Dcel {
+  toDcel() {
     return Dcel.fromSubdivision(this);
   }
 }

@@ -17,7 +17,7 @@ class FaceFaceBoundary {
    * Gets the minimal configuration pair of a face-face-boundary. Using the 6 smallest positive and negative contractions, as described in Buchin et al. 2016.
    * @returns A tuple of two complementary, feasible contractions, posing  minimal configuration pair of a {@link FaceFaceBoundary}.
    */
-  getMinimalConfigurationPair(): ConfigurationPair | undefined {
+  getMinimalConfigurationPair() {
     const pContractions = this.edges
       .reduce((contractions: Contraction[], edge) => {
         const pContraction = edge.configuration?.[ContractionType.P];

@@ -39,18 +39,18 @@ class Contraction {
       : undefined;
   }
 
-  isFeasible(): boolean {
+  isFeasible() {
     if (!this.point) return false;
     return this.area === 0 || (this.area > 0 && this.blockingNumber === 0)
       ? true
       : false;
   }
 
-  isComplementary(other: Contraction): boolean {
+  isComplementary(other: Contraction) {
     return this.type !== other.type;
   }
 
-  getOverlappingEdges(other: Contraction): HalfEdge[] {
+  getOverlappingEdges(other: Contraction) {
     return this.configuration
       .getX()
       .filter((edge) => other.configuration.getX().includes(edge));
@@ -61,7 +61,7 @@ class Contraction {
    * @param complementary The complementary {@link Contraction} of the {@link ConfigurationPair}.
    * @returns A boolean, indicating whether or not the pair of contractions conflict.
    */
-  isConflicting(complementary: Contraction): boolean | undefined {
+  isConflicting(complementary: Contraction) {
     const overlappingEdges = this.getOverlappingEdges(complementary);
     const contractionX = this.configuration.getX();
     const complementaryX = complementary.configuration.getX();
@@ -85,10 +85,7 @@ class Contraction {
    * @param configuration The {@link Configuration} to be used for the edge move.
    * @returns A {@link Point}, posing a configuration's contraction point.
    */
-  static getPoint(
-    configuration: Configuration,
-    type: ContractionType,
-  ): Point | undefined {
+  static getPoint(configuration: Configuration, type: ContractionType) {
     type PointCandidate = {
       point: Point;
       dist: number;
@@ -144,7 +141,7 @@ class Contraction {
       : pointCandidates.filter((candidate) => candidate.dist <= 0).pop()?.point;
   }
 
-  getAreaPoints(): Point[] {
+  getAreaPoints() {
     const c = this.configuration;
     const prev = c.getOuterEdge(OuterEdge.PREV);
     const prevHead = prev?.getHead();
@@ -190,7 +187,7 @@ class Contraction {
     return areaPoints;
   }
 
-  getArea(): number {
+  getArea() {
     return this.areaPoints
       ? Polygon.fromCoordinates([this.areaPoints.map(({ x, y }) => [x, y])])
           .area
@@ -202,7 +199,7 @@ class Contraction {
    * @param edge The {@link HalfEdge}
    * @returns A boolean, indicating whether or not the {@link Contraction} is blocked by the specified {@link HalfEdge}.
    */
-  isBlockedBy(edge: HalfEdge): boolean | undefined {
+  isBlockedBy(edge: HalfEdge) {
     const x = this.configuration.getX();
     const x_ = this.configuration.innerEdge.twin?.configuration?.getX();
     if (x_) x.push(...x_);
@@ -239,7 +236,7 @@ class Contraction {
    * Initializes the blocking number of the Contraction.
    * @returns A number, indicating how many {@link HalfEdge}s block the {@link Contraction}.
    */
-  initializeBlockingNumber(): number {
+  initializeBlockingNumber() {
     let blockingNumber = 0;
     if (!this.point) return blockingNumber;
 
@@ -282,7 +279,7 @@ class Contraction {
     this.blockingNumber = this.blockingNumber + increment;
   }
 
-  getCompensationHeight(contractionArea: number): number | undefined {
+  getCompensationHeight(contractionArea: number) {
     const a = this.configuration.innerEdge;
     const aLength = a.getLength();
     if (!a.face || !aLength) return;

@@ -27,7 +27,7 @@ class Configuration {
     this[ContractionType.P] = Contraction.initialize(this, ContractionType.P);
   }
 
-  getOuterEdge(position: OuterEdge): HalfEdge | undefined {
+  getOuterEdge(position: OuterEdge) {
     return position === OuterEdge.PREV
       ? this.innerEdge.prev
       : this.innerEdge.next;
@@ -37,7 +37,7 @@ class Configuration {
    * Gets all 3 edges forming the configuration.
    * @returns An array of {@link HalfEdge}s.
    */
-  getX(): HalfEdge[] {
+  getX() {
     const [prev, next] = [
       this.getOuterEdge(OuterEdge.PREV),
       this.getOuterEdge(OuterEdge.NEXT),
@@ -50,7 +50,7 @@ class Configuration {
    * Kind of the inverse to getX().
    * @returns An array of {@link HalfEdge}s.
    */
-  getX_(): HalfEdge[] {
+  getX_() {
     const x = this.getX();
     return x
       ? this.innerEdge.getCycle().filter((edge) => !x.includes(edge))
@@ -62,7 +62,7 @@ class Configuration {
    * @param outerEdge The outer edge for which to get the track.
    * @returns A {@link Line} representing the track of the configuration.
    */
-  getTrack(outerEdge: OuterEdge): Line | undefined {
+  getTrack(outerEdge: OuterEdge) {
     const [prev, next] = [
       this.getOuterEdge(OuterEdge.PREV),
       this.getOuterEdge(OuterEdge.NEXT),
@@ -105,11 +105,11 @@ class Configuration {
    * Checks if the configuration has a junction.
    * @returns A boolean indicating if the configuration has a junction.
    */
-  hasJunction(): boolean {
+  hasJunction() {
     return this.innerEdge.getEndpoints().some((p) => p.edges.length > 2);
   }
 
-  getJunctionType(vertex: Vertex): Junction | undefined {
+  getJunctionType(vertex: Vertex) {
     if (!this.innerEdge.twin) return;
     let idx = vertex.edges.indexOf(this.innerEdge);
     idx = idx === -1 ? vertex.edges.indexOf(this.innerEdge.twin) : idx;

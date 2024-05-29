@@ -18,7 +18,7 @@ class CRegular extends C {
     this.angles = this.getAngles();
   }
 
-  private getAngles(): number[] {
+  private getAngles() {
     const angles = [];
     for (let index = 0; index < this.orientations * 2; index++) {
       const angle = this.beta + (index * Math.PI) / this.orientations;
@@ -27,7 +27,7 @@ class CRegular extends C {
     return angles;
   }
 
-  getSectorAngle(): number {
+  getSectorAngle() {
     return Math.PI / this.orientations;
   }
 

@@ -20,7 +20,7 @@ class Ring {
     return new Ring(points);
   }
 
-  get points(): Point[] {
+  get points() {
     return this.isClockwise ? [...this._points].reverse() : this._points;
   }
 
