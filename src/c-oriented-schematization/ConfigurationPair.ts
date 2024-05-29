@@ -27,6 +27,9 @@ class ConfigurationPair {
     return x1x2;
   }
 
+  /**
+   * Perform the edge move.
+   */
   doEdgeMove() {
     const contractionEdge = this.contraction.configuration.innerEdge;
     const contractionHead = contractionEdge.getHead();

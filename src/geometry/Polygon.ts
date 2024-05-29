@@ -46,14 +46,23 @@ class Polygon {
     }, 0);
   }
 
+  /**
+   * Get the polygon's exterior ring.
+   */
   get exteriorRing() {
     return this.rings[0];
   }
 
+  /**
+   * Get the polygon's interior rings (holes).
+   */
   get interiorRings() {
     return this.rings.slice(1);
   }
 
+  /**
+   * Get the polygon's exterior line segments.
+   */
   get exteriorLineSegments() {
     return this.exteriorRing.points.map(
       (p, idx) =>
@@ -65,7 +74,7 @@ class Polygon {
    * Checks for intersections with a given edge.
    * Currently only considers the exterior ring.
    * @param edge
-   * @returns
+   * @returns An array of {@link Point}s where the edge intersects the polygon.
    */
   getIntersections(edge: HalfEdge) {
     return this.exteriorLineSegments.reduce((acc: Point[], boundaryEdge) => {
@@ -78,6 +87,11 @@ class Polygon {
     }, []);
   }
 
+  /**
+   * Creates a polygon from an array of coordinates.
+   * @param coordinates The coordinates of the polygon.
+   * @returns A new Polygon instance.
+   */
   static fromCoordinates(coordinates: [number, number][][]) {
     const rings = coordinates.map(
       (ring) => new Ring(ring.map(([x, y]) => new Point(x, y))),

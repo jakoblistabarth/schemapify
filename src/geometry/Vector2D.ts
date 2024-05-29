@@ -9,6 +9,9 @@ class Vector2D {
     this.dy = dy;
   }
 
+  /**
+   * Get the vector's magnitude.
+   */
   getMagnitude() {
     return Math.sqrt(Math.pow(this.dx, 2) + Math.pow(this.dy, 2));
   }
@@ -24,38 +27,67 @@ class Vector2D {
       : new Vector2D(this.dy, -this.dx);
   }
 
+  /**
+   * Get the vector's inverse.
+   */
   getInvers() {
     return new Vector2D(-this.dx, -this.dy);
   }
 
+  /**
+   * Get the vector's unit vector.
+   */
   getUnitVector() {
     return this.times(1 / this.getMagnitude());
   }
 
+  /**
+   * Get the sum with the given vector.
+   */
   plus(vector: Vector2D) {
     return new Vector2D(this.dx + vector.dx, this.dy + vector.dy);
   }
 
+  /**
+   * Get the difference with the given vector.
+   */
   minus(vector: Vector2D) {
     return new Vector2D(this.dx - vector.dx, this.dy - vector.dy);
   }
 
+  /**
+   * Get the product with the given scalar.
+   */
   times(scalar: number) {
     return new Vector2D(this.dx * scalar, this.dy * scalar);
   }
 
+  /**
+   * Get the dot product with the given vector.
+   */
   dot(vector: Vector2D) {
     return this.dx * vector.dx + this.dy * vector.dy;
   }
 
+  /**
+   * Get the cross product with the given vector.
+   */
   cross(vector: Vector2D) {
     return this.dx * vector.dy - this.dy * vector.dx;
   }
 
+  /**
+   * Get the Point representation of the Vector.
+   * @returns The Vector as a {@link Point}.
+   */
   toPoint() {
     return new Point(this.dx, this.dy);
   }
 
+  /**
+   * Get the array representation of the Vector.
+   * @returns The Vector as an array of coordinates.
+   */
   toArray(): [number, number] {
     return [this.dx, this.dy];
   }

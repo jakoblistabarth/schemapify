@@ -46,6 +46,12 @@ class HalfEdge {
     this.dcel = dcel;
   }
 
+  /**
+   * Get the key of the HalfEdge.
+   * @param tail The tail of the HalfEdge.
+   * @param head The head of the HalfEdge.
+   * @returns A string, representing the HalfEdge's key.
+   */
   static getKey(tail: Vertex, head: Vertex): string {
     return `${tail.getUuid(10)}/${head.getUuid(10)}`;
   }
@@ -119,6 +125,10 @@ class HalfEdge {
     return Math.min(forwards, backwards);
   }
 
+  /**
+   * Gets the Vector representation of the HalfEdge.
+   * @returns A {@link Vector2D}, representing the {@link HalfEdge}'s direction.
+   */
   getVector() {
     const [tail, head] = this.getEndpoints();
     if (tail && head) return new Vector2D(head.x - tail.x, head.y - tail.y);
@@ -276,7 +286,6 @@ class HalfEdge {
    * Moves an Halfedge to the specified tail's and head's position.
    * @param newTail {@link} A {@link Point}, indicating the new position of the {@link HalfEdge}'s tail.
    * @param newHead A {@link Point}, indicating the new position of the {@link HalfEdge}'s head.
-   * @returns The moved {@link HalfEdge}.
    */
   move(newTail: Point, newHead: Point) {
     const head = this.getHead();
@@ -296,10 +305,10 @@ class HalfEdge {
   }
 
   /**
-   * Returns the intersection point of the HalfEdge and a line, if exists.
+   * Get the intersection point of the HalfEdge and a line, if exists.
    * @credits Part that determines whether or not the point is on the line segment, was adapted from this [stack overflow answer](https://stackoverflow.com/a/17590923).
    * @param line The infinite {@link Line} the {@link HalfEdge} is intersected with.
-   * @returns
+   * @returns A {@Point} representing the intersection.
    */
   intersectsLine(line: Line) {
     const head = this.getHead();
@@ -434,6 +443,11 @@ class HalfEdge {
     }
   }
 
+  /**
+   * Determines the deviation of the HalfEdge in respect to its associated sector.
+   * @param sector The {@link Sector} the deviation is calculated for.
+   * @returns The deviation in radians.
+   */
   getDeviation(sector: Sector) {
     const angle = this.getAngle();
     if (typeof angle !== "number") return;
@@ -514,6 +528,13 @@ class HalfEdge {
     if (this.twin) this.twin.class = classification;
   }
 
+  /**
+   * Get the lengths of the staircase steps.
+   * @param se The step size of the staircase.
+   * @param d1 The direction of the first step.
+   * @param sectors The sectors the HalfEdge is enclosed by.
+   * @returns An array of numbers, indicating the lengths of the steps.
+   */
   getStepLengths(se: number, d1: number, sectors: Sector[]) {
     //TODO: move getStepLengths() to staircase ??
     const associatedAngles = this.getAssociatedAngles(sectors);
@@ -568,7 +589,7 @@ class HalfEdge {
   }
 
   /**
-   * Converts the halfedge into a short string. For debbuging purposes.
+   * Converts the halfedge into a short string. For debugging purposes.
    * @returns A string representing the {@link Halfedge}'s endpoints.
    */
   toString() {

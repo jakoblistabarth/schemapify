@@ -65,10 +65,18 @@ class Face {
     return this.uuid.substring(0, length);
   }
 
+  /**
+   * Get the face's outer ring.
+   * @returns the face's outer ring
+   */
   getEdges(counterclockwise: boolean = true) {
     return this.edge ? this.edge.getCycle(counterclockwise) : [];
   }
 
+  /**
+   * Remove the face's inner edge.
+   * @returns the face's remaining inner edges
+   */
   removeInnerEdge(edge: HalfEdge) {
     const idx = this.innerEdges.indexOf(edge);
     if (idx > -1) {
@@ -77,6 +85,12 @@ class Face {
     return this.innerEdges;
   }
 
+  /**
+   * Replace an face's inner edge.
+   * @param old the {@link HalfEdge} to be replaced
+   * @param edge the new {@link HalfEdge}
+   * @returns the updated face's inner {@link HalfEdge}s
+   */
   replaceInnerEdge(old: HalfEdge, edge: HalfEdge) {
     const idx = this.innerEdges.indexOf(old);
     if (idx === -1) {
@@ -87,6 +101,12 @@ class Face {
     return this.innerEdges;
   }
 
+  /**
+   * Replace the face's outer ring edge.
+   * @param old the {@link HalfEdge} to be replaced
+   * @param edge the {@link HalfEdge} to replace the old {@link HalfEdge}
+   * @returns the updated outer ring {@link HalfEdge}
+   */
   replaceOuterRingEdge(old: HalfEdge, edge: HalfEdge) {
     if (!this.outerRing || this.outerRing.edge != old) {
       return;

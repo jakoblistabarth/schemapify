@@ -15,19 +15,33 @@ class Ring {
     this._points = points;
   }
 
+  /**
+   * Create a ring from an array of coordinates.
+   * @param coordinates An array of coordinates.
+   * @returns A new Ring.
+   */
   static fromCoordinates(coordinates: [number, number][]) {
     const points = coordinates.map(([x, y]) => new Point(x, y));
     return new Ring(points);
   }
 
+  /**
+   * Get the ring's points.
+   */
   get points() {
     return this.isClockwise ? [...this._points].reverse() : this._points;
   }
 
+  /**
+   * Get the ring's length.
+   */
   get length() {
     return this.points.length;
   }
 
+  /**
+   * Returns a boolean indicating whether the ring is clockwise.
+   */
   get isClockwise() {
     const sum = this._points.reduce((acc: number, point, i, points) => {
       const next = points[i + 1] ?? points[0];

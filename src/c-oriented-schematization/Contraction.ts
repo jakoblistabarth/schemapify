@@ -29,6 +29,12 @@ class Contraction {
     this.blockingNumber = this.initializeBlockingNumber();
   }
 
+  /**
+   * Initializes a Contraction.
+   * @param configuration The {@link Configuration} on which the contraction (particular edge move) is performed.
+   * @param contractionType The {@link ContractionType} of the to performed contraction (particular edge move).
+   * @returns A {@link Contraction} instance.
+   */
   static initialize(
     configuration: Configuration,
     contractionType: ContractionType,
@@ -39,6 +45,10 @@ class Contraction {
       : undefined;
   }
 
+  /**
+   * Determines whether or not the Contraction is feasible.
+   * @returns A boolean, indicating whether or not the Contraction is feasible.
+   */
   isFeasible() {
     if (!this.point) return false;
     return this.area === 0 || (this.area > 0 && this.blockingNumber === 0)
@@ -46,10 +56,20 @@ class Contraction {
       : false;
   }
 
+  /**
+   * Determines whether or not the Contraction is complementary to the specified Contraction.
+   * @param other The other {@link Contraction} to be compared.
+   * @returns A boolean, indicating whether or not the Contraction is complementary.
+   */
   isComplementary(other: Contraction) {
     return this.type !== other.type;
   }
 
+  /**
+   * Gets the overlapping edges of the Contraction and the specified complementary Contraction.
+   * @param other The complementary {@link Contraction} of the {@link ConfigurationPair}.
+   * @returns An array of {@link HalfEdge}s, representing the overlapping edges.
+   */
   getOverlappingEdges(other: Contraction) {
     return this.configuration
       .getX()
@@ -141,6 +161,10 @@ class Contraction {
       : pointCandidates.filter((candidate) => candidate.dist <= 0).pop()?.point;
   }
 
+  /**
+   * Gets the area points of the Contraction.
+   * @returns An array of {@link Point}s representing the area points of the Contraction.
+   */
   getAreaPoints() {
     const c = this.configuration;
     const prev = c.getOuterEdge(OuterEdge.PREV);
@@ -187,6 +211,10 @@ class Contraction {
     return areaPoints;
   }
 
+  /**
+   * Gets the area of the Contraction.
+   * @returns A number, indicating the area of the Contraction.
+   */
   getArea() {
     return this.areaPoints
       ? Polygon.fromCoordinates([this.areaPoints.map(({ x, y }) => [x, y])])
@@ -279,6 +307,11 @@ class Contraction {
     this.blockingNumber = this.blockingNumber + increment;
   }
 
+  /**
+   * Gets the compensation height of the Contraction.
+   * @param contractionArea The area of the contraction.
+   * @returns The height of the compensation.
+   */
   getCompensationHeight(contractionArea: number) {
     const a = this.configuration.innerEdge;
     const aLength = a.getLength();
