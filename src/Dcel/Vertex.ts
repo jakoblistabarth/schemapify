@@ -101,7 +101,7 @@ class Vertex extends Point {
     const f1 = ex__.face;
     const f2 = ex__.twin?.face;
 
-    const eTail = a?.getHead();
+    const eTail = a?.head;
     const eHead = c?.tail;
 
     if (
@@ -173,7 +173,7 @@ class Vertex extends Point {
    * Determines whether all incident Edges to the Vertex are aligned (to C).
    * @returns A Boolean indicating whether or not all {@link HalfEdge}s are aligned.
    */
-  allEdgesAligned(sectors: Sector[]) {
+  hasOnlyAlignedEdges(sectors: Sector[]) {
     return this.edges.every((edge) => edge.isAligned(sectors));
   }
 
@@ -185,7 +185,7 @@ class Vertex extends Point {
     // TODO: move to another class? to not mix dcel and schematization?
 
     // classify as insignificant if all edges are already aligned
-    if (this.allEdgesAligned(sectors)) {
+    if (this.hasOnlyAlignedEdges(sectors)) {
       return (this.significant = false);
     }
 
@@ -236,7 +236,7 @@ class Vertex extends Point {
    */
   assignDirections(c: C) {
     const edges = this.sortEdges(false);
-    const sectors = c.getSectors();
+    const sectors = c.sectors;
 
     function getDeviation(edges: HalfEdge[], directions: number[]): number {
       return edges.reduce((deviation, edge, index) => {

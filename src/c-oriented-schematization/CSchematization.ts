@@ -56,13 +56,13 @@ class CSchematization implements Schematization {
    */
   classifyVertices(input: Dcel): void {
     input.getVertices().forEach((v) => {
-      v.isSignificant(this.style.c.getSectors());
+      v.isSignificant(this.style.c.sectors);
     });
 
     input.getHalfEdges(undefined, true).forEach((edge) => {
-      const [tail, head] = edge.getEndpoints();
+      const [tail, head] = edge.endpoints;
       if (tail.significant && head.significant) {
-        const newPoint = edge.subdivide()?.getHead();
+        const newPoint = edge.subdivide()?.head;
         if (newPoint) newPoint.significant = false;
       }
     });
@@ -104,8 +104,8 @@ class CSchematization implements Schematization {
     input.getHalfEdges(undefined, true).forEach((edge) => {
       if (edge.class === OrientationClasses.AB) return;
       if (
-        edge.getSignificantVertex() &&
-        edge.getSignificantVertex() !== edge.tail &&
+        edge.significantVertex &&
+        edge.significantVertex !== edge.tail &&
         edge.twin
       )
         edge = edge.twin;
@@ -172,9 +172,9 @@ class CSchematization implements Schematization {
         const eLength = e.getLength();
         if (
           e.tail !== e_.tail &&
-          e.tail !== e_.getHead() &&
-          e.getHead() !== e_.getHead() &&
-          e.getHead() !== e_.tail
+          e.tail !== e_.head &&
+          e.head !== e_.head &&
+          e.head !== e_.tail
         ) {
           // "If the compared regions' edges do not have a vertex in common,
           // de is is simply the minimal distance between the edges."
@@ -185,16 +185,16 @@ class CSchematization implements Schematization {
           }
         } else {
           // "If e and e' share a vertex v, they interfere only if the edges reside in the same sector with respect to v."
-          const v = e
-            .getEndpoints()
-            .find((endpoint) => e_.getEndpoints().indexOf(endpoint) >= 0); // get common vertex
+          const v = e.endpoints.find(
+            (endpoint) => e_.endpoints.indexOf(endpoint) >= 0,
+          ); // get common vertex
           e = e.tail !== v && e.twin ? e.twin : e;
           e_ = e_.tail !== v && e_.twin ? e_.twin : e_;
           const e_angle = e_.getAngle();
           if (
             typeof e_angle !== "number" ||
             !e
-              .getAssociatedSector(this.style.c.getSectors())
+              .getAssociatedSector(this.style.c.sectors)
               .some((sector) => sector.encloses(e_angle))
           )
             return;
@@ -261,7 +261,7 @@ class CSchematization implements Schematization {
    */
   setSes(staircases: Staircase[]) {
     for (const staircase of staircases) {
-      staircase.setSe(this.style.c.getSectors());
+      staircase.setSe(this.style.c.sectors);
     }
   }
 
@@ -438,7 +438,7 @@ class CSchematization implements Schematization {
    */
   createConfigurations(input: Dcel) {
     input.getHalfEdges().forEach((edge) => {
-      if (edge.getEndpoints().every((vertex) => vertex.edges.length <= 3))
+      if (edge.endpoints.every((vertex) => vertex.edges.length <= 3))
         edge.configuration = new Configuration(edge);
     });
   }

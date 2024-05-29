@@ -28,8 +28,8 @@ class Line {
    * A is the difference in y-coordinates, B is the difference in x-coordinates.
    * @returns An array containing the line's coefficients [A, B, C].
    */
-  getABC() {
-    const [x2, y2] = this.getPointOnLine().xy();
+  get abc() {
+    const [x2, y2] = this.getPointOnLine().xy;
     const A = y2 - this.point.y;
     const B = this.point.x - x2;
     const C = A * this.point.x + B * this.point.y;
@@ -43,8 +43,8 @@ class Line {
    * @returns The {@link Point} of intersection, or nothing if {@link Line}s are parallel.
    */
   intersectsLine(line: Line) {
-    const [A1, B1, C1] = this.getABC();
-    const [A2, B2, C2] = line.getABC();
+    const [A1, B1, C1] = this.abc;
+    const [A2, B2, C2] = line.abc;
     const det = A1 * B2 - A2 * B1;
     if (det === 0) {
       //Lines are parallel, no intersection Point

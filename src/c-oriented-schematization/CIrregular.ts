@@ -11,7 +11,7 @@ class CIrregular extends C {
    * Get the sectors of C.
    * @returns An array of {@link Sector}s.
    */
-  getSectors(): Sector[] {
+  get sectors(): Sector[] {
     return this.angles.map((angle, idx) => {
       return new Sector(
         this,
@@ -27,7 +27,7 @@ class CIrregular extends C {
    * @returns The central angle of a {@link Sector}.
    * TODO: @param idx for irregular Cs only meaningful with index as argument?
    */
-  getSectorAngle() {
+  get sectorAngle() {
     // TODO: for irregular Cs only meaningful with index as argument?
     return 0;
   }

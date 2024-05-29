@@ -42,7 +42,7 @@ class Configuration {
    * Gets all 3 edges forming the configuration.
    * @returns An array of {@link HalfEdge}s.
    */
-  getX() {
+  get x() {
     const [prev, next] = [
       this.getOuterEdge(OuterEdge.PREV),
       this.getOuterEdge(OuterEdge.NEXT),
@@ -55,8 +55,8 @@ class Configuration {
    * Kind of the inverse to getX().
    * @returns An array of {@link HalfEdge}s.
    */
-  getX_() {
-    const x = this.getX();
+  get x_() {
+    const x = this.x;
     return x
       ? this.innerEdge.getCycle().filter((edge) => !x.includes(edge))
       : [];
@@ -74,7 +74,7 @@ class Configuration {
     ];
     const prevAngle = prev?.getAngle();
     const nextAngle = next?.getAngle();
-    const head = this.innerEdge.getHead();
+    const head = this.innerEdge.head;
     if (
       !prev ||
       !next ||
@@ -110,8 +110,8 @@ class Configuration {
    * Checks if the configuration has a junction.
    * @returns A boolean indicating if the configuration has a junction.
    */
-  hasJunction() {
-    return this.innerEdge.getEndpoints().some((p) => p.edges.length > 2);
+  get hasJunction() {
+    return this.innerEdge.endpoints.some((p) => p.edges.length > 2);
   }
 
   /**

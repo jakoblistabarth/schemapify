@@ -19,82 +19,72 @@ describe("isDeviating()", function () {
 
   it("returns true for an deviating edge", function () {
     s.directions.od53.assignedDirection = 2;
-    expect(s.directions.od53.isDeviating(c.getSectors())).toBe(true);
+    expect(s.directions.od53.isDeviating(c.sectors)).toBe(true);
   });
 
   it("returns true for an deviating edge", function () {
     s.directions.od53.assignedDirection = 3;
-    expect(s.directions.od53.isDeviating(c.getSectors())).toBe(true);
-    expect(s.directions.od53.isDeviating(new CRegular(4).getSectors())).toBe(
-      true,
-    );
+    expect(s.directions.od53.isDeviating(c.sectors)).toBe(true);
+    expect(s.directions.od53.isDeviating(new CRegular(4).sectors)).toBe(true);
   });
 
   it("returns false for a basic edge", function () {
     s.directions.od53.assignedDirection = 1;
-    expect(s.directions.od53.isDeviating(c.getSectors())).toBe(false);
-    expect(s.directions.od53.isDeviating(new CRegular(4).getSectors())).toBe(
-      false,
-    );
+    expect(s.directions.od53.isDeviating(c.sectors)).toBe(false);
+    expect(s.directions.od53.isDeviating(new CRegular(4).sectors)).toBe(false);
   });
 
   it("returns false for a basic edge", function () {
     s.directions.od333.assignedDirection = 0;
-    expect(s.directions.od333.isDeviating(c.getSectors())).toBe(false);
-    expect(s.directions.od333.isDeviating(new CRegular(4).getSectors())).toBe(
-      false,
-    );
+    expect(s.directions.od333.isDeviating(c.sectors)).toBe(false);
+    expect(s.directions.od333.isDeviating(new CRegular(4).sectors)).toBe(false);
   });
 
   it("returns false for a basic edge", function () {
     s.directions.od53.assignedDirection = 0;
-    expect(s.directions.od53.isDeviating(c.getSectors())).toBe(false);
+    expect(s.directions.od53.isDeviating(c.sectors)).toBe(false);
   });
 
   it("returns false for a for a basic aligned edge", function () {
     s.directions.od90.assignedDirection = 1;
-    expect(s.directions.od90.isDeviating(c.getSectors())).toBe(false);
+    expect(s.directions.od90.isDeviating(c.sectors)).toBe(false);
   });
 
   it("returns true for a for a deviating aligned edge", function () {
     s.directions.od90.assignedDirection = 2;
-    expect(s.directions.od90.isDeviating(c.getSectors())).toBe(true);
+    expect(s.directions.od90.isDeviating(c.sectors)).toBe(true);
   });
 
   it("returns false for a for a basic aligned edge", function () {
     s.directions.od90.assignedDirection = 2;
 
-    expect(s.directions.od90.isDeviating(new CRegular(4).getSectors())).toBe(
-      false,
-    );
+    expect(s.directions.od90.isDeviating(new CRegular(4).sectors)).toBe(false);
   });
 
   it("returns false for a for a basic aligned edge", function () {
     s.directions.od315.assignedDirection = 7;
 
-    expect(s.directions.od315.isDeviating(new CRegular(4).getSectors())).toBe(
-      false,
-    );
+    expect(s.directions.od315.isDeviating(new CRegular(4).sectors)).toBe(false);
   });
 });
 
-describe("getSignificantVertex()", function () {
+describe("The getter significantVertex()", function () {
   let s: TestSetup;
   beforeEach(function () {
     s = createEdgeVertexSetup();
   });
 
   it("returns an significant endpoint if one is specified", function () {
-    const significantVertex = s.directions.od53.getSignificantVertex();
+    const significantVertex = s.directions.od53.significantVertex;
     expect(significantVertex?.significant).toBe(true);
   });
   it("returns null if none of its endpoints are significant", function () {
     s.o.significant = false;
-    expect(s.directions.od53.getSignificantVertex()).toBeUndefined();
+    expect(s.directions.od53.significantVertex).toBeUndefined();
   });
 });
 
-describe("Given the examples in the paper of buchin et al., classify() works as expected on example", function () {
+describe("Given the examples in the paper of Buchin et al., classify() works as expected on example", function () {
   let s: TestSetup;
   let c: C;
 

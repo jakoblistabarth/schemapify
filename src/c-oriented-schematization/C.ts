@@ -6,13 +6,13 @@ export default abstract class C {
    */
   angles: number[] = [];
 
-  abstract getSectorAngle(): number;
-  abstract getSectors(): Sector[];
+  abstract get sectorAngle(): number;
+  abstract get sectors(): Sector[];
 
   /**
    * Get the number of directions in C.
    */
-  getDirections() {
+  get directions() {
     const n = this.angles.length;
     return Array.from(Array(n).keys());
   }
@@ -22,7 +22,7 @@ export default abstract class C {
    * @param idx The index of the Sector.
    */
   getSector(idx: number) {
-    return this.getSectors().find((sector) => sector.idx == idx);
+    return this.sectors.find((sector) => sector.idx == idx);
   }
 
   /**

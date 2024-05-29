@@ -127,7 +127,7 @@ describe("getAssignedDirection()", function () {
 
   it("returns the correct angle", function () {
     const c = new CRegular(2);
-    const sectors = c.getSectors();
+    const sectors = c.sectors;
     s.directions.od53.assignedDirection = 1;
     s.directions.od104.assignedDirection = 2;
     s.directions.od217.assignedDirection = 3;

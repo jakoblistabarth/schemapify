@@ -15,27 +15,26 @@ class CRegular extends C {
     super();
     this.beta = beta;
     this.orientations = orientations; //TODO: at least 2
-    this.angles = this.getAngles();
+    this.angles = this.initializeAngles();
   }
 
   /**
    * Get the angles of C.
    * @returns an array of angles
    */
-  private getAngles() {
-    const angles = [];
-    for (let index = 0; index < this.orientations * 2; index++) {
-      const angle = this.beta + (index * Math.PI) / this.orientations;
-      angles.push(angle);
-    }
-    return angles;
+  private initializeAngles() {
+    return Array(this.orientations * 2)
+      .fill(0)
+      .map((_, idx) => {
+        return this.beta + (idx * Math.PI) / this.orientations;
+      });
   }
 
   /**
    * Get the central angle of a Sector.
    * @returns The central angle of a {@link Sector}.
    */
-  getSectorAngle() {
+  get sectorAngle() {
     return Math.PI / this.orientations;
   }
 
@@ -43,7 +42,7 @@ class CRegular extends C {
    * Get the sectors of C.
    * @returns An array of {@link Sector}s.
    */
-  getSectors(): Sector[] {
+  get sectors(): Sector[] {
     return this.angles.map((angle, idx) => {
       const upperBound =
         idx + 1 == this.angles.length ? Math.PI * 2 : this.angles[idx + 1];

@@ -21,15 +21,15 @@ class Point {
    * Gets the x and y coordinates of the point as tuple.
    * @returns A tuple.
    */
-  xy() {
-    return [this.x, this.y];
+  get xy() {
+    return [this.x, this.y] as [number, number];
   }
 
   /**
    * Converts the Point to a {@link Vector2D}.
    * @returns The Point as a {@link Vector2D}.
    */
-  toVector() {
+  get vector() {
     return new Vector2D(this.x, this.y);
   }
 
@@ -39,8 +39,8 @@ class Point {
    * @returns The distance between the two Points.
    */
   distanceToPoint(p: Point) {
-    const [x1, y1] = this.xy();
-    const [x2, y2] = p.xy();
+    const [x1, y1] = this.xy;
+    const [x2, y2] = p.xy;
 
     const a = x1 - x2;
     const b = y1 - y2;
@@ -54,9 +54,9 @@ class Point {
    * @returns The distance between the Point and the LineSegment.
    */
   distanceToLineSegment(l: LineSegment) {
-    const [vx, vy] = this.xy();
-    const [e1x, e1y] = l.endPoint1.xy();
-    const [e2x, e2y] = l.endPoint2.xy();
+    const [vx, vy] = this.xy;
+    const [e1x, e1y] = l.endPoint1.xy;
+    const [e2x, e2y] = l.endPoint2.xy;
     const edx = e2x - e1x;
     const edy = e2y - e1y;
     const lineLengthSquared = edx ** 2 + edy ** 2;

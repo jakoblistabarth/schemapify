@@ -45,7 +45,7 @@ export default class ConfigurationLayer extends CompositeLayer<ConfigurationLaye
         this.getSubLayerProps({
           id: "contraction-area-layer",
           data: this.contractions.map(([, contraction]) => ({
-            polygon: contraction.areaPoints.map((d) => d.toVector().toArray()),
+            polygon: contraction.areaPoints.map((d) => d.vector.toArray()),
           })),
           getFillColor: (_: [number, number], { index }: { index: number }) =>
             index > 0 ? [0, 0, 255, 100] : [0, 0, 255, 25],
@@ -55,11 +55,11 @@ export default class ConfigurationLayer extends CompositeLayer<ConfigurationLaye
         this.getSubLayerProps({
           id: `x-layer`,
           data: this.contractions
-            .map(([, contraction]) => contraction.configuration.getX())
+            .map(([, contraction]) => contraction.configuration.x)
             .flat(),
-          getSourcePosition: (e: HalfEdge) => e.tail.toVector().toArray(),
+          getSourcePosition: (e: HalfEdge) => e.tail.vector.toArray(),
           getTargetPosition: (e: HalfEdge) =>
-            e.getHead()?.toVector().toArray() ?? [0, 0],
+            e.head?.vector.toArray() ?? [0, 0],
           getColor: [0, 0, 255],
           getWidth: 1,
         }),
@@ -70,9 +70,9 @@ export default class ConfigurationLayer extends CompositeLayer<ConfigurationLaye
           data: this.contractions
             .map(([, contraction]) => contraction.configuration.innerEdge)
             .flat(),
-          getSourcePosition: (e: HalfEdge) => e.tail.toVector().toArray(),
+          getSourcePosition: (e: HalfEdge) => e.tail.vector.toArray(),
           getTargetPosition: (e: HalfEdge) =>
-            e.getHead()?.toVector().toArray() ?? [0, 0],
+            e.head?.vector.toArray() ?? [0, 0],
           getColor: [0, 0, 255],
           getWidth: 4,
         }),
