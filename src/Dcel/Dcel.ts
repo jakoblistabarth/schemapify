@@ -405,24 +405,6 @@ class Dcel {
     }, []);
   }
 
-  toConsole(verbose: boolean = false): void {
-    if (!verbose) console.log("DCEL " + this.name, this);
-    else {
-      console.log("🡒 START DCEL:", this);
-
-      this.getFaces().forEach((f) => {
-        console.log("→ new face", f.uuid);
-        if (f.getEdges() != undefined) {
-          //QUESTION: chris???
-          f.getEdges().forEach((e) => {
-            console.log(e, `(${e.tail.x},${e.tail.y})`);
-          });
-        }
-      });
-      console.log("🡐 DCEL END");
-    }
-  }
-
   /**
    * Transform the DCEL into a {@link Subdivision}.
    * @returns A {@link Subdivision} representation of the DCEL.
