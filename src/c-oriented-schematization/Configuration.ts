@@ -27,6 +27,11 @@ class Configuration {
     this[ContractionType.P] = Contraction.initialize(this, ContractionType.P);
   }
 
+  /**
+   * Gets either the previous or the next outer edge of the configuration (in regard to the inner edge).
+   * @param position The relative position of the outerEdge in respect to the innerEdge.
+   * @returns A {@link HalfEdge} representing the outerEdge.
+   */
   getOuterEdge(position: OuterEdge) {
     return position === OuterEdge.PREV
       ? this.innerEdge.prev
@@ -109,6 +114,11 @@ class Configuration {
     return this.innerEdge.getEndpoints().some((p) => p.edges.length > 2);
   }
 
+  /**
+   * Get the junction type of the configuration.
+   * @param vertex The vertex to check for the junction type.
+   * @returns A {@link Junction} representing the junction type.
+   */
   getJunctionType(vertex: Vertex) {
     if (!this.innerEdge.twin) return;
     let idx = vertex.edges.indexOf(this.innerEdge);

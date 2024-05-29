@@ -25,10 +25,19 @@ class Point {
     return [this.x, this.y];
   }
 
+  /**
+   * Converts the Point to a {@link Vector2D}.
+   * @returns The Point as a {@link Vector2D}.
+   */
   toVector() {
     return new Vector2D(this.x, this.y);
   }
 
+  /**
+   * Determines the distance between two Points.
+   * @param p A {@link Point} to calculate the distance to.
+   * @returns The distance between the two Points.
+   */
   distanceToPoint(p: Point) {
     const [x1, y1] = this.xy();
     const [x2, y2] = p.xy();
@@ -39,6 +48,11 @@ class Point {
     return Math.sqrt(a * a + b * b);
   }
 
+  /**
+   * Determines the distance between the Point and a LineSegment.
+   * @param l A {@link LineSegment} to calculate the distance to.
+   * @returns The distance between the Point and the LineSegment.
+   */
   distanceToLineSegment(l: LineSegment) {
     const [vx, vy] = this.xy();
     const [e1x, e1y] = l.endPoint1.xy();
@@ -58,6 +72,12 @@ class Point {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  /**
+   * Gets a new Point at a specified distance and angle from the Point.
+   * @param distance The distance from the Point.
+   * @param angle The angle in radians.
+   * @returns A new Point at the specified distance and angle from the Point.
+   */
   getNewPoint(distance: number, angle: number) {
     // QUESTION: do i really need this conditions for dx, and dy because js' sin/cos implementation is inaccurate??
     const dx =

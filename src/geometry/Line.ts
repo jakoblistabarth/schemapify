@@ -13,10 +13,21 @@ class Line {
     this.angle = angle;
   }
 
+  /**
+   * Get the point on the line at a given distance from the starting point.
+   * @param distance The distance from the starting point.
+   * @returns The point on the line at the given distance.
+   */
   getPointOnLine(distance: number = 1) {
     return this.point.getNewPoint(distance, this.angle);
   }
 
+  /**
+   * Get the line's coefficients.
+   * The line is represented by the equation Ax + By = C.
+   * A is the difference in y-coordinates, B is the difference in x-coordinates.
+   * @returns An array containing the line's coefficients [A, B, C].
+   */
   getABC() {
     const [x2, y2] = this.getPointOnLine().xy();
     const A = y2 - this.point.y;

@@ -116,6 +116,11 @@ class Dcel {
     return edges;
   }
 
+  /**
+   * Returns the simple {@link HalfEdge}s of the DCEL.
+   * @param edges The {@link HalfEdge}s to check for simplicity.
+   * @returns A (sub)set of {@link HalfEdge}s.
+   */
   getSimpleEdges(edges: HalfEdge[]) {
     // FIXME: confusing for map output: sometimes clockwise/counterclockwise assignment in map output wrong
     const simpleEdges: HalfEdge[] = [];
@@ -127,6 +132,11 @@ class Dcel {
     return simpleEdges;
   }
 
+  /**
+   * Returns the Vertices of the DCEL.
+   * @param significant If true, only the significant {@link Vertex}s will be returned.
+   * @returns A (sub)set of {@link Vertex}s.
+   */
   getVertices(significant?: boolean) {
     if (significant)
       return Array.from(this.vertices.values()).filter(
@@ -135,6 +145,10 @@ class Dcel {
     return Array.from(this.vertices.values());
   }
 
+  /**
+   * Returns the area enclosed by the DCEL.
+   * @returns The area of the DCEL.
+   */
   getArea() {
     return this.getFaces().reduce((acc, face) => {
       // do only consider faces associated with one feature
@@ -360,8 +374,9 @@ class Dcel {
   }
 
   /**
-   * Get the center of the polygon.
+   * Gets the DCEL's center.
    * Defined as the center of it's Boundingbox
+   * @returns The center of the {@link Dcel}.
    */
   get center() {
     return this.getBbox().center;
@@ -408,6 +423,10 @@ class Dcel {
     }
   }
 
+  /**
+   * Transform the DCEL into a {@link Subdivision}.
+   * @returns A {@link Subdivision} representation of the DCEL.
+   */
   toSubdivision() {
     //TODO: implement
     return new Subdivision([]);

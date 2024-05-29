@@ -84,7 +84,9 @@ class CSchematization implements Schematization {
   }
 
   /**
-   * Returns all Staircases of an DCEL.
+   * Get all Staircases of an {@link Dcel}.
+   * @param input The {@link Dcel} to get the Staircases from.
+   * @returns An array of Staircases.
    */
   getStaircases(input: Dcel) {
     return input
@@ -93,6 +95,10 @@ class CSchematization implements Schematization {
       .filter((staircase): staircase is Staircase => !!staircase);
   }
 
+  /**
+   * Adds a staircase to every edge of the {@link DCEL}.
+   * @param input The {@link Dcel} to add staircases to.
+   */
   addStaircases(input: Dcel) {
     // create staircase for every pair of edges
     input.getHalfEdges(undefined, true).forEach((edge) => {
@@ -107,6 +113,10 @@ class CSchematization implements Schematization {
     });
   }
 
+  /**
+   * Calculate all staircases of a {@link Dcel}.
+   * @param input The {@link Dcel} to calculate staircases for.
+   */
   calculateStaircases(input: Dcel) {
     // calculate edgedistance and stepnumber for deviating edges first (p. 18)
     const staircasesOfDeviatingEdges = this.getStaircases(input).filter(
@@ -135,6 +145,10 @@ class CSchematization implements Schematization {
     );
   }
 
+  /**
+   * Set the edgedistance for each staircase of a given array of staircases.
+   * @param staircases The array of staircases to set the edgedistance for.
+   */
   setEdgeDistances(staircases: Staircase[]) {
     // TODO: make sure the edgedistance cannot be too small?
     // To account for topology error ("Must Be Larger Than Cluster tolerance"), when minimum distance between points is too small
@@ -243,8 +257,7 @@ class CSchematization implements Schematization {
   /**
    * Calculate and set se, defined as "the number of steps a {@link Staircase} must use"
    * for each staircase of a given array of staircases.
-   * @param staircases
-   * @returns
+   * @param staircases The array of staircases to set se for.
    */
   setSes(staircases: Staircase[]) {
     for (const staircase of staircases) {
@@ -252,6 +265,10 @@ class CSchematization implements Schematization {
     }
   }
 
+  /**
+   * Replace all edges of a {@link Dcel} with staircases.
+   * @param input The {@link Dcel} to replace the edges with staircases in.
+   */
   replaceEdgesWithStaircases(input: Dcel) {
     input.getHalfEdges().forEach((edge) => {
       if (!edge.staircase) return;
@@ -288,6 +305,11 @@ class CSchematization implements Schematization {
     superfluousVertices.forEach((v) => v.remove());
   }
 
+  /**
+   * Preprocesses a {@link Dcel} by subdividing all edges.
+   * @param input The {@link Dcel} to preprocess.
+   * @returns The preprocessed {@link Dcel}.
+   */
   preProcess(input: Dcel) {
     const t0 = performance.now();
     this.doAction({
@@ -308,6 +330,11 @@ class CSchematization implements Schematization {
     return input;
   }
 
+  /**
+   * Constrain the angles of a {@link Dcel}.
+   * @param input The {@link Dcel} to constrain the angles of.
+   * @returns The constrained {@link Dcel}.
+   */
   constrainAngles(input: Dcel) {
     const t0 = performance.now();
     this.classify(input);
@@ -332,6 +359,11 @@ class CSchematization implements Schematization {
     return input;
   }
 
+  /**
+   * Simplify a {@link Dcel} by removing superfluous vertices and applying edge moves.
+   * @param input The {@link Dcel} to simplify.
+   * @returns The simplified {@link Dcel}.
+   */
   simplify(input: Dcel) {
     const t0 = performance.now();
     this.removeSuperfluousVertices(input);
@@ -361,6 +393,11 @@ class CSchematization implements Schematization {
     return input;
   }
 
+  /**
+   * Run the schematization process on a {@link Dcel}.
+   * @param input The {@link Dcel} to run the schematization process on.
+   * @returns The schematized {@link Dcel}.
+   */
   run(input: Dcel) {
     this.preProcess(input);
     this.constrainAngles(input);
@@ -406,6 +443,11 @@ class CSchematization implements Schematization {
     });
   }
 
+  /**
+   * Converts all staircase regions of a {@link Dcel} to {@link MultiPolygon}s.
+   * @param input The {@link Dcel} to convert the staircase regions of.
+   * @returns An array of {@link MultiPolygon}s representing the staircase regions.
+   */
   staircaseRegionsToGeometry(input: Dcel) {
     return this.getStaircases(input).map((staircase): MultiPolygon => {
       const region = staircase.region.exteriorRing;

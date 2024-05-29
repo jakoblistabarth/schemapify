@@ -35,6 +35,7 @@ class Staircase {
     this.interferesWith = [];
   }
 
+  // TODO: fix typing, infere type if possible
   get de(): number | undefined {
     return this._de;
   }
@@ -51,7 +52,6 @@ class Staircase {
    * Set se, defined as "the number of steps a {@link Staircase} must use"
    * The number of steps is per staircase is determined by the distance to the next edge:
    * "By increasing the number of steps in the staircase, intersections can be avoided."
-   * @returns the number of steps
    */
   setSe(sectors: Sector[]) {
     const edge = this.edge;
@@ -115,7 +115,7 @@ class Staircase {
    * Gets the staircase region of an edge, depending on its class.
    * If the edge has an significant Vertex, it has to be the tail of the edge.
    * If that's not the case its twin is used for calculating the staircase region.
-   * @returns The region of an edge.
+   * @returns A {@link Polygon} representing the region of an edge.
    */
   getRegion() {
     const edge =
@@ -211,6 +211,10 @@ class Staircase {
     return (assignedEdge * associatedEdge * Math.sin(enclosingAngle)) / 2;
   }
 
+  /**
+   * Returns the points of the staircase.
+   * @returns All {@link Point}s constructing the {@link Staircase}.
+   */
   getStaircasePoints() {
     switch (this.edge.class) {
       case OrientationClasses.UB:
@@ -260,7 +264,7 @@ class Staircase {
   /**
    * Gets the Points of the staircase region for unaligned basic and evading edges.
    * The region is the area bounded by lines oriented according to the associated directions (both at v and w).
-   * @returns a set of Points defining the region
+   * @returns a {@link Polygon} representing the Staircase region.
    */
   getSimpleRegion() {
     const edge = this.edge;
@@ -352,12 +356,12 @@ class Staircase {
   }
 
   /**
-   *
+   * Get the 2 points that are appended to the staircase region of an "unaligned deviating" edge.
    * @param originalStaircasePoints Points of the original staircase
    * @param l1 length of an assigned step
    * @param l2 length of an associated step
    * @param d1 angle of the assigned step
-   * @returns
+   * @returns The 2 points appended to the staircase region.
    */
   getAppendedAreaPoints(
     originalStaircasePoints: Point[],

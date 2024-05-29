@@ -17,12 +17,23 @@ class FaceFaceBoundaryList {
     return [faceA, faceB].sort((a, b) => a.uuid.localeCompare(b.uuid));
   }
 
+  /**
+   * Gets the key for a Face-Face-Boundary structure.
+   * @param faceA The first {@link Face}.
+   * @param faceB The second {@link Face}.
+   * @returns A string, representing the key for the Face-Face-Boundary structure.
+   */
   static getKey(faceA: Face, faceB: Face) {
     return FaceFaceBoundaryList.sortFaces(faceA, faceB)
       .map((d) => d.uuid)
       .join("|");
   }
 
+  /**
+   * Creates a Face-Face-Boundary structure from a {@link Dcel}.
+   * @param dcel The {@link Dcel} to create the Face-Face-Boundary structure from.
+   * @returns A {@link FaceFaceBoundaryMap}, containing the Face-Face-Boundary structure.
+   */
   create(dcel: Dcel) {
     const boundaries: Map<string, FaceFaceBoundary> = new Map();
 
@@ -41,6 +52,10 @@ class FaceFaceBoundaryList {
     return boundaries;
   }
 
+  /**
+   * Gets the Face-Face-Boundary structure.
+   * @returns An array of {@link FaceFaceBoundary}s.
+   */
   getBoundaries() {
     return Array.from(this.boundaries.values());
   }

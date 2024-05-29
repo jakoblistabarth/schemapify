@@ -22,10 +22,18 @@ class MultiPolygon {
     this.properties = properties;
   }
 
+  /**
+   * Get the multipolygon's area.
+   */
   get area() {
     return this.polygons.reduce((acc: number, d) => (acc += d.area), 0);
   }
 
+  /**
+   * Create a multipolygon from an array of coordinates.
+   * @param coordinates An array of coordinates.
+   * @returns A new MultiPolygon.
+   */
   static fromCoordinates(coordinates: [number, number][][][]) {
     return new MultiPolygon(
       coordinates.map((polygon) => Polygon.fromCoordinates(polygon)),
