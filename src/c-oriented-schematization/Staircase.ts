@@ -103,7 +103,7 @@ class Staircase {
     }
   }
 
-  getDeltaE(): number | undefined {
+  getDeltaE() {
     const length = this.edge.getLength();
     return typeof length === "number" &&
       this.edge.class === OrientationClasses.AD
@@ -117,7 +117,7 @@ class Staircase {
    * If that's not the case its twin is used for calculating the staircase region.
    * @returns The region of an edge.
    */
-  getRegion(): Polygon {
+  getRegion() {
     const edge =
       !this.edge.getSignificantVertex() ||
       this.edge.getSignificantVertex() === this.edge.tail
@@ -205,10 +205,7 @@ class Staircase {
    * @param associatedEdge The length of the associated step edge.
    * @returns The area of a step.
    */
-  getStepArea(
-    assignedEdge: number,
-    associatedEdge: number,
-  ): number | undefined {
+  getStepArea(assignedEdge: number, associatedEdge: number) {
     const enclosingAngle =
       (Math.PI * 2) / this.#cStyle.c.getDirections().length;
     return (assignedEdge * associatedEdge * Math.sin(enclosingAngle)) / 2;
@@ -233,7 +230,7 @@ class Staircase {
    * Returns a staircase for an "aligned deviating" edge.
    * @returns All {@link Point}s constructing the {@link Staircase} (including tail and head of the original edge).
    */
-  getStaircasePointsAD(): Point[] {
+  getStaircasePointsAD() {
     const edge = this.edge;
     if (!this.deltaE) return [];
     const epsilon = this.#cStyle.staircaseEpsilon;
@@ -265,7 +262,7 @@ class Staircase {
    * The region is the area bounded by lines oriented according to the associated directions (both at v and w).
    * @returns a set of Points defining the region
    */
-  getSimpleRegion(): Polygon {
+  getSimpleRegion() {
     const edge = this.edge;
     const head = edge.getHead();
     if (!head) return new Polygon([]);
@@ -291,7 +288,7 @@ class Staircase {
    * @param se number of steps used to construct the staircase, the minimum number of steps is, the functions default value: 2
    * @returns all points constructing the staircase (including tail and head of the original edge)
    */
-  getStaircasePointsUB(): Point[] {
+  getStaircasePointsUB() {
     const se = this.se || 2;
     const edge = this.edge;
 
@@ -325,7 +322,7 @@ class Staircase {
    * @param se number of steps used to construct the staircase, the minimum number of steps is, the functions default value: 4
    * @returns all points constructing the staircase (including tail and head of the original edge)
    */
-  getStaircasePointsE(): Point[] {
+  getStaircasePointsE() {
     const se = this.se || 4;
     const edge = this.edge;
 
@@ -367,7 +364,7 @@ class Staircase {
     l1: number,
     l2: number,
     d1: number,
-  ): Point[] {
+  ) {
     const stepArea = this.getStepArea(l1, l2);
     const sectors = this.#cStyle.c.getSectors();
     const assignedAngle = this.edge.getAssignedAngle(sectors);
@@ -387,7 +384,7 @@ class Staircase {
    * @param se number of steps used to construct the staircase, the minimum number of steps is, the functions default value: 4
    * @returns all points constructing the staircase (including tail and head of the original edge)
    */
-  getStaircasePointsUD(): Point[] {
+  getStaircasePointsUD() {
     const se = this.se || 4;
     const edge = this.edge;
 

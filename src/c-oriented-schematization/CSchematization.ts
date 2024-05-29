@@ -86,7 +86,7 @@ class CSchematization implements Schematization {
   /**
    * Returns all Staircases of an DCEL.
    */
-  getStaircases(input: Dcel): Staircase[] {
+  getStaircases(input: Dcel) {
     return input
       .getHalfEdges()
       .map((edge) => edge.staircase)
@@ -273,8 +273,9 @@ class CSchematization implements Schematization {
   /**
    * Removes all vertices of the DCEL which are collinear, hence superfluous:
    * they can be removed without changing the visual geometry of the DCEL.
+   * @param input The DCEL to remove superfluous vertices from.
    */
-  removeSuperfluousVertices(input: Dcel): void {
+  removeSuperfluousVertices(input: Dcel) {
     const superfluousVertices = input.getVertices().filter((v) => {
       if (v.edges.length != 2) return false;
       const angle = v.edges
@@ -372,7 +373,7 @@ class CSchematization implements Schematization {
    * @param lambda A constant factor.
    * @returns Epsilon. The maximum length of a {@link HalfEdge}.
    */
-  setEpsilon(input: Dcel, lambda: number): number | undefined {
+  setEpsilon(input: Dcel, lambda: number) {
     return this.style
       ? (this.style.epsilon = input.getDiameter() * lambda)
       : undefined;
@@ -383,7 +384,7 @@ class CSchematization implements Schematization {
    * @param threshold
    * @returns A subdivided {@link Dcel}.
    */
-  splitEdges(input: Dcel, threshold = this.style?.epsilon): Dcel | undefined {
+  splitEdges(input: Dcel, threshold = this.style?.epsilon) {
     if (!threshold) return;
     input.getBoundedFaces().forEach((f) => {
       const edges = f.getEdges();
@@ -405,7 +406,7 @@ class CSchematization implements Schematization {
     });
   }
 
-  staircaseRegionsToGeometry(input: Dcel): MultiPolygon[] {
+  staircaseRegionsToGeometry(input: Dcel) {
     return this.getStaircases(input).map((staircase): MultiPolygon => {
       const region = staircase.region.exteriorRing;
 

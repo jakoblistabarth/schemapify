@@ -38,7 +38,7 @@ class Dcel {
    * @param y y coordinate of the new {@link Vertex}.
    * @returns The created {@link Vertex}.
    */
-  addVertex(x: number, y: number): Vertex {
+  addVertex(x: number, y: number) {
     const key = Vertex.getKey(x, y);
     const existingVertex = this.vertices.get(key);
     if (existingVertex) return existingVertex;
@@ -54,7 +54,7 @@ class Dcel {
    * @param head head {@link Vertex} of the new {@link HalfEdge}.
    * @returns The created HalfEdge.
    */
-  addHalfEdge(tail: Vertex, head: Vertex): HalfEdge {
+  addHalfEdge(tail: Vertex, head: Vertex) {
     const key = HalfEdge.getKey(tail, head);
     const existingHalfEdge = this.halfEdges.get(key);
     if (existingHalfEdge) return existingHalfEdge;
@@ -70,7 +70,7 @@ class Dcel {
    * Creates a new Face and adds it to the DCEL.
    * @returns The created {@link Face}.
    */
-  addFace(): Face {
+  addFace() {
     const face = new Face();
     this.faces.push(face);
     return face;
@@ -80,7 +80,7 @@ class Dcel {
    * Gets all Faces of the DCEL.
    * @returns An array of {@link Face}s.
    */
-  getFaces(): Face[] {
+  getFaces() {
     return this.faces;
   }
 
@@ -88,7 +88,7 @@ class Dcel {
    * Returns only the bounded Faces of the DCEL (the unbounded outer Face is not returned).
    * @returns An array of {@link Face}s.
    */
-  getBoundedFaces(): Face[] {
+  getBoundedFaces() {
     return this.faces.filter((f) => !f.isUnbounded);
   }
 
@@ -96,7 +96,7 @@ class Dcel {
    * Returns the unbounded Face of the DCEL.
    * @returns The unbounded {@link Face}.
    */
-  getUnboundedFace(): Face | undefined {
+  getUnboundedFace() {
     return this.faces.find((f) => f.isUnbounded);
   }
 
@@ -107,7 +107,7 @@ class Dcel {
    * @param significantTail If true, for a pair of {@link HalfEdge}s which do have a significant {@link Vertex}, the one where the significant {@link Vertex} is the tail will be returned, default = false
    * @returns A (sub)set of {@link HalfEdge}s.
    */
-  getHalfEdges(edgeClass?: OrientationClasses, simple = false): HalfEdge[] {
+  getHalfEdges(edgeClass?: OrientationClasses, simple = false) {
     const halfEdges = Array.from(this.halfEdges.values());
     let edges = edgeClass
       ? halfEdges.filter((e) => e.class === edgeClass)
@@ -135,7 +135,7 @@ class Dcel {
     return Array.from(this.vertices.values());
   }
 
-  getArea(): number {
+  getArea() {
     return this.getFaces().reduce((acc, face) => {
       // do only consider faces associated with one feature
       // the unbounded faces (no associated features) need to be ignored
@@ -154,7 +154,7 @@ class Dcel {
    * @param y y Position
    * @returns A {@link Vertex} if one exists on this position, otherwise undefined.
    */
-  findVertex(x: number, y: number): Vertex | undefined {
+  findVertex(x: number, y: number) {
     return this.vertices.get(Vertex.getKey(x, y));
   }
 
@@ -164,7 +164,7 @@ class Dcel {
    * @param headPos {@link Point} representing the position of the {@link HalfEdge}'s head {@link Vertex}.
    * @returns A {@link HalfEdge}, if one exists with this endpoint positions, otherwise undefined.
    */
-  findHalfEdge(tailPos: Point, headPos: Point): HalfEdge | undefined {
+  findHalfEdge(tailPos: Point, headPos: Point) {
     return this.getHalfEdges().find((edge) => {
       const edgeHeadPos = edge.getHead()?.toPoint();
       if (!edgeHeadPos) return;
@@ -178,7 +178,7 @@ class Dcel {
    * @param vertex The {@link Vertex} to remove.
    * @returns The remaining {@link Vertex|Vertices} in the DCEL.
    */
-  removeVertex(vertex: Vertex): Map<string, Vertex> {
+  removeVertex(vertex: Vertex) {
     const key = Vertex.getKey(vertex.x, vertex.y);
     this.vertices.delete(key);
     return this.vertices;
@@ -189,7 +189,7 @@ class Dcel {
    * @param edge The {@link HalfEdge} to remove.
    * @returns The remaining {@link HalfEdge}s in the DCEL.
    */
-  removeHalfEdge(edge: HalfEdge): Map<string, HalfEdge> {
+  removeHalfEdge(edge: HalfEdge) {
     const head = edge.getHead();
     if (!head) return this.halfEdges;
     const edgeKey = HalfEdge.getKey(edge.tail, head);
@@ -214,7 +214,7 @@ class Dcel {
    */
   static fromGeoJSON(
     geoJSON: geojson.FeatureCollection<geojson.Polygon | geojson.MultiPolygon>,
-  ): Dcel {
+  ) {
     if (!validateGeoJSON(geoJSON)) throw new Error("invalid input");
     const geometry = geoJsonToGeometry(geoJSON);
     return this.fromSubdivision(geometry);
@@ -226,7 +226,7 @@ class Dcel {
    * @param multiPolygons an array of {@link MultiPolygon}s.
    * @returns A {@link Dcel}.
    */
-  static fromSubdivision(subdivision: Subdivision): Dcel {
+  static fromSubdivision(subdivision: Subdivision) {
     const dcel = new Dcel();
 
     dcel.featureProperties = subdivision.multiPolygons.map((d) => d.properties);
@@ -363,7 +363,7 @@ class Dcel {
    * Get the center of the polygon.
    * Defined as the center of it's Boundingbox
    */
-  get center(): [number, number] {
+  get center() {
     return this.getBbox().center;
   }
 
@@ -371,7 +371,7 @@ class Dcel {
    * Calculates the diameter of the DCEL (as the diameter of its bounding box).
    * @returns The diameter of the {@link Dcel}.
    */
-  getDiameter(): number {
+  getDiameter() {
     return this.getBbox().diameter;
   }
 
@@ -379,7 +379,7 @@ class Dcel {
    * Gets all contractions within a DCEL.
    * @returns An array of {@link Contraction}s.
    */
-  getContractions(): Contraction[] {
+  getContractions() {
     return this.getHalfEdges().reduce((acc: Contraction[], edge) => {
       if (!edge.configuration) return acc;
       const n = edge.configuration[ContractionType.N];
@@ -413,7 +413,7 @@ class Dcel {
     return new Subdivision([]);
   }
 
-  toGeoJSON(): geojson.FeatureCollection<geojson.MultiPolygon> {
+  toGeoJSON() {
     const outerRingsByFID = this.getBoundedFaces().reduce(
       (groupedFaces: { [key: number]: Face[] }, face) => {
         face.associatedFeatures.forEach((featureId, idx) => {
@@ -468,7 +468,7 @@ class Dcel {
     return createGeoJSON(features);
   }
 
-  verticesToGeoJSON(): geojson.FeatureCollection<geojson.Point> {
+  verticesToGeoJSON() {
     const vertexFeatures = Array.from(this.vertices.values()).map(
       (v): geojson.Feature<geojson.Point> => {
         return {
@@ -489,7 +489,7 @@ class Dcel {
     return createGeoJSON(vertexFeatures);
   }
 
-  facesToGeoJSON(): geojson.FeatureCollection<geojson.Polygon> {
+  facesToGeoJSON() {
     const faceFeatures = this.getBoundedFaces().map(
       (f): geojson.Feature<geojson.Polygon> => {
         const halfEdges = f.getEdges();
@@ -513,9 +513,7 @@ class Dcel {
     return createGeoJSON(faceFeatures);
   }
 
-  staircasesToGeoJSON(
-    cStyle: CStyle,
-  ): geojson.FeatureCollection<geojson.Polygon> {
+  staircasesToGeoJSON(cStyle: CStyle) {
     const staircaseFeatures = this.getHalfEdges(undefined, true).map(
       (edge): geojson.Feature<geojson.Polygon> => {
         const staircase: Staircase = new Staircase(edge, cStyle);
@@ -537,9 +535,7 @@ class Dcel {
     return createGeoJSON(staircaseFeatures);
   }
 
-  edgesToGeoJSON(
-    sectors: Sector[],
-  ): geojson.FeatureCollection<geojson.LineString> {
+  edgesToGeoJSON(sectors: Sector[]) {
     const edgeFeatures = this.getHalfEdges(undefined, true).map(
       (e): geojson.Feature<geojson.LineString> => {
         const a = e.tail;

@@ -65,11 +65,11 @@ class Face {
     return this.uuid.substring(0, length);
   }
 
-  getEdges(counterclockwise: boolean = true): HalfEdge[] {
+  getEdges(counterclockwise: boolean = true) {
     return this.edge ? this.edge.getCycle(counterclockwise) : [];
   }
 
-  removeInnerEdge(edge: HalfEdge): HalfEdge[] {
+  removeInnerEdge(edge: HalfEdge) {
     const idx = this.innerEdges.indexOf(edge);
     if (idx > -1) {
       this.innerEdges.splice(idx, 1);
@@ -77,7 +77,7 @@ class Face {
     return this.innerEdges;
   }
 
-  replaceInnerEdge(old: HalfEdge, edge: HalfEdge): HalfEdge[] {
+  replaceInnerEdge(old: HalfEdge, edge: HalfEdge) {
     const idx = this.innerEdges.indexOf(old);
     if (idx === -1) {
       return [];
@@ -87,7 +87,7 @@ class Face {
     return this.innerEdges;
   }
 
-  replaceOuterRingEdge(old: HalfEdge, edge: HalfEdge): HalfEdge | undefined {
+  replaceOuterRingEdge(old: HalfEdge, edge: HalfEdge) {
     if (!this.outerRing || this.outerRing.edge != old) {
       return;
     } else {
@@ -100,7 +100,7 @@ class Face {
    * Get the Area of the face.
    * @returns A number, indicating the size of the {@link Face}.
    */
-  getArea(): number | undefined {
+  getArea() {
     const edges = this.getEdges();
     if (!edges) return;
     const vertices = edges.map((edge) => edge.tail.toVector().toArray());

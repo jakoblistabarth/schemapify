@@ -26,7 +26,7 @@ class Polygon {
    * @param points An array of Points, which has to be sorted (either clockwise or counter-clockwise).
    * @returns A number indicating the area of the polygon.
    */
-  get area(): number {
+  get area() {
     return this.rings.reduce((sum, ring, idx) => {
       let total = 0;
 
@@ -46,15 +46,15 @@ class Polygon {
     }, 0);
   }
 
-  get exteriorRing(): (typeof this.rings)[number] {
+  get exteriorRing() {
     return this.rings[0];
   }
 
-  get interiorRings(): typeof this.rings {
+  get interiorRings() {
     return this.rings.slice(1);
   }
 
-  get exteriorLineSegments(): LineSegment[] {
+  get exteriorLineSegments() {
     return this.exteriorRing.points.map(
       (p, idx) =>
         new LineSegment(p, crawlArray(this.exteriorRing.points, idx, +1)),
@@ -67,7 +67,7 @@ class Polygon {
    * @param edge
    * @returns
    */
-  getIntersections(edge: HalfEdge): Point[] | undefined {
+  getIntersections(edge: HalfEdge) {
     return this.exteriorLineSegments.reduce((acc: Point[], boundaryEdge) => {
       const intersection = edge
         .toLineSegment()

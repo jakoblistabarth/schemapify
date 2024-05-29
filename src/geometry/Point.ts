@@ -25,7 +25,7 @@ class Point {
     return [this.x, this.y];
   }
 
-  toVector(): Vector2D {
+  toVector() {
     return new Vector2D(this.x, this.y);
   }
 
@@ -58,7 +58,7 @@ class Point {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  getNewPoint(distance: number, angle: number): Point {
+  getNewPoint(distance: number, angle: number) {
     // QUESTION: do i really need this conditions for dx, and dy because js' sin/cos implementation is inaccurate??
     const dx =
       angle === Math.PI * 0.5 || angle === Math.PI * 1.5 ? 0 : Math.cos(angle);
@@ -135,7 +135,7 @@ class Point {
    * @param point A {@link Point} the Point is compared to.
    * @returns A boolean, indicating whether or not the {@link Point}'s position equals the specified {@link Point}'s position.
    */
-  equals(point: Point): boolean {
+  equals(point: Point) {
     return (
       Number((this.x - point.x).toFixed(10)) === 0 &&
       Number((this.y - point.y).toFixed(10)) === 0

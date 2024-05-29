@@ -21,7 +21,7 @@ class ConfigurationPair {
    * Get all edges of the configurations involved in the edge move (contraction and compensation).
    * @returns An array of {@link HalfEdge}s.
    */
-  getX1X2(): HalfEdge[] {
+  getX1X2() {
     const x1x2 = this.contraction.configuration.getX();
     if (this.compensation) x1x2.push(...this.compensation.configuration.getX());
     return x1x2;

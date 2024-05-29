@@ -17,7 +17,7 @@ class FaceFaceBoundaryList {
     return [faceA, faceB].sort((a, b) => a.uuid.localeCompare(b.uuid));
   }
 
-  static getKey(faceA: Face, faceB: Face): string {
+  static getKey(faceA: Face, faceB: Face) {
     return FaceFaceBoundaryList.sortFaces(faceA, faceB)
       .map((d) => d.uuid)
       .join("|");
@@ -41,7 +41,7 @@ class FaceFaceBoundaryList {
     return boundaries;
   }
 
-  getBoundaries(): FaceFaceBoundary[] {
+  getBoundaries() {
     return Array.from(this.boundaries.values());
   }
 
@@ -49,7 +49,7 @@ class FaceFaceBoundaryList {
    * Gets the overall minimal configuration pair of a Face-Face-Boundary structure.
    * @returns A tuple, containing 2 complementary, non-conflicting {@link Contraction}s, the minimal Configuration Pair.
    */
-  getMinimalConfigurationPair(): ConfigurationPair | undefined {
+  getMinimalConfigurationPair() {
     return this.getBoundaries().reduce(
       (minimum: ConfigurationPair | undefined, boundary) => {
         const boundaryPair = boundary.getMinimalConfigurationPair();
