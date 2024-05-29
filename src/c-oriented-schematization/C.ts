@@ -34,7 +34,7 @@ export default abstract class C {
     const calculateCombinations = function (
       combination: number[],
       directions: number[],
-      edges: number
+      edges: number,
     ): number[][] {
       if (!edges) return [combination];
 
@@ -44,13 +44,21 @@ export default abstract class C {
         .reduce((output: number[][][], el) => {
           const start = directions.indexOf(el);
           output.push(
-            calculateCombinations([...combination, el], directions.slice(start + 1), edges - 1)
+            calculateCombinations(
+              [...combination, el],
+              directions.slice(start + 1),
+              edges - 1,
+            ),
           );
           return output;
         }, [])
         .flat(1);
     };
 
-    return calculateCombinations([], Array.from(Array(this.angles.length).keys()), numberOfEdges);
+    return calculateCombinations(
+      [],
+      Array.from(Array(this.angles.length).keys()),
+      numberOfEdges,
+    );
   }
 }
