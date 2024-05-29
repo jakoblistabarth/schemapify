@@ -28,20 +28,9 @@ class Polygon {
    */
   get area() {
     return this.rings.reduce((sum, ring, idx) => {
-      let total = 0;
-
-      for (let i = 0; i < ring.length; i++) {
-        const addX = ring.points[i].x;
-        const addY = ring.points[i == ring.length - 1 ? 0 : i + 1].y;
-        const subX = ring.points[i == ring.length - 1 ? 0 : i + 1].x;
-        const subY = ring.points[i].y;
-
-        total += addX * addY * 0.5;
-        total -= subX * subY * 0.5;
-      }
-
+      const ringArea = ring.area;
       // subtract area of every hole
-      sum += Math.abs(total) * (idx > 0 ? -1 : 1);
+      sum += Math.abs(ringArea) * (idx > 0 ? -1 : 1);
       return sum;
     }, 0);
   }

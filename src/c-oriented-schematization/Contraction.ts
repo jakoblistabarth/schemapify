@@ -211,10 +211,7 @@ class Contraction {
    * @returns A number, indicating the area of the Contraction.
    */
   get area() {
-    return this.areaPoints
-      ? Polygon.fromCoordinates([this.areaPoints.map(({ x, y }) => [x, y])])
-          .area
-      : 0;
+    return this.areaPoints ? new Ring(this.areaPoints).area : 0;
   }
 
   /**
