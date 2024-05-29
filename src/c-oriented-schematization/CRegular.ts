@@ -45,7 +45,8 @@ class CRegular extends C {
    */
   getSectors(): Sector[] {
     return this.angles.map((angle, idx) => {
-      const upperBound = idx + 1 == this.angles.length ? Math.PI * 2 : this.angles[idx + 1];
+      const upperBound =
+        idx + 1 == this.angles.length ? Math.PI * 2 : this.angles[idx + 1];
       return new Sector(this, idx, angle, upperBound);
     });
   }
