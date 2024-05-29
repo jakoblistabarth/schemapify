@@ -180,7 +180,7 @@ class Dcel {
    */
   findHalfEdge(tailPos: Point, headPos: Point) {
     return this.getHalfEdges().find((edge) => {
-      const edgeHeadPos = edge.getHead()?.toPoint();
+      const edgeHeadPos = edge.head?.toPoint();
       if (!edgeHeadPos) return;
       const edgeTailPos = edge.tail.toPoint();
       return edgeHeadPos.equals(headPos) && edgeTailPos.equals(tailPos);
@@ -204,7 +204,7 @@ class Dcel {
    * @returns The remaining {@link HalfEdge}s in the DCEL.
    */
   removeHalfEdge(edge: HalfEdge) {
-    const head = edge.getHead();
+    const head = edge.head;
     if (!head) return this.halfEdges;
     const edgeKey = HalfEdge.getKey(edge.tail, head);
     this.halfEdges.delete(edgeKey);

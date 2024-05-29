@@ -26,12 +26,12 @@ describe("dot() returns the correct scalar", function () {
   });
 });
 
-describe("getInvers() returns the correct inverted vector", function () {
+describe("The getter invers() returns the correct inverted vector", function () {
   it("for a simple vector", function () {
-    expect(new Vector2D(2, 0).getInvers()).toEqual(new Vector2D(-2, -0));
-    expect(new Vector2D(-1, -5).getInvers()).toEqual(new Vector2D(1, 5));
-    expect(new Vector2D(-1, 5).getInvers()).toEqual(new Vector2D(1, -5));
-    expect(new Vector2D(1, 5).getInvers()).toEqual(new Vector2D(-1, -5));
+    expect(new Vector2D(2, 0).invers).toEqual(new Vector2D(-2, -0));
+    expect(new Vector2D(-1, -5).invers).toEqual(new Vector2D(1, 5));
+    expect(new Vector2D(-1, 5).invers).toEqual(new Vector2D(1, -5));
+    expect(new Vector2D(1, 5).invers).toEqual(new Vector2D(-1, -5));
   });
 });
 
@@ -43,11 +43,11 @@ describe("times() returns the correct vector", function () {
   });
 });
 
-describe("getUnitVector() returns the correct vector", function () {
+describe("The getter unitVector() returns the correct vector", function () {
   it("for a simple vector", function () {
-    expect(new Vector2D(2, 0).getUnitVector()).toEqual(new Vector2D(1, 0));
-    expect(new Vector2D(-2, 0).getUnitVector()).toEqual(new Vector2D(-1, 0));
-    expect(new Vector2D(2, 4).getUnitVector().dx).toBeCloseTo(0.44721);
-    expect(new Vector2D(2, 4).getUnitVector().dy).toBeCloseTo(0.89443);
+    expect(new Vector2D(2, 0).unitVector).toEqual(new Vector2D(1, 0));
+    expect(new Vector2D(-2, 0).unitVector).toEqual(new Vector2D(-1, 0));
+    expect(new Vector2D(2, 4).unitVector.dx).toBeCloseTo(0.44721);
+    expect(new Vector2D(2, 4).unitVector.dy).toBeCloseTo(0.89443);
   });
 });

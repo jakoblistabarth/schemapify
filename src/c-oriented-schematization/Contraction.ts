@@ -12,8 +12,6 @@ class Contraction {
   type: ContractionType;
   configuration: Configuration;
   point: Point;
-  areaPoints: Point[];
-  area: number;
   blockingNumber: number;
 
   constructor(
@@ -24,8 +22,6 @@ class Contraction {
     this.type = contractionType;
     this.configuration = configuration;
     this.point = point;
-    this.areaPoints = this.getAreaPoints();
-    this.area = this.getArea();
     this.blockingNumber = this.initializeBlockingNumber();
   }
 
@@ -49,7 +45,7 @@ class Contraction {
    * Determines whether or not the Contraction is feasible.
    * @returns A boolean, indicating whether or not the Contraction is feasible.
    */
-  isFeasible() {
+  get isFeasible() {
     if (!this.point) return false;
     return this.area === 0 || (this.area > 0 && this.blockingNumber === 0)
       ? true
@@ -71,9 +67,9 @@ class Contraction {
    * @returns An array of {@link HalfEdge}s, representing the overlapping edges.
    */
   getOverlappingEdges(other: Contraction) {
-    return this.configuration
-      .getX()
-      .filter((edge) => other.configuration.getX().includes(edge));
+    return this.configuration.x.filter((edge) =>
+      other.configuration.x.includes(edge),
+    );
   }
 
   /**
@@ -83,8 +79,8 @@ class Contraction {
    */
   isConflicting(complementary: Contraction) {
     const overlappingEdges = this.getOverlappingEdges(complementary);
-    const contractionX = this.configuration.getX();
-    const complementaryX = complementary.configuration.getX();
+    const contractionX = this.configuration.x;
+    const complementaryX = complementary.configuration.x;
     const outerEdges = [
       contractionX[0],
       contractionX[2],
@@ -115,10 +111,9 @@ class Contraction {
 
     const innerEdgeNormal = configuration.innerEdge
       .getVector()
-      ?.getNormal()
-      .getUnitVector();
+      ?.getNormal().unitVector;
     const A = configuration.innerEdge.prev?.tail.toPoint();
-    const D = configuration.innerEdge.next?.getHead()?.toPoint();
+    const D = configuration.innerEdge.next?.head?.toPoint();
     const [trackPrev, trackNext] = [
       configuration.getTrack(OuterEdge.PREV),
       configuration.getTrack(OuterEdge.NEXT),
@@ -165,13 +160,13 @@ class Contraction {
    * Gets the area points of the Contraction.
    * @returns An array of {@link Point}s representing the area points of the Contraction.
    */
-  getAreaPoints() {
+  get areaPoints() {
     const c = this.configuration;
     const prev = c.getOuterEdge(OuterEdge.PREV);
-    const prevHead = prev?.getHead();
+    const prevHead = prev?.head;
     const next = c.getOuterEdge(OuterEdge.NEXT);
-    const nextHead = next?.getHead();
-    const innerEdgeHead = c.innerEdge.getHead();
+    const nextHead = next?.head;
+    const innerEdgeHead = c.innerEdge.head;
     const innerEdgeAngle = c.innerEdge.getAngle();
 
     if (
@@ -215,7 +210,7 @@ class Contraction {
    * Gets the area of the Contraction.
    * @returns A number, indicating the area of the Contraction.
    */
-  getArea() {
+  get area() {
     return this.areaPoints
       ? Polygon.fromCoordinates([this.areaPoints.map(({ x, y }) => [x, y])])
           .area
@@ -228,16 +223,16 @@ class Contraction {
    * @returns A boolean, indicating whether or not the {@link Contraction} is blocked by the specified {@link HalfEdge}.
    */
   isBlockedBy(edge: HalfEdge) {
-    const x = this.configuration.getX();
-    const x_ = this.configuration.innerEdge.twin?.configuration?.getX();
+    const x = this.configuration.x;
+    const x_ = this.configuration.innerEdge.twin?.configuration?.x;
     if (x_) x.push(...x_);
     if (x.includes(edge)) return false;
     const edgeLine = edge.toLineSegment();
     if (!edgeLine) return;
     const area = new Polygon([new Ring(this.areaPoints)]);
-    const pointsInPolygon = edge
-      .getEndpoints()
-      .filter((vertex) => vertex.isInPolygon(area));
+    const pointsInPolygon = edge.endpoints.filter((vertex) =>
+      vertex.isInPolygon(area),
+    );
     const intersections = area.getIntersections(edge);
     const xLineSegments = x.reduce((acc: LineSegment[], edge) => {
       const lineSegment = edge.toLineSegment();
@@ -268,7 +263,7 @@ class Contraction {
     let blockingNumber = 0;
     if (!this.point) return blockingNumber;
 
-    this.configuration.getX_().forEach((boundaryEdge) => {
+    this.configuration.x_.forEach((boundaryEdge) => {
       if (this.isBlockedBy(boundaryEdge)) {
         blockingNumber++;
       }
@@ -317,7 +312,7 @@ class Contraction {
     const aLength = a.getLength();
     if (!a.face || !aLength) return;
     const alpha1 = a.tail.getExteriorAngle(a.face);
-    const alpha2 = a.getHead()?.getExteriorAngle(a.face);
+    const alpha2 = a.head?.getExteriorAngle(a.face);
     if (alpha1 === undefined || alpha2 === undefined) return;
     const alpha1_ = -Math.abs(alpha1) + Math.PI * 0.5;
     const alpha2_ = -Math.abs(alpha2) + Math.PI * 0.5;

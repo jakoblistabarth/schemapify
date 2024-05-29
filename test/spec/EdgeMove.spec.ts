@@ -22,7 +22,7 @@ describe("createConfigurations()", function () {
 
     const edgesDegree4 = dcel
       .getHalfEdges()
-      .filter((e) => e.getEndpoints()?.some((v) => v.edges.length > 3));
+      .filter((e) => e.endpoints?.some((v) => v.edges.length > 3));
 
     const configurationCount = dcel
       .getHalfEdges()
@@ -107,6 +107,7 @@ describe("doEdgeMove()", function () {
     const pair = dcel.faceFaceBoundaryList
       .getBoundaries()[0]
       .getMinimalConfigurationPair();
+    const originalContractionArea = pair?.contraction.area;
     pair?.doEdgeMove();
     const newArea = dcel.getArea();
 
@@ -122,7 +123,7 @@ describe("doEdgeMove()", function () {
     expect(edges[4]).toBe("2.5/3->2.5/4");
     expect(edges[5]).toBe("2.5/4->0/4");
     expect(edges[6]).toBe("0/4->0/0");
-    expect(pair?.contraction.area).toEqual(1);
+    expect(originalContractionArea).toEqual(1);
     expect(originalArea).toEqual(newArea);
   });
 });

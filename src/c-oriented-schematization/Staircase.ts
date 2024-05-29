@@ -119,12 +119,12 @@ class Staircase {
    */
   getRegion() {
     const edge =
-      !this.edge.getSignificantVertex() ||
-      this.edge.getSignificantVertex() === this.edge.tail
+      !this.edge.significantVertex ||
+      this.edge.significantVertex === this.edge.tail
         ? this.edge
         : this.edge.twin;
-    const head = edge?.getHead();
-    const sectors = this.#cStyle.c.getSectors();
+    const head = edge?.head;
+    const sectors = this.#cStyle.c.sectors;
     const assignedAngle = edge?.getAssignedAngle(sectors);
     if (!edge || !head || typeof assignedAngle !== "number")
       return new Polygon([]);
@@ -206,8 +206,7 @@ class Staircase {
    * @returns The area of a step.
    */
   getStepArea(assignedEdge: number, associatedEdge: number) {
-    const enclosingAngle =
-      (Math.PI * 2) / this.#cStyle.c.getDirections().length;
+    const enclosingAngle = (Math.PI * 2) / this.#cStyle.c.directions.length;
     return (assignedEdge * associatedEdge * Math.sin(enclosingAngle)) / 2;
   }
 
@@ -238,7 +237,7 @@ class Staircase {
     const edge = this.edge;
     if (!this.deltaE) return [];
     const epsilon = this.#cStyle.staircaseEpsilon;
-    const d1 = edge.getAssignedAngle(this.#cStyle.c.getSectors());
+    const d1 = edge.getAssignedAngle(this.#cStyle.c.sectors);
     if (typeof d1 !== "number") return [];
     const d2 = edge.getAngle();
     if (typeof d2 !== "number") return [];
@@ -246,7 +245,7 @@ class Staircase {
 
     const points: Point[] = [];
     const tail = edge.tail;
-    const head = edge.getHead();
+    const head = edge.head;
     const length = edge.getLength();
     if (typeof length !== "number" || !head) return [];
 
@@ -268,12 +267,10 @@ class Staircase {
    */
   getSimpleRegion() {
     const edge = this.edge;
-    const head = edge.getHead();
+    const head = edge.head;
     if (!head) return new Polygon([]);
 
-    const associatedSector = edge.getAssociatedSector(
-      this.#cStyle.c.getSectors(),
-    );
+    const associatedSector = edge.getAssociatedSector(this.#cStyle.c.sectors);
     if (!associatedSector) return new Polygon([]);
     const [lower, upper] = associatedSector[0].getBounds();
     const A = new Point(edge.tail.x, edge.tail.y);
@@ -296,7 +293,7 @@ class Staircase {
     const se = this.se || 2;
     const edge = this.edge;
 
-    const sectors = this.#cStyle.c.getSectors();
+    const sectors = this.#cStyle.c.sectors;
     const d1 = edge.getAssignedAngle(sectors);
     const associatedAngles = edge.getAssociatedAngles(sectors);
     if (typeof d1 !== "number" || !associatedAngles) return [];
@@ -330,7 +327,7 @@ class Staircase {
     const se = this.se || 4;
     const edge = this.edge;
 
-    const sectors = this.#cStyle.c.getSectors();
+    const sectors = this.#cStyle.c.sectors;
     const d1 = edge.getAssignedAngle(sectors);
     const associatedAngles = edge.getAssociatedAngles(sectors);
     if (typeof d1 !== "number" || !associatedAngles) return [];
@@ -370,7 +367,7 @@ class Staircase {
     d1: number,
   ) {
     const stepArea = this.getStepArea(l1, l2);
-    const sectors = this.#cStyle.c.getSectors();
+    const sectors = this.#cStyle.c.sectors;
     const assignedAngle = this.edge.getAssignedAngle(sectors);
     if (typeof stepArea !== "number" || typeof assignedAngle !== "number")
       return [];
@@ -392,7 +389,7 @@ class Staircase {
     const se = this.se || 4;
     const edge = this.edge;
 
-    const sectors = this.#cStyle.c.getSectors();
+    const sectors = this.#cStyle.c.sectors;
     const d1 = edge.getClosestAssociatedAngle(this.#cStyle.c);
     const associatedAngles = edge.getAssociatedAngles(sectors);
     if (typeof d1 !== "number" || !associatedAngles) return [];

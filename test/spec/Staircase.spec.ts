@@ -414,7 +414,7 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
     edge.assignedDirection = 2;
 
     expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(
-      ((Math.PI * 2) / new CRegular(2).getDirections().length) * 3,
+      ((Math.PI * 2) / new CRegular(2).directions.length) * 3,
     );
   });
 });

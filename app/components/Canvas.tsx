@@ -50,16 +50,16 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       if (!vertex)
         throw "Error drawing halfEdge: vertex for offset is not defined";
       const shift =
-        edge.getVector()?.getNormal(true).getUnitVector().times(scale) ??
+        edge.getVector()?.getNormal(true).unitVector.times(scale) ??
         new Vector2D(0, 0);
-      return vertex?.toVector().plus(shift).toArray();
+      return vertex?.vector.plus(shift).toArray();
     },
     [],
   );
 
   const getShiftedPath = useCallback(
     (edge: HalfEdge) => {
-      return [edge.tail, edge.getHead()].map((p, idx) => {
+      return [edge.tail, edge.head].map((p, idx) => {
         return { coordinates: shiftPoint(edge, p), timestamp: idx };
       });
     },
@@ -77,7 +77,7 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       id: "edges",
       data: halfedges,
       getSourcePosition: (e: HalfEdge) => shiftPoint(e, e.tail),
-      getTargetPosition: (e: HalfEdge) => shiftPoint(e, e.getHead()),
+      getTargetPosition: (e: HalfEdge) => shiftPoint(e, e.head),
       pickable: true,
       onHover: (info) => setHoverInfo(info),
       getWidth: (e: HalfEdge) => (hoverInfo?.object?.uuid === e.uuid ? 5 : 1),
@@ -95,10 +95,10 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       data: dcel
         .getContractions()
         .filter((c) => c.configuration.innerEdge.face?.edge)
-        .filter((c) => c.isFeasible())
+        .filter((c) => c.isFeasible)
         // .filter((c) => c.type === ContractionType.N)
         .map((c) => ({
-          polygon: c.areaPoints.map((p) => p.toVector().toArray()),
+          polygon: c.areaPoints.map((p) => p.vector.toArray()),
           type: c.type,
         })),
       getFillColor: (c: Contraction) =>

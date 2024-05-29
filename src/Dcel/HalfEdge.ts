@@ -69,7 +69,7 @@ class HalfEdge {
    * Gets the Head of the HalfEdge.
    * @returns A {@link Vertex}, representing the {@link HalfEdge}'s head.
    */
-  getHead() {
+  get head() {
     if (this.twin) return this.twin.tail;
   }
 
@@ -77,8 +77,8 @@ class HalfEdge {
    * Gets the Vertices of the HalfEdge.
    * @returns An array of {@link Vertex}s, representing the {@link HalfEdge}'s endpoints.
    */
-  getEndpoints() {
-    const head = this.getHead();
+  get endpoints() {
+    const head = this.head;
     return head ? [this.tail, head] : [];
   }
 
@@ -87,8 +87,8 @@ class HalfEdge {
    * A Vertex is significant if its incident Edges reside in the same sector or adjacent sectors.
    * @returns The significant {@link Vertex} of the {@link HalfEdge}, if it exists.
    */
-  getSignificantVertex() {
-    const endPoints = this.getEndpoints();
+  get significantVertex() {
+    const endPoints = this.endpoints;
     if (endPoints) return endPoints.find((v) => v.significant);
   }
 
@@ -130,7 +130,7 @@ class HalfEdge {
    * @returns A {@link Vector2D}, representing the {@link HalfEdge}'s direction.
    */
   getVector() {
-    const [tail, head] = this.getEndpoints();
+    const [tail, head] = this.endpoints;
     if (tail && head) return new Vector2D(head.x - tail.x, head.y - tail.y);
   }
 
@@ -160,7 +160,7 @@ class HalfEdge {
    * @returns The Length.
    */
   getLength() {
-    const head = this.getHead();
+    const head = this.head;
     if (head) return this.tail.distanceToVertex(head);
   }
 
@@ -169,10 +169,10 @@ class HalfEdge {
    * @returns A {@link Point}, indicating the midpoint of the {@link HalfEdge}.
    */
   getMidpoint() {
-    const head = this.getHead();
+    const head = this.head;
     if (!head) return;
-    const [x1, y1] = this.tail.xy();
-    const [x2, y2] = head.xy();
+    const [x1, y1] = this.tail.xy;
+    const [x2, y2] = head.xy;
 
     const mx = (x1 + x2) / 2;
     const my = (y1 + y2) / 2;
@@ -211,7 +211,7 @@ class HalfEdge {
     const d = et.prev;
     if (!a || !b || !c || !d) return;
 
-    const [x, y] = newPoint.xy();
+    const [x, y] = newPoint.xy;
     const N = this.dcel.addVertex(x, y);
 
     const et_ = this.dcel.addHalfEdge(N, e.tail);
@@ -288,9 +288,9 @@ class HalfEdge {
    * @param newHead A {@link Point}, indicating the new position of the {@link HalfEdge}'s head.
    */
   move(newTail: Point, newHead: Point) {
-    const head = this.getHead();
+    const head = this.head;
     const prevTail = this.prev?.tail;
-    const nextHead = this.next?.getHead();
+    const nextHead = this.next?.head;
     if (!head || !nextHead || !prevTail) return;
     if (newHead.equals(nextHead)) {
       const newEdge = head.remove(this.face);
@@ -311,7 +311,7 @@ class HalfEdge {
    * @returns A {@Point} representing the intersection.
    */
   intersectsLine(line: Line) {
-    const head = this.getHead();
+    const head = this.head;
     const P = this.toLine()?.intersectsLine(line);
     //TODO: check if the fact that intersectsLine returns undefined for parallel line
     // poses a problem for the case that the halfedge is part of the line
@@ -406,7 +406,7 @@ class HalfEdge {
   // TODO: Where does such function live?
   // within the HalfEdge class or rather within Staircase??
   getClosestAssociatedAngle(c: C) {
-    const sectors = c.getSectors();
+    const sectors = c.sectors;
     const associatedSector = this.getAssociatedSector(sectors);
     if (this.class !== OrientationClasses.UD || !associatedSector) return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges
     const sector = associatedSector[0];
@@ -420,7 +420,7 @@ class HalfEdge {
         ? Math.PI * 2
         : this.getAssignedAngle(sectors);
 
-    return upper + c.getSectorAngle() === angle ? upper : lower;
+    return upper + c.sectorAngle === angle ? upper : lower;
   }
 
   /**
@@ -470,8 +470,8 @@ class HalfEdge {
    * @returns A number, indicating the minimum distance.
    */
   distanceToEdge(otherEdge: HalfEdge) {
-    const head = this.getHead();
-    const otherHead = otherEdge.getHead();
+    const head = this.head;
+    const otherHead = otherEdge.head;
     if (!head || !otherHead) return;
     const verticesThis = [this.tail, head];
     const verticesEdge = [otherEdge.tail, otherHead];
@@ -487,7 +487,7 @@ class HalfEdge {
    * @returns A {@link LineSegment}.
    */
   toLineSegment() {
-    const head = this.getHead();
+    const head = this.head;
     if (head) return new LineSegment(this.tail, head);
   }
 
@@ -499,14 +499,14 @@ class HalfEdge {
     this.tail.assignDirections(c);
 
     if (this.class) return; // do not overwrite classification
-    const head = this.getHead();
+    const head = this.head;
 
     if (head && head.significant) return; // do not classify a HalfEdge which has a significant head
 
-    const sectors = c.getSectors();
+    const sectors = c.sectors;
     const associatedSector = this.getAssociatedSector(sectors);
     const sector = associatedSector[0];
-    const significantVertex = this.getSignificantVertex() || this.tail;
+    const significantVertex = this.significantVertex || this.tail;
     const edges = significantVertex
       .getEdgesInSector(sector)
       .filter((edge) => !edge.isAligned(sectors) && !edge.isDeviating(sectors));
@@ -577,7 +577,7 @@ class HalfEdge {
    * @returns A enum, indicating the inflection Type of the {@link HalfEdge}.
    */
   getInflectionType() {
-    const head = this.getHead();
+    const head = this.head;
     if (!head || !this.face) return;
     const tailAngle = this.tail.getExteriorAngle(this.face);
     const headAngle = head.getExteriorAngle(this.face);
@@ -593,9 +593,7 @@ class HalfEdge {
    * @returns A string representing the {@link Halfedge}'s endpoints.
    */
   toString() {
-    return this.getEndpoints()
-      .map((p) => p.xy().join("/"))
-      .join("->");
+    return this.endpoints.map((p) => p.xy.join("/")).join("->");
   }
 }
 

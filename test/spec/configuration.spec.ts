@@ -48,7 +48,7 @@ describe("getX() for a configuration", function () {
     const s = configurationCases.bothNoBlockingPoint;
 
     s.innerEdge.configuration = new Configuration(s.innerEdge);
-    const x = s.innerEdge.configuration.getX();
+    const x = s.innerEdge.configuration.x;
 
     expect(x.length).toBe(3);
     expect(x).toEqual([s.edges[0], s.edges[1], s.edges[2]]);
@@ -148,8 +148,8 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
   it("given a negative contraction point.", function () {
     const s = configurationCases.bothBlockingPointNeg;
     const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
-    const areaPoints = c[ContractionType.N]?.getAreaPoints();
-    expect(areaPoints?.map((p) => p.xy())).toEqual([
+    const areaPoints = c[ContractionType.N]?.areaPoints;
+    expect(areaPoints?.map((p) => p.xy)).toEqual([
       [-4, 4],
       [-2, 0],
       [2, 0],
@@ -160,8 +160,8 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
   it("given a positive contraction point.", function () {
     const s = configurationCases.bothBlockingPointNeg;
     const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
-    const areaPoints = c[ContractionType.P]?.getAreaPoints();
-    expect(areaPoints?.map((p) => p.xy())).toEqual([
+    const areaPoints = c[ContractionType.P]?.areaPoints;
+    expect(areaPoints?.map((p) => p.xy)).toEqual([
       [1, -2],
       [2, 0],
       [-2, 0],
@@ -172,9 +172,9 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
   it("given a negative contraction point on the configuration's first edge.", function () {
     const s = configurationCases.bothContractionOnFirstEdge;
     const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
-    const areaPoints = c[ContractionType.N]?.getAreaPoints();
+    const areaPoints = c[ContractionType.N]?.areaPoints;
 
-    expect(areaPoints?.map((p) => p.xy())).toEqual([
+    expect(areaPoints?.map((p) => p.xy)).toEqual([
       [-2, 1.3333333333],
       [-2, 0],
       [2, 0],
@@ -184,9 +184,9 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
   it("given a negative contraction point on the configuration's third edge.", function () {
     const s = configurationCases.bothContractionOnThirdEdge;
     const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
-    const areaPoints = c[ContractionType.N]?.getAreaPoints();
+    const areaPoints = c[ContractionType.N]?.areaPoints;
 
-    expect(areaPoints?.map((p) => p.xy())).toEqual([
+    expect(areaPoints?.map((p) => p.xy)).toEqual([
       [2, 1.3333333333],
       [2, 0],
       [-2, 0],
@@ -194,18 +194,18 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
   });
 });
 
-describe("getX() and getX_() returns the correct number of boundary edges", function () {
+describe("x and x_ return the correct number of boundary edges", function () {
   it("for a setup with one interference.", function () {
     const s = configurationCases.bothBlockingPointNeg;
     const c = new Configuration(s.innerEdge);
 
-    expect(c.getX()?.length).toBe(3);
-    expect(s.edges.length - c.getX_().length).toEqual(c.getX().length);
+    expect(c.x.length).toBe(3);
+    expect(s.edges.length - c.x_.length).toEqual(c.x.length);
   });
 });
 
 describe("isBlockedBy() determines whether or not a contraction is blocked by an edge", function () {
-  it("for a negtive contraction", function () {
+  it("for a negative contraction", function () {
     const s = createConfigurationSetup(
       new Point(-4, 2),
       new Point(-2, 0),
@@ -320,14 +320,14 @@ describe("initializeBlockingNumber() returns the number of interfering edges", f
   });
 });
 
-describe("isFeasible() returns", function () {
+describe("The getter isFeasible returns", function () {
   it("true for a contraction with a contraction point and a blockingnumber of 0, and false if the blocking number is > 0.", function () {
     const s = configurationCases.bothBlockingPointNeg;
 
     const c = new Configuration(s.innerEdge);
 
-    expect(c[ContractionType.N]?.isFeasible()).toBe(false);
-    expect(c[ContractionType.P]?.isFeasible()).toBe(true);
+    expect(c[ContractionType.N]?.isFeasible).toBe(false);
+    expect(c[ContractionType.P]?.isFeasible).toBe(true);
   });
 });
 

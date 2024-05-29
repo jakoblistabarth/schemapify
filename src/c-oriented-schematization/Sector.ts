@@ -34,7 +34,7 @@ class Sector {
    * @returns An array containing the adjacent Sectors.
    */
   getNeighbors() {
-    const sectors = this.c.getSectors();
+    const sectors = this.c.sectors;
     const idx = this.getIdx();
     const prev = idx == 0 ? sectors.length - 1 : idx - 1;
     const next = (idx + 1) % sectors.length;

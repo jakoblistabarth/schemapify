@@ -123,7 +123,7 @@ class Face {
   getArea() {
     const edges = this.getEdges();
     if (!edges) return;
-    const vertices = edges.map((edge) => edge.tail.toVector().toArray());
+    const vertices = edges.map((edge) => edge.tail.xy);
     return Polygon.fromCoordinates([vertices]).area;
   }
 }

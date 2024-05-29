@@ -12,7 +12,7 @@ class Vector2D {
   /**
    * Get the vector's magnitude.
    */
-  getMagnitude() {
+  get magnitude() {
     return Math.sqrt(Math.pow(this.dx, 2) + Math.pow(this.dy, 2));
   }
 
@@ -30,15 +30,15 @@ class Vector2D {
   /**
    * Get the vector's inverse.
    */
-  getInvers() {
+  get invers() {
     return new Vector2D(-this.dx, -this.dy);
   }
 
   /**
    * Get the vector's unit vector.
    */
-  getUnitVector() {
-    return this.times(1 / this.getMagnitude());
+  get unitVector() {
+    return this.times(1 / this.magnitude);
   }
 
   /**
