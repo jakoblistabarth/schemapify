@@ -40,6 +40,23 @@ class Ring {
   }
 
   /**
+   * Returns the area of the ring.
+   */
+  get area() {
+    return this.points.reduce((acc, point, i, points) => {
+      const addX = point.x;
+      const addY = points[i == this.length - 1 ? 0 : i + 1].y;
+      const subX = points[i == this.length - 1 ? 0 : i + 1].x;
+      const subY = point.y;
+
+      acc += addX * addY * 0.5;
+      acc -= subX * subY * 0.5;
+
+      return acc;
+    }, 0);
+  }
+
+  /**
    * Returns a boolean indicating whether the ring is clockwise.
    */
   get isClockwise() {
