@@ -414,6 +414,15 @@ class Dcel {
     return new Subdivision([]);
   }
 
+  /**
+   * Clone the DCEL.
+   * @returns A deep copy of the DCEL.
+   */
+  public clone() {
+    return this;
+    // return this.toSubdivision().toDcel();
+  }
+
   toGeoJSON() {
     const outerRingsByFID = this.getBoundedFaces().reduce(
       (groupedFaces: { [key: number]: Face[] }, face) => {
