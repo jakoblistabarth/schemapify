@@ -1,5 +1,4 @@
 import { v4 as uuid } from "uuid";
-import Sector from "../c-oriented-schematization/Sector";
 import Point from "../geometry/Point";
 import Dcel from "./Dcel";
 import Face from "./Face";
@@ -10,7 +9,6 @@ class Vertex extends Point {
   dcel: Dcel;
   uuid: string;
   edges: HalfEdge[];
-  significant?: boolean;
 
   constructor(x: number, y: number, dcel: Dcel) {
     super(x, y);
@@ -167,67 +165,6 @@ class Vertex extends Point {
       this.edges.splice(idx, 1);
     }
     return this.edges;
-  }
-
-  /**
-   * Determines whether all incident Edges to the Vertex are aligned (to C).
-   * @returns A Boolean indicating whether or not all {@link HalfEdge}s are aligned.
-   */
-  hasOnlyAlignedEdges(sectors: Sector[]) {
-    return this.edges.every((edge) => edge.isAligned(sectors));
-  }
-
-  /**
-   * Determines the significance of the Vertex..
-   * @returns A Boolean indicating whether or not the {@link Vertex} is significant.
-   */
-  isSignificant(sectors: Sector[]) {
-    // TODO: move to another class? to not mix dcel and schematization?
-
-    // classify as insignificant if all edges are already aligned
-    if (this.hasOnlyAlignedEdges(sectors)) {
-      return (this.significant = false);
-    }
-
-    // classify as significant if one sector occurs multiple times
-    const occupiedSectors = this.edges
-      .map((edge) => edge.getAssociatedSector(sectors))
-      .flat();
-
-    const uniqueSectors: Sector[] = occupiedSectors.reduce(
-      (acc: Sector[], sector: Sector) => {
-        if (!acc.find((accSector) => accSector.idx == sector.idx))
-          acc.push(sector);
-        return acc;
-      },
-      [],
-    );
-
-    if (occupiedSectors.length !== uniqueSectors.length) {
-      return (this.significant = true);
-    }
-
-    // classify as significant if neighbor sectors are not empty
-    const isSignificant = uniqueSectors.every((sector: Sector) => {
-      const [prevSector, nextSector] = sector.getNeighbors();
-      return (
-        this.getEdgesInSector(prevSector).length > 0 ||
-        this.getEdgesInSector(nextSector).length > 0
-      );
-    });
-    return (this.significant = isSignificant);
-  }
-
-  /**
-   * Returns only incident HalfEdges which lie in the specified sector.
-   * @param sector A sector, against which the {@link HalfEdge}s are checked.
-   * @returns An array, containing all {@link HalfEdge}s lying in the sector.
-   */
-  getEdgesInSector(sector: Sector) {
-    return this.edges.filter((edge) => {
-      const angle = edge.getAngle();
-      if (typeof angle === "number") return sector.encloses(angle);
-    });
   }
 
   /**

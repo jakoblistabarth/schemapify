@@ -1,5 +1,4 @@
 import Dcel from "@/src/Dcel/Dcel";
-import { OrientationClasses } from "@/src/Dcel/HalfEdge";
 import Schematization, {
   Callback,
   Callbacks,
@@ -13,6 +12,10 @@ import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
 import Staircase from "./Staircase";
 import type { CStyle } from "./schematization.style";
 import { style as defaultStyle } from "./schematization.style";
+import PreProcessor from "./PreProcessor";
+import VertexClassifier from "./VertexClassifier";
+import SignificantHalfEdgeProcessor from "./SignificantHalfEdgeProcessor";
+import HalfEdgeClassifier from "./HalfEdgeClassifier";
 
 export enum LABEL {
   // TODO: is a default label needed?
@@ -47,40 +50,6 @@ class CSchematization implements Schematization {
     level: "debug" | "visualize";
   } & Parameters<Callback>[0]): void {
     this.callbacks[level]?.(rest);
-  }
-
-  /**
-   * Classifies all Vertices in the DCEL.
-   * This also adds new Vertices on every HalfEdge which has two significant Vertices.
-   * By doing so it is guaranteed that every HalfEdge has at most one significant Vertex.
-   */
-  classifyVertices(input: Dcel): void {
-    input.getVertices().forEach((v) => {
-      v.isSignificant(this.style.c.sectors);
-    });
-
-    input.getHalfEdges(undefined, true).forEach((edge) => {
-      const [tail, head] = edge.endpoints;
-      if (tail.significant && head.significant) {
-        const newPoint = edge.subdivide()?.head;
-        if (newPoint) newPoint.significant = false;
-      }
-    });
-  }
-
-  classify(input: Dcel) {
-    const t0 = performance.now();
-    this.classifyVertices(input);
-    input.halfEdges.forEach((e) => e.classify(this.style.c));
-    this.doAction({
-      level: "visualize",
-      dcel: input,
-      label: LABEL.CLASSIFY,
-      forSnapshots: {
-        snapshotList: this.snapshots,
-        triggeredAt: t0,
-      },
-    });
   }
 
   /**
@@ -311,6 +280,7 @@ class CSchematization implements Schematization {
    * @returns The preprocessed {@link Dcel}.
    */
   preProcess(input: Dcel) {
+    input = input.clone();
     const t0 = performance.now();
     this.doAction({
       level: "visualize",
@@ -320,14 +290,15 @@ class CSchematization implements Schematization {
     });
 
     const t1 = performance.now();
-    this.splitEdges(input);
+    const preProcessor = new PreProcessor();
+    const output = preProcessor.run(input);
     this.doAction({
       level: "visualize",
-      dcel: input,
+      dcel: output,
       label: LABEL.SUBDIVIDE,
       forSnapshots: { snapshotList: this.snapshots, triggeredAt: t1 },
     });
-    return input;
+    return output;
   }
 
   /**
@@ -336,8 +307,31 @@ class CSchematization implements Schematization {
    * @returns The constrained {@link Dcel}.
    */
   constrainAngles(input: Dcel) {
-    const t0 = performance.now();
-    this.classify(input);
+    let start = performance.now();
+
+    const significantVertices = new VertexClassifier(this.style.c.sectors).run(
+      input,
+    );
+    const withClassifiedVertices = new SignificantHalfEdgeProcessor(
+      significantVertices,
+    ).run(input);
+    //TODO: add vertex classes map to snapshot
+    this.doAction({
+      level: "visualize",
+      dcel: withClassifiedVertices,
+      label: LABEL.CLASSIFY,
+      forSnapshots: {
+        snapshotList: this.snapshots,
+        triggeredAt: start,
+      },
+    });
+
+    start = performance.now();
+    const halfEdgeClasses = new HalfEdgeClassifier(
+      this.style.c,
+      significantVertices,
+    ).run(withClassifiedVertices);
+
     this.addStaircases(input);
     this.calculateStaircases(input);
     //TODO: add additional data to Snapshot: staircaseRegions as geometry
@@ -346,7 +340,7 @@ class CSchematization implements Schematization {
       level: "visualize",
       dcel: input,
       label: LABEL.STAIRCASEREGIONS,
-      forSnapshots: { snapshotList: this.snapshots, triggeredAt: t0 },
+      forSnapshots: { snapshotList: this.snapshots, triggeredAt: start },
     });
     const t1 = performance.now();
     this.replaceEdgesWithStaircases(input);
@@ -399,10 +393,10 @@ class CSchematization implements Schematization {
    * @returns The schematized {@link Dcel}.
    */
   run(input: Dcel) {
-    this.preProcess(input);
-    this.constrainAngles(input);
-    this.simplify(input);
-    return input;
+    const preprocessed = this.preProcess(input);
+    const constrained = this.constrainAngles(preprocessed);
+    const output = this.simplify(constrained);
+    return output;
   }
 
   /**
@@ -414,23 +408,6 @@ class CSchematization implements Schematization {
     return this.style
       ? (this.style.epsilon = input.getDiameter() * lambda)
       : undefined;
-  }
-
-  /**
-   * Subdivide all edges of an DCEL so that no edges are longer than the defined threshold.
-   * @param threshold
-   * @returns A subdivided {@link Dcel}.
-   */
-  splitEdges(input: Dcel, threshold = this.style?.epsilon) {
-    if (!threshold) return;
-    input.getBoundedFaces().forEach((f) => {
-      const edges = f.getEdges();
-      if (!edges) return;
-      edges.forEach((e) => {
-        e.subdivideToThreshold(threshold);
-      });
-    });
-    return input;
   }
 
   /**

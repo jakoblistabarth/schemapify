@@ -1,7 +1,6 @@
 import { v4 as uuid } from "uuid";
 import Configuration from "../c-oriented-schematization/Configuration";
 import Sector from "../c-oriented-schematization/Sector";
-import Staircase from "../c-oriented-schematization/Staircase";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
 import Point from "../geometry/Point";
@@ -11,14 +10,6 @@ import Dcel from "./Dcel";
 import Face from "./Face";
 import Vertex from "./Vertex";
 import C from "../c-oriented-schematization/C";
-
-export enum OrientationClasses {
-  AB = "alignedBasic",
-  UB = "unalignedBasic",
-  E = "evading",
-  AD = "alignedDeviating",
-  UD = "unalignedDeviating",
-}
 
 export enum InflectionType {
   C = "convex",
@@ -34,11 +25,6 @@ class HalfEdge {
   face?: Face;
   prev?: HalfEdge;
   next?: HalfEdge;
-  assignedDirection?: number;
-  isAligning?: boolean;
-  class?: OrientationClasses;
-  staircase?: Staircase;
-  configuration?: Configuration;
 
   constructor(tail: Vertex, dcel: Dcel) {
     this.uuid = uuid();
@@ -80,16 +66,6 @@ class HalfEdge {
   get endpoints() {
     const head = this.head;
     return head ? [this.tail, head] : [];
-  }
-
-  /**
-   * Gets the significant Vertex of the HalfEdge.
-   * A Vertex is significant if its incident Edges reside in the same sector or adjacent sectors.
-   * @returns The significant {@link Vertex} of the {@link HalfEdge}, if it exists.
-   */
-  get significantVertex() {
-    const endPoints = this.endpoints;
-    if (endPoints) return endPoints.find((v) => v.significant);
   }
 
   /**
@@ -320,31 +296,6 @@ class HalfEdge {
   }
 
   /**
-   * Subdivides the HalfEdge into smaller Edges, using a threshold.
-   * @param threshold The value determining the maximum length of a subdivision of the original {@link HalfEdge}.
-   */
-  subdivideToThreshold(threshold: number) {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const initialHalfEdge: HalfEdge = this;
-    let currentHalfEdge: HalfEdge = initialHalfEdge;
-
-    while (currentHalfEdge != initialHalfEdge.next) {
-      const length = currentHalfEdge.getLength();
-      if (
-        currentHalfEdge.next &&
-        typeof length === "number" &&
-        length < threshold
-      ) {
-        currentHalfEdge = currentHalfEdge.next;
-      } else {
-        const newHalfEdge = currentHalfEdge.subdivide();
-        currentHalfEdge =
-          newHalfEdge ?? currentHalfEdge.next ?? initialHalfEdge;
-      }
-    }
-  }
-
-  /**
    * Gets the associated angle of the HalfEdge, which are the defined as the
    * sector bounds of the sector enclosing the HalfEdge.
    * @returns An Array of angles in radians. It has length one if the {@link HalfEdge} is aligned.
@@ -424,26 +375,6 @@ class HalfEdge {
   }
 
   /**
-   * Determines whether the HalfEdge's assigned Direction is adjacent to its associated sector.
-   * @returns A boolean, indicating whether or not the {@link HalfEdge} is deviating.
-   */
-  isDeviating(sectors: Sector[]) {
-    let assignedAngle = this.getAssignedAngle(sectors);
-    if (typeof assignedAngle !== "number") return false;
-    if (this.isAligned(sectors)) {
-      return (
-        this.getAssociatedAngles(sectors)[0] !== this.getAssignedAngle(sectors)
-      );
-    } else {
-      const sector = this.getAssociatedSector(sectors)[0];
-      //TODO: refactor find better solution for last sector (idx=0)
-      if (sector.idx === sectors.length - 1 && assignedAngle === 0)
-        assignedAngle = Math.PI * 2;
-      return !sector.encloses(assignedAngle);
-    }
-  }
-
-  /**
    * Determines the deviation of the HalfEdge in respect to its associated sector.
    * @param sector The {@link Sector} the deviation is calculated for.
    * @returns The deviation in radians.
@@ -453,15 +384,6 @@ class HalfEdge {
     if (typeof angle !== "number") return;
     const diff = Math.abs(angle - sector.lower);
     return diff > Math.PI ? Math.abs(diff - Math.PI * 2) : diff;
-  }
-
-  /**
-   * Determines whether the HalfEdge is aligned to one of the orientations of C.
-   * @returns A boolean, indicating whether or not the {@link HalfEdge} is aligned.
-   */
-  isAligned(sectors: Sector[]) {
-    const isAligned = this.getAssociatedAngles(sectors).length === 1;
-    return (this.isAligning = isAligned);
   }
 
   /**
@@ -489,43 +411,6 @@ class HalfEdge {
   toLineSegment() {
     const head = this.head;
     if (head) return new LineSegment(this.tail, head);
-  }
-
-  /**
-   * Classifies a HalfEdge and its twin, based on its orientation.
-   * The classes depend on the defined set of orientations, the setup of {@link C}.
-   */
-  classify(c: C) {
-    this.tail.assignDirections(c);
-
-    if (this.class) return; // do not overwrite classification
-    const head = this.head;
-
-    if (head && head.significant) return; // do not classify a HalfEdge which has a significant head
-
-    const sectors = c.sectors;
-    const associatedSector = this.getAssociatedSector(sectors);
-    const sector = associatedSector[0];
-    const significantVertex = this.significantVertex || this.tail;
-    const edges = significantVertex
-      .getEdgesInSector(sector)
-      .filter((edge) => !edge.isAligned(sectors) && !edge.isDeviating(sectors));
-
-    let classification: OrientationClasses;
-    if (this.isAligned(sectors)) {
-      classification = this.isDeviating(sectors)
-        ? OrientationClasses.AD
-        : OrientationClasses.AB;
-    } else if (this.isDeviating(sectors)) {
-      classification = OrientationClasses.UD;
-    } else if (edges.length == 2) {
-      classification = OrientationClasses.E;
-    } else {
-      classification = OrientationClasses.UB;
-    }
-
-    this.class = classification;
-    if (this.twin) this.twin.class = classification;
   }
 
   /**
