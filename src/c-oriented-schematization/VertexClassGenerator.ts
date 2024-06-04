@@ -1,10 +1,11 @@
 import Dcel from "../Dcel/Dcel";
 import Vertex from "../Dcel/Vertex";
-import Classifier from "../Schematization/Classifier";
+import Generator from "../Schematization/Generator";
+import { getAssociatedSector } from "./HalfEdgeUtils";
 import Sector from "./Sector";
 import { getEdgesInSector } from "./VertexUtils";
 
-class VertexClassifier implements Classifier {
+class VertexClassGenerator implements Generator {
   sectors: Sector[];
 
   constructor(sectors: Sector[]) {
@@ -34,7 +35,7 @@ class VertexClassifier implements Classifier {
 
     // classify as significant if one sector occurs multiple times
     const occupiedSectors = vertex.edges
-      .map((edge) => edge.getAssociatedSector(sectors))
+      .map((edge) => getAssociatedSector(edge, sectors))
       .flat();
 
     const uniqueSectors: Sector[] = occupiedSectors.reduce(
@@ -67,4 +68,4 @@ class VertexClassifier implements Classifier {
   }
 }
 
-export default VertexClassifier;
+export default VertexClassGenerator;

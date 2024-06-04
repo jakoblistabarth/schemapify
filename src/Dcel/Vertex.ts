@@ -3,7 +3,6 @@ import Point from "../geometry/Point";
 import Dcel from "./Dcel";
 import Face from "./Face";
 import HalfEdge from "./HalfEdge";
-import C from "../c-oriented-schematization/C";
 
 class Vertex extends Point {
   dcel: Dcel;
@@ -165,45 +164,6 @@ class Vertex extends Point {
       this.edges.splice(idx, 1);
     }
     return this.edges;
-  }
-
-  /**
-   * Assigns directions to all incident HalfEdges of the Vertex.
-   * @returns An Array, holding the assigned directions starting with the direction of the {@link HalfEge} with the smallest angle on the unit circle.
-   */
-  assignDirections(c: C) {
-    const edges = this.sortEdges(false);
-    const sectors = c.sectors;
-
-    function getDeviation(edges: HalfEdge[], directions: number[]): number {
-      return edges.reduce((deviation, edge, index) => {
-        const newDeviation = edge.getDeviation(sectors[directions[index]]);
-        return typeof newDeviation === "number"
-          ? deviation + newDeviation
-          : Infinity;
-      }, 0);
-    }
-
-    const validDirections = c.getValidDirections(edges.length);
-
-    let minmalDeviation = Infinity;
-    let solution: number[] = [];
-
-    validDirections.forEach((directions) => {
-      for (let index = 0; index < directions.length; index++) {
-        const deviation = getDeviation(edges, directions);
-
-        if (deviation < minmalDeviation) {
-          minmalDeviation = deviation;
-          solution = [...directions];
-        }
-        const lastElement = directions.pop();
-        if (lastElement) directions.unshift(lastElement);
-      }
-    });
-
-    edges.forEach((edge, idx) => (edge.assignedDirection = solution[idx]));
-    return solution;
   }
 
   /**

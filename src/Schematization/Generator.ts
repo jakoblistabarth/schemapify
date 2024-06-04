@@ -1,9 +1,9 @@
 import Dcel from "../Dcel/Dcel";
 
-abstract class Classifier {
+abstract class Generator {
   constructor() {}
 
   public abstract run(input: Dcel): Map<string, object | string> | string[];
 }
 
-export default Classifier;
+export default Generator;
