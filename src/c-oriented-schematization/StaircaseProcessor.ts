@@ -1,13 +1,11 @@
-import { CStyle } from "./schematization.style";
+import Dcel from "../Dcel/Dcel";
 
 class StaircaseProcessor {
-  public addStaircases(
-    vertexMap: Map<string, any>,
-    HalfEdgeMap: Map<string, any>,
-    style: CStyle,
-  ) {
+  public run(input: Dcel) {
     this.caclulateStaircase();
     this.replaceEdgesWithStaircases();
+    const output = input;
+    return output;
   }
 
   private caclulateStaircase() {}

@@ -9,13 +9,14 @@ import Point from "@/src/geometry/Point";
 import Polygon from "@/src/geometry/Polygon";
 import Configuration from "./Configuration";
 import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
-import Staircase from "./Staircase";
 import type { CStyle } from "./schematization.style";
 import { style as defaultStyle } from "./schematization.style";
 import PreProcessor from "./PreProcessor";
-import VertexClassifier from "./VertexClassifier";
+import VertexClassGenerator from "./VertexClassGenerator";
 import SignificantHalfEdgeProcessor from "./SignificantHalfEdgeProcessor";
-import HalfEdgeClassifier from "./HalfEdgeClassifier";
+import HalfEdgeClassGenerator from "./HalfEdgeClassGenerator";
+import StaircaseGenerator from "./StaircaseGenerator";
+import StaircaseProcessor from "./StaircaseProcessor";
 
 export enum LABEL {
   // TODO: is a default label needed?
@@ -53,188 +54,6 @@ class CSchematization implements Schematization {
   }
 
   /**
-   * Get all Staircases of an {@link Dcel}.
-   * @param input The {@link Dcel} to get the Staircases from.
-   * @returns An array of Staircases.
-   */
-  getStaircases(input: Dcel) {
-    return input
-      .getHalfEdges()
-      .map((edge) => edge.staircase)
-      .filter((staircase): staircase is Staircase => !!staircase);
-  }
-
-  /**
-   * Adds a staircase to every edge of the {@link DCEL}.
-   * @param input The {@link Dcel} to add staircases to.
-   */
-  addStaircases(input: Dcel) {
-    // create staircase for every pair of edges
-    input.getHalfEdges(undefined, true).forEach((edge) => {
-      if (edge.class === OrientationClasses.AB) return;
-      if (
-        edge.significantVertex &&
-        edge.significantVertex !== edge.tail &&
-        edge.twin
-      )
-        edge = edge.twin;
-      edge.staircase = new Staircase(edge, this.style);
-    });
-  }
-
-  /**
-   * Calculate all staircases of a {@link Dcel}.
-   * @param input The {@link Dcel} to calculate staircases for.
-   */
-  calculateStaircases(input: Dcel) {
-    // calculate edgedistance and stepnumber for deviating edges first (p. 18)
-    const staircasesOfDeviatingEdges = this.getStaircases(input).filter(
-      (staircase) =>
-        staircase.edge.class === OrientationClasses.AD ||
-        staircase.edge.class === OrientationClasses.UD,
-    );
-    this.setEdgeDistances(staircasesOfDeviatingEdges);
-    this.setSes(
-      staircasesOfDeviatingEdges.filter(
-        (staircase) => staircase.interferesWith.length > 0,
-      ),
-    );
-
-    // calculate edgedistance and stepnumber for remaining edges
-    const staircasesOther = this.getStaircases(input).filter(
-      (staircase) =>
-        staircase.edge.class !== OrientationClasses.AD &&
-        staircase.edge.class !== OrientationClasses.UD,
-    );
-    this.setEdgeDistances(staircasesOther);
-    this.setSes(
-      staircasesOther.filter(
-        (staircase) => staircase.interferesWith.length > 0,
-      ),
-    );
-  }
-
-  /**
-   * Set the edgedistance for each staircase of a given array of staircases.
-   * @param staircases The array of staircases to set the edgedistance for.
-   */
-  setEdgeDistances(staircases: Staircase[]) {
-    // TODO: make sure the edgedistance cannot be too small?
-    // To account for topology error ("Must Be Larger Than Cluster tolerance"), when minimum distance between points is too small
-    // see: https://pro.arcgis.com/en/pro-app/latest/help/editing/geodatabase-topology-rules-for-polygon-features.htm
-
-    // check if any point of a region is within another staircase region
-    for (const staircase of staircases) {
-      staircases.forEach((staircase_) => {
-        if (staircase_ === staircase) return;
-        if (
-          staircase.region.exteriorRing.points.every(
-            (point) => !point.isInPolygon(staircase_.region),
-          )
-        )
-          return;
-
-        let e = staircase.edge;
-        let e_ = staircase_.edge;
-        const eStaircaseEpsilon = this.style.staircaseEpsilon;
-        const e_staircaseSe = e_.staircase?.se;
-        const eLength = e.getLength();
-        if (
-          e.tail !== e_.tail &&
-          e.tail !== e_.head &&
-          e.head !== e_.head &&
-          e.head !== e_.tail
-        ) {
-          // "If the compared regions' edges do not have a vertex in common,
-          // de is is simply the minimal distance between the edges."
-          const de = e.distanceToEdge(e_);
-          if (typeof de === "number") {
-            staircase.de = de;
-            staircase.interferesWith.push(e_);
-          }
-        } else {
-          // "If e and e' share a vertex v, they interfere only if the edges reside in the same sector with respect to v."
-          const v = e.endpoints.find(
-            (endpoint) => e_.endpoints.indexOf(endpoint) >= 0,
-          ); // get common vertex
-          e = e.tail !== v && e.twin ? e.twin : e;
-          e_ = e_.tail !== v && e_.twin ? e_.twin : e_;
-          const e_angle = e_.getAngle();
-          if (
-            typeof e_angle !== "number" ||
-            !e
-              .getAssociatedSector(this.style.c.sectors)
-              .some((sector) => sector.encloses(e_angle))
-          )
-            return;
-          staircase.interferesWith.push(e_);
-
-          // "However, if e and e' do share a vertex, then we must again look at the classification."
-          let de = undefined;
-          switch (e.class) {
-            case OrientationClasses.UB: {
-              // "If e' is aligned, then we ignore a fraction of (1 − ε)/2 of e'."
-              // "If e' is unaligned, then we ignore a fraction of e' equal to the length of the first step."
-              // "In other words, we ignore a fraction of 1/(se' − 1) [of e']."
-              if (e_.class === OrientationClasses.AD) {
-                const offset = (1 - eStaircaseEpsilon) / 2;
-                const vertexOffset = e.getOffsetVertex(e_, offset);
-                de = vertexOffset?.distanceToEdge(e);
-              } else {
-                if (!e_staircaseSe) return;
-                const offset = 1 / (e_staircaseSe - 1);
-                const vertexOffset = e.getOffsetVertex(e_, offset);
-                de = vertexOffset?.distanceToEdge(e);
-              }
-              break;
-            }
-            case OrientationClasses.E: {
-              // "If e' is an evading edge, we ignore the first half of e (but not of e')."
-              // "If e' is a deviating edge, we treat it as if e were an unaligned basic edge."
-              if (typeof eLength !== "number") return;
-              if (e_.class === OrientationClasses.E) {
-                const vertexOffset = e.getOffsetVertex(e, (eLength * 1) / 2);
-                de = vertexOffset?.distanceToEdge(e_);
-              } else {
-                // AD or UD
-                if (typeof e_staircaseSe !== "number") return;
-                const offset = 1 / (e_staircaseSe - 1);
-                const vertexOffset = e.getOffsetVertex(e_, offset);
-                de = vertexOffset?.distanceToEdge(e);
-              }
-              break;
-            }
-            case OrientationClasses.AD: {
-              const offset = (1 - eStaircaseEpsilon) / 2;
-              const vertexOffset = e.getOffsetVertex(e, offset);
-              de = vertexOffset?.distanceToEdge(e_);
-              break;
-            }
-            case OrientationClasses.UD: {
-              if (typeof eLength !== "number") return;
-              const vertexOffset = e.getOffsetVertex(e, (eLength * 1) / 3);
-              de = vertexOffset?.distanceToEdge(e_);
-              break;
-            }
-          }
-          if (typeof de === "number") staircase.de = de;
-        }
-      });
-    }
-  }
-
-  /**
-   * Calculate and set se, defined as "the number of steps a {@link Staircase} must use"
-   * for each staircase of a given array of staircases.
-   * @param staircases The array of staircases to set se for.
-   */
-  setSes(staircases: Staircase[]) {
-    for (const staircase of staircases) {
-      staircase.setSe(this.style.c.sectors);
-    }
-  }
-
-  /**
    * Replace all edges of a {@link Dcel} with staircases.
    * @param input The {@link Dcel} to replace the edges with staircases in.
    */
@@ -249,11 +68,6 @@ class CSchematization implements Schematization {
         if (dividedEdge.next) edgeToSubdivide = dividedEdge.next;
       }
     });
-
-    // assign class AB to all edges of just created staircases
-    input
-      .getHalfEdges()
-      .forEach((edge) => (edge.class = OrientationClasses.AB));
   }
 
   /**
@@ -290,7 +104,7 @@ class CSchematization implements Schematization {
     });
 
     const t1 = performance.now();
-    const preProcessor = new PreProcessor();
+    const preProcessor = new PreProcessor(this.style.epsilon);
     const output = preProcessor.run(input);
     this.doAction({
       level: "visualize",
@@ -309,16 +123,16 @@ class CSchematization implements Schematization {
   constrainAngles(input: Dcel) {
     let start = performance.now();
 
-    const significantVertices = new VertexClassifier(this.style.c.sectors).run(
-      input,
-    );
-    const withClassifiedVertices = new SignificantHalfEdgeProcessor(
+    const significantVertices = new VertexClassGenerator(
+      this.style.c.sectors,
+    ).run(input);
+    const withSubdividedEdges = new SignificantHalfEdgeProcessor(
       significantVertices,
     ).run(input);
     //TODO: add vertex classes map to snapshot
     this.doAction({
       level: "visualize",
-      dcel: withClassifiedVertices,
+      dcel: withSubdividedEdges,
       label: LABEL.CLASSIFY,
       forSnapshots: {
         snapshotList: this.snapshots,
@@ -327,12 +141,41 @@ class CSchematization implements Schematization {
     });
 
     start = performance.now();
-    const halfEdgeClasses = new HalfEdgeClassifier(
+    //TODO: add halfedge classes to snapshot
+    const halfEdgeClasses = new HalfEdgeClassGenerator(
       this.style.c,
       significantVertices,
-    ).run(withClassifiedVertices);
+    ).run(withSubdividedEdges);
+    this.doAction({
+      level: "visualize",
+      dcel: withSubdividedEdges,
+      label: LABEL.CLASSIFY,
+      forSnapshots: {
+        snapshotList: this.snapshots,
+        triggeredAt: start,
+      },
+    });
 
-    this.addStaircases(input);
+    start = performance.now();
+    const staircases = new StaircaseGenerator(
+      significantVertices,
+      halfEdgeClasses,
+    ).run(withSubdividedEdges);
+    //TODO: add additional data to Snapshot: staircaseRegions as geometry
+    this.doAction({
+      level: "visualize",
+      dcel: withSubdividedEdges,
+      label: LABEL.STAIRCASEREGIONS,
+      forSnapshots: {
+        snapshotList: this.snapshots,
+        triggeredAt: start,
+      },
+    });
+
+    const withStaircases = new StaircaseProcessor(staircases).run(
+      withSubdividedEdges,
+    );
+
     this.calculateStaircases(input);
     //TODO: add additional data to Snapshot: staircaseRegions as geometry
     //   additionalData: { staircaseRegions: this.staircaseRegionsToGeometry() },

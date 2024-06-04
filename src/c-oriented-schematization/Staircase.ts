@@ -1,6 +1,6 @@
 import ConvexHullGrahamScan from "graham_scan";
 import Dcel from "../Dcel/Dcel";
-import HalfEdge, { OrientationClasses } from "../Dcel/HalfEdge";
+import HalfEdge from "../Dcel/HalfEdge";
 import Vertex from "../Dcel/Vertex";
 import Line from "../geometry/Line";
 import Point from "../geometry/Point";
@@ -8,10 +8,17 @@ import Polygon from "../geometry/Polygon";
 import Ring from "../geometry/Ring";
 import Sector from "./Sector";
 import { CStyle } from "./schematization.style";
+import { OrientationClasses } from "./HalfEdgeClassGenerator";
+import { getAssociatedAngles, getAssociatedSector } from "./HalfEdgeUtils";
+import { getUnitVector } from "../utilities";
 
 class Staircase {
   /** The {@link HalfEdge} the staircase belongs to. */
   edge: HalfEdge;
+  /** The orientation class of the {@link HalfEdge} */
+  edgeClass: OrientationClasses;
+  /** the significant {@link Vertex} */
+  significantVertex?: Vertex;
   /** A {@link Polygon} encompassing the staircase. */
   region: Polygon;
   /** Upper bound on the maximal distance between the staircase of e and e itself. */
@@ -26,8 +33,15 @@ class Staircase {
   interferesWith: HalfEdge[];
   #cStyle: CStyle;
 
-  constructor(edge: HalfEdge, cStyle: CStyle) {
+  constructor(
+    edge: HalfEdge,
+    edgeClass: OrientationClasses,
+    significantVertex: Vertex | undefined,
+    cStyle: CStyle,
+  ) {
     this.edge = edge;
+    this.edgeClass = edgeClass;
+    this.significantVertex = significantVertex;
     this.#cStyle = cStyle;
     this.deltaE = this.getDeltaE();
     this.points = [];
@@ -57,7 +71,7 @@ class Staircase {
     const edge = this.edge;
     const length = edge.getLength();
     const angle = edge.getAngle();
-    switch (edge.class) {
+    switch (this.edgeClass) {
       // "Aligned deviating edges do not use steps but a value δe instead. (p.17)"
       // TODO: make this function pure by not setting deltaE from within
       case OrientationClasses.AD: {
@@ -91,8 +105,8 @@ class Staircase {
           return;
         // "Let 𝛼1 denote the absolute angle between vector w−v and the assigned direction of e.
         // Similarly, 𝛼2 denotes the absolute angle between vector w−v and the other associated direction of e."
-        const alpha1 = angle - edge.getAssociatedAngles(sectors)[0];
-        const alpha2 = edge.getAssociatedAngles(sectors)[1] - angle;
+        const alpha1 = angle - getAssociatedAngles(edge, sectors)[0];
+        const alpha2 = getAssociatedAngles(edge, sectors)[1] - angle;
         const maximum_step_length =
           ((Math.pow(Math.tan(alpha1), -1) + Math.pow(Math.tan(alpha2), -1)) *
             this.de) /
@@ -106,7 +120,7 @@ class Staircase {
   getDeltaE() {
     const length = this.edge.getLength();
     return typeof length === "number" &&
-      this.edge.class === OrientationClasses.AD
+      this.edgeClass === OrientationClasses.AD
       ? length * 0.1
       : undefined;
   }
@@ -119,8 +133,7 @@ class Staircase {
    */
   getRegion() {
     const edge =
-      !this.edge.significantVertex ||
-      this.edge.significantVertex === this.edge.tail
+      !this.significantVertex || this.significantVertex === this.edge.tail
         ? this.edge
         : this.edge.twin;
     const head = edge?.head;
@@ -129,7 +142,7 @@ class Staircase {
     if (!edge || !head || typeof assignedAngle !== "number")
       return new Polygon([]);
 
-    switch (edge.class) {
+    switch (this.edgeClass) {
       case OrientationClasses.AB:
         return Polygon.fromCoordinates([
           [
@@ -148,15 +161,18 @@ class Staircase {
         // "that is used to make the staircase adhere to the assigned direction (see Figure 12(b–c))."
         this.points = this.getStaircasePoints();
 
-        const [lower, upper] = edge.getAssociatedSector(sectors)[0].getBounds();
+        const [lower, upper] = getAssociatedSector(
+          edge,
+          sectors,
+        )[0].getBounds();
         if (typeof lower !== "number" || typeof upper !== "number")
           return new Polygon([]);
         const smallestAssociatedAngle = edge.getClosestAssociatedAngle(
           this.#cStyle.c,
         );
-        const largestAssociatedAngle = edge
-          .getAssociatedAngles(sectors)
-          .find((angle) => angle != smallestAssociatedAngle);
+        const largestAssociatedAngle = getAssociatedAngles(edge, sectors).find(
+          (angle) => angle != smallestAssociatedAngle,
+        );
         if (
           typeof smallestAssociatedAngle !== "number" ||
           typeof largestAssociatedAngle !== "number"
@@ -215,7 +231,7 @@ class Staircase {
    * @returns All {@link Point}s constructing the {@link Staircase}.
    */
   getStaircasePoints() {
-    switch (this.edge.class) {
+    switch (this.edgeClass) {
       case OrientationClasses.UB:
         return this.getStaircasePointsUB();
       case OrientationClasses.E:
@@ -270,7 +286,7 @@ class Staircase {
     const head = edge.head;
     if (!head) return new Polygon([]);
 
-    const associatedSector = edge.getAssociatedSector(this.#cStyle.c.sectors);
+    const associatedSector = getAssociatedSector(edge, this.#cStyle.c.sectors);
     if (!associatedSector) return new Polygon([]);
     const [lower, upper] = associatedSector[0].getBounds();
     const A = new Point(edge.tail.x, edge.tail.y);
@@ -295,11 +311,11 @@ class Staircase {
 
     const sectors = this.#cStyle.c.sectors;
     const d1 = edge.getAssignedAngle(sectors);
-    const associatedAngles = edge.getAssociatedAngles(sectors);
+    const associatedAngles = getAssociatedAngles(edge, sectors);
     if (typeof d1 !== "number" || !associatedAngles) return [];
     const d2 = associatedAngles.find((angle) => angle !== d1);
     if (typeof d2 !== "number") return [];
-    const [l1, l2] = edge.getStepLengths(se, d1, sectors);
+    const [l1, l2] = getStepLengths(edge, se, d1, sectors);
 
     const points: Point[] = [edge.tail];
     for (let idx = 0; idx < se; idx++) {
@@ -329,11 +345,11 @@ class Staircase {
 
     const sectors = this.#cStyle.c.sectors;
     const d1 = edge.getAssignedAngle(sectors);
-    const associatedAngles = edge.getAssociatedAngles(sectors);
+    const associatedAngles = getAssociatedAngles(edge, sectors);
     if (typeof d1 !== "number" || !associatedAngles) return [];
     const d2 = associatedAngles.find((angle) => angle !== d1);
     if (typeof d2 !== "number") return [];
-    const [l1, l2] = edge.getStepLengths(se, d1, sectors);
+    const [l1, l2] = getStepLengths(edge, se, d1, sectors);
 
     const points: Point[] = [edge.tail];
     for (let idx = 0; idx < se; idx++) {
@@ -391,11 +407,11 @@ class Staircase {
 
     const sectors = this.#cStyle.c.sectors;
     const d1 = edge.getClosestAssociatedAngle(this.#cStyle.c);
-    const associatedAngles = edge.getAssociatedAngles(sectors);
+    const associatedAngles = getAssociatedAngles(edge, sectors);
     if (typeof d1 !== "number" || !associatedAngles) return [];
     const d2 = associatedAngles.find((angle) => angle !== d1);
     if (typeof d2 !== "number") return [];
-    const [l1, l2] = edge.getStepLengths(se - 1, d1, sectors);
+    const [l1, l2] = getStepLengths(edge, se - 1, d1, sectors);
 
     // like for an evading edge, but 1 associated step less
     const points: Point[] = [edge.tail];
@@ -420,3 +436,38 @@ class Staircase {
 }
 
 export default Staircase;
+
+/**
+ * Get the lengths of the staircase steps.
+ * @param se The step size of the staircase.
+ * @param d1 The direction of the first step.
+ * @param sectors The sectors the HalfEdge is enclosed by.
+ * @returns An array of numbers, indicating the lengths of the steps.
+ */
+export const getStepLengths = (
+  halfEdge: HalfEdge,
+  se: number,
+  d1: number,
+  sectors: Sector[],
+) => {
+  const associatedAngles = getAssociatedAngles(halfEdge, sectors);
+  if (!associatedAngles) return [];
+  const d2 = associatedAngles.find((angle) => angle !== d1);
+  if (typeof d2 !== "number") return [];
+  const d1u = getUnitVector(d1);
+  const d2u = getUnitVector(d2);
+
+  // create vector of edge
+  const v = halfEdge.getVector();
+  if (!v) return [];
+  const vse = v.times(1 / se);
+
+  // solve linear equation for l1 and l2 with cramer's rule for 2x2 systems
+  const det = d1u.dx * d2u.dy - d1u.dy * d2u.dx;
+  const detX = vse.dx * d2u.dy - vse.dy * d2u.dx;
+  const l1 = detX / det;
+  const detY = d1u.dx * vse.dy - d1u.dy * vse.dx;
+  const l2 = detY / det;
+
+  return [l1, l2];
+};

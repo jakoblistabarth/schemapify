@@ -5,11 +5,9 @@ import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
 import Point from "../geometry/Point";
 import Vector2D from "../geometry/Vector2D";
-import { getUnitVector } from "../utilities";
 import Dcel from "./Dcel";
 import Face from "./Face";
 import Vertex from "./Vertex";
-import C from "../c-oriented-schematization/C";
 
 export enum InflectionType {
   C = "convex",
@@ -296,85 +294,6 @@ class HalfEdge {
   }
 
   /**
-   * Gets the associated angle of the HalfEdge, which are the defined as the
-   * sector bounds of the sector enclosing the HalfEdge.
-   * @returns An Array of angles in radians. It has length one if the {@link HalfEdge} is aligned.
-   */
-  getAssociatedAngles(sectors: Sector[]) {
-    const angle = this.getAngle();
-    if (typeof angle !== "number") return [];
-    const directions: number[] = [];
-    sectors.some(function (sector) {
-      if (angle === sector.lower) {
-        return directions.push(sector.lower);
-      } else if (angle === sector.upper) {
-        return directions.push(sector.upper);
-      } else if (angle > sector.lower && angle < sector.upper) {
-        return directions.push(sector.lower, sector.upper);
-      }
-    });
-
-    return directions;
-  }
-
-  /**
-   * Gets the angle of the HalfEdge's assigned direction.
-   * @returns The angle in radians.
-   */
-  getAssignedAngle(sectors: Sector[]) {
-    if (typeof this.assignedDirection !== "number") return;
-    return Math.PI * 2 * (this.assignedDirection / sectors.length);
-  }
-
-  /**
-   * Gets the sector(s) the HalfEdge is enclosed by.
-   * @returns An array of Sectors. It has length 2 if the {@link HalfEdge} is aligned.
-   */
-  getAssociatedSector(sectors: Sector[]) {
-    const associatedAngles = this.getAssociatedAngles(sectors);
-    const direction = associatedAngles;
-
-    return sectors.reduce((acc: Sector[], sector) => {
-      if (
-        (direction[0] === sector.lower && direction[1] === sector.upper) ||
-        +direction === sector.lower ||
-        +direction === sector.upper ||
-        +direction === sector.upper - Math.PI * 2
-      ) {
-        acc.push(sector);
-      }
-      return acc;
-    }, []);
-  }
-
-  /**
-   * Gets the closest associated angle (one bound of its associated sector)
-   * of an unaligned deviating(!) edge in respect to its assigned angle.
-   * Needed for constructing the staircase of an unaligned deviating edge.
-   * @returns The closest associated angle of an {@link HalfEdge} in respect to its assigned angle.
-   */
-
-  // TODO: Where does such function live?
-  // within the HalfEdge class or rather within Staircase??
-  getClosestAssociatedAngle(c: C) {
-    const sectors = c.sectors;
-    const associatedSector = this.getAssociatedSector(sectors);
-    if (this.class !== OrientationClasses.UD || !associatedSector) return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges
-    const sector = associatedSector[0];
-
-    // TODO: refactor: find better solution for last sector and it's upper bound
-    // set upperbound of last to Math.PI * 2 ?
-    const upper = sector.idx === sectors.length - 1 ? 0 : sector.upper;
-    const lower = sector.lower;
-    const angle =
-      this.getAssignedAngle(sectors) === 0
-        ? Math.PI * 2
-        : this.getAssignedAngle(sectors);
-
-    return upper + c.sectorAngle === angle ? upper : lower;
-  }
-
-  /**
    * Determines the deviation of the HalfEdge in respect to its associated sector.
    * @param sector The {@link Sector} the deviation is calculated for.
    * @returns The deviation in radians.
@@ -411,50 +330,6 @@ class HalfEdge {
   toLineSegment() {
     const head = this.head;
     if (head) return new LineSegment(this.tail, head);
-  }
-
-  /**
-   * Get the lengths of the staircase steps.
-   * @param se The step size of the staircase.
-   * @param d1 The direction of the first step.
-   * @param sectors The sectors the HalfEdge is enclosed by.
-   * @returns An array of numbers, indicating the lengths of the steps.
-   */
-  getStepLengths(se: number, d1: number, sectors: Sector[]) {
-    //TODO: move getStepLengths() to staircase ??
-    const associatedAngles = this.getAssociatedAngles(sectors);
-    if (!associatedAngles) return [];
-    const d2 = associatedAngles.find((angle) => angle !== d1);
-    if (typeof d2 !== "number") return [];
-    const d1u = getUnitVector(d1);
-    const d2u = getUnitVector(d2);
-
-    // create vector of edge
-    const v = this.getVector();
-    if (!v) return [];
-    const vse = v.times(1 / se);
-
-    // solve linear equation for l1 and l2 with cramer's rule for 2x2 systems
-    const det = d1u.dx * d2u.dy - d1u.dy * d2u.dx;
-    const detX = vse.dx * d2u.dy - vse.dy * d2u.dx;
-    const l1 = detX / det;
-    const detY = d1u.dx * vse.dy - d1u.dy * vse.dx;
-    const l2 = detY / det;
-
-    return [l1, l2];
-  }
-
-  /**
-   * Gets the modified tail {@link Vertex}, which is used for calculating the edgeDistance between HalfEdges sharing one Vertex.
-   * @param offsetEdge The {@link HalfEdge} of which a part should be ignored.
-   * @param offset The distance the offset Vertex should be moved in respect to its (original) tail {@link Vertex}.
-   * @returns The Vertex on the edge of which a part should be ignored and from where the edge is considered for calculating the edgeDistance.
-   */
-  getOffsetVertex(offsetEdge: HalfEdge, offset: number) {
-    const angle = offsetEdge.getAngle();
-    if (typeof angle !== "number") return;
-    const pointOffset = offsetEdge.tail.getNewPoint(offset, angle);
-    return new Vertex(pointOffset.x, pointOffset.y, offsetEdge.dcel);
   }
 
   /**
