@@ -23,8 +23,19 @@ class Configuration {
 
   constructor(edge: HalfEdge) {
     this.innerEdge = edge;
-    this[ContractionType.N] = Contraction.initialize(this, ContractionType.N);
-    this[ContractionType.P] = Contraction.initialize(this, ContractionType.P);
+  }
+
+  initialize(configurations: Map<string, Configuration>) {
+    this[ContractionType.P] = Contraction.initialize(
+      this,
+      ContractionType.P,
+      configurations,
+    );
+    this[ContractionType.N] = Contraction.initialize(
+      this,
+      ContractionType.N,
+      configurations,
+    );
   }
 
   /**
@@ -60,6 +71,13 @@ class Configuration {
     return x
       ? this.innerEdge.getCycle().filter((edge) => !x.includes(edge))
       : [];
+  }
+
+  get contractions() {
+    return {
+      [ContractionType.N]: this[ContractionType.N],
+      [ContractionType.P]: this[ContractionType.P],
+    };
   }
 
   /**

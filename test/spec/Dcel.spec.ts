@@ -286,13 +286,7 @@ describe("getVertices()", function () {
     dcel = Dcel.fromGeoJSON(polygon);
   });
 
-  it("returns vertices of type insignificant if specified", function () {
-    expect(dcel.getVertices(false).every((v) => !v.significant)).toBeTruthy();
-  });
-  it("returns vertices of type significant if specified", function () {
-    expect(dcel.getVertices(true).every((v) => v.significant)).toBeTruthy();
-  });
-  it("returns all vertices if no type specified", function () {
+  it("returns all vertices", function () {
     expect(dcel.getVertices().length).toBe(dcel.vertices.size);
   });
 });

@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
 import Dcel from "@/src/Dcel/Dcel";
-import { OrientationClasses } from "@/src/Dcel/HalfEdge";
+import { Orientation } from "@/src/c-oriented-schematization/HalfEdgeClassGenerator";
 import { createEdgeVertexSetup, TestSetup } from "./test-setup";
 import { style } from "@/src/c-oriented-schematization/schematization.style";
 import C from "@/src/c-oriented-schematization/C";
@@ -98,8 +98,8 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od53.classify(c);
     s.directions.od217.classify(c);
 
-    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
-    expect(s.directions.od217.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od53.class).toBe(Orientation.UB);
+    expect(s.directions.od217.class).toBe(Orientation.UB);
   });
 
   it("b", function () {
@@ -108,9 +108,9 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od180.classify(c);
     s.directions.od270.classify(c);
 
-    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
-    expect(s.directions.od180.class).toBe(OrientationClasses.AB);
-    expect(s.directions.od270.class).toBe(OrientationClasses.AB);
+    expect(s.directions.od53.class).toBe(Orientation.UB);
+    expect(s.directions.od180.class).toBe(Orientation.AB);
+    expect(s.directions.od270.class).toBe(Orientation.AB);
   });
 
   it("c", function () {
@@ -119,9 +119,9 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od90.classify(c);
     s.directions.od104.classify(c);
 
-    expect(s.directions.od37.class).toBe(OrientationClasses.UB);
-    expect(s.directions.od90.class).toBe(OrientationClasses.AB);
-    expect(s.directions.od104.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od37.class).toBe(Orientation.UB);
+    expect(s.directions.od90.class).toBe(Orientation.AB);
+    expect(s.directions.od104.class).toBe(Orientation.UB);
   });
 
   it("d", function () {
@@ -129,8 +129,8 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od37.classify(c);
     s.directions.od53.classify(c);
 
-    expect(s.directions.od37.class).toBe(OrientationClasses.E);
-    expect(s.directions.od53.class).toBe(OrientationClasses.E);
+    expect(s.directions.od37.class).toBe(Orientation.E);
+    expect(s.directions.od53.class).toBe(Orientation.E);
   });
 
   it("e", function () {
@@ -139,9 +139,9 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od53.classify(c);
     s.directions.od76.classify(c);
 
-    expect(s.directions.od37.class).toBe(OrientationClasses.E);
-    expect(s.directions.od53.class).toBe(OrientationClasses.E);
-    expect(s.directions.od76.class).toBe(OrientationClasses.UD);
+    expect(s.directions.od37.class).toBe(Orientation.E);
+    expect(s.directions.od53.class).toBe(Orientation.E);
+    expect(s.directions.od76.class).toBe(Orientation.UD);
   });
 
   it("f", function () {
@@ -156,10 +156,10 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od53.classify(c);
     s.directions.od76.classify(c);
 
-    expect(s.directions.od0.class).toBe(OrientationClasses.AD);
-    expect(s.directions.od37.class).toBe(OrientationClasses.E);
-    expect(s.directions.od53.class).toBe(OrientationClasses.E);
-    expect(s.directions.od76.class).toBe(OrientationClasses.UD);
+    expect(s.directions.od0.class).toBe(Orientation.AD);
+    expect(s.directions.od37.class).toBe(Orientation.E);
+    expect(s.directions.od53.class).toBe(Orientation.E);
+    expect(s.directions.od76.class).toBe(Orientation.UD);
   });
 
   it("g", function () {
@@ -174,10 +174,10 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od53.classify(c);
     s.directions.od76.classify(c);
 
-    expect(s.directions.od315.class).toBe(OrientationClasses.E);
-    expect(s.directions.od333.class).toBe(OrientationClasses.E);
-    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
-    expect(s.directions.od76.class).toBe(OrientationClasses.UD);
+    expect(s.directions.od315.class).toBe(Orientation.E);
+    expect(s.directions.od333.class).toBe(Orientation.E);
+    expect(s.directions.od53.class).toBe(Orientation.UB);
+    expect(s.directions.od76.class).toBe(Orientation.UD);
   });
 
   it("h", function () {
@@ -185,8 +185,8 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od53.classify(new CRegular(4));
     s.directions.od217.classify(new CRegular(4));
 
-    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
-    expect(s.directions.od217.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od53.class).toBe(Orientation.UB);
+    expect(s.directions.od217.class).toBe(Orientation.UB);
   });
 
   it("i", function () {
@@ -195,9 +195,9 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od180.classify(new CRegular(4));
     s.directions.od270.classify(new CRegular(4));
 
-    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
-    expect(s.directions.od180.class).toBe(OrientationClasses.AB);
-    expect(s.directions.od270.class).toBe(OrientationClasses.AB);
+    expect(s.directions.od53.class).toBe(Orientation.UB);
+    expect(s.directions.od180.class).toBe(Orientation.AB);
+    expect(s.directions.od270.class).toBe(Orientation.AB);
   });
 
   it("j", function () {
@@ -206,9 +206,9 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od90.classify(new CRegular(4));
     s.directions.od104.classify(new CRegular(4));
 
-    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
-    expect(s.directions.od90.class).toBe(OrientationClasses.AB);
-    expect(s.directions.od104.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od53.class).toBe(Orientation.UB);
+    expect(s.directions.od90.class).toBe(Orientation.AB);
+    expect(s.directions.od104.class).toBe(Orientation.UB);
   });
 
   it("k", function () {
@@ -216,8 +216,8 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od37.classify(new CRegular(4));
     s.directions.od53.classify(new CRegular(4));
 
-    expect(s.directions.od37.class).toBe(OrientationClasses.UB);
-    expect(s.directions.od53.class).toBe(OrientationClasses.UB);
+    expect(s.directions.od37.class).toBe(Orientation.UB);
+    expect(s.directions.od53.class).toBe(Orientation.UB);
   });
 
   it("l", function () {
@@ -226,9 +226,9 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od53.classify(new CRegular(4));
     s.directions.od76.classify(new CRegular(4));
 
-    expect(s.directions.od37.class).toBe(OrientationClasses.UB);
-    expect(s.directions.od53.class).toBe(OrientationClasses.E);
-    expect(s.directions.od76.class).toBe(OrientationClasses.E);
+    expect(s.directions.od37.class).toBe(Orientation.UB);
+    expect(s.directions.od53.class).toBe(Orientation.E);
+    expect(s.directions.od76.class).toBe(Orientation.E);
   });
 
   it("m", function () {
@@ -243,10 +243,10 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od53.classify(new CRegular(4));
     s.directions.od76.classify(new CRegular(4));
 
-    expect(s.directions.od0.class).toBe(OrientationClasses.AD);
-    expect(s.directions.od14.class).toBe(OrientationClasses.UB);
-    expect(s.directions.od53.class).toBe(OrientationClasses.E);
-    expect(s.directions.od76.class).toBe(OrientationClasses.E);
+    expect(s.directions.od0.class).toBe(Orientation.AD);
+    expect(s.directions.od14.class).toBe(Orientation.UB);
+    expect(s.directions.od53.class).toBe(Orientation.E);
+    expect(s.directions.od76.class).toBe(Orientation.E);
   });
 
   it("n", function () {
@@ -261,10 +261,10 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s.directions.od53.classify(new CRegular(4));
     s.directions.od76.classify(new CRegular(4));
 
-    expect(s.directions.od315.class).toBe(OrientationClasses.AB);
-    expect(s.directions.od333.class).toBe(OrientationClasses.UB);
-    expect(s.directions.od53.class).toBe(OrientationClasses.E);
-    expect(s.directions.od76.class).toBe(OrientationClasses.E);
+    expect(s.directions.od315.class).toBe(Orientation.AB);
+    expect(s.directions.od333.class).toBe(Orientation.UB);
+    expect(s.directions.od53.class).toBe(Orientation.E);
+    expect(s.directions.od76.class).toBe(Orientation.E);
   });
 });
 

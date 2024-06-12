@@ -3,6 +3,7 @@ import Configuration from "./Configuration";
 import HalfEdge from "../Dcel/HalfEdge";
 import Point from "../geometry/Point";
 import { ContractionType } from "./ContractionType";
+import Dcel from "../Dcel/Dcel";
 
 /**
  * A pair of {@link Contraction}s, which are complementary and non-conflicting.
@@ -30,24 +31,32 @@ class ConfigurationPair {
   /**
    * Perform the edge move.
    */
-  doEdgeMove() {
+  doEdgeMove(
+    dcel: Dcel,
+    contractions: Map<
+      string,
+      { [ContractionType.P]?: Contraction; [ContractionType.N]?: Contraction }
+    >,
+    configurations: Map<string, Configuration>,
+  ) {
     const contractionEdge = this.contraction.configuration.innerEdge;
     const contractionHead = contractionEdge.head;
     if (!contractionHead) return;
-    const dcel = contractionEdge.dcel;
     const compensationEdge = this.compensation?.configuration.innerEdge;
 
     if (!compensationEdge)
       return console.warn("compensation contraction is not defined");
 
     // 1. Update (decrement) blocking edges
-    dcel.getContractions().forEach((contraction) => {
+    contractions.forEach((contractions, edgeUuid) => {
       // console.log(
       //   "blockingNumber before",
       //   contraction.configuration.innerEdge.toString(),
       //   contraction.blockingNumber
       // );
-      contraction.decrementBlockingNumber(this.x1x2); // FIXME: fix blocking Number!! Done?
+      Object.values(contractions).forEach((d) =>
+        d.decrementBlockingNumber(this.x1x2, configurations),
+      ); // FIXME: fix blocking Number!! Done?
       // console.log(
       //   "blockingNumber after",
       //   contraction.configuration.innerEdge.toString(),
@@ -97,9 +106,17 @@ class ConfigurationPair {
     const nextEdgeLineSegment = contractionEdge.next?.toLineSegment();
     if (!prevEdgeLineSegment || !nextEdgeLineSegment) return;
 
-    if (pointA.isOnLineSegment(prevEdgeLineSegment)) {
-      contractionEdge.move(pointA, pointB);
-    } else contractionEdge.move(pointB, pointA);
+    const newEdge = pointA.isOnLineSegment(prevEdgeLineSegment)
+      ? contractionEdge.move(pointA, pointB)
+      : contractionEdge.move(pointB, pointA);
+
+    if (newEdge) {
+      const newConfiguration = new Configuration(newEdge);
+      newConfiguration.initialize(configurations);
+      configurations.set(newEdge.uuid, newConfiguration);
+      // TODO: add newEdge to facefaceBoundaryList
+      // newEdge?.dcel.faceFaceBoundaryList?.addEdge(newEdge);
+    }
 
     movedPositions.push(contractionEdge.tail.toPoint());
     movedPositions.push(contractionHead.toPoint());
@@ -133,7 +150,7 @@ class ConfigurationPair {
     // );
 
     // 2.4 Update the affected configurations
-    this.updateConfigurations(remainingEdges);
+    this.updateConfigurations(remainingEdges, configurations);
 
     // console.log("moved vertices", movedPositions);
 
@@ -148,9 +165,14 @@ class ConfigurationPair {
     // );
 
     // TODO: 3. Update (increment) blocking numbers again
-    dcel.getContractions().forEach((contraction) => {
-      contraction.incrementBlockingNumber(this.x1x2);
+    contractions.forEach((contraction, edgeUuid) => {
+      Object.values(contraction).forEach((d) =>
+        d.incrementBlockingNumber(this.x1x2, configurations),
+      );
     });
+
+    //TODO: update uuids of maps?
+    return { dcel, contractions, configurations };
   }
 
   get compensationShift() {
@@ -179,7 +201,7 @@ class ConfigurationPair {
     if (newHeadComp) compensationEdge.move(newTailComp, newHeadComp);
   }
 
-  doSimpleEdgeMove() {
+  doSimpleEdgeMove(configurations: Map<string, Configuration>) {
     // console.log("simple contraction", this.contraction.point.xy());
     const contractionEdge = this.contraction.configuration.innerEdge;
     const prevAngle = contractionEdge.prev?.getAngle();
@@ -201,7 +223,10 @@ class ConfigurationPair {
     const newEdge = vertexToDelete.remove(contractionEdge.face);
     if (!newEdge || !newEdge.prev || !newEdge.next) return;
     // console.log(newEdge.prev.toString(), newEdge.toString(), newEdge.next.toString());
-    this.updateConfigurations([newEdge, newEdge.prev, newEdge.next]);
+    this.updateConfigurations(
+      [newEdge, newEdge.prev, newEdge.next],
+      configurations,
+    );
   }
 
   /**
@@ -209,10 +234,13 @@ class ConfigurationPair {
    * @param involvedEdges An array of {@link HalfEdges} which are left from the {@link ConfigurationPair}.
    * @returns void, if the {@link Dcel}'s links are not complete.
    */
-  updateConfigurations(involvedEdges: HalfEdge[]) {
+  updateConfigurations(
+    involvedEdges: HalfEdge[],
+    configurations: Map<string, Configuration>,
+  ) {
     involvedEdges.forEach((edge) => {
       if (edge.endpoints.every((vertex) => vertex.edges.length <= 3))
-        edge.configuration = new Configuration(edge);
+        configurations.set(edge.uuid, new Configuration(edge));
     });
   }
 }

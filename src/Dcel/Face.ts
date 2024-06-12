@@ -27,10 +27,9 @@ class Face {
   outerRing?: Face;
 
   /**
-   * List of IDs of the associated features.
-   * A face can be associated with up to 2 features:
-   * it can server as an inner ring (hole) for one feature
-   * and as an exterior ring for another.
+   * List of Ids of the associated features.
+   * A face can be associated with up to 2 features of the input data:
+   * it can serve as an inner ring (hole) for one feature and as an exterior ring for another.
    */
   associatedFeatures: number[];
 

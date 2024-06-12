@@ -18,11 +18,12 @@ class Contraction {
     configuration: Configuration,
     contractionType: ContractionType,
     point: Point,
+    configurations: Map<string, Configuration>,
   ) {
     this.type = contractionType;
     this.configuration = configuration;
     this.point = point;
-    this.blockingNumber = this.initializeBlockingNumber();
+    this.blockingNumber = this.initializeBlockingNumber(configurations);
   }
 
   /**
@@ -34,10 +35,11 @@ class Contraction {
   static initialize(
     configuration: Configuration,
     contractionType: ContractionType,
+    configurations: Map<string, Configuration>,
   ): Contraction | undefined {
     const point = this.getPoint(configuration, contractionType);
     return point
-      ? new Contraction(configuration, contractionType, point)
+      ? new Contraction(configuration, contractionType, point, configurations)
       : undefined;
   }
 
@@ -219,9 +221,11 @@ class Contraction {
    * @param edge The {@link HalfEdge}
    * @returns A boolean, indicating whether or not the {@link Contraction} is blocked by the specified {@link HalfEdge}.
    */
-  isBlockedBy(edge: HalfEdge) {
+  isBlockedBy(edge: HalfEdge, configurations: Map<string, Configuration>) {
     const x = this.configuration.x;
-    const x_ = this.configuration.innerEdge.twin?.configuration?.x;
+    const twin = this.configuration.innerEdge.twin;
+    if (!twin) return;
+    const x_ = configurations.get(twin.uuid)?.x;
     if (x_) x.push(...x_);
     if (x.includes(edge)) return false;
     const edgeLine = edge.toLineSegment();
@@ -256,12 +260,12 @@ class Contraction {
    * Initializes the blocking number of the Contraction.
    * @returns A number, indicating how many {@link HalfEdge}s block the {@link Contraction}.
    */
-  initializeBlockingNumber() {
+  initializeBlockingNumber(configurations: Map<string, Configuration>) {
     let blockingNumber = 0;
     if (!this.point) return blockingNumber;
 
     this.configuration.x_.forEach((boundaryEdge) => {
-      if (this.isBlockedBy(boundaryEdge)) {
+      if (this.isBlockedBy(boundaryEdge, configurations)) {
         blockingNumber++;
       }
     });
@@ -273,10 +277,13 @@ class Contraction {
    * Discards the contribution that the edges of X1 and X2 made to the blocking numbers, as a preliminary step for an edge-move.
    * @param x1x2 An array of {@link Halfedge}s involved in the edge-move.
    */
-  decrementBlockingNumber(x1x2: HalfEdge[]) {
+  decrementBlockingNumber(
+    x1x2: HalfEdge[],
+    configurations: Map<string, Configuration>,
+  ) {
     if (this.blockingNumber === 0) return; // skip check for interference when no blocking point exists
     const decrement = x1x2.reduce((acc: number, edge) => {
-      if (this.isBlockedBy(edge)) ++acc;
+      if (this.isBlockedBy(edge, configurations)) ++acc;
       return acc;
     }, 0);
     this.blockingNumber = this.blockingNumber - decrement;
@@ -286,11 +293,14 @@ class Contraction {
    * Adds the contribution to the blocking numbers for the edges that changed during the contraction (i.e., the remaining edges of X1 and X2) edge-move.
    * @param x1x2 An array of {@link HalfEdges} that changed during the contraction.
    */
-  incrementBlockingNumber(x1x2: HalfEdge[]) {
+  incrementBlockingNumber(
+    x1x2: HalfEdge[],
+    configurations: Map<string, Configuration>,
+  ) {
     const increment = x1x2.reduce((acc: number, edge) => {
       // console.log("---->", this.configuration.innerEdge.toString());
 
-      if (this.isBlockedBy(edge)) {
+      if (this.isBlockedBy(edge, configurations)) {
         // console.log("blocking edge", edge.toString());
         ++acc;
       }

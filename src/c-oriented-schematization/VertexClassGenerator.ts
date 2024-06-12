@@ -1,6 +1,7 @@
 import Dcel from "../Dcel/Dcel";
 import Vertex from "../Dcel/Vertex";
 import Generator from "../Schematization/Generator";
+import { isAligned } from "./HalfEdgeClassGenerator";
 import { getAssociatedSector } from "./HalfEdgeUtils";
 import Sector from "./Sector";
 import { getEdgesInSector } from "./VertexUtils";
@@ -64,7 +65,7 @@ class VertexClassGenerator implements Generator {
    * @returns A Boolean indicating whether or not all {@link HalfEdge}s are aligned.
    */
   private hasOnlyAlignedEdges(vertex: Vertex, sectors: Sector[]) {
-    return vertex.edges.every((edge) => edge.isAligned(sectors));
+    return vertex.edges.every((edge) => isAligned(edge, sectors));
   }
 }
 

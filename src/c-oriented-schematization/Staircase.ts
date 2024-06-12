@@ -8,15 +8,18 @@ import Polygon from "../geometry/Polygon";
 import Ring from "../geometry/Ring";
 import Sector from "./Sector";
 import { CStyle } from "./schematization.style";
-import { OrientationClasses } from "./HalfEdgeClassGenerator";
+import { Orientation, getAssignedAngle } from "./HalfEdgeClassGenerator";
 import { getAssociatedAngles, getAssociatedSector } from "./HalfEdgeUtils";
 import { getUnitVector } from "../utilities";
+import C from "./C";
 
 class Staircase {
   /** The {@link HalfEdge} the staircase belongs to. */
   edge: HalfEdge;
   /** The orientation class of the {@link HalfEdge} */
-  edgeClass: OrientationClasses;
+  orientation: Orientation;
+  /** The assigned direction of the {@link HalfEdge} */
+  assignedDirection: number;
   /** the significant {@link Vertex} */
   significantVertex?: Vertex;
   /** A {@link Polygon} encompassing the staircase. */
@@ -35,12 +38,14 @@ class Staircase {
 
   constructor(
     edge: HalfEdge,
-    edgeClass: OrientationClasses,
+    orientation: Orientation,
+    assignedDirection: number,
     significantVertex: Vertex | undefined,
     cStyle: CStyle,
   ) {
     this.edge = edge;
-    this.edgeClass = edgeClass;
+    this.orientation = orientation;
+    this.assignedDirection = assignedDirection;
     this.significantVertex = significantVertex;
     this.#cStyle = cStyle;
     this.deltaE = this.getDeltaE();
@@ -71,17 +76,17 @@ class Staircase {
     const edge = this.edge;
     const length = edge.getLength();
     const angle = edge.getAngle();
-    switch (this.edgeClass) {
+    switch (this.orientation) {
       // "Aligned deviating edges do not use steps but a value δe instead. (p.17)"
       // TODO: make this function pure by not setting deltaE from within
-      case OrientationClasses.AD: {
+      case Orientation.AD: {
         if (typeof this.de !== "number" || typeof this.deltaE !== "number")
           return;
         // "… we use δe = min{de/2,Δe}, where Δe = 0.1||e|| as defined for the staircase regions."
         if (this.de / 2 < this.deltaE) this.deltaE = this.de / 2;
         break;
       }
-      case OrientationClasses.UD: {
+      case Orientation.UD: {
         if (typeof this.de !== "number" || typeof length !== "number") return;
         const maxVertices = this.getStaircasePoints() // TODO: use points property instead
           .slice(1, 2)
@@ -119,8 +124,7 @@ class Staircase {
 
   getDeltaE() {
     const length = this.edge.getLength();
-    return typeof length === "number" &&
-      this.edgeClass === OrientationClasses.AD
+    return typeof length === "number" && this.orientation === Orientation.AD
       ? length * 0.1
       : undefined;
   }
@@ -138,12 +142,12 @@ class Staircase {
         : this.edge.twin;
     const head = edge?.head;
     const sectors = this.#cStyle.c.sectors;
-    const assignedAngle = edge?.getAssignedAngle(sectors);
+    const assignedAngle = getAssignedAngle(this.assignedDirection, sectors);
     if (!edge || !head || typeof assignedAngle !== "number")
       return new Polygon([]);
 
-    switch (this.edgeClass) {
-      case OrientationClasses.AB:
+    switch (this.orientation) {
+      case Orientation.AB:
         return Polygon.fromCoordinates([
           [
             [edge.tail.x, edge.tail.y],
@@ -152,11 +156,11 @@ class Staircase {
             [edge.tail.x, edge.tail.y],
           ],
         ]);
-      case OrientationClasses.UB:
+      case Orientation.UB:
         return this.getSimpleRegion();
-      case OrientationClasses.E:
+      case Orientation.E:
         return this.getSimpleRegion();
-      case OrientationClasses.UD:
+      case Orientation.UD:
         // like UB and E but accommodate for the appended area
         // "that is used to make the staircase adhere to the assigned direction (see Figure 12(b–c))."
         this.points = this.getStaircasePoints();
@@ -167,8 +171,11 @@ class Staircase {
         )[0].getBounds();
         if (typeof lower !== "number" || typeof upper !== "number")
           return new Polygon([]);
-        const smallestAssociatedAngle = edge.getClosestAssociatedAngle(
+        const smallestAssociatedAngle = getClosestAssociatedAngle(
+          edge,
           this.#cStyle.c,
+          this.orientation,
+          this.assignedDirection,
         );
         const largestAssociatedAngle = getAssociatedAngles(edge, sectors).find(
           (angle) => angle != smallestAssociatedAngle,
@@ -202,7 +209,7 @@ class Staircase {
         }
 
         return new Polygon([new Ring(regionPoints)]);
-      case OrientationClasses.AD:
+      case Orientation.AD:
         this.points = this.getStaircasePoints();
         const convexHull = new ConvexHullGrahamScan();
         this.points.forEach((p) => convexHull.addPoint(p.x, p.y));
@@ -231,14 +238,14 @@ class Staircase {
    * @returns All {@link Point}s constructing the {@link Staircase}.
    */
   getStaircasePoints() {
-    switch (this.edgeClass) {
-      case OrientationClasses.UB:
+    switch (this.orientation) {
+      case Orientation.UB:
         return this.getStaircasePointsUB();
-      case OrientationClasses.E:
+      case Orientation.E:
         return this.getStaircasePointsE();
-      case OrientationClasses.AD:
+      case Orientation.AD:
         return this.getStaircasePointsAD();
-      case OrientationClasses.UD:
+      case Orientation.UD:
         return this.getStaircasePointsUD();
       default:
         return [];
@@ -253,7 +260,7 @@ class Staircase {
     const edge = this.edge;
     if (!this.deltaE) return [];
     const epsilon = this.#cStyle.staircaseEpsilon;
-    const d1 = edge.getAssignedAngle(this.#cStyle.c.sectors);
+    const d1 = getAssignedAngle(this.assignedDirection, this.#cStyle.c.sectors);
     if (typeof d1 !== "number") return [];
     const d2 = edge.getAngle();
     if (typeof d2 !== "number") return [];
@@ -310,7 +317,7 @@ class Staircase {
     const edge = this.edge;
 
     const sectors = this.#cStyle.c.sectors;
-    const d1 = edge.getAssignedAngle(sectors);
+    const d1 = getAssignedAngle(this.assignedDirection, sectors);
     const associatedAngles = getAssociatedAngles(edge, sectors);
     if (typeof d1 !== "number" || !associatedAngles) return [];
     const d2 = associatedAngles.find((angle) => angle !== d1);
@@ -344,7 +351,7 @@ class Staircase {
     const edge = this.edge;
 
     const sectors = this.#cStyle.c.sectors;
-    const d1 = edge.getAssignedAngle(sectors);
+    const d1 = getAssignedAngle(this.assignedDirection, sectors);
     const associatedAngles = getAssociatedAngles(edge, sectors);
     if (typeof d1 !== "number" || !associatedAngles) return [];
     const d2 = associatedAngles.find((angle) => angle !== d1);
@@ -384,7 +391,7 @@ class Staircase {
   ) {
     const stepArea = this.getStepArea(l1, l2);
     const sectors = this.#cStyle.c.sectors;
-    const assignedAngle = this.edge.getAssignedAngle(sectors);
+    const assignedAngle = getAssignedAngle(this.assignedDirection, sectors);
     if (typeof stepArea !== "number" || typeof assignedAngle !== "number")
       return [];
     const height = (stepArea * 2) / l2; // get the height of a parallelogram, using A/b = h
@@ -406,7 +413,12 @@ class Staircase {
     const edge = this.edge;
 
     const sectors = this.#cStyle.c.sectors;
-    const d1 = edge.getClosestAssociatedAngle(this.#cStyle.c);
+    const d1 = getClosestAssociatedAngle(
+      edge,
+      this.#cStyle.c,
+      this.orientation,
+      this.assignedDirection,
+    );
     const associatedAngles = getAssociatedAngles(edge, sectors);
     if (typeof d1 !== "number" || !associatedAngles) return [];
     const d2 = associatedAngles.find((angle) => angle !== d1);
@@ -470,4 +482,37 @@ export const getStepLengths = (
   const l2 = detY / det;
 
   return [l1, l2];
+};
+
+/**
+ * Gets the closest associated angle (one bound of its associated sector)
+ * of an unaligned deviating(!) edge in respect to its assigned angle.
+ * Needed for constructing the {@link Staircase} of an unaligned deviating edge.
+ * @param halfEdge The {@link HalfEdge} of which to get the closest associated angle.
+ * @param c The set of orientations used for determining the associated angle.
+ * @param orientation The orientation of the {@link HalfEdge}.
+ * @param assignedDirection The assigned direction of the {@link HalfeEge}.
+ * @returns The closest associated angle of an {@link HalfEdge} in respect to its assigned angle.
+ */
+export const getClosestAssociatedAngle = (
+  halfEdge: HalfEdge,
+  c: C,
+  orientation: Orientation,
+  assignedDirection: number,
+) => {
+  const sectors = c.sectors;
+  const associatedSector = getAssociatedSector(halfEdge, sectors);
+  if (orientation !== Orientation.UD || !associatedSector) return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges
+  const sector = associatedSector[0];
+
+  // TODO: refactor: find better solution for last sector and it's upper bound
+  // set upperbound of last to Math.PI * 2 ?
+  const upper = sector.idx === sectors.length - 1 ? 0 : sector.upper;
+  const lower = sector.lower;
+  const angle =
+    getAssignedAngle(assignedDirection, sectors) === 0
+      ? Math.PI * 2
+      : getAssignedAngle(assignedDirection, sectors);
+
+  return upper + c.sectorAngle === angle ? upper : lower;
 };
