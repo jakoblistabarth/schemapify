@@ -1,13 +1,11 @@
 import * as geojson from "geojson";
-import Contraction from "../c-oriented-schematization/Contraction";
-import { ContractionType } from "../c-oriented-schematization/ContractionType";
 import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
 import Point from "../geometry/Point";
 import Subdivision from "../geometry/Subdivision";
 import BoundingBox from "../helpers/BoundingBox";
 import { geoJsonToGeometry, validateGeoJSON } from "../utilities";
 import Face from "./Face";
-import HalfEdge, { OrientationClasses } from "./HalfEdge";
+import HalfEdge from "./HalfEdge";
 import Vertex from "./Vertex";
 
 class Dcel {
@@ -16,7 +14,6 @@ class Dcel {
   halfEdges: Map<string, HalfEdge>;
   faces: Face[];
   featureProperties: geojson.GeoJsonProperties;
-  faceFaceBoundaryList?: FaceFaceBoundaryList;
 
   constructor() {
     this.vertices = new Map();
@@ -95,17 +92,12 @@ class Dcel {
 
   /**
    * Returns Halfedges of the DCEL.
-   * @param edgeClass If set, only the {@link HalfEdge}s of this class will be returned.
    * @param simple If true, for every pair of {@link HalfEdge}s only one will be returned. false by default.
-   * @param significantTail If true, for a pair of {@link HalfEdge}s which do have a significant {@link Vertex}, the one where the significant {@link Vertex} is the tail will be returned, default = false
    * @returns A (sub)set of {@link HalfEdge}s.
    */
-  getHalfEdges(edgeClass?: OrientationClasses, simple = false) {
+  getHalfEdges(simple = false) {
     const halfEdges = Array.from(this.halfEdges.values());
-    let edges = edgeClass
-      ? halfEdges.filter((e) => e.class === edgeClass)
-      : halfEdges;
-    edges = simple ? this.getSimpleEdges(edges) : edges;
+    const edges = simple ? this.getSimpleEdges(halfEdges) : halfEdges;
     return edges;
   }
 
@@ -115,7 +107,8 @@ class Dcel {
    * @returns A (sub)set of {@link HalfEdge}s.
    */
   getSimpleEdges(edges: HalfEdge[]) {
-    // FIXME: confusing for map output: sometimes clockwise/counterclockwise assignment in map output wrong
+    // FIXME: confusing for map output:
+    // sometimes clockwise/counterclockwise assignment in map output wrong
     const simpleEdges: HalfEdge[] = [];
     edges.forEach((e) => {
       if (!e.twin) return;
@@ -130,12 +123,8 @@ class Dcel {
    * @param significant If true, only the significant {@link Vertex}s will be returned.
    * @returns A (sub)set of {@link Vertex}s.
    */
-  getVertices(significant?: boolean) {
-    if (significant)
-      return Array.from(this.vertices.values()).filter(
-        (v) => v.significant === significant,
-      );
-    return Array.from(this.vertices.values());
+  getVertices() {
+    return [...this.vertices.values()];
   }
 
   /**
@@ -206,10 +195,12 @@ class Dcel {
         edge.face,
         edge.twin.face,
       );
-      const boundaryEdges =
-        this.faceFaceBoundaryList?.boundaries.get(boundaryKey)?.edges;
-      if (boundaryEdges && boundaryEdges.indexOf(edge) >= 0)
-        boundaryEdges.splice(boundaryEdges.indexOf(edge), 1);
+      // this needs to be moved
+      // to a c-oriente-schematization class (e.g. to the edge move processor?)
+      // const boundaryEdges =
+      //   this.faceFaceBoundaryList?.boundaries.get(boundaryKey)?.edges;
+      // if (boundaryEdges && boundaryEdges.indexOf(edge) >= 0)
+      //   boundaryEdges.splice(boundaryEdges.indexOf(edge), 1);
     }
     return this.halfEdges;
   }
@@ -384,21 +375,6 @@ class Dcel {
   }
 
   /**
-   * Gets all contractions within a DCEL.
-   * @returns An array of {@link Contraction}s.
-   */
-  getContractions() {
-    return this.getHalfEdges().reduce((acc: Contraction[], edge) => {
-      if (!edge.configuration) return acc;
-      const n = edge.configuration[ContractionType.N];
-      const p = edge.configuration[ContractionType.P];
-      if (n) acc.push(n);
-      if (p) acc.push(p);
-      return acc;
-    }, []);
-  }
-
-  /**
    * Transform the DCEL into a {@link Subdivision}.
    * @returns A {@link Subdivision} representation of the DCEL.
    */
@@ -413,6 +389,9 @@ class Dcel {
    */
   public clone() {
     return this;
+    //TODO: cloning is not trivial: it regenerates the uuids?
+    // using some kind of hashing based on coordinates is also complicated:
+    // e.g. for faces, whose edges are subject to change during edge move
     // return this.toSubdivision().toDcel();
   }
 }

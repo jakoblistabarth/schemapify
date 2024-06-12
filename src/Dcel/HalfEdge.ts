@@ -260,6 +260,7 @@ class HalfEdge {
    * Moves an Halfedge to the specified tail's and head's position.
    * @param newTail {@link} A {@link Point}, indicating the new position of the {@link HalfEdge}'s tail.
    * @param newHead A {@link Point}, indicating the new position of the {@link HalfEdge}'s head.
+   * @returns The just created {@link HalfEdge}.
    */
   move(newTail: Point, newHead: Point) {
     const head = this.head;
@@ -268,13 +269,11 @@ class HalfEdge {
     if (!head || !nextHead || !prevTail) return;
     if (newHead.equals(nextHead)) {
       const newEdge = head.remove(this.face);
-      if (newEdge) newEdge.configuration = new Configuration(newEdge);
-      newEdge?.dcel.faceFaceBoundaryList?.addEdge(newEdge);
+      return newEdge;
     } else head.moveTo(newHead.x, newHead.y);
     if (newTail.equals(prevTail)) {
       const newEdge = this.tail.remove(this.face);
-      if (newEdge) newEdge.configuration = new Configuration(newEdge);
-      newEdge?.dcel.faceFaceBoundaryList?.addEdge(newEdge);
+      return newEdge;
     } else this.tail.moveTo(newTail.x, newTail.y);
   }
 

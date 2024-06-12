@@ -11,7 +11,7 @@ import {
 import Sector from "./Sector";
 import { getEdgesInSector } from "./VertexUtils";
 
-export enum OrientationClasses {
+export enum Orientation {
   AB = "alignedBasic",
   UB = "unalignedBasic",
   E = "evading",
@@ -22,7 +22,7 @@ export enum OrientationClasses {
 class HalfEdgeClassGenerator implements Generator {
   c: C;
   significantVertices: string[];
-  halfEdgeClasses: Map<string, OrientationClasses>;
+  halfEdgeClasses: Map<string, Orientation>;
   assignedDirections: Map<string, number>;
 
   constructor(c: C, significantVertices: string[]) {
@@ -33,28 +33,32 @@ class HalfEdgeClassGenerator implements Generator {
   }
 
   /**
-   * Classifies all Vertices in the DCEL.
+   * Classifies all Halfedges in the DCEL.
    * @param input The DCEL to classify.
    */
   public run(input: Dcel) {
     return input
       .getHalfEdges()
-      .reduce<Map<string, OrientationClasses>>((acc, e) => {
-        const classification = this.classify(
-          e,
+      .reduce<
+        Map<string, { orientation: Orientation; assignedDirection: number }>
+      >((acc, edge) => {
+        const orientation = this.classify(
+          edge,
           this.c,
           this.significantVertices,
         );
-        if (classification) {
-          acc.set(e.uuid, classification);
-          e.twin && acc.set(e.twin.uuid, classification);
+        const assignedDirection = this.assignedDirections.get(edge.uuid);
+        if (orientation && assignedDirection) {
+          acc.set(edge.uuid, { orientation, assignedDirection });
+          edge.twin &&
+            acc.set(edge.twin.uuid, { orientation, assignedDirection });
         }
         return acc;
       }, new Map());
   }
 
   /**
-   * Classifies a HalfEdge and its twin, based on its orientation.
+   * Classifies a Halfedge and its twin, based on its orientation.
    * The classes depend on the defined set of orientations, the setup of {@link C}.
    * @param halfEdge The HalfEdge to classify.
    * @param c The set of orientations to classify the HalfEdge with.
@@ -71,51 +75,49 @@ class HalfEdgeClassGenerator implements Generator {
     const head = halfEdge.head;
     if (head && significantVertices.includes(head.uuid)) return;
 
-    const sectors = c.sectors;
-    const associatedSector = getAssociatedSector(halfEdge, sectors);
+    const assignedDirection = this.assignedDirections.get(halfEdge.uuid);
+    if (!assignedDirection) return;
+    const associatedSector = getAssociatedSector(halfEdge, c.sectors);
     const sector = associatedSector[0];
     const significantVertex =
       getSignificantVertex(halfEdge, this.significantVertices) || halfEdge.tail;
     const edges = getEdgesInSector(significantVertex, sector).filter(
       (edge) =>
-        !this.isAligned(edge, sectors) && !this.isDeviating(edge, sectors),
+        !isAligned(edge, c.sectors) &&
+        !this.isDeviating(edge, c.sectors, assignedDirection),
     );
 
-    let classification: OrientationClasses;
-    if (this.isAligned(halfEdge, sectors)) {
-      classification = this.isDeviating(halfEdge, sectors)
-        ? OrientationClasses.AD
-        : OrientationClasses.AB;
-    } else if (this.isDeviating(halfEdge, sectors)) {
-      classification = OrientationClasses.UD;
+    let classification: Orientation;
+    if (isAligned(halfEdge, c.sectors)) {
+      classification = this.isDeviating(halfEdge, c.sectors, assignedDirection)
+        ? Orientation.AD
+        : Orientation.AB;
+    } else if (this.isDeviating(halfEdge, c.sectors, assignedDirection)) {
+      classification = Orientation.UD;
     } else if (edges.length == 2) {
-      classification = OrientationClasses.E;
+      classification = Orientation.E;
     } else {
-      classification = OrientationClasses.UB;
+      classification = Orientation.UB;
     }
 
     return classification;
   }
 
   /**
-   * Determines whether the HalfEdge is aligned to one of the orientations of C.
-   * @returns A boolean, indicating whether or not the {@link HalfEdge} is aligned.
-   */
-  private isAligned(halfEdge: HalfEdge, sectors: Sector[]) {
-    return getAssociatedAngles(halfEdge, sectors).length === 1;
-  }
-
-  /**
    * Determines whether the HalfEdge's assigned Direction is adjacent to its associated sector.
    * @returns A boolean, indicating whether or not the {@link HalfEdge} is deviating.
    */
-  private isDeviating(halfEdge: HalfEdge, sectors: Sector[]) {
-    let assignedAngle = this.getAssignedAngle(halfEdge, sectors);
+  private isDeviating(
+    halfEdge: HalfEdge,
+    sectors: Sector[],
+    assignedDirection: number,
+  ) {
+    let assignedAngle = getAssignedAngle(assignedDirection, sectors);
     if (typeof assignedAngle !== "number") return false;
-    if (this.isAligned(halfEdge, sectors)) {
+    if (isAligned(halfEdge, sectors)) {
       return (
         getAssociatedAngles(halfEdge, sectors)[0] !==
-        this.getAssignedAngle(halfEdge, sectors)
+        getAssignedAngle(assignedDirection, sectors)
       );
     } else {
       const sector = getAssociatedSector(halfEdge, sectors)[0];
@@ -124,45 +126,6 @@ class HalfEdgeClassGenerator implements Generator {
         assignedAngle = Math.PI * 2;
       return !sector.encloses(assignedAngle);
     }
-  }
-
-  //TODO: Move this either to the halfedgeutils
-  // or to the staircase generator?
-  /**
-   * Gets the closest associated angle (one bound of its associated sector)
-   * of an unaligned deviating(!) edge in respect to its assigned angle.
-   * Needed for constructing the staircase of an unaligned deviating edge.
-   * @param halfEdge The halfedge of which to get the closest associated angle.
-   * @param c The set of orientations used  for determining the associated angle.
-   * @returns The closest associated angle of an {@link HalfEdge} in respect to its assigned angle.
-   */
-  private getClosestAssociatedAngle(halfEdge: HalfEdge, c: C) {
-    const sectors = c.sectors;
-    const associatedSector = getAssociatedSector(halfEdge, sectors);
-    if (this.getClass(halfEdge) !== OrientationClasses.UD || !associatedSector)
-      return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges
-    const sector = associatedSector[0];
-
-    // TODO: refactor: find better solution for last sector and it's upper bound
-    // set upperbound of last to Math.PI * 2 ?
-    const upper = sector.idx === sectors.length - 1 ? 0 : sector.upper;
-    const lower = sector.lower;
-    const angle =
-      this.getAssignedAngle(halfEdge, sectors) === 0
-        ? Math.PI * 2
-        : this.getAssignedAngle(halfEdge, sectors);
-
-    return upper + c.sectorAngle === angle ? upper : lower;
-  }
-
-  /**
-   * Gets the angle of the HalfEdge's assigned direction.
-   * @returns The angle in radians.
-   */
-  private getAssignedAngle(halfEdge: HalfEdge, sectors: Sector[]) {
-    const assignedDirection = this.assignedDirections.get(halfEdge.uuid);
-    if (typeof assignedDirection !== "number") return;
-    return Math.PI * 2 * (assignedDirection / sectors.length);
   }
 
   /**
@@ -217,3 +180,22 @@ class HalfEdgeClassGenerator implements Generator {
 }
 
 export default HalfEdgeClassGenerator;
+
+/**
+ * Gets the angle of the HalfEdge's assigned direction.
+ * @returns The angle in radians.
+ */
+export const getAssignedAngle = (
+  assignedDirection: number,
+  sectors: Sector[],
+) => {
+  return Math.PI * 2 * (assignedDirection / sectors.length);
+};
+
+/**
+ * Determines whether the HalfEdge is aligned to one of the orientations of C.
+ * @returns A boolean, indicating whether or not the {@link HalfEdge} is aligned.
+ */
+export const isAligned = (halfEdge: HalfEdge, sectors: Sector[]) => {
+  return getAssociatedAngles(halfEdge, sectors).length === 1;
+};

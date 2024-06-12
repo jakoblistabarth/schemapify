@@ -20,6 +20,8 @@ const Hotkeys = () => {
     () =>
       dcel &&
       snapshotList &&
+      //TODO: ideally I could write something like this:
+      // schematization.doEdgeMove();
       handleSimplify(dcel, snapshotList, setActiveSnapshot),
   );
   useHotkeys(["ctrl+c"], () => removeSource());

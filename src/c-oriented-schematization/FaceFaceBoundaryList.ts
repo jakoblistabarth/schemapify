@@ -3,6 +3,7 @@ import Face from "../Dcel/Face";
 import Dcel from "../Dcel/Dcel";
 import FaceFaceBoundary from "./FaceFaceBoundary";
 import ConfigurationPair from "./ConfigurationPair";
+import Configuration from "./Configuration";
 
 export type FaceFaceBoundaryMap = Map<string, FaceFaceBoundary>;
 
@@ -37,7 +38,7 @@ class FaceFaceBoundaryList {
   create(dcel: Dcel) {
     const boundaries: Map<string, FaceFaceBoundary> = new Map();
 
-    dcel.getHalfEdges(undefined, true).forEach((edge) => {
+    dcel.getHalfEdges(true).forEach((edge) => {
       if (!edge.face || !edge.twin?.face) return;
       const faces = [edge.face, edge.twin?.face] as [Face, Face];
       const key = FaceFaceBoundaryList.getKey(...faces);
@@ -64,10 +65,11 @@ class FaceFaceBoundaryList {
    * Gets the overall minimal configuration pair of a Face-Face-Boundary structure.
    * @returns A tuple, containing 2 complementary, non-conflicting {@link Contraction}s, the minimal Configuration Pair.
    */
-  getMinimalConfigurationPair() {
+  getMinimalConfigurationPair(configurations: Map<string, Configuration>) {
     return this.getBoundaries().reduce(
       (minimum: ConfigurationPair | undefined, boundary) => {
-        const boundaryPair = boundary.getMinimalConfigurationPair();
+        const boundaryPair =
+          boundary.getMinimalConfigurationPair(configurations);
         if (
           boundaryPair &&
           (!minimum || boundaryPair.contraction.area < minimum.contraction.area)

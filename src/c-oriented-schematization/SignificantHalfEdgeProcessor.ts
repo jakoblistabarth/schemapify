@@ -14,8 +14,8 @@ class SignificantHalfEdgeProcessor implements Processor {
    * @returns The processed DCEL.
    */
   public run(input: Dcel): Dcel {
-    // input = input.clone(); TODO: clone is not possible because it regenerates the uuids? should I use keys based on the vertices positions?
-    input.getHalfEdges(undefined, true).forEach((edge) => {
+    const output = input.clone();
+    output.getHalfEdges(true).forEach((edge) => {
       const [tail, head] = edge.endpoints;
       if (
         this.significantVertices.includes(tail.uuid) &&
@@ -23,7 +23,7 @@ class SignificantHalfEdgeProcessor implements Processor {
       )
         edge.subdivide();
     });
-    return input;
+    return output;
   }
 }
 

@@ -11,7 +11,7 @@ import Subdivision from "@/src/geometry/Subdivision";
 const DcelViewer: FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const { dcel } = useMemo(() => {
+  const { output } = useMemo(() => {
     const dcel = Dcel.fromSubdivision(
       Subdivision.fromCoordinates([
         [
@@ -27,8 +27,8 @@ const DcelViewer: FC = () => {
       ]),
     );
     const schematization = new CSchematization();
-    schematization.run(dcel);
-    return { dcel };
+    const output = schematization.run(dcel);
+    return { output };
   }, []);
   return (
     <div>
@@ -41,7 +41,7 @@ const DcelViewer: FC = () => {
         </Button>
       </div>
       <div className="relative min-h-[500px] overflow-hidden rounded bg-gray-200/25">
-        <Canvas isAnimating={isAnimating} dcel={dcel} />
+        <Canvas isAnimating={isAnimating} dcel={output} />
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import Dcel from "@/src/Dcel/Dcel";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
-import { OrientationClasses } from "@/src/Dcel/HalfEdge";
+import { Orientation } from "@/src/c-oriented-schematization/HalfEdgeClassGenerator";
 import Vertex from "@/src/Dcel/Vertex";
 import Staircase from "@/src/c-oriented-schematization/Staircase";
 import Polygon from "@/src/geometry/Polygon";
@@ -20,7 +20,7 @@ describe("The staircase class", function () {
     const twin = dcel.addHalfEdge(d, o);
     edge.twin = twin;
     twin.twin = edge;
-    edge.class = OrientationClasses.UB;
+    edge.class = Orientation.UB;
     edge.assignedDirection = 0;
 
     const staircase = new Staircase(edge, style);
@@ -45,7 +45,7 @@ describe("The staircase class", function () {
     const twin = dcel.addHalfEdge(d, o);
     edge.twin = twin;
     twin.twin = edge;
-    edge.class = OrientationClasses.UB;
+    edge.class = Orientation.UB;
     edge.assignedDirection = 2;
 
     const staircase = new Staircase(edge, style);
@@ -71,7 +71,7 @@ describe("The staircase class", function () {
     const twin = dcel.addHalfEdge(d, o);
     edge.twin = twin;
     twin.twin = edge;
-    edge.class = OrientationClasses.UB;
+    edge.class = Orientation.UB;
     edge.assignedDirection = 2;
 
     const staircase = new Staircase(edge, style);
@@ -97,7 +97,7 @@ describe("Build staircase for a HalfEdge of class AD", function () {
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.AD;
+    edge.class = Orientation.AD;
     edge.assignedDirection = 0;
 
     edge.staircase = new Staircase(edge, { ...style, c: new CRegular(4) });
@@ -119,7 +119,7 @@ describe("Build staircase for a HalfEdge of class UB", function () {
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UB;
+    edge.class = Orientation.UB;
     edge.assignedDirection = 0;
 
     const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
@@ -137,7 +137,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 3;
 
     const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
@@ -156,7 +156,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 2;
 
     const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
@@ -181,7 +181,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 3;
 
     const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
@@ -206,7 +206,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 3;
 
     const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
@@ -231,7 +231,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 0;
 
     const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
@@ -256,7 +256,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 0;
 
     const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
@@ -275,7 +275,7 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 2;
 
     const staircase = new Staircase(edge, { ...style, c: new CRegular(2) });
@@ -326,7 +326,7 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 3;
 
     expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(0);
@@ -340,7 +340,7 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 2;
 
     expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(Math.PI * 0.5);
@@ -354,7 +354,7 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 0;
 
     expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(Math.PI * 0.5);
@@ -368,7 +368,7 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 3;
 
     expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(Math.PI);
@@ -382,7 +382,7 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 1;
 
     expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(Math.PI);
@@ -396,7 +396,7 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 0;
 
     expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(Math.PI * 1.5);
@@ -410,7 +410,7 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
-    edge.class = OrientationClasses.UD;
+    edge.class = Orientation.UD;
     edge.assignedDirection = 2;
 
     expect(edge.getClosestAssociatedAngle(new CRegular(2))).toBe(
