@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import Configuration from "../c-oriented-schematization/Configuration";
 import Sector from "../c-oriented-schematization/Sector";
 import Line from "../geometry/Line";
@@ -16,7 +15,6 @@ export enum InflectionType {
 }
 
 class HalfEdge {
-  uuid: string;
   tail: Vertex;
   dcel: Dcel;
   twin?: HalfEdge;
@@ -25,7 +23,6 @@ class HalfEdge {
   next?: HalfEdge;
 
   constructor(tail: Vertex, dcel: Dcel) {
-    this.uuid = uuid();
     this.tail = tail;
     this.dcel = dcel;
   }
@@ -37,7 +34,7 @@ class HalfEdge {
    * @returns A string, representing the HalfEdge's key.
    */
   static getKey(tail: Vertex, head: Vertex): string {
-    return `${tail.getUuid(10)}/${head.getUuid(10)}`;
+    return `${tail.uuid}->${head.uuid}`;
   }
 
   /**
@@ -45,8 +42,9 @@ class HalfEdge {
    * @param stop defines how many strings of the uuid are returned
    * @returns the edge's uuid
    */
-  getUuid(length?: number) {
-    return this.uuid.substring(0, length);
+  get uuid() {
+    if (!this.head) return `${this.tail.uuid}->na`;
+    return HalfEdge.getKey(this.tail, this.head);
   }
 
   /**

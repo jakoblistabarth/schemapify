@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import Point from "../geometry/Point";
 import Dcel from "./Dcel";
 import Face from "./Face";
@@ -6,13 +5,11 @@ import HalfEdge from "./HalfEdge";
 
 class Vertex extends Point {
   dcel: Dcel;
-  uuid: string;
   edges: HalfEdge[];
 
   constructor(x: number, y: number, dcel: Dcel) {
     super(x, y);
     this.dcel = dcel;
-    this.uuid = uuid();
     this.edges = [];
   }
 
@@ -23,17 +20,14 @@ class Vertex extends Point {
    * @returns A string, holding the {@link Vertex}'s key.
    */
   static getKey(x: number, y: number) {
-    return `${x}/${y}`;
+    return `${x}|${y}`;
   }
 
   /**
    * Gets the unique ID of a Vertex.
-   * @param stop Defines how many strings of the uuid are returned.
-   * @returns A string, holding the {@link Vertex}'s unique ID.
    */
-  getUuid(length?: number) {
-    // QUESTION: extending classes instead of declaring this method separately for all 3 dcel entities?
-    return this.uuid.substring(0, length);
+  get uuid() {
+    return Vertex.getKey(this.x, this.y);
   }
 
   /**

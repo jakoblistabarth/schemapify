@@ -1,13 +1,7 @@
-import { v4 as uuid } from "uuid";
 import Polygon from "../geometry/Polygon";
 import HalfEdge from "./HalfEdge";
 
 class Face {
-  /**
-   * Unique ID.
-   */
-  uuid: string;
-
   /**
    * Pointer to an arbitrary edge of the outer connected component (boundary).
    * The edge is undefined for the unbounded face.
@@ -34,7 +28,6 @@ class Face {
   associatedFeatures: number[];
 
   constructor() {
-    this.uuid = uuid();
     this.associatedFeatures = [];
     this.innerEdges = [];
   }
@@ -65,11 +58,12 @@ class Face {
 
   /**
    * Get the face's uuid.
-   * @param length defines how many strings of the uuid are returned
    * @returns the edge's uuid
    */
-  getUuid(length?: number) {
-    return this.uuid.substring(0, length);
+  get uuid() {
+    // fallback string for unbounded face
+    const edgeId = this.edge?.uuid ?? "unbounded";
+    return `${edgeId}-${this.associatedFeatures.join("-")}`;
   }
 
   /**

@@ -4,6 +4,7 @@ import HalfEdge from "../Dcel/HalfEdge";
 import Point from "../geometry/Point";
 import { ContractionType } from "./ContractionType";
 import Dcel from "../Dcel/Dcel";
+import Vertex from "../Dcel/Vertex";
 
 /**
  * A pair of {@link Contraction}s, which are complementary and non-conflicting.
@@ -132,7 +133,7 @@ class ConfigurationPair {
 
     const remainingEdges = movedPositions.reduce(
       (acc: HalfEdge[], pos: Point) => {
-        const key = `${pos.x}/${pos.y}`;
+        const key = Vertex.getKey(pos.x, pos.y);
         const vertex = dcel.vertices.get(key);
         if (!vertex) return acc;
         vertex.edges.forEach((edge) => {
@@ -155,13 +156,13 @@ class ConfigurationPair {
     // console.log("moved vertices", movedPositions);
 
     // console.log(
-    //   contractionEdge.prev?.getUuid() +
+    //   contractionEdge.prev?.uuid() +
     //     " " +
     //     contractionEdge.prev?.tail.xy() +
     //     "->" +
     //     contractionEdge.prev?.head?.xy(),
-    //   contractionEdge.getUuid() + " " + contractionEdge.toString(),
-    //   contractionEdge.next?.getUuid() + " " + contractionEdge.next?.toString()
+    //   contractionEdge.uuid() + " " + contractionEdge.toString(),
+    //   contractionEdge.next?.uuid() + " " + contractionEdge.next?.toString()
     // );
 
     // TODO: 3. Update (increment) blocking numbers again

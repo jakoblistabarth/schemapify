@@ -238,9 +238,7 @@ class CSchematization implements Schematization {
       const properties = {
         uuid: staircase.edge.uuid,
         class: orientations.get(staircase.edge.uuid),
-        interferesWith: staircase.interferesWith
-          .map((e) => e.getUuid(5))
-          .join(" ,"),
+        interferesWith: staircase.interferesWith.map((e) => e.uuid).join(" ,"),
       };
 
       return new MultiPolygon(

@@ -479,11 +479,7 @@ class Dcel {
    * @returns A deep copy of the DCEL.
    */
   public clone() {
-    return this;
-    //TODO: cloning is not trivial: it regenerates the uuids?
-    // using some kind of hashing based on coordinates is also complicated:
-    // e.g. for faces, whose edges are subject to change during edge move
-    // return this.toSubdivision().toDcel();
+    return this.toSubdivision().toDcel();
   }
 }
 
