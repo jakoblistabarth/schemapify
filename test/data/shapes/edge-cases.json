@@ -5,7 +5,7 @@
       "type": "Feature",
       "properties": {
         "id": 1,
-        "edge-case": "hole"
+        "edgeCase": "With hole"
       },
       "geometry": {
         "type": "Polygon",
@@ -31,7 +31,7 @@
       "type": "Feature",
       "properties": {
         "id": 2,
-        "edge-case": "Lakes"
+        "edgeCase": "With lakes"
       },
       "geometry": {
         "type": "Polygon",
@@ -69,7 +69,7 @@
       "type": "Feature",
       "properties": {
         "id": 3,
-        "edge-case": "island"
+        "edgeCase": "Has island"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -105,7 +105,7 @@
       "type": "Feature",
       "properties": {
         "id": 4,
-        "edge-case": "enclave"
+        "edgeCase": "Is enclave"
       },
       "geometry": {
         "type": "Polygon",

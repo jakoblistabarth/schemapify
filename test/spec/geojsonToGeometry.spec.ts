@@ -26,12 +26,14 @@ describe("geojsonToGeometry parses a geojson feature collection of Austria into 
     expect(burgenland.polygons.length).toBe(1);
     expect(burgenland.polygons[0].rings.length).toBe(1);
     expect(burgenland.polygons[0].rings[0].length).toBe(3);
+    expect(burgenland.properties?.NAME_1).toBe("Burgenland");
   });
 
   it("with the 3rd multipolygon (Lower Austria) consisting of 1 polygon, with a hole", function () {
     const lowerAustria = subdivision.multiPolygons[2];
     expect(lowerAustria.polygons.length).toBe(1);
     expect(lowerAustria.polygons[0].rings.length).toBe(2);
+    expect(lowerAustria.properties?.NAME_1).toBe("Niederösterreich");
   });
 
   it("with the 7th multipolygon (Tyrol) consisting of 2 polygons", function () {
@@ -39,6 +41,7 @@ describe("geojsonToGeometry parses a geojson feature collection of Austria into 
     expect(tyrol.polygons.length).toBe(2);
     expect(tyrol.polygons[0].rings[0].length).toBe(3);
     expect(tyrol.polygons[1].rings[0].length).toBe(4);
+    expect(tyrol.properties?.NAME_1).toBe("Tirol");
   });
 
   it("with only counterclockwise ordered Rings", function () {

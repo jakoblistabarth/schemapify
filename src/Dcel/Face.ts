@@ -56,6 +56,14 @@ class Face {
   }
 
   /**
+   * Type guard to check if the face is bounded.
+   * @returns A boolean, indicating whether the face is bounded.
+   */
+  static isBounded(face: Face): face is Face & { edge: HalfEdge } {
+    return !face.isUnbounded;
+  }
+
+  /**
    * Get the face's uuid.
    * @param length defines how many strings of the uuid are returned
    * @returns the edge's uuid

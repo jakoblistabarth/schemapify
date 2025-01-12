@@ -7,6 +7,9 @@ import { geoJsonToGeometry, validateGeoJSON } from "../utilities";
 import Face from "./Face";
 import HalfEdge from "./HalfEdge";
 import Vertex from "./Vertex";
+import Polygon from "../geometry/Polygon";
+import MultiPolygon from "../geometry/MultiPolygon";
+import Ring from "../geometry/Ring";
 
 class Dcel {
   name?: string;
@@ -79,7 +82,7 @@ class Dcel {
    * @returns An array of {@link Face}s.
    */
   getBoundedFaces() {
-    return this.faces.filter((f) => !f.isUnbounded);
+    return this.faces.filter(Face.isBounded);
   }
 
   /**
@@ -376,11 +379,99 @@ class Dcel {
 
   /**
    * Transform the DCEL into a {@link Subdivision}.
-   * @returns A {@link Subdivision} representation of the DCEL.
+   * @returns A {@link Subdivision} representation of the {@link DCEL}.
    */
   toSubdivision() {
-    //TODO: implement
-    return new Subdivision([]);
+    const multiPolygons = this.facesByFeature.map(
+      ({ id: featureId, faces }) => {
+        const polygons = faces
+          ?.filter(
+            (face) =>
+              !face.isHole ||
+              // TODO: think of a clever condition which excludes rings which are inner holes for the respective ring
+              (face.isHole &&
+                face.outerRing &&
+                !faces.map(({ uuid }) => uuid).includes(face.outerRing?.uuid)),
+          )
+          .map((face) => {
+            const outerRing = this.getRingCoordinates(face.edge);
+            const innerRings = this.getInnerRings(face);
+            const rings = [outerRing, ...innerRings];
+            return new Polygon(
+              rings.map(
+                (ring) => new Ring(ring.map(([x, y]) => new Point(x, y))),
+              ),
+            );
+          });
+
+        const properties = this.featureProperties?.at(featureId);
+
+        const multiPolygon = new MultiPolygon(
+          polygons ?? [],
+          featureId,
+          properties,
+        );
+        return multiPolygon;
+      },
+    );
+
+    return new Subdivision(multiPolygons);
+  }
+
+  private getRingCoordinates(edge: HalfEdge): [number, number][] {
+    const coordinates: [number, number][] = [];
+    const startEdge = edge;
+    do {
+      coordinates.push([edge.tail.x, edge.tail.y]);
+      edge = edge.next ? edge.next : startEdge;
+    } while (edge !== startEdge);
+    return coordinates;
+  }
+
+  private getInnerRings(face: Face): [number, number][][] {
+    const innerRings: [number, number][][] = [];
+    face.innerEdges.forEach((innerEdge) => {
+      const ringCoordinates = this.getRingCoordinates(innerEdge);
+      innerRings.push(ringCoordinates);
+      // Recursively process nested rings
+      const nestedRings = this.getInnerRingsFromEdge(innerEdge);
+      innerRings.push(...nestedRings);
+    });
+    return innerRings;
+  }
+
+  private getInnerRingsFromEdge(edge: HalfEdge): [number, number][][] {
+    const innerRings: [number, number][][] = [];
+    const startEdge = edge;
+    do {
+      if (edge.face?.innerEdges) {
+        edge.face.innerEdges.forEach((innerEdge) => {
+          const ringCoordinates = this.getRingCoordinates(innerEdge);
+          innerRings.push(ringCoordinates);
+          // Recursively process nested rings
+          const nestedRings = this.getInnerRingsFromEdge(innerEdge);
+          innerRings.push(...nestedRings);
+        });
+      }
+      edge = edge.next ? edge.next : startEdge;
+    } while (edge !== startEdge);
+    return innerRings;
+  }
+
+  /**
+   * Get the faces of the DCEL grouped by their associated feature.
+   * It only considers bounded faces.
+   * @returns An object with the associated feature id as key and an array of associated {@link Face}s as value.
+   */
+  private get facesByFeature() {
+    const explodedFaces = this.getBoundedFaces().flatMap((face) =>
+      face.associatedFeatures.flatMap((id) => ({ id, face })),
+    );
+    const groups = Object.groupBy(explodedFaces, ({ id }) => id);
+    return Object.entries(groups).map(([id, faces]) => ({
+      id,
+      faces: faces?.map(({ face }) => face),
+    }));
   }
 
   /**

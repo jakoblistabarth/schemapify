@@ -115,3 +115,5 @@ export const geoJsonToGeometry = (
 
   return new Subdivision(multiPolygons);
 };
+
+// TODO: implement geometryToGeoJSON
