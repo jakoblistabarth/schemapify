@@ -3,11 +3,11 @@ import Polygon from "./Polygon";
 
 /**
  * Class representing a 2-dimensional multipolygon.
- * It is defined by its polygons.
+ * It is defined by its {@link Polygon}s.
  */
 class MultiPolygon {
   /**
-   * An array of {@links Polygon}s.
+   * An array of {@link Polygon}s.
    */
   polygons: Polygon[];
   id?: string;

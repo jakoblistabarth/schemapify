@@ -6,7 +6,7 @@ import Ring from "./Ring";
 
 /**
  * Class representing a 2-dimensional polygon.
- * It is defined by its rings.
+ * It is defined by its {@link Ring}s.
  */
 class Polygon {
   /**

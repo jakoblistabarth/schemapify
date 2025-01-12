@@ -2,7 +2,7 @@ import Point from "./Point";
 
 /**
  * Class representing a ring.
- * It is defined by its Points
+ * It is defined by its {@link Point}s
  * Its points are always returned in counterclockwise order.
  */
 class Ring {
