@@ -76,3 +76,19 @@ describe("isClockwise() returns the correct boolean", function () {
     ).toBeTruthy();
   });
 });
+
+describe("The first and last point are the same", function () {
+  it("for a simple square.", function () {
+    const points: [number, number][] = [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, 1],
+    ];
+
+    const ring = Ring.fromCoordinates(points);
+
+    expect(ring.points.length).toBe(5);
+    expect(ring.points.at(0)?.xy).toEqual(ring.points.at(-1)?.xy);
+  });
+});

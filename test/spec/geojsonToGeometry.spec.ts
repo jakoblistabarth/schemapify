@@ -21,11 +21,11 @@ describe("geojsonToGeometry parses a geojson feature collection of Austria into 
     expect(subdivision.multiPolygons.length).toBe(9);
   });
 
-  it("with the first multipolygon (Burgenland), being a Polygon, with a single ring with 3 vertices", function () {
+  it("with the first multipolygon (Burgenland), being a Polygon, with a single ring with 4 vertices", function () {
     const burgenland = subdivision.multiPolygons[0];
     expect(burgenland.polygons.length).toBe(1);
     expect(burgenland.polygons[0].rings.length).toBe(1);
-    expect(burgenland.polygons[0].rings[0].length).toBe(3);
+    expect(burgenland.polygons[0].rings[0].length).toBe(4);
     expect(burgenland.properties?.NAME_1).toBe("Burgenland");
   });
 
@@ -39,8 +39,8 @@ describe("geojsonToGeometry parses a geojson feature collection of Austria into 
   it("with the 7th multipolygon (Tyrol) consisting of 2 polygons", function () {
     const tyrol = subdivision.multiPolygons[6];
     expect(tyrol.polygons.length).toBe(2);
-    expect(tyrol.polygons[0].rings[0].length).toBe(3);
-    expect(tyrol.polygons[1].rings[0].length).toBe(4);
+    expect(tyrol.polygons[0].rings[0].length).toBe(4);
+    expect(tyrol.polygons[1].rings[0].length).toBe(5);
     expect(tyrol.properties?.NAME_1).toBe("Tirol");
   });
 

@@ -12,7 +12,7 @@ class Ring {
   _points: Point[];
 
   constructor(points: Point[]) {
-    this._points = points;
+    this._points = Ring.validatePoints(points);
   }
 
   /**
@@ -25,11 +25,17 @@ class Ring {
     return new Ring(points);
   }
 
+  static validatePoints(points: Point[]) {
+    const [first, last] = [points[0], points[points.length - 1]];
+    if (!first.equals(last)) points.push(first);
+    return points;
+  }
+
   /**
    * Get the ring's points.
    */
   get points() {
-    return this.isClockwise ? [...this._points].reverse() : this._points;
+    return this.isClockwise ? [...this._points].toReversed() : this._points;
   }
 
   /**

@@ -238,11 +238,13 @@ class Dcel {
         acc.push(
           ...multiPolygon.polygons.map((polygon) =>
             polygon.rings.map((ring) =>
-              ring.points.map(
-                (point) =>
-                  dcel.findVertex(point.x, point.y) ||
-                  dcel.addVertex(point.x, point.y),
-              ),
+              ring.points
+                .slice(0, -1)
+                .map(
+                  (point) =>
+                    dcel.findVertex(point.x, point.y) ||
+                    dcel.addVertex(point.x, point.y),
+                ),
             ),
           ),
         );
