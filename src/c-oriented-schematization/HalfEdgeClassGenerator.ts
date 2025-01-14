@@ -48,7 +48,7 @@ class HalfEdgeClassGenerator implements Generator {
           this.significantVertices,
         );
         const assignedDirection = this.assignedDirections.get(edge.uuid);
-        if (orientation && assignedDirection) {
+        if (orientation && (assignedDirection || assignedDirection === 0)) {
           acc.set(edge.uuid, { orientation, assignedDirection });
           edge.twin &&
             acc.set(edge.twin.uuid, { orientation, assignedDirection });
@@ -74,9 +74,8 @@ class HalfEdgeClassGenerator implements Generator {
     // do not classify a HalfEdge which has a significant head
     const head = halfEdge.head;
     if (head && significantVertices.includes(head.uuid)) return;
-
     const assignedDirection = this.assignedDirections.get(halfEdge.uuid);
-    if (!assignedDirection) return;
+    if (!assignedDirection && assignedDirection !== 0) return;
     const associatedSector = getAssociatedSector(halfEdge, c.sectors);
     const sector = associatedSector[0];
     const significantVertex =
@@ -139,7 +138,10 @@ class HalfEdgeClassGenerator implements Generator {
 
   /**
    * Assigns directions to all incident HalfEdges of the Vertex.
-   * @returns An Array, holding the assigned directions starting with the direction of the {@link HalfEge} with the smallest angle on the unit circle.
+   * @returns An Array, holding the assigned directions starting
+   * with the direction of the {@link HalfEge} with the smallest angle on the unit circle.
+   * Direction indices are based on the sectors of C.
+   * For e.g., for C2, the directions are [0, 1, 2, 3], where 0 is 0 degree on the unit circle.
    */
   assignDirections(vertex: Vertex, c: C) {
     const edges = vertex.sortEdges(false);

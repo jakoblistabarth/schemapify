@@ -1,10 +1,14 @@
-import fs from "fs";
-import Point from "@/src/geometry/Point";
-import Vertex from "@/src/Dcel/Vertex";
-import HalfEdge from "@/src/Dcel/HalfEdge";
-import Face from "@/src/Dcel/Face";
+import CIrregular from "@/src/c-oriented-schematization/CIrregular";
+import CRegular from "@/src/c-oriented-schematization/CRegular";
+import HalfEdgeClassGenerator from "@/src/c-oriented-schematization/HalfEdgeClassGenerator";
+import style from "@/src/c-oriented-schematization/schematization.style";
 import Dcel from "@/src/Dcel/Dcel";
+import Face from "@/src/Dcel/Face";
+import HalfEdge from "@/src/Dcel/HalfEdge";
+import Vertex from "@/src/Dcel/Vertex";
+import Point from "@/src/geometry/Point";
 import { crawlArray } from "@/src/utilities";
+import fs from "fs";
 
 export function getTestFiles(dir: string) {
   const filesInDir = fs.readdirSync(dir);
@@ -18,13 +22,13 @@ type Directions = {
 export type TestSetup = {
   directions: Directions;
   dcel: Dcel;
-  o: Vertex;
+  origin: Vertex;
 };
 
-export function createEdgeVertexSetup() {
+export const createEdgeVertexSetup = () => {
   const dcel = new Dcel();
-  const o = new Vertex(0, 0, dcel);
-  o.significant = true;
+  const origin = new Vertex(0, 0, dcel);
+  dcel.addVertex(origin.x, origin.y);
 
   const destinations: { [key: string]: Vertex } = {
     d0: new Vertex(4, 0, dcel),
@@ -49,15 +53,50 @@ export function createEdgeVertexSetup() {
   const directions: Directions = {};
 
   Object.entries(destinations).forEach(([key, vertex]) => {
-    const edge = new HalfEdge(o, dcel);
+    const edge = new HalfEdge(origin, dcel);
     edge.twin = new HalfEdge(vertex, dcel);
     edge.twin.twin = edge;
     directions["o" + key] = edge;
   });
 
-  const setup: TestSetup = { dcel, o, directions };
+  const setup: TestSetup = { dcel, origin, directions };
   return setup;
-}
+};
+
+type Options = {
+  c?: CRegular | CIrregular;
+  significantVertices?: string[];
+};
+
+export const getDirections = (
+  testSetup: TestSetup,
+  edges: HalfEdge[],
+  options: Options = {},
+) => {
+  const { dcel, origin } = testSetup;
+  const { c = style.c, significantVertices = [] } = options;
+  edges.forEach((direction) => {
+    const head = new Vertex(
+      direction.head?.x ?? 0,
+      direction.head?.y ?? 0,
+      testSetup.dcel,
+    );
+    const tail = testSetup.origin;
+    dcel.addVertex(head.x, head.y);
+    const halfEdge = dcel.addHalfEdge(tail, head);
+    const halfEdgeTwin = dcel.addHalfEdge(head, tail);
+    halfEdge.twin = halfEdgeTwin;
+    halfEdgeTwin.twin = halfEdge;
+  });
+  const assignedDirections = new HalfEdgeClassGenerator(
+    c,
+    significantVertices,
+  ).run(dcel);
+  const directionSolution = origin.edges.map(
+    (edge) => assignedDirections.get(edge.uuid)?.assignedDirection,
+  );
+  return directionSolution;
+};
 
 export type ConfigurationSetup = {
   vertices: Vertex[];
