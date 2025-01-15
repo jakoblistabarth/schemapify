@@ -63,6 +63,23 @@ export const createEdgeVertexSetup = () => {
   return setup;
 };
 
+const createDcel = (origin: Vertex, edges: HalfEdge[]) => {
+  const dcel = edges[0].dcel;
+  edges.forEach((direction) => {
+    const head = new Vertex(
+      direction.head?.x ?? 0,
+      direction.head?.y ?? 0,
+      dcel,
+    );
+    const tail = origin;
+    dcel.addVertex(head.x, head.y);
+    const halfEdge = dcel.addHalfEdge(tail, head);
+    const halfEdgeTwin = dcel.addHalfEdge(head, tail);
+    halfEdge.twin = halfEdgeTwin;
+    halfEdgeTwin.twin = halfEdge;
+  });
+};
+
 type Options = {
   c?: CRegular | CIrregular;
   significantVertices?: string[];
@@ -75,19 +92,7 @@ export const getDirections = (
 ) => {
   const { dcel, origin } = testSetup;
   const { c = style.c, significantVertices = [] } = options;
-  edges.forEach((direction) => {
-    const head = new Vertex(
-      direction.head?.x ?? 0,
-      direction.head?.y ?? 0,
-      testSetup.dcel,
-    );
-    const tail = testSetup.origin;
-    dcel.addVertex(head.x, head.y);
-    const halfEdge = dcel.addHalfEdge(tail, head);
-    const halfEdgeTwin = dcel.addHalfEdge(head, tail);
-    halfEdge.twin = halfEdgeTwin;
-    halfEdgeTwin.twin = halfEdge;
-  });
+  createDcel(origin, edges);
   const assignedDirections = new HalfEdgeClassGenerator(
     c,
     significantVertices,

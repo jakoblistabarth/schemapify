@@ -29,8 +29,6 @@ class VertexClassGenerator implements Generator {
    * @returns A Boolean indicating whether or not the {@link Vertex} is significant.
    */
   private isSignificant(vertex: Vertex, sectors: Sector[]) {
-    // TODO: move to another class? to not mix dcel and schematization?
-
     // classify as insignificant if all edges are already aligned
     if (this.hasOnlyAlignedEdges(vertex, sectors)) return false;
 
@@ -38,7 +36,6 @@ class VertexClassGenerator implements Generator {
     const occupiedSectors = vertex.edges
       .map((edge) => getAssociatedSector(edge, sectors))
       .flat();
-
     const uniqueSectors: Sector[] = occupiedSectors.reduce(
       (acc: Sector[], sector: Sector) => {
         if (!acc.find((accSector) => accSector.idx == sector.idx))
@@ -47,7 +44,6 @@ class VertexClassGenerator implements Generator {
       },
       [],
     );
-
     if (occupiedSectors.length !== uniqueSectors.length) return true;
 
     // classify as significant if neighbor sectors are not empty
