@@ -1,8 +1,7 @@
 import Dcel from "../Dcel/Dcel";
 import Vertex from "../Dcel/Vertex";
 import Generator from "../Schematization/Generator";
-import { isAligned } from "./HalfEdgeClassGenerator";
-import { getAssociatedSector } from "./HalfEdgeUtils";
+import { getAssociatedSector, isAligned } from "./HalfEdgeUtils";
 import Sector from "./Sector";
 import { getEdgesInSector } from "./VertexUtils";
 

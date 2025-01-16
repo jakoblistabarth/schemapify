@@ -62,3 +62,47 @@ export const getAssociatedSector = (halfEdge: HalfEdge, sectors: Sector[]) => {
     return acc;
   }, []);
 };
+
+/**
+ * Gets the angle of the HalfEdge's assigned direction.
+ * @returns The angle in radians.
+ */
+export const getAssignedAngle = (
+  assignedDirection: number,
+  sectors: Sector[],
+) => {
+  return Math.PI * 2 * (assignedDirection / sectors.length);
+};
+
+/**
+ * Determines whether the HalfEdge is aligned to one of the orientations of C.
+ * @returns A boolean, indicating whether or not the {@link HalfEdge} is aligned.
+ */
+export const isAligned = (halfEdge: HalfEdge, sectors: Sector[]) => {
+  return getAssociatedAngles(halfEdge, sectors).length === 1;
+};
+
+/**
+ * Determines whether the HalfEdge's assigned Direction is adjacent to its associated sector.
+ * @returns A boolean, indicating whether or not the {@link HalfEdge} is deviating.
+ */
+export const isDeviating = (
+  halfEdge: HalfEdge,
+  sectors: Sector[],
+  assignedDirection: number,
+) => {
+  let assignedAngle = getAssignedAngle(assignedDirection, sectors);
+  if (typeof assignedAngle !== "number") return false;
+  if (isAligned(halfEdge, sectors)) {
+    return (
+      getAssociatedAngles(halfEdge, sectors)[0] !==
+      getAssignedAngle(assignedDirection, sectors)
+    );
+  } else {
+    const sector = getAssociatedSector(halfEdge, sectors)[0];
+    //TODO: refactor find better solution for last sector (idx=0)
+    if (sector.idx === sectors.length - 1 && assignedAngle === 0)
+      assignedAngle = Math.PI * 2;
+    return !sector.encloses(assignedAngle);
+  }
+};

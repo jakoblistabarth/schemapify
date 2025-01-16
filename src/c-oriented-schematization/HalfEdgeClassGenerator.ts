@@ -1,14 +1,15 @@
+import { sign } from "crypto";
 import Dcel from "../Dcel/Dcel";
 import HalfEdge from "../Dcel/HalfEdge";
 import Vertex from "../Dcel/Vertex";
 import Generator from "../Schematization/Generator";
 import C from "./C";
 import {
-  getAssociatedAngles,
   getAssociatedSector,
   getSignificantVertex,
+  isAligned,
+  isDeviating,
 } from "./HalfEdgeUtils";
-import Sector from "./Sector";
 import { getEdgesInSector } from "./VertexUtils";
 
 export enum Orientation {
@@ -80,18 +81,20 @@ class HalfEdgeClassGenerator implements Generator {
     const sector = associatedSector[0];
     const significantVertex =
       getSignificantVertex(halfEdge, this.significantVertices) || halfEdge.tail;
-    const edges = getEdgesInSector(significantVertex, sector).filter(
-      (edge) =>
-        !isAligned(edge, c.sectors) &&
-        !this.isDeviating(edge, c.sectors, assignedDirection),
-    );
+    const edges = getEdgesInSector(significantVertex, sector).filter((edge) => {
+      const direction = this.assignedDirections.get(edge.uuid);
+      if (typeof direction !== "number") return;
+      const edgeIsAligned = isAligned(edge, c.sectors);
+      const edgeIsDeviating = isDeviating(edge, c.sectors, direction);
+      return !edgeIsAligned && !edgeIsDeviating;
+    });
 
     let classification: Orientation;
     if (isAligned(halfEdge, c.sectors)) {
-      classification = this.isDeviating(halfEdge, c.sectors, assignedDirection)
+      classification = isDeviating(halfEdge, c.sectors, assignedDirection)
         ? Orientation.AD
         : Orientation.AB;
-    } else if (this.isDeviating(halfEdge, c.sectors, assignedDirection)) {
+    } else if (isDeviating(halfEdge, c.sectors, assignedDirection)) {
       classification = Orientation.UD;
     } else if (edges.length == 2) {
       classification = Orientation.E;
@@ -100,31 +103,6 @@ class HalfEdgeClassGenerator implements Generator {
     }
 
     return classification;
-  }
-
-  /**
-   * Determines whether the HalfEdge's assigned Direction is adjacent to its associated sector.
-   * @returns A boolean, indicating whether or not the {@link HalfEdge} is deviating.
-   */
-  private isDeviating(
-    halfEdge: HalfEdge,
-    sectors: Sector[],
-    assignedDirection: number,
-  ) {
-    let assignedAngle = getAssignedAngle(assignedDirection, sectors);
-    if (typeof assignedAngle !== "number") return false;
-    if (isAligned(halfEdge, sectors)) {
-      return (
-        getAssociatedAngles(halfEdge, sectors)[0] !==
-        getAssignedAngle(assignedDirection, sectors)
-      );
-    } else {
-      const sector = getAssociatedSector(halfEdge, sectors)[0];
-      //TODO: refactor find better solution for last sector (idx=0)
-      if (sector.idx === sectors.length - 1 && assignedAngle === 0)
-        assignedAngle = Math.PI * 2;
-      return !sector.encloses(assignedAngle);
-    }
   }
 
   /**
@@ -182,22 +160,3 @@ class HalfEdgeClassGenerator implements Generator {
 }
 
 export default HalfEdgeClassGenerator;
-
-/**
- * Gets the angle of the HalfEdge's assigned direction.
- * @returns The angle in radians.
- */
-export const getAssignedAngle = (
-  assignedDirection: number,
-  sectors: Sector[],
-) => {
-  return Math.PI * 2 * (assignedDirection / sectors.length);
-};
-
-/**
- * Determines whether the HalfEdge is aligned to one of the orientations of C.
- * @returns A boolean, indicating whether or not the {@link HalfEdge} is aligned.
- */
-export const isAligned = (halfEdge: HalfEdge, sectors: Sector[]) => {
-  return getAssociatedAngles(halfEdge, sectors).length === 1;
-};

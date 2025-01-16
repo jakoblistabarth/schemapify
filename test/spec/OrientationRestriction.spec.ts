@@ -56,7 +56,6 @@ describe("isAligned() works properly", function () {
 describe("getNeighbors() returns the neighboring sectors of the sector", function () {
   it("for the 'last' sector.", function () {
     const sector0 = new CRegular(2).getSector(0) as Sector;
-
     const neighbors = sector0.getNeighbors().map((neighbor) => neighbor.idx);
     expect(neighbors).toEqual([3, 1]);
   });

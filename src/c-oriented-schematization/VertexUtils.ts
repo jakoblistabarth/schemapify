@@ -3,6 +3,7 @@ import Sector from "./Sector";
 
 /**
  * Returns only incident HalfEdges which lie in the specified sector.
+ * @param vertex A Vertex, which is the origin for the {@link Sector}s.
  * @param sector A sector, against which the {@link HalfEdge}s are checked.
  * @returns An array, containing all {@link HalfEdge}s lying in the sector.
  */

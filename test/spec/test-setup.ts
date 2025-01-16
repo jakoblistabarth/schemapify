@@ -85,9 +85,10 @@ type Options = {
   significantVertices?: string[];
 };
 
-export const getDirections = (
+export const getClassification = (
   testSetup: TestSetup,
   edges: HalfEdge[],
+  classficationProperty: "orientation" | "assignedDirection",
   options: Options = {},
 ) => {
   const { dcel, origin } = testSetup;
@@ -98,7 +99,7 @@ export const getDirections = (
     significantVertices,
   ).run(dcel);
   const directionSolution = origin.edges.map(
-    (edge) => assignedDirections.get(edge.uuid)?.assignedDirection,
+    (edge) => assignedDirections.get(edge.uuid)?.[classficationProperty],
   );
   return directionSolution;
 };

@@ -1,270 +1,365 @@
+import CRegular from "@/src/c-oriented-schematization/CRegular";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import HalfEdgeClassGenerator, {
+  Orientation,
+} from "@/src/c-oriented-schematization/HalfEdgeClassGenerator";
+import {
+  getSignificantVertex,
+  isDeviating,
+} from "@/src/c-oriented-schematization/HalfEdgeUtils";
+import { style } from "@/src/c-oriented-schematization/schematization.style";
+import VertexClassGenerator from "@/src/c-oriented-schematization/VertexClassGenerator";
+import Dcel from "@/src/Dcel/Dcel";
+import Vertex from "@/src/Dcel/Vertex";
 import fs from "fs";
 import path from "path";
-import CRegular from "@/src/c-oriented-schematization/CRegular";
-import Dcel from "@/src/Dcel/Dcel";
-import { Orientation } from "@/src/c-oriented-schematization/HalfEdgeClassGenerator";
-import { createEdgeVertexSetup, TestSetup } from "./test-setup";
-import { style } from "@/src/c-oriented-schematization/schematization.style";
-import C from "@/src/c-oriented-schematization/C";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import {
+  createEdgeVertexSetup,
+  getClassification,
+  TestSetup,
+} from "./test-setup";
 
 describe("isDeviating()", function () {
   let s: TestSetup;
-  let c: C;
 
   beforeEach(function () {
     s = createEdgeVertexSetup();
-    ({ c } = style);
   });
 
   it("returns true for an deviating edge", function () {
-    s.directions.od53.assignedDirection = 2;
-    expect(s.directions.od53.isDeviating(c.sectors)).toBe(true);
+    const edgeIsDeviating = isDeviating(
+      s.directions.od76,
+      new CRegular(2).sectors,
+      2,
+    );
+    expect(edgeIsDeviating).toBe(true);
   });
 
   it("returns true for an deviating edge", function () {
-    s.directions.od53.assignedDirection = 3;
-    expect(s.directions.od53.isDeviating(c.sectors)).toBe(true);
-    expect(s.directions.od53.isDeviating(new CRegular(4).sectors)).toBe(true);
+    const edgeIsDeviating = isDeviating(
+      s.directions.od53,
+      new CRegular(2).sectors,
+      2,
+    );
+    expect(edgeIsDeviating).toBe(true);
+  });
+
+  it("returns true for an deviating edge", function () {
+    const edgeIsDeviatingC2 = isDeviating(
+      s.directions.od53,
+      new CRegular(2).sectors,
+      3,
+    );
+    const edgeIsDeviatingC4 = isDeviating(
+      s.directions.od53,
+      new CRegular(4).sectors,
+      3,
+    );
+    expect(edgeIsDeviatingC2).toBe(true);
+    expect(edgeIsDeviatingC4).toBe(true);
   });
 
   it("returns false for a basic edge", function () {
-    s.directions.od53.assignedDirection = 1;
-    expect(s.directions.od53.isDeviating(c.sectors)).toBe(false);
-    expect(s.directions.od53.isDeviating(new CRegular(4).sectors)).toBe(false);
+    const edgeIsDeviatingC2 = isDeviating(
+      s.directions.od53,
+      new CRegular(2).sectors,
+      1,
+    );
+    const edgeIsDeviatingC4 = isDeviating(
+      s.directions.od53,
+      new CRegular(4).sectors,
+      1,
+    );
+    expect(edgeIsDeviatingC2).toBe(false);
+    expect(edgeIsDeviatingC4).toBe(false);
   });
 
   it("returns false for a basic edge", function () {
-    s.directions.od333.assignedDirection = 0;
-    expect(s.directions.od333.isDeviating(c.sectors)).toBe(false);
-    expect(s.directions.od333.isDeviating(new CRegular(4).sectors)).toBe(false);
+    const edgeIsDeviatingC2 = isDeviating(
+      s.directions.od333,
+      new CRegular(2).sectors,
+      0,
+    );
+    const edgeIsDeviatingC4 = isDeviating(
+      s.directions.od333,
+      new CRegular(4).sectors,
+      0,
+    );
+    expect(edgeIsDeviatingC2).toBe(false);
+    expect(edgeIsDeviatingC4).toBe(false);
   });
 
   it("returns false for a basic edge", function () {
-    s.directions.od53.assignedDirection = 0;
-    expect(s.directions.od53.isDeviating(c.sectors)).toBe(false);
+    const edgeIsDeviating = isDeviating(
+      s.directions.od53,
+      new CRegular(2).sectors,
+      0,
+    );
+    expect(edgeIsDeviating).toBe(false);
   });
 
   it("returns false for a for a basic aligned edge", function () {
-    s.directions.od90.assignedDirection = 1;
-    expect(s.directions.od90.isDeviating(c.sectors)).toBe(false);
+    const edgeIsDeviating = isDeviating(
+      s.directions.od90,
+      new CRegular(2).sectors,
+      1,
+    );
+    expect(edgeIsDeviating).toBe(false);
   });
 
   it("returns true for a for a deviating aligned edge", function () {
-    s.directions.od90.assignedDirection = 2;
-    expect(s.directions.od90.isDeviating(c.sectors)).toBe(true);
+    const edgeIsDeviating = isDeviating(
+      s.directions.od90,
+      new CRegular(2).sectors,
+      2,
+    );
+    expect(edgeIsDeviating).toBe(true);
   });
 
   it("returns false for a for a basic aligned edge", function () {
-    s.directions.od90.assignedDirection = 2;
-
-    expect(s.directions.od90.isDeviating(new CRegular(4).sectors)).toBe(false);
+    const edgeIsDeviating = isDeviating(
+      s.directions.od90,
+      new CRegular(4).sectors,
+      2,
+    );
+    expect(edgeIsDeviating).toBe(false);
   });
 
   it("returns false for a for a basic aligned edge", function () {
-    s.directions.od315.assignedDirection = 7;
-
-    expect(s.directions.od315.isDeviating(new CRegular(4).sectors)).toBe(false);
+    const edgeIsDeviating = isDeviating(
+      s.directions.od315,
+      new CRegular(4).sectors,
+      7,
+    );
+    expect(edgeIsDeviating).toBe(false);
   });
 });
 
-describe("The getter significantVertex()", function () {
+describe("getSignificantVertex()", function () {
   let s: TestSetup;
   beforeEach(function () {
     s = createEdgeVertexSetup();
   });
 
   it("returns an significant endpoint if one is specified", function () {
-    const significantVertex = s.directions.od53.significantVertex;
-    expect(significantVertex?.significant).toBe(true);
+    const significantVertex = getSignificantVertex(s.directions.od53, [
+      s.origin.uuid,
+    ]);
+    expect(significantVertex?.uuid).toBe(Vertex.getKey(0, 0));
   });
   it("returns null if none of its endpoints are significant", function () {
-    s.o.significant = false;
-    expect(s.directions.od53.significantVertex).toBeUndefined();
+    const significantVertex = getSignificantVertex(s.directions.od53, []);
+    expect(significantVertex).toBeUndefined();
   });
 });
 
 describe("Given the examples in the paper of Buchin et al., classify() works as expected on example", function () {
   let s: TestSetup;
-  let c: C;
 
   beforeEach(function () {
     s = createEdgeVertexSetup();
-    ({ c } = style);
   });
 
   it("a", function () {
-    s.o.edges.push(s.directions.od53, s.directions.od217);
-    s.directions.od53.classify(c);
-    s.directions.od217.classify(c);
-
-    expect(s.directions.od53.class).toBe(Orientation.UB);
-    expect(s.directions.od217.class).toBe(Orientation.UB);
+    const orientations = getClassification(
+      s,
+      [s.directions.od53, s.directions.od217],
+      "orientation",
+    );
+    expect(orientations).toEqual([Orientation.UB, Orientation.UB]);
   });
 
   it("b", function () {
-    s.o.edges.push(s.directions.od53, s.directions.od180, s.directions.od270);
-    s.directions.od53.classify(c);
-    s.directions.od180.classify(c);
-    s.directions.od270.classify(c);
-
-    expect(s.directions.od53.class).toBe(Orientation.UB);
-    expect(s.directions.od180.class).toBe(Orientation.AB);
-    expect(s.directions.od270.class).toBe(Orientation.AB);
+    const orientations = getClassification(
+      s,
+      [s.directions.od53, s.directions.od180, s.directions.od270],
+      "orientation",
+    );
+    expect(orientations).toEqual([
+      Orientation.UB,
+      Orientation.AB,
+      Orientation.AB,
+    ]);
   });
 
   it("c", function () {
-    s.o.edges.push(s.directions.od37, s.directions.od90, s.directions.od104);
-    s.directions.od37.classify(c);
-    s.directions.od90.classify(c);
-    s.directions.od104.classify(c);
-
-    expect(s.directions.od37.class).toBe(Orientation.UB);
-    expect(s.directions.od90.class).toBe(Orientation.AB);
-    expect(s.directions.od104.class).toBe(Orientation.UB);
+    const orientations = getClassification(
+      s,
+      [s.directions.od37, s.directions.od90, s.directions.od104],
+      "orientation",
+      { significantVertices: [s.origin.uuid] },
+    );
+    expect(orientations).toEqual([
+      Orientation.UB,
+      Orientation.AB,
+      Orientation.UB,
+    ]);
   });
 
   it("d", function () {
-    s.o.edges.push(s.directions.od37, s.directions.od53);
-    s.directions.od37.classify(c);
-    s.directions.od53.classify(c);
-
-    expect(s.directions.od37.class).toBe(Orientation.E);
-    expect(s.directions.od53.class).toBe(Orientation.E);
+    const orientations = getClassification(
+      s,
+      [s.directions.od37, s.directions.od53],
+      "orientation",
+      { significantVertices: [s.origin.uuid] },
+    );
+    expect(orientations).toEqual([Orientation.E, Orientation.E]);
   });
 
   it("e", function () {
-    s.o.edges.push(s.directions.od37, s.directions.od53, s.directions.od76);
-    s.directions.od37.classify(c);
-    s.directions.od53.classify(c);
-    s.directions.od76.classify(c);
-
-    expect(s.directions.od37.class).toBe(Orientation.E);
-    expect(s.directions.od53.class).toBe(Orientation.E);
-    expect(s.directions.od76.class).toBe(Orientation.UD);
+    const orientations = getClassification(
+      s,
+      [s.directions.od37, s.directions.od53, s.directions.od76],
+      "orientation",
+      { significantVertices: [s.origin.uuid] },
+    );
+    expect(orientations).toEqual([
+      Orientation.E,
+      Orientation.E,
+      Orientation.UD,
+    ]);
   });
 
   it("f", function () {
-    s.o.edges.push(
-      s.directions.od0,
-      s.directions.od37,
-      s.directions.od53,
-      s.directions.od76,
+    const orientations = getClassification(
+      s,
+      [
+        s.directions.od0,
+        s.directions.od37,
+        s.directions.od53,
+        s.directions.od76,
+      ],
+      "orientation",
+      { significantVertices: [s.origin.uuid] },
     );
-    s.directions.od0.classify(c);
-    s.directions.od37.classify(c);
-    s.directions.od53.classify(c);
-    s.directions.od76.classify(c);
-
-    expect(s.directions.od0.class).toBe(Orientation.AD);
-    expect(s.directions.od37.class).toBe(Orientation.E);
-    expect(s.directions.od53.class).toBe(Orientation.E);
-    expect(s.directions.od76.class).toBe(Orientation.UD);
+    expect(orientations).toEqual([
+      Orientation.AD,
+      Orientation.E,
+      Orientation.E,
+      Orientation.UD,
+    ]);
   });
 
   it("g", function () {
-    s.o.edges.push(
-      s.directions.od315,
-      s.directions.od333,
-      s.directions.od53,
-      s.directions.od76,
+    const orientations = getClassification(
+      s,
+      [
+        s.directions.od53,
+        s.directions.od76,
+        s.directions.od315,
+        s.directions.od333,
+      ],
+      "orientation",
+      { significantVertices: [s.origin.uuid] },
     );
-    s.directions.od315.classify(c);
-    s.directions.od333.classify(c);
-    s.directions.od53.classify(c);
-    s.directions.od76.classify(c);
-
-    expect(s.directions.od315.class).toBe(Orientation.E);
-    expect(s.directions.od333.class).toBe(Orientation.E);
-    expect(s.directions.od53.class).toBe(Orientation.UB);
-    expect(s.directions.od76.class).toBe(Orientation.UD);
+    expect(orientations).toEqual([
+      Orientation.UB,
+      Orientation.UD,
+      Orientation.E,
+      Orientation.E,
+    ]);
   });
 
   it("h", function () {
-    s.o.edges.push(s.directions.od53, s.directions.od217);
-    s.directions.od53.classify(new CRegular(4));
-    s.directions.od217.classify(new CRegular(4));
-
-    expect(s.directions.od53.class).toBe(Orientation.UB);
-    expect(s.directions.od217.class).toBe(Orientation.UB);
+    const orientations = getClassification(
+      s,
+      [s.directions.od53, s.directions.od217],
+      "orientation",
+      { c: new CRegular(4) },
+    );
+    expect(orientations).toEqual([Orientation.UB, Orientation.UB]);
   });
 
   it("i", function () {
-    s.o.edges.push(s.directions.od53, s.directions.od180, s.directions.od270);
-    s.directions.od53.classify(new CRegular(4));
-    s.directions.od180.classify(new CRegular(4));
-    s.directions.od270.classify(new CRegular(4));
-
-    expect(s.directions.od53.class).toBe(Orientation.UB);
-    expect(s.directions.od180.class).toBe(Orientation.AB);
-    expect(s.directions.od270.class).toBe(Orientation.AB);
+    const orientations = getClassification(
+      s,
+      [s.directions.od53, s.directions.od180, s.directions.od270],
+      "orientation",
+      { c: new CRegular(4) },
+    );
+    expect(orientations).toEqual([
+      Orientation.UB,
+      Orientation.AB,
+      Orientation.AB,
+    ]);
   });
 
   it("j", function () {
-    s.o.edges.push(s.directions.od53, s.directions.od90, s.directions.od104);
-    s.directions.od53.classify(new CRegular(4));
-    s.directions.od90.classify(new CRegular(4));
-    s.directions.od104.classify(new CRegular(4));
-
-    expect(s.directions.od53.class).toBe(Orientation.UB);
-    expect(s.directions.od90.class).toBe(Orientation.AB);
-    expect(s.directions.od104.class).toBe(Orientation.UB);
+    const orientations = getClassification(
+      s,
+      [s.directions.od53, s.directions.od90, s.directions.od104],
+      "orientation",
+      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
+    );
+    expect(orientations).toEqual([
+      Orientation.UB,
+      Orientation.AB,
+      Orientation.UB,
+    ]);
   });
 
   it("k", function () {
-    s.o.edges.push(s.directions.od37, s.directions.od53);
-    s.directions.od37.classify(new CRegular(4));
-    s.directions.od53.classify(new CRegular(4));
-
-    expect(s.directions.od37.class).toBe(Orientation.UB);
-    expect(s.directions.od53.class).toBe(Orientation.UB);
+    const orientations = getClassification(
+      s,
+      [s.directions.od37, s.directions.od53],
+      "orientation",
+      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
+    );
+    expect(orientations).toEqual([Orientation.UB, Orientation.UB]);
   });
 
   it("l", function () {
-    s.o.edges.push(s.directions.od37, s.directions.od53, s.directions.od76);
-    s.directions.od37.classify(new CRegular(4));
-    s.directions.od53.classify(new CRegular(4));
-    s.directions.od76.classify(new CRegular(4));
-
-    expect(s.directions.od37.class).toBe(Orientation.UB);
-    expect(s.directions.od53.class).toBe(Orientation.E);
-    expect(s.directions.od76.class).toBe(Orientation.E);
+    const orientations = getClassification(
+      s,
+      [s.directions.od37, s.directions.od53, s.directions.od76],
+      "orientation",
+      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
+    );
+    expect(orientations).toEqual([
+      Orientation.UB,
+      Orientation.E,
+      Orientation.E,
+    ]);
   });
 
   it("m", function () {
-    s.o.edges.push(
-      s.directions.od0,
-      s.directions.od14,
-      s.directions.od53,
-      s.directions.od76,
+    const orientations = getClassification(
+      s,
+      [
+        s.directions.od0,
+        s.directions.od14,
+        s.directions.od53,
+        s.directions.od76,
+      ],
+      "orientation",
+      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
     );
-    s.directions.od0.classify(new CRegular(4));
-    s.directions.od14.classify(new CRegular(4));
-    s.directions.od53.classify(new CRegular(4));
-    s.directions.od76.classify(new CRegular(4));
-
-    expect(s.directions.od0.class).toBe(Orientation.AD);
-    expect(s.directions.od14.class).toBe(Orientation.UB);
-    expect(s.directions.od53.class).toBe(Orientation.E);
-    expect(s.directions.od76.class).toBe(Orientation.E);
+    expect(orientations).toEqual([
+      Orientation.AD,
+      Orientation.UB,
+      Orientation.E,
+      Orientation.E,
+    ]);
   });
 
   it("n", function () {
-    s.o.edges.push(
-      s.directions.od315,
-      s.directions.od333,
-      s.directions.od53,
-      s.directions.od76,
+    const orientations = getClassification(
+      s,
+      [
+        s.directions.od76,
+        s.directions.od53,
+        s.directions.od315,
+        s.directions.od333,
+      ],
+      "orientation",
+      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
     );
-    s.directions.od315.classify(new CRegular(4));
-    s.directions.od333.classify(new CRegular(4));
-    s.directions.od53.classify(new CRegular(4));
-    s.directions.od76.classify(new CRegular(4));
-
-    expect(s.directions.od315.class).toBe(Orientation.AB);
-    expect(s.directions.od333.class).toBe(Orientation.UB);
-    expect(s.directions.od53.class).toBe(Orientation.E);
-    expect(s.directions.od76.class).toBe(Orientation.E);
+    expect(orientations).toEqual([
+      Orientation.E,
+      Orientation.E,
+      Orientation.AB,
+      Orientation.UB,
+    ]);
   });
 });
 
@@ -276,19 +371,30 @@ describe("classifyEdges() in a classification where all edges are classified and
     const dcel = Dcel.fromGeoJSON(json);
     const schematization = new CSchematization();
     schematization.preProcess(dcel);
-    schematization.classify(dcel);
-    const edgesWithoutAssignedAngles = dcel
+    const significantVertices = new VertexClassGenerator(style.c.sectors).run(
+      dcel,
+    );
+    const classifications = new HalfEdgeClassGenerator(
+      style.c,
+      significantVertices,
+    ).run(dcel);
+    const edgesWithoutAssignedAngles = [...classifications.values()].filter(
+      (edge) => edge.assignedDirection === undefined,
+    );
+    const edgesWithoutClassification = [...classifications.values()].filter(
+      (edge) => edge.orientation === undefined,
+    );
+    const edgesWithConflictingClasses = dcel
       .getHalfEdges()
-      .filter((edge) => edge.assignedDirection === undefined);
-    const edgesWithoutClassification = dcel
-      .getHalfEdges()
-      .filter((edge) => edge.class === undefined);
-    const edgesWithDivergingClasses = dcel
-      .getHalfEdges()
-      .filter((edge) => edge.class !== edge.twin?.class);
+      .filter(
+        (edge) =>
+          edge.twin &&
+          classifications.get(edge.uuid)?.orientation !==
+            classifications.get(edge.twin.uuid)?.orientation,
+      );
 
     expect(edgesWithoutAssignedAngles.length).toBe(0);
-    expect(edgesWithDivergingClasses.length).toBe(0);
+    expect(edgesWithConflictingClasses.length).toBe(0);
     expect(edgesWithoutClassification.length).toBe(0);
   });
 
@@ -302,19 +408,30 @@ describe("classifyEdges() in a classification where all edges are classified and
     const dcel = Dcel.fromGeoJSON(json);
     const schematization = new CSchematization();
     schematization.preProcess(dcel);
-    schematization.classify(dcel);
-    const edgesWithoutAssignedAngles = dcel
+    const significantVertices = new VertexClassGenerator(style.c.sectors).run(
+      dcel,
+    );
+    const classifications = new HalfEdgeClassGenerator(
+      style.c,
+      significantVertices,
+    ).run(dcel);
+    const edgesWithoutAssignedAngles = [...classifications.values()].filter(
+      (edge) => edge.assignedDirection === undefined,
+    );
+    const edgesWithoutClassification = [...classifications.values()].filter(
+      (edge) => edge.orientation === undefined,
+    );
+    const edgesWithConflictingClasses = dcel
       .getHalfEdges()
-      .filter((edge) => edge.assignedDirection === undefined);
-    const edgesWithoutClassification = dcel
-      .getHalfEdges()
-      .filter((edge) => edge.class === undefined);
-    const edgesWithDivergingClasses = dcel
-      .getHalfEdges()
-      .filter((edge) => edge.class !== edge.twin?.class);
+      .filter(
+        (edge) =>
+          edge.twin &&
+          classifications.get(edge.uuid)?.orientation !==
+            classifications.get(edge.twin.uuid)?.orientation,
+      );
 
     expect(edgesWithoutAssignedAngles.length).toBe(0);
-    expect(edgesWithDivergingClasses.length).toBe(0);
+    expect(edgesWithConflictingClasses.length).toBe(0);
     expect(edgesWithoutClassification.length).toBe(0);
   });
 });

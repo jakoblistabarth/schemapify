@@ -8,8 +8,12 @@ import Polygon from "../geometry/Polygon";
 import Ring from "../geometry/Ring";
 import Sector from "./Sector";
 import { CStyle } from "./schematization.style";
-import { Orientation, getAssignedAngle } from "./HalfEdgeClassGenerator";
-import { getAssociatedAngles, getAssociatedSector } from "./HalfEdgeUtils";
+import { Orientation } from "./HalfEdgeClassGenerator";
+import {
+  getAssignedAngle,
+  getAssociatedAngles,
+  getAssociatedSector,
+} from "./HalfEdgeUtils";
 import { getUnitVector } from "../utilities";
 import C from "./C";
 
