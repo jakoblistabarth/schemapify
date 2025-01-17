@@ -1,7 +1,12 @@
 import CIrregular from "@/src/c-oriented-schematization/CIrregular";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
-import HalfEdgeClassGenerator from "@/src/c-oriented-schematization/HalfEdgeClassGenerator";
-import style from "@/src/c-oriented-schematization/schematization.style";
+import HalfEdgeClassGenerator, {
+  Orientation,
+} from "@/src/c-oriented-schematization/HalfEdgeClassGenerator";
+import cStyle, {
+  CStyle,
+} from "@/src/c-oriented-schematization/schematization.style";
+import StaircaseGenerator from "@/src/c-oriented-schematization/StaircaseGenerator";
 import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
 import HalfEdge from "@/src/Dcel/HalfEdge";
@@ -9,6 +14,7 @@ import Vertex from "@/src/Dcel/Vertex";
 import Point from "@/src/geometry/Point";
 import { crawlArray } from "@/src/utilities";
 import fs from "fs";
+import { Position } from "geojson";
 
 export function getTestFiles(dir: string) {
   const filesInDir = fs.readdirSync(dir);
@@ -80,6 +86,30 @@ const createDcel = (origin: Vertex, edges: HalfEdge[]) => {
   });
 };
 
+export const createStaircaseSetup = (
+  destination: Position,
+  assignedDirection: number,
+  orientation: Orientation,
+  options: { style?: CStyle; significantVertices?: string[] } = {},
+) => {
+  const { style = cStyle, significantVertices = [] } = options;
+  const dcel = new Dcel();
+  const o = new Vertex(0, 0, dcel);
+  const d = new Vertex(destination[0], destination[1], dcel);
+  const edge = dcel.addHalfEdge(o, d);
+  const twin = dcel.addHalfEdge(d, o);
+  edge.twin = twin;
+  twin.twin = edge;
+  o.edges.push(edge);
+  const generator = new StaircaseGenerator(
+    significantVertices,
+    new Map([[edge.uuid, { orientation, assignedDirection }]]),
+    style,
+  );
+  const staircases = generator.run(dcel);
+  return staircases.get(edge.uuid);
+};
+
 type Options = {
   c?: CRegular | CIrregular;
   significantVertices?: string[];
@@ -92,7 +122,7 @@ export const getClassification = (
   options: Options = {},
 ) => {
   const { dcel, origin } = testSetup;
-  const { c = style.c, significantVertices = [] } = options;
+  const { c = cStyle.c, significantVertices = [] } = options;
   createDcel(origin, edges);
   const assignedDirections = new HalfEdgeClassGenerator(
     c,

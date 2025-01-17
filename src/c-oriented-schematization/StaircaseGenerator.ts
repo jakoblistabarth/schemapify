@@ -47,7 +47,11 @@ class StaircaseGenerator implements Generator {
         const assignedDirection = this.halfEdgeClassifications.get(
           edge.uuid,
         )?.assignedDirection;
-        if (!edgeClass || edgeClass === Orientation.AB || !assignedDirection)
+        if (
+          !edgeClass ||
+          edgeClass === Orientation.AB ||
+          typeof assignedDirection !== "number"
+        )
           return acc;
         if (
           this.sigificantVertices.includes(edge.uuid) &&
