@@ -1,3 +1,7 @@
+import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
+import Contraction from "@/src/c-oriented-schematization/Contraction";
+import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
+import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
@@ -15,8 +19,6 @@ import {
 } from "deck.gl";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import ConfigurationLayer from "../helpers/ConfigurationLayer";
-import Contraction from "@/src/c-oriented-schematization/Contraction";
-import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
 
 const step = 0.005;
 const intervalMS = 24;
@@ -73,7 +75,7 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       .map((i) => range(-50, 50, 0.5).map((j) => [i, j]))
       .flat();
 
-    const edges = new LineLayer({
+    const edgeLayer = new LineLayer({
       id: "edges",
       data: halfedges,
       getSourcePosition: (e: HalfEdge) => shiftPoint(e, e.tail),
@@ -90,22 +92,25 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       },
     });
 
-    const contractions = new SolidPolygonLayer({
+    const configurations = new ConfigurationGenerator().run(dcel);
+
+    const contractionLayer = new SolidPolygonLayer({
       id: "contractions",
-      data: dcel
-        .getContractions()
-        .filter((c) => c.configuration.innerEdge.face?.edge)
-        .filter((c) => c.isFeasible)
+      data: configurations
+        .values()
+        .flatMap((c) => Object.values(c.contractions))
+        .filter((c) => c?.configuration.innerEdge.face?.edge)
+        .filter((c) => c?.isFeasible)
         // .filter((c) => c.type === ContractionType.N)
         .map((c) => ({
-          polygon: c.areaPoints.map((p) => p.vector.toArray()),
-          type: c.type,
+          polygon: c?.areaPoints.map((p) => p.vector.toArray()),
+          type: c?.type,
         })),
       getFillColor: (c: Contraction) =>
         c.type === ContractionType.N ? [255, 0, 0, 10] : [0, 255, 0, 10],
     });
 
-    const edgesAnimated = new TripsLayer({
+    const edgeAnimationLayer = new TripsLayer({
       id: "edges-animated",
       data: halfedges,
       getPath: (e: HalfEdge) => getShiftedPath(e).map((e) => e.coordinates),
@@ -117,7 +122,7 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       currentTime: time,
     });
 
-    const points = new ScatterplotLayer({
+    const pointsLayer = new ScatterplotLayer({
       id: "vertices",
       pickable: true,
       data: vertices,
@@ -134,7 +139,7 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
         hoverInfo?.object?.uuid === d.uuid ? [0, 255, 0] : [255, 255, 255],
     });
 
-    const grid = new ScatterplotLayer({
+    const gridLayer = new ScatterplotLayer({
       id: "grid",
       data: gridPoints,
       getPosition: (d) => d,
@@ -143,17 +148,19 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       getFillColor: [0, 0, 0, 50],
     });
 
-    const configurations = new ConfigurationLayer({
-      data: dcel.faceFaceBoundaryList?.getMinimalConfigurationPair(),
+    const ffbList = new FaceFaceBoundaryListGenerator().run(dcel);
+
+    const configurationLayer = new ConfigurationLayer({
+      data: ffbList.getMinimalConfigurationPair(configurations),
     });
 
     const layers = [
-      grid,
-      configurations,
-      contractions,
-      edges,
-      edgesAnimated,
-      points,
+      gridLayer,
+      configurationLayer,
+      contractionLayer,
+      edgeLayer,
+      edgeAnimationLayer,
+      pointsLayer,
     ];
 
     const initialViewState: OrthographicViewState = {
