@@ -1,4 +1,3 @@
-import { sign } from "crypto";
 import Dcel from "../Dcel/Dcel";
 import HalfEdge from "../Dcel/HalfEdge";
 import Vertex from "../Dcel/Vertex";

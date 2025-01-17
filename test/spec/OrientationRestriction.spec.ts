@@ -1,9 +1,9 @@
 import C from "@/src/c-oriented-schematization/C";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
-import { isAligned } from "@/src/c-oriented-schematization/HalfEdgeClassGenerator";
 import {
   getAssociatedAngles,
   getAssociatedSector,
+  isAligned,
 } from "@/src/c-oriented-schematization/HalfEdgeUtils";
 import { style } from "@/src/c-oriented-schematization/schematization.style";
 import Sector from "@/src/c-oriented-schematization/Sector";

@@ -1,5 +1,5 @@
 import * as geojson from "geojson";
-import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
+// import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
 import Point from "../geometry/Point";
 import Subdivision from "../geometry/Subdivision";
 import BoundingBox from "../helpers/BoundingBox";
@@ -194,10 +194,10 @@ class Dcel {
     const edgeKey = HalfEdge.getKey(edge.tail, head);
     this.halfEdges.delete(edgeKey);
     if (edge.face && edge.twin?.face) {
-      const boundaryKey = FaceFaceBoundaryList.getKey(
-        edge.face,
-        edge.twin.face,
-      );
+      // const boundaryKey = FaceFaceBoundaryList.getKey(
+      //   edge.face,
+      //   edge.twin.face,
+      // );
       // this needs to be moved
       // to a c-oriente-schematization class (e.g. to the edge move processor?)
       // const boundaryEdges =
