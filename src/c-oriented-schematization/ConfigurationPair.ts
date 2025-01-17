@@ -46,10 +46,10 @@ class ConfigurationPair {
     const compensationEdge = this.compensation?.configuration.innerEdge;
 
     if (!compensationEdge)
-      return console.warn("compensation contraction is not defined");
+      return console.error("compensation contraction is not defined");
 
     // 1. Update (decrement) blocking edges
-    contractions.forEach((contractions, edgeUuid) => {
+    contractions.forEach((contractions) => {
       // console.log(
       //   "blockingNumber before",
       //   contraction.configuration.innerEdge.toString(),
@@ -166,7 +166,7 @@ class ConfigurationPair {
     // );
 
     // TODO: 3. Update (increment) blocking numbers again
-    contractions.forEach((contraction, edgeUuid) => {
+    contractions.forEach((contraction) => {
       Object.values(contraction).forEach((d) =>
         d.incrementBlockingNumber(this.x1x2, configurations),
       );

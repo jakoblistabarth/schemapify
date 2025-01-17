@@ -1,9 +1,11 @@
 import Dcel from "../Dcel/Dcel";
-import Processor from "../Schematization/Processor";
+// import Processor from "../Schematization/Processor";
 import Configuration from "./Configuration";
 import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
 
-class EdgeMoveProcessor implements Processor {
+//TODO: make this class more in line with the other processors?
+// class EdgeMoveProcessor implements Processor {
+class EdgeMoveProcessor {
   faceFaceBoundaryList: FaceFaceBoundaryList;
   configurations: Map<string, Configuration>;
 
@@ -21,21 +23,23 @@ class EdgeMoveProcessor implements Processor {
     const pair = this.faceFaceBoundaryList.getMinimalConfigurationPair(
       this.configurations,
     );
+    // contractions and configurations are updated as side effects in doEdgeMove()
     const edgeMove = pair?.doEdgeMove(
       input,
       this.contractions,
       this.configurations,
     );
-    return edgeMove
-      ? {
-          dcel: edgeMove.dcel,
-          configurations: edgeMove.configurations,
-          contractions: edgeMove.contractions,
-        }
-      : undefined;
+    return {
+      dcel: edgeMove ? edgeMove.dcel : input,
+      configurations: edgeMove ? edgeMove.configurations : this.configurations,
+      faceFaceBoundaryList: edgeMove
+        ? //TODO: update the ffbl as its creation(?) is expensive O(n^2)?
+          new FaceFaceBoundaryList(edgeMove.dcel)
+        : this.faceFaceBoundaryList,
+    };
   }
 
-  get contractions() {
+  private get contractions() {
     return new Map(
       Array.from(this.configurations.entries()).map(
         ([edgeUuid, configuration]) => {

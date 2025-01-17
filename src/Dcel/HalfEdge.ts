@@ -1,4 +1,3 @@
-import Configuration from "../c-oriented-schematization/Configuration";
 import Sector from "../c-oriented-schematization/Sector";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";

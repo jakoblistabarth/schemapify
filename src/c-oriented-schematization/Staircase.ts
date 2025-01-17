@@ -217,8 +217,8 @@ class Staircase {
         this.points = this.getStaircasePoints();
         const convexHull = new ConvexHullGrahamScan();
         this.points.forEach((p) => convexHull.addPoint(p.x, p.y));
-        return new Polygon([
-          new Ring(convexHull.getHull().map((p) => new Point(p.x, p.y))),
+        return Polygon.fromCoordinates([
+          convexHull.getHull().map(({ x, y }) => [x, y]),
         ]);
       default:
         return new Polygon([]);

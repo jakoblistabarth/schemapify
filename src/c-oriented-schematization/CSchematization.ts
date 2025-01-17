@@ -185,12 +185,14 @@ class CSchematization implements Schematization {
     });
 
     // TODO: check wether loop is correct
-    let dcel;
+    let dcel: Dcel;
     do {
-      dcel = new EdgeMoveProcessor(faceFaceBoundaryList, configurations).run(
-        input,
-      );
-    } while (debug ? !debug : dcel.halfEdges.size >= this.style.k);
+      const { dcel: newDcel } = new EdgeMoveProcessor(
+        faceFaceBoundaryList,
+        configurations,
+      ).run(input);
+      dcel = newDcel;
+    } while (debug ? !!debug : dcel.halfEdges.size >= this.style.k);
 
     this.doAction({
       level: "visualize",
