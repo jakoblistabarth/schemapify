@@ -1,5 +1,5 @@
 import Dcel from "@/src/Dcel/Dcel";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
 import Subdivision from "@/src/geometry/Subdivision";
 import { readFileSync } from "fs";
 import path from "path";
@@ -13,10 +13,9 @@ describe("removeSuperfluousVertices()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const schematization = new CSchematization();
-    schematization.removeSuperfluousVertices(dcel);
+    const result = new CollinearPointProcessor().run(dcel);
 
-    expect(dcel.getVertices().length).toBe(3);
+    expect(result.vertices.size).toBe(3);
   });
 
   it("on a square-shaped DCEL of with superfluous vertices, results in a DCEL of 4 vertices", function () {
@@ -27,10 +26,9 @@ describe("removeSuperfluousVertices()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const schematization = new CSchematization();
-    schematization.removeSuperfluousVertices(dcel);
+    const result = new CollinearPointProcessor().run(dcel);
 
-    expect(dcel.getVertices().length).toBe(4);
+    expect(result.vertices.size).toBe(4);
   });
 
   it("removes 3 collinear points", function () {
@@ -39,13 +37,11 @@ describe("removeSuperfluousVertices()", function () {
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].getEdges()[0].subdivide();
+    const result = new CollinearPointProcessor().run(dcel);
 
-    const schematization = new CSchematization();
-    schematization.removeSuperfluousVertices(dcel);
-
-    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
-    expect(dcel.getHalfEdges().length).toBe(8);
-    expect(dcel.getVertices().length).toBe(4);
+    expect(result.getBoundedFaces()[0].getEdges().length).toBe(4);
+    expect(result.halfEdges.size).toBe(8);
+    expect(result.vertices.size).toBe(4);
   });
 
   it("removes 4 collinear points", function () {
@@ -54,13 +50,11 @@ describe("removeSuperfluousVertices()", function () {
     );
     const dcel = Dcel.fromGeoJSON(json);
     dcel.getBoundedFaces()[0].getEdges()[0].subdivide()?.subdivide();
+    const result = new CollinearPointProcessor().run(dcel);
 
-    const schematization = new CSchematization();
-    schematization.removeSuperfluousVertices(dcel);
-
-    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
-    expect(dcel.getHalfEdges().length).toBe(8);
-    expect(dcel.getVertices().length).toBe(4);
+    expect(result.getBoundedFaces()[0].getEdges().length).toBe(4);
+    expect(result.halfEdges.size).toBe(8);
+    expect(result.vertices.size).toBe(4);
   });
 
   it("removes any collinear points on a simples square", function () {
@@ -89,11 +83,9 @@ describe("removeSuperfluousVertices()", function () {
       ]),
     );
 
-    const schematization = new CSchematization();
-    schematization.removeSuperfluousVertices(dcel);
-
-    expect(dcel.getVertices().length).toBe(4);
-    expect(dcel.getHalfEdges().length).toBe(8);
-    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
+    const result = new CollinearPointProcessor().run(dcel);
+    expect(result.vertices.size).toBe(4);
+    expect(result.halfEdges.size).toBe(8);
+    expect(result.getBoundedFaces()[0].getEdges().length).toBe(4);
   });
 });
