@@ -96,8 +96,7 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
 
     const contractionLayer = new SolidPolygonLayer({
       id: "contractions",
-      data: configurations
-        .values()
+      data: [...configurations.values()]
         .flatMap((c) => Object.values(c.contractions))
         .filter((c) => c?.configuration.innerEdge.face?.edge)
         .filter((c) => c?.isFeasible)
