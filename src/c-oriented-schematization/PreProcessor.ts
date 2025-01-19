@@ -9,7 +9,9 @@ class PreProcessor implements Processor {
   }
 
   public run(input: Dcel) {
-    return this.subdivideEdges(input, this.epsilon);
+    // TODO: should I clone within the processor or rather clone
+    // the argument passed to the constructor?
+    return this.subdivideEdges(input.clone(), this.epsilon);
   }
 
   /**

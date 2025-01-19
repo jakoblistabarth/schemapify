@@ -345,29 +345,26 @@ describe("subdivide()", function () {
 });
 
 describe("subdivideToThreshold()", function () {
-  it("on one edge of a square with side length 20 into 8 edges (epsilon: .5)", function () {
+  it("turns a square with side length 20 into a dcel with 4 times more halfedges 8 edges (epsilon: 5.01, subdivides 2 times)", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const edge = dcel.getBoundedFaces()[0].edge;
+    const result = new PreProcessor(5.01).run(dcel);
 
-    const halfEdgesBefore = dcel.halfEdges.size;
-    edge?.subdivideToThreshold(5);
-    const halfEdgesAfter = dcel.halfEdges.size;
-
-    expect(halfEdgesAfter).toBe(halfEdgesBefore - 2 + 8 * 2);
+    expect(result.halfEdges.size).toBe(dcel.halfEdges.size * 4);
   });
 
-  it("turns an square with sides of length 20 into a dcel with 64 edges (epsilon: .5)", function () {
+  it("turns a square with sides of length 20 into a dcel with 64 edges (epsilon: 2.51)", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const schematization = new CSchematization();
-    schematization.splitEdges(dcel, 5);
+    const result = new PreProcessor(2.51).run(dcel);
 
-    expect(dcel.halfEdges.size).toBe(64);
+    // every side of the square is subdivided 3 times
+    // resulting in 2^3 = 8 edges (16 halfEdges) per side
+    expect(result.halfEdges.size).toBe(64);
   });
 });
 
