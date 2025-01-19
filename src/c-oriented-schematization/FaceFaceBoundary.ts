@@ -53,11 +53,11 @@ class FaceFaceBoundary {
       const compensationCandidate = compensationCandidates
         .reduce((solutions: CompensationCandidate[], candidate) => {
           // console.log(
-          //   contractionCandidate.configuration.innerEdge.toString(),
+          //   contractionCandidate.configuration.innerEdge.uuid,
           //   contractionCandidate.area,
           //   "->",
           //   contractionCandidate.point.xy(),
-          //   candidate.configuration.innerEdge.toString(),
+          //   candidate.configuration.innerEdge.uuid,
           //   candidate.area,
           //   "->",
           //   candidate.point.xy(),

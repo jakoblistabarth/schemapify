@@ -83,13 +83,9 @@ describe("getMinimalConfigurationPair()", function () {
     const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
 
     expect(pair.contraction.area).toBe(0.5);
-    expect(pair.contraction.configuration.innerEdge.toString()).toBe(
-      "9.5/7->9.5/8",
-    );
+    expect(pair.contraction.configuration.innerEdge.uuid).toBe("9.5|7->9.5|8");
     expect(pair.compensation?.area).toBeGreaterThan(0.5);
-    expect(pair.compensation?.configuration.innerEdge.toString()).toBe(
-      "11/0->11/1",
-    );
+    expect(pair.compensation?.configuration.innerEdge.uuid).toBe("11|0->11|1");
   });
 
   xit("on a test file returns the expected contraction pair.", function () {
@@ -107,13 +103,11 @@ describe("getMinimalConfigurationPair()", function () {
     const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
 
     expect(pair.contraction.area).toBe(0.5);
-    expect(pair.contraction.configuration.innerEdge.toString()).toBe(
-      "10.5/7->10.5/8",
+    expect(pair.contraction.configuration.innerEdge.uuid).toBe(
+      "10.5|7->10.5|8",
     );
     expect(pair.compensation?.area).toBeGreaterThan(0.5);
-    expect(pair.compensation?.configuration.innerEdge.toString()).toBe(
-      "9/2->9/3",
-    );
+    expect(pair.compensation?.configuration.innerEdge.uuid).toBe("9|2->9|3");
   });
 
   //TODO: add test where no complementary exists for smallest contraction

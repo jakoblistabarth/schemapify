@@ -301,7 +301,7 @@ class Dcel {
 
           // check whether there's already a face related to this edge
           const existingFace = dcel.faces.find((f) => f.edge === edge);
-          // console.log({ existingFace, featureId, idx, edge: edge.toString() });
+          // console.log({ existingFace, featureId, idx, edge: edge.uuid });
           // console.log({
           //   props: multiPolygon.properties,
           //   featureId,

@@ -52,7 +52,7 @@ class ConfigurationPair {
     contractions.forEach((contractions) => {
       // console.log(
       //   "blockingNumber before",
-      //   contraction.configuration.innerEdge.toString(),
+      //   contraction.configuration.innerEdge.uuid,
       //   contraction.blockingNumber
       // );
       Object.values(contractions).forEach((d) =>
@@ -60,7 +60,7 @@ class ConfigurationPair {
       ); // FIXME: fix blocking Number!! Done?
       // console.log(
       //   "blockingNumber after",
-      //   contraction.configuration.innerEdge.toString(),
+      //   contraction.configuration.innerEdge.uuid,
       //   contraction.blockingNumber
       // );
     });
@@ -147,7 +147,7 @@ class ConfigurationPair {
 
     // console.log(
     //   "remainingEdges",
-    //   remainingEdges.map((e) => e.toString())
+    //   remainingEdges.map((e) => e.uuid)
     // );
 
     // 2.4 Update the affected configurations
@@ -161,8 +161,8 @@ class ConfigurationPair {
     //     contractionEdge.prev?.tail.xy() +
     //     "->" +
     //     contractionEdge.prev?.head?.xy(),
-    //   contractionEdge.uuid() + " " + contractionEdge.toString(),
-    //   contractionEdge.next?.uuid() + " " + contractionEdge.next?.toString()
+    //   contractionEdge.uuid() + " " + contractionEdge.uuid,
+    //   contractionEdge.next?.uuid() + " " + contractionEdge.next?.uuid
     // );
 
     // TODO: 3. Update (increment) blocking numbers again
@@ -208,9 +208,9 @@ class ConfigurationPair {
     const prevAngle = contractionEdge.prev?.getAngle();
 
     // console.log(
-    //   contractionEdge.prev?.toString(),
+    //   contractionEdge.prev?.uuid,
     //   prevAngle,
-    //   contractionEdge.next?.toString(),
+    //   contractionEdge.next?.uuid,
     //   contractionEdge.next?.getAngle(),
     //   contractionEdge.getAngle()
     // );
@@ -223,7 +223,7 @@ class ConfigurationPair {
     // console.log("toDelete", vertexToDelete);
     const newEdge = vertexToDelete.remove(contractionEdge.face);
     if (!newEdge || !newEdge.prev || !newEdge.next) return;
-    // console.log(newEdge.prev.toString(), newEdge.toString(), newEdge.next.toString());
+    // console.log(newEdge.prev.uuid, newEdge.uuid, newEdge.next.uuid);
     this.updateConfigurations(
       [newEdge, newEdge.prev, newEdge.next],
       configurations,

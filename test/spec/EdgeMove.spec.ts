@@ -55,18 +55,10 @@ describe("doEdgeMove()", function () {
     pair?.doEdgeMove();
     const newArea = dcel.getArea();
 
-    expect(dcel.getBoundedFaces()[0].getEdges()[2].toString()).toBe(
-      "10.5/1->10/1",
-    );
-    expect(dcel.getBoundedFaces()[0].getEdges()[3].toString()).toBe(
-      "10/1->10/7",
-    );
-    expect(dcel.getBoundedFaces()[0].getEdges()[4].toString()).toBe(
-      "10/7->10/8",
-    );
-    expect(dcel.getBoundedFaces()[0].getEdges()[5].toString()).toBe(
-      "10/8->10/10",
-    );
+    expect(dcel.getBoundedFaces()[0].getEdges()[2].uuid).toBe("10.5|1->10|1");
+    expect(dcel.getBoundedFaces()[0].getEdges()[3].uuid).toBe("10|1->10|7");
+    expect(dcel.getBoundedFaces()[0].getEdges()[4].uuid).toBe("10|7->10|8");
+    expect(dcel.getBoundedFaces()[0].getEdges()[5].uuid).toBe("10|8->10|10");
     expect(pair?.contraction.area).toEqual(0.5);
     expect(originalArea).toEqual(newArea);
   });
@@ -114,15 +106,15 @@ describe("doEdgeMove()", function () {
     const edges = dcel
       .getBoundedFaces()[0]
       .getEdges()
-      .map((e) => e.toString());
+      .map((e) => e.uuid);
 
-    expect(edges[0]).toBe("0/0->4/0");
-    expect(edges[1]).toBe("4/0->4/2");
-    expect(edges[2]).toBe("4/2->2.5/2");
-    expect(edges[3]).toBe("2.5/2->2.5/3");
-    expect(edges[4]).toBe("2.5/3->2.5/4");
-    expect(edges[5]).toBe("2.5/4->0/4");
-    expect(edges[6]).toBe("0/4->0/0");
+    expect(edges[0]).toBe("0|0->4|0");
+    expect(edges[1]).toBe("4|0->4|2");
+    expect(edges[2]).toBe("4|2->2.5|2");
+    expect(edges[3]).toBe("2.5|2->2.5|3");
+    expect(edges[4]).toBe("2.5|3->2.5|4");
+    expect(edges[5]).toBe("2.5|4->0|4");
+    expect(edges[6]).toBe("0|4->0|0");
     expect(originalContractionArea).toEqual(1);
     expect(originalArea).toEqual(newArea);
   });

@@ -134,12 +134,12 @@ describe("remove() on a vertex", function () {
 
     expect(newEdge?.prev?.tail.xy).toEqual([20, 20]);
     expect(newEdge?.prev?.head?.xy).toEqual([0, 20]);
-    expect(newEdge?.prev?.toString()).toBe("20/20->0/20");
-    expect(newEdge?.prev?.next?.toString()).toBe("0/20->20/0");
+    expect(newEdge?.prev?.uuid).toBe("20|20->0|20");
+    expect(newEdge?.prev?.next?.uuid).toBe("0|20->20|0");
     expect(newEdge?.next?.tail.xy).toEqual([20, 0]);
     expect(newEdge?.next?.head?.xy).toEqual([20, 20]);
-    expect(newEdge?.next?.toString()).toBe("20/0->20/20");
-    expect(newEdge?.next?.prev?.toString()).toBe("0/20->20/0");
+    expect(newEdge?.next?.uuid).toBe("20|0->20|20");
+    expect(newEdge?.next?.prev?.uuid).toBe("0|20->20|0");
   });
 
   it("returns any of the just created halfedges if no face is given", function () {
@@ -151,7 +151,7 @@ describe("remove() on a vertex", function () {
     const vertex = dcel.findVertex(0, 0);
     const e = vertex?.remove();
 
-    expect(e?.toString()).toBe("20/0->0/20");
+    expect(e?.uuid).toBe("20|0->0|20");
   });
 
   it("returns the specific halfedge if a face is given", function () {
@@ -164,7 +164,7 @@ describe("remove() on a vertex", function () {
     const vertex = dcel.findVertex(0, 0);
     const e = vertex?.remove(squareFace);
 
-    expect(e?.toString()).toBe("0/20->20/0");
+    expect(e?.uuid).toBe("0|20->20|0");
   });
 });
 

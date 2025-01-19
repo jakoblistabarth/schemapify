@@ -17,13 +17,11 @@ describe("getMinimalConfigurationPair() finds the expected pair", function () {
     schematization.createConfigurations(dcel);
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
     const pair = dcel.faceFaceBoundaryList.getMinimalConfigurationPair();
-    const contractionEdge =
-      pair?.contraction.configuration.innerEdge.toString();
-    const compensationEdge =
-      pair?.compensation?.configuration.innerEdge.toString();
+    const contractionEdge = pair?.contraction.configuration.innerEdge.uuid;
+    const compensationEdge = pair?.compensation?.configuration.innerEdge.uuid;
 
-    expect(contractionEdge).toEqual("9.5/7->9.5/8");
-    expect(compensationEdge).toEqual("11/0->11/1");
+    expect(contractionEdge).toEqual("9.5|7->9.5|8");
+    expect(compensationEdge).toEqual("11|0->11|1");
     expect(pair?.contraction.area).toEqual(0.5);
   });
 
@@ -39,13 +37,11 @@ describe("getMinimalConfigurationPair() finds the expected pair", function () {
     schematization.createConfigurations(dcel);
     dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel);
     const pair = dcel.faceFaceBoundaryList.getMinimalConfigurationPair();
-    const contractionEdge =
-      pair?.contraction.configuration.innerEdge.toString();
-    const compensationEdge =
-      pair?.compensation?.configuration.innerEdge.toString();
+    const contractionEdge = pair?.contraction.configuration.innerEdge.uuid;
+    const compensationEdge = pair?.compensation?.configuration.innerEdge.uuid;
 
-    expect(contractionEdge).toEqual("10.5/7->10.5/8");
-    expect(compensationEdge).toEqual("9/2->9/3");
+    expect(contractionEdge).toEqual("10.5|7->10.5|8");
+    expect(compensationEdge).toEqual("9|2->9|3");
     expect(pair?.contraction.area).toEqual(0.5);
   });
 });
@@ -67,14 +63,13 @@ describe("recursive doEdgeMove() on minimal configuration pairs", function () {
     for (let index = 0; index < 10; index++) {
       const pair = dcel.faceFaceBoundaryList.getMinimalConfigurationPair();
       const contractionEdge = pair?.contraction.configuration.innerEdge;
-      if (contractionEdge)
-        contractionEdges.push(contractionEdge?.toString() as string);
+      if (contractionEdge) contractionEdges.push(contractionEdge?.uuid);
       pair?.doEdgeMove();
     }
     expect(contractionEdges).toEqual([
-      "9.5/7->9.5/8",
-      "10/1->10/7",
-      "10/8->10/10",
+      "9.5|7->9.5|8",
+      "10|1->10|7",
+      "10|8->10|10",
     ]);
   });
 });

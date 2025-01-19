@@ -444,9 +444,7 @@ describe("move().", function () {
       .getEdges()[1]
       .move(new Point(10, 0), new Point(10, 1));
 
-    expect(dcel.getBoundedFaces()[0].getEdges()[1].toString()).toBe(
-      "10/0->10/1",
-    );
+    expect(dcel.getBoundedFaces()[0].getEdges()[1].uuid).toBe("10|0->10|1");
   });
 
   it("deletes(merges) vertices if target points are existing.", function () {
@@ -462,15 +460,9 @@ describe("move().", function () {
       .getEdges()[5]
       .move(new Point(10, 7), new Point(10, 8));
 
-    expect(dcel.getBoundedFaces()[0].getEdges()[3].toString()).toBe(
-      "10/1->10/7",
-    );
-    expect(dcel.getBoundedFaces()[0].getEdges()[4].toString()).toBe(
-      "10/7->10/8",
-    );
-    expect(dcel.getBoundedFaces()[0].getEdges()[5].toString()).toBe(
-      "10/8->10/10",
-    );
+    expect(dcel.getBoundedFaces()[0].getEdges()[3].uuid).toBe("10|1->10|7");
+    expect(dcel.getBoundedFaces()[0].getEdges()[4].uuid).toBe("10|7->10|8");
+    expect(dcel.getBoundedFaces()[0].getEdges()[5].uuid).toBe("10|8->10|10");
   });
 
   it("moves an edge.", function () {
@@ -486,8 +478,6 @@ describe("move().", function () {
       .getEdges()[1]
       .move(new Point(10.5, 0), new Point(10.5, 1));
 
-    expect(dcel.getBoundedFaces()[0].getEdges()[1].toString()).toBe(
-      "10.5/0->10.5/1",
-    );
+    expect(dcel.getBoundedFaces()[0].getEdges()[1].uuid).toBe("10.5|0->10.5|1");
   });
 });
