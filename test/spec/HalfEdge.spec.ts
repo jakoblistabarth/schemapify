@@ -1,13 +1,15 @@
-import fs from "fs";
-import path from "path";
+import CRegular from "@/src/c-oriented-schematization/CRegular";
+import { getAssignedAngle } from "@/src/c-oriented-schematization/HalfEdgeUtils";
+import PreProcessor from "@/src/c-oriented-schematization/PreProcessor";
 import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
-import Point from "@/src/geometry/Point";
-import CRegular from "@/src/c-oriented-schematization/CRegular";
-import { createEdgeVertexSetup, TestSetup, getTestFiles } from "./test-setup";
 import Line from "@/src/geometry/Line";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import Point from "@/src/geometry/Point";
+import fs from "fs";
+import path from "path";
+import { getTestFiles } from "./test-setup";
+import Subdivision from "@/src/geometry/Subdivision";
 
 describe("getLength()", function () {
   it("returns the correct length for a single halfEdge", function () {
@@ -120,23 +122,13 @@ describe("getAngle()", function () {
 });
 
 describe("getAssignedDirection()", function () {
-  let s: TestSetup;
-  beforeEach(function () {
-    s = createEdgeVertexSetup();
-  });
-
   it("returns the correct angle", function () {
     const c = new CRegular(2);
-    const sectors = c.sectors;
-    s.directions.od53.assignedDirection = 1;
-    s.directions.od104.assignedDirection = 2;
-    s.directions.od217.assignedDirection = 3;
-    s.directions.od315.assignedDirection = 0;
-
-    expect(s.directions.od53.getAssignedAngle(sectors)).toBe(c.angles[1]);
-    expect(s.directions.od104.getAssignedAngle(sectors)).toBe(c.angles[2]);
-    expect(s.directions.od217.getAssignedAngle(sectors)).toBe(c.angles[3]);
-    expect(s.directions.od315.getAssignedAngle(sectors)).toBe(c.angles[0]);
+    const { sectors } = c;
+    expect(getAssignedAngle(1, sectors)).toBe(c.angles[1]);
+    expect(getAssignedAngle(2, sectors)).toBe(c.angles[2]);
+    expect(getAssignedAngle(3, sectors)).toBe(c.angles[3]);
+    expect(getAssignedAngle(0, sectors)).toBe(c.angles[0]);
   });
 });
 
@@ -428,38 +420,90 @@ describe("getMinimalCycleDistance()", function () {
 });
 
 describe("move().", function () {
-  it("deletes(merges) a vertex if target point is existing.", function () {
-    const json = JSON.parse(
-      fs.readFileSync(
-        path.resolve("test/data/shapes/smallest-contraction.json"),
-        "utf8",
-      ),
+  it("moves an edge where both new position are free.", function () {
+    const dcel = Dcel.fromSubdivision(
+      Subdivision.fromCoordinates([
+        [
+          [
+            [
+              [0, 0],
+              [0, 1],
+              [1, 1],
+              [1, 0],
+              [0, 0],
+            ],
+          ],
+        ],
+      ]),
     );
-    const dcel = Dcel.fromGeoJSON(json);
     dcel
-      .getBoundedFaces()[0]
-      .getEdges()[1]
-      .move(new Point(10, 0), new Point(10, 1));
+      .findHalfEdge(new Point(0, 0), new Point(0, 1))
+      ?.move(new Point(-2, 0), new Point(-2, 1));
 
-    expect(dcel.getBoundedFaces()[0].getEdges()[1].uuid).toBe("10|0->10|1");
+    expect(dcel.findVertex(-2, 0)).toBeInstanceOf(Vertex);
+    expect(dcel.findVertex(-2, 1)).toBeInstanceOf(Vertex);
+    expect(dcel.findVertex(1, 1)).toBeInstanceOf(Vertex);
+    expect(dcel.findVertex(1, 0)).toBeInstanceOf(Vertex);
+    expect(dcel.vertices.size).toBe(4);
   });
 
-  it("deletes(merges) vertices if target points are existing.", function () {
-    const json = JSON.parse(
-      fs.readFileSync(
-        path.resolve("test/data/shapes/smallest-contraction.json"),
-        "utf8",
-      ),
+  fit("moves an edge where both new position are free.", function () {
+    const dcel = Dcel.fromSubdivision(
+      Subdivision.fromCoordinates([
+        [
+          [
+            [
+              [0, 0],
+              [0, 1],
+              [1, 1],
+              [1, 0],
+              [0, 0],
+            ],
+          ],
+        ],
+      ]),
     );
-    const dcel = Dcel.fromGeoJSON(json);
     dcel
-      .getBoundedFaces()[0]
-      .getEdges()[5]
-      .move(new Point(10, 7), new Point(10, 8));
+      .findHalfEdge(new Point(0, 0), new Point(0, 1))
+      ?.move(new Point(0, -1), new Point(0, 0));
 
-    expect(dcel.getBoundedFaces()[0].getEdges()[3].uuid).toBe("10|1->10|7");
-    expect(dcel.getBoundedFaces()[0].getEdges()[4].uuid).toBe("10|7->10|8");
-    expect(dcel.getBoundedFaces()[0].getEdges()[5].uuid).toBe("10|8->10|10");
+    expect(dcel.findVertex(0, -1)).toBeInstanceOf(Vertex);
+    expect(dcel.findVertex(0, 0)).toBeInstanceOf(Vertex);
+    expect(dcel.findVertex(1, 1)).toBeInstanceOf(Vertex);
+    expect(dcel.findVertex(1, 0)).toBeInstanceOf(Vertex);
+    expect(dcel.vertices.size).toBe(4);
+  });
+
+  it("moves an edge where one position is free.", function () {
+    const dcel = Dcel.fromSubdivision(
+      Subdivision.fromCoordinates([
+        [
+          [
+            [
+              [0, 0],
+              [1.5, 0],
+              [1.5, 0.25],
+              [1, 0.25],
+              [1, 1],
+              [0, 1],
+              [0, 0],
+            ],
+          ],
+        ],
+      ]),
+    );
+    dcel
+      .findHalfEdge(new Point(1.5, 0), new Point(1.5, 0.25))
+      ?.move(new Point(1, 0), new Point(1, 0.25));
+
+    console.log(dcel.getVertices().map((v) => v.uuid));
+
+    expect(dcel.findVertex(0, 0)).toBeInstanceOf(Vertex);
+    expect(dcel.findVertex(1, 0)).toBeInstanceOf(Vertex);
+    expect(dcel.findVertex(1, 0.25)).toBeInstanceOf(Vertex);
+    expect(dcel.findVertex(1, 1)).toBeInstanceOf(Vertex);
+    expect(dcel.findVertex(0, 1)).toBeInstanceOf(Vertex);
+    expect(dcel.vertices.size).toBe(5);
   });
 
   it("moves an edge.", function () {
@@ -476,5 +520,55 @@ describe("move().", function () {
       .move(new Point(10.5, 0), new Point(10.5, 1));
 
     expect(dcel.getBoundedFaces()[0].getEdges()[1].uuid).toBe("10.5|0->10.5|1");
+  });
+
+  it("deletes (merges) a vertex if target point is existing.", function () {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/shapes/smallest-contraction.json"),
+        "utf8",
+      ),
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    console.log(dcel.getBoundedFaces()[0].getEdges()[1].uuid);
+    console.log(
+      dcel
+        .getBoundedFaces()[0]
+        .getEdges()
+        .map((e) => e.uuid),
+    );
+    dcel
+      .getBoundedFaces()[0]
+      .getEdges()[1]
+      .move(new Point(10, 0), new Point(10, 1));
+    console.log(dcel.getBoundedFaces()[0].getEdges()[1].uuid);
+    console.log(
+      dcel
+        .getBoundedFaces()[0]
+        .getEdges()
+        .map((e) => e.uuid),
+    );
+
+    expect(dcel.findVertex(10, 0)).toBeUndefined();
+    expect(dcel.findVertex(10, 1)).toBeDefined();
+    expect(dcel.getBoundedFaces()[0].getEdges()[1].uuid).toBe("10|0->10|1");
+  });
+
+  it("deletes (merges) vertices if target points are existing.", function () {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/shapes/smallest-contraction.json"),
+        "utf8",
+      ),
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    dcel
+      .getBoundedFaces()[0]
+      .getEdges()[5]
+      .move(new Point(10, 7), new Point(10, 8));
+
+    expect(dcel.getBoundedFaces()[0].getEdges()[3].uuid).toBe("10|1->10|7");
+    expect(dcel.getBoundedFaces()[0].getEdges()[4].uuid).toBe("10|7->10|8");
+    expect(dcel.getBoundedFaces()[0].getEdges()[5].uuid).toBe("10|8->10|10");
   });
 });

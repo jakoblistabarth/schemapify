@@ -201,7 +201,22 @@ class Vertex extends Point {
    * @returns The moved {@link Vertex}.
    */
   moveTo(x: number, y: number) {
+    console.log("moving vertex", this.uuid, "to", `${x}|${y}`);
     if (this.x === x && this.y === y) return this;
+    // TODO: check whether this actually needs to be handled here
+    //  merge vertices, if a vertex on this (new) position already exists
+    const key = Vertex.getKey(x, y);
+    if (this.dcel.vertices.has(key)) {
+      const v = this.dcel.vertices.get(key);
+      console.log("merging vertices", v?.uuid, "already exists");
+      if (!v) return this;
+      this.edges.forEach((edge) => {
+        // edge.head = v;
+        v.edges.push(edge);
+      });
+      this.remove();
+      return v;
+    }
     this.dcel.vertices.set(Vertex.getKey(x, y), this);
     this.dcel.vertices.delete(Vertex.getKey(this.x, this.y));
     this.x = x;

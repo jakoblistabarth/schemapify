@@ -261,17 +261,34 @@ class HalfEdge {
    */
   move(newTail: Point, newHead: Point) {
     const head = this.head;
+    console.log(
+      "head edges beginning",
+      head?.edges.map((e) => e.uuid),
+    );
     const prevTail = this.prev?.tail;
     const nextHead = this.next?.head;
     if (!head || !nextHead || !prevTail) return;
-    if (newHead.equals(nextHead)) {
-      const newEdge = head.remove(this.face);
-      return newEdge;
-    } else head.moveTo(newHead.x, newHead.y);
-    if (newTail.equals(prevTail)) {
-      const newEdge = this.tail.remove(this.face);
-      return newEdge;
-    } else this.tail.moveTo(newTail.x, newTail.y);
+
+    head.moveTo(newHead.x, newHead.y);
+    this.tail.moveTo(newTail.x, newTail.y);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    let edge = this;
+    console.log(
+      "head edges after moving points",
+      head.edges.map((e) => e.uuid),
+    );
+
+    if (newHead.equals(nextHead) && !newHead.equals(this.tail)) {
+      console.log(this.uuid, "removing head: ", head.xy);
+      const removedEdge = head.remove(this.face);
+      if (removedEdge) edge = removedEdge as this;
+    }
+    if (newTail.equals(prevTail) && !newTail.equals(head)) {
+      console.log("new tail: ", newTail.xy, "equals", prevTail.xy);
+      const removedEdge = this.tail.remove(this.face);
+      if (removedEdge) edge = removedEdge as this;
+    }
+    return edge;
   }
 
   /**
