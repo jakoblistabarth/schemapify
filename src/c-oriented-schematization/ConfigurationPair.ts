@@ -108,8 +108,8 @@ class ConfigurationPair {
     if (!prevEdgeLineSegment || !nextEdgeLineSegment) return;
 
     const newEdge = pointA.isOnLineSegment(prevEdgeLineSegment)
-      ? contractionEdge.move(pointA, pointB)
-      : contractionEdge.move(pointB, pointA);
+      ? contractionEdge.moveTo(pointA, pointB)
+      : contractionEdge.moveTo(pointB, pointA);
 
     if (newEdge) {
       const newConfiguration = new Configuration(newEdge);
@@ -122,7 +122,7 @@ class ConfigurationPair {
     movedPositions.push(contractionEdge.tail.toPoint());
     movedPositions.push(contractionHead.toPoint());
 
-    compensationEdge.move(newTail, newHead);
+    compensationEdge.moveTo(newTail, newHead);
 
     movedPositions.push(compensationEdge.tail.toPoint());
     const compensationHead = compensationEdge.head?.toPoint();
@@ -198,8 +198,8 @@ class ConfigurationPair {
     const newTailCon = contractionEdge.tail.vector.minus(normal).toPoint();
     const newHeadCon = contractionEdge.head?.vector.minus(normal).toPoint();
 
-    if (newHeadCon) contractionEdge.move(newTailCon, newHeadCon);
-    if (newHeadComp) compensationEdge.move(newTailComp, newHeadComp);
+    if (newHeadCon) contractionEdge.moveTo(newTailCon, newHeadCon);
+    if (newHeadComp) compensationEdge.moveTo(newTailComp, newHeadComp);
   }
 
   doSimpleEdgeMove(configurations: Map<string, Configuration>) {

@@ -254,41 +254,36 @@ class HalfEdge {
   }
 
   /**
-   * Moves an Halfedge to the specified tail's and head's position.
-   * @param newTail {@link} A {@link Point}, indicating the new position of the {@link HalfEdge}'s tail.
-   * @param newHead A {@link Point}, indicating the new position of the {@link HalfEdge}'s head.
-   * @returns The just created {@link HalfEdge}.
+   * Moves the HalfEdge to the specified tail's and head's position.
+   * Vertices are only merged after both are at their final position.
+   * @param newTail {@link Point} - new position for the tail.
+   * @param newHead {@link Point} - new position for the head.
+   * @returns The updated {@link HalfEdge} or null if removed.
    */
-  move(newTail: Point, newHead: Point) {
-    const head = this.head;
-    console.log(
-      "head edges beginning",
-      head?.edges.map((e) => e.uuid),
-    );
-    const prevTail = this.prev?.tail;
-    const nextHead = this.next?.head;
-    if (!head || !nextHead || !prevTail) return;
-
-    head.moveTo(newHead.x, newHead.y);
+  moveTo(newTail: Point, newHead: Point) {
+    // 1. Move both endpoints to their new positions (no merging yet)
     this.tail.moveTo(newTail.x, newTail.y);
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let edge = this;
-    console.log(
-      "head edges after moving points",
-      head.edges.map((e) => e.uuid),
-    );
+    const head = this.head;
+    if (head) head.moveTo(newHead.x, newHead.y);
 
-    if (newHead.equals(nextHead) && !newHead.equals(this.tail)) {
-      console.log(this.uuid, "removing head: ", head.xy);
-      const removedEdge = head.remove(this.face);
-      if (removedEdge) edge = removedEdge as this;
+    // 2. After both moves, check if tail and head now coincide (but are different objects)
+    const tailKey = this.tail.uuid;
+    const headKey = head?.uuid;
+    if (head && this.tail !== head && tailKey === headKey) {
+      // 3. Merge vertices using DCEL logic
+      const merged = this.dcel.mergeVertices(this.tail, head);
+      // Update references
+      this.tail = merged;
+      if (this.twin) this.twin.tail = merged;
     }
-    if (newTail.equals(prevTail) && !newTail.equals(head)) {
-      console.log("new tail: ", newTail.xy, "equals", prevTail.xy);
-      const removedEdge = this.tail.remove(this.face);
-      if (removedEdge) edge = removedEdge as this;
+
+    // 4. If edge is now degenerate (tail === head), remove it
+    if (head && this.tail === head) {
+      this.remove();
+      return null;
     }
-    return edge;
+
+    return this;
   }
 
   /**

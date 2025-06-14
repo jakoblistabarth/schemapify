@@ -438,7 +438,7 @@ describe("move().", function () {
     );
     dcel
       .findHalfEdge(new Point(0, 0), new Point(0, 1))
-      ?.move(new Point(-2, 0), new Point(-2, 1));
+      ?.moveTo(new Point(-2, 0), new Point(-2, 1));
 
     expect(dcel.findVertex(-2, 0)).toBeInstanceOf(Vertex);
     expect(dcel.findVertex(-2, 1)).toBeInstanceOf(Vertex);
@@ -447,7 +447,7 @@ describe("move().", function () {
     expect(dcel.vertices.size).toBe(4);
   });
 
-  fit("moves an edge where both new position are free.", function () {
+  it("moves an edge where both new position are free.", function () {
     const dcel = Dcel.fromSubdivision(
       Subdivision.fromCoordinates([
         [
@@ -465,7 +465,7 @@ describe("move().", function () {
     );
     dcel
       .findHalfEdge(new Point(0, 0), new Point(0, 1))
-      ?.move(new Point(0, -1), new Point(0, 0));
+      ?.moveTo(new Point(0, -1), new Point(0, 0));
 
     expect(dcel.findVertex(0, -1)).toBeInstanceOf(Vertex);
     expect(dcel.findVertex(0, 0)).toBeInstanceOf(Vertex);
@@ -494,7 +494,7 @@ describe("move().", function () {
     );
     dcel
       .findHalfEdge(new Point(1.5, 0), new Point(1.5, 0.25))
-      ?.move(new Point(1, 0), new Point(1, 0.25));
+      ?.moveTo(new Point(1, 0), new Point(1, 0.25));
 
     console.log(dcel.getVertices().map((v) => v.uuid));
 
@@ -517,7 +517,7 @@ describe("move().", function () {
     dcel
       .getBoundedFaces()[0]
       .getEdges()[1]
-      .move(new Point(10.5, 0), new Point(10.5, 1));
+      .moveTo(new Point(10.5, 0), new Point(10.5, 1));
 
     expect(dcel.getBoundedFaces()[0].getEdges()[1].uuid).toBe("10.5|0->10.5|1");
   });
@@ -537,10 +537,11 @@ describe("move().", function () {
         .getEdges()
         .map((e) => e.uuid),
     );
+    console.log("length:", dcel.getBoundedFaces()[0].getEdges().length);
     dcel
       .getBoundedFaces()[0]
       .getEdges()[1]
-      .move(new Point(10, 0), new Point(10, 1));
+      .moveTo(new Point(10, 0), new Point(10, 1));
     console.log(dcel.getBoundedFaces()[0].getEdges()[1].uuid);
     console.log(
       dcel
@@ -548,8 +549,11 @@ describe("move().", function () {
         .getEdges()
         .map((e) => e.uuid),
     );
+    console.log("length:", dcel.getBoundedFaces()[0].getEdges().length);
 
-    expect(dcel.findVertex(10, 0)).toBeUndefined();
+    expect(dcel.findVertex(11, 0)).toBeUndefined();
+    expect(dcel.findVertex(11, 1)).toBeUndefined();
+    expect(dcel.findVertex(10, 0)).toBeDefined();
     expect(dcel.findVertex(10, 1)).toBeDefined();
     expect(dcel.getBoundedFaces()[0].getEdges()[1].uuid).toBe("10|0->10|1");
   });
@@ -565,7 +569,7 @@ describe("move().", function () {
     dcel
       .getBoundedFaces()[0]
       .getEdges()[5]
-      .move(new Point(10, 7), new Point(10, 8));
+      .moveTo(new Point(10, 7), new Point(10, 8));
 
     expect(dcel.getBoundedFaces()[0].getEdges()[3].uuid).toBe("10|1->10|7");
     expect(dcel.getBoundedFaces()[0].getEdges()[4].uuid).toBe("10|7->10|8");

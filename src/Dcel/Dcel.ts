@@ -483,6 +483,39 @@ class Dcel {
   public clone() {
     return this.toSubdivision().toDcel();
   }
+
+  /**
+   * Merges two vertices if they are at the same position.
+   * All incident edges of v2 are reassigned to v1, and v2 is removed from the DCEL.
+   * @param v1 The vertex to keep.
+   * @param v2 The vertex to merge and remove.
+   * @returns The merged vertex (v1).
+   */
+  mergeVertices(v1: Vertex, v2: Vertex): Vertex {
+    if (v1 === v2) return v1;
+    if (v1.x !== v2.x || v1.y !== v2.y) {
+      throw new Error("mergeVertices: Vertices are not at the same position");
+    }
+    // Reassign all incident edges of v2 to v1
+    v2.edges.forEach((edge) => {
+      if (edge.tail === v2) edge.tail = v1;
+      if (edge.head === v2) {
+        if (edge.twin) edge.twin.tail = v1;
+      }
+      v1.edges.push(edge);
+    });
+    // Remove duplicate edges (same tail and head)
+    v1.edges = v1.edges.filter(
+      (edge, idx, arr) =>
+        idx ===
+        arr.findIndex(
+          (e) =>
+            e.tail === edge.tail && e.head === edge.head && e !== edge.twin,
+        ),
+    );
+    this.removeVertex(v2);
+    return v1;
+  }
 }
 
 export default Dcel;
