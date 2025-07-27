@@ -53,10 +53,12 @@ class Polygon {
    * Get the polygon's exterior line segments.
    */
   get exteriorLineSegments() {
-    return this.exteriorRing.points.map(
-      (p, idx) =>
-        new LineSegment(p, crawlArray(this.exteriorRing.points, idx, +1)),
-    );
+    return this.exteriorRing.points
+      .slice(0, -1)
+      .map(
+        (p, idx) =>
+          new LineSegment(p, crawlArray(this.exteriorRing.points, idx, +1)),
+      );
   }
 
   /**
