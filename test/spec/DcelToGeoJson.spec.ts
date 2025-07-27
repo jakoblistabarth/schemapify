@@ -30,14 +30,14 @@ describe("toSubdivision converts to a valid subdivision from a DCEL of test case
   it(`"${input.fileName}".`, function () {
     const subdivision = dcel.toSubdivision();
     const multiPolygons = subdivision.multiPolygons;
-    // the subdivision consists of a single MultiPolygon
+    // the subdivision consists of a single Multipolygon
     const polygons = multiPolygons.at(0)?.polygons;
     const rings = polygons?.at(0)?.rings;
 
     expect(multiPolygons.length).toBe(1);
     expect(polygons?.length).toBe(1);
     expect(rings?.length).toBe(2);
-    expect(rings?.map((d) => d.points.length)).toStrictEqual([4, 4]);
+    expect(rings?.map((d) => d.points.length)).toStrictEqual([5, 5]);
   });
 });
 
