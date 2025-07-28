@@ -496,7 +496,7 @@ describe("move().", function () {
       .findHalfEdge(new Point(1.5, 0), new Point(1.5, 0.25))
       ?.moveTo(new Point(1, 0), new Point(1, 0.25));
 
-    console.log(dcel.getVertices().map((v) => v.uuid));
+    // console.log(dcel.getVertices().map((v) => v.uuid));
 
     expect(dcel.findVertex(0, 0)).toBeInstanceOf(Vertex);
     expect(dcel.findVertex(1, 0)).toBeInstanceOf(Vertex);
@@ -530,26 +530,10 @@ describe("move().", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    console.log(dcel.getBoundedFaces()[0].getEdges()[1].uuid);
-    console.log(
-      dcel
-        .getBoundedFaces()[0]
-        .getEdges()
-        .map((e) => e.uuid),
-    );
-    console.log("length:", dcel.getBoundedFaces()[0].getEdges().length);
     dcel
       .getBoundedFaces()[0]
       .getEdges()[1]
       .moveTo(new Point(10, 0), new Point(10, 1));
-    console.log(dcel.getBoundedFaces()[0].getEdges()[1].uuid);
-    console.log(
-      dcel
-        .getBoundedFaces()[0]
-        .getEdges()
-        .map((e) => e.uuid),
-    );
-    console.log("length:", dcel.getBoundedFaces()[0].getEdges().length);
 
     expect(dcel.findVertex(11, 0)).toBeUndefined();
     expect(dcel.findVertex(11, 1)).toBeUndefined();
