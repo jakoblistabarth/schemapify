@@ -276,25 +276,3 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
     ).toBe(((Math.PI * 2) / new CRegular(2).directions.length) * 3);
   });
 });
-
-xdescribe("Staircaseregions incident to a certain vertex are always interfering with each other", function () {
-  // TODO: add more specs with other epsilon
-  // TODO: how to implement this without copying too much code to get the staircase output
-  // it("with an epsilon of 0.05", function () {
-  //   const input = JSON.parse(
-  //     fs.readFileSync(
-  //       path.resolve("test/data/shapes/triangle-unaligned.json"),
-  //       "utf8",
-  //     ),
-  //   );
-  //   const dcel = Dcel.fromGeoJSON(input);
-  //   const schematization = new CSchematization();
-  //   schematization.preProcess(dcel);
-  //   schematization.classify(dcel);
-  //   schematization.addStaircases(dcel);
-  //   schematization.calculateStaircases(dcel);
-  //   const v = dcel.findVertex(0, 11);
-  //   expect(v?.edges[0].staircase?.interferesWith.length).toBeGreaterThan(0);
-  //   expect(v?.edges[1].staircase?.interferesWith.length).toBeGreaterThan(0);
-  // });
-});
