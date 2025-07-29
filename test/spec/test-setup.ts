@@ -135,6 +135,7 @@ export const getClassification = (
 };
 
 export type ConfigurationSetup = {
+  dcel: Dcel;
   vertices: Vertex[];
   edges: HalfEdge[];
   innerEdge: HalfEdge;
@@ -168,16 +169,19 @@ export function createConfigurationSetup(
     if (!edge.twin) return;
     edge.twin.prev = crawlArray(edges, idx, -1).twin;
     edge.twin.next = crawlArray(edges, idx, +1).twin;
+    dcel.halfEdges.set(edge.uuid, edge);
   });
 
   vertices.forEach((vertex, idx) => {
     const edge = edges[idx];
     if (edge.prev?.twin) vertex.edges.push(edge, edge.prev.twin);
+    dcel.vertices.set(vertex.uuid, vertex);
   });
 
   const configuration: ConfigurationSetup = {
-    vertices: vertices,
-    edges: edges,
+    dcel,
+    vertices,
+    edges,
     innerEdge: edges[1],
   };
   return configuration;

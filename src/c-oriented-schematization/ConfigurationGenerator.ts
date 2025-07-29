@@ -14,16 +14,16 @@ class ConfigurationGenerator implements Generator {
     const configurations = input
       .getHalfEdges()
       .reduce<Map<string, Configuration>>((acc, edge) => {
-        if (edge.endpoints.every((vertex) => vertex.edges.length > 3))
+        if (edge.endpoints.some((vertex) => vertex.edges.length > 3))
           return acc;
-        return acc.set(edge.uuid, new Configuration(edge));
+        acc.set(edge.uuid, new Configuration(edge));
+        return acc;
       }, new Map());
 
     configurations.forEach((configuration) => {
       //TODO: Check whether this works in such a recursive way
       configuration.initialize(configurations);
     });
-
     return configurations;
   }
 }

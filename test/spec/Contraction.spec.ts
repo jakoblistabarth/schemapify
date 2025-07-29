@@ -1,11 +1,10 @@
 import fs from "fs";
 import path from "path";
 import Point from "@/src/geometry/Point";
-import Configuration from "@/src/c-oriented-schematization/Configuration";
-import Contraction from "@/src/c-oriented-schematization/Contraction";
 import Dcel from "@/src/Dcel/Dcel";
 import { configurationCases, createConfigurationSetup } from "./test-setup";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
+import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 
 describe("isConflicting() returns", function () {
   let dcel: Dcel;
@@ -19,66 +18,110 @@ describe("isConflicting() returns", function () {
     dcel = Dcel.fromGeoJSON(json);
   });
 
-  it("false for 2 non-conflicting contractions.", function () {
-    const edgeA = dcel.getHalfEdges()[2];
-    const cA = (edgeA.configuration = new Configuration(edgeA));
+  it("false for 2 non-conflicting contractions. (1.1)", function () {
+    const configurations = new ConfigurationGenerator().run(dcel);
 
-    const edgeB = dcel.getHalfEdges()[6];
-    const cB = (edgeB.configuration = new Configuration(edgeB));
+    const edgeA = dcel.halfEdges.get("5|0->5|1");
+    const cA = configurations.get(edgeA?.uuid ?? "");
 
-    expect(
-      cA[ContractionType.N]?.isConflicting(
-        cB[ContractionType.P] as Contraction,
-      ),
-    ).toBe(false);
+    const edgeB = dcel.halfEdges.get("4|1->4|3");
+    const cB = configurations.get(edgeB?.uuid ?? "");
+
+    if (!cA || !cB || !cB[ContractionType.N]) {
+      throw new Error("Configurations or contractions undefined.");
+    }
+
+    expect(cA[ContractionType.N]?.isConflicting(cB[ContractionType.N])).toBe(
+      false,
+    );
   });
 
-  it("true for 2 conflicting contractions, due to 2 overlapping Edges.", function () {
-    const edgeA = dcel.getHalfEdges()[0];
-    const cA = (edgeA.configuration = new Configuration(edgeA));
+  it("true for 2 conflicting contractions, due to 2 overlapping Edges. (1.2)", function () {
+    const configurations = new ConfigurationGenerator().run(dcel);
 
-    const edgeB = dcel.getHalfEdges()[2];
-    const cB = (edgeB.configuration = new Configuration(edgeB));
+    const edgeA = dcel.halfEdges.get("0|0->2|0");
+    const cA = configurations.get(edgeA?.uuid ?? "");
 
-    expect(
-      cA[ContractionType.N]?.isConflicting(
-        cB[ContractionType.N] as Contraction,
-      ),
-    ).toBe(true);
+    const edgeB = dcel.halfEdges.get("2|0->2|1");
+    const cB = configurations.get(edgeB?.uuid ?? "");
+
+    if (!cA || !cB || !cB[ContractionType.N]) {
+      throw new Error("Configurations or contractions undefined.");
+    }
+
+    expect(cA[ContractionType.N]?.isConflicting(cB[ContractionType.N])).toBe(
+      true,
+    );
   });
 
-  xit("true for 2 conflicting contractions, due to wrong inflectionType of the overlapping Edge.", function () {
-    const edgeA = dcel.getHalfEdges()[0];
-    const cA = (edgeA.configuration = new Configuration(edgeA));
+  it("true for 2 conflicting contractions, due to wrong inflectionType of the overlapping Edge. (1.3)", function () {
+    const configurations = new ConfigurationGenerator().run(dcel);
 
-    const edgeB = dcel.getHalfEdges()[4];
-    const cB = (edgeB.configuration = new Configuration(edgeB));
+    const edgeA = dcel.halfEdges.get("0|0->2|0");
+    const cA = configurations.get(edgeA?.uuid ?? "");
 
-    const edgeC = dcel.getHalfEdges()[8];
-    const cC = (edgeC.configuration = new Configuration(edgeC));
+    const edgeB = dcel.halfEdges.get("2|1->1|1");
+    const cB = configurations.get(edgeB?.uuid ?? "");
 
-    expect(
-      cA[ContractionType.N]?.isConflicting(
-        cB[ContractionType.N] as Contraction,
+    const edgeC = dcel.halfEdges.get("1|2->0|3");
+    const cC = configurations.get(edgeC?.uuid ?? "");
+
+    if (
+      !cA ||
+      !cB ||
+      !cC ||
+      !cB[ContractionType.N] ||
+      !cB[ContractionType.P] ||
+      !cC[ContractionType.N]
+    ) {
+      throw new Error("Configurations or contractions undefined.");
+    }
+
+    expect(cA[ContractionType.N]?.isConflicting(cB[ContractionType.N])).toBe(
+      true,
+    );
+    expect(cA[ContractionType.N]?.isConflicting(cB[ContractionType.P])).toBe(
+      true,
+    );
+    expect(cA[ContractionType.N]?.isConflicting(cC[ContractionType.N])).toBe(
+      true,
+    );
+  });
+
+  it("true for 2 conflicting contractions, due to too many overlapping Edges. (1.4)", function () {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/shapes/smallest-contraction-2.json"),
+        "utf8",
       ),
-    ).toBe(true);
-    expect(
-      cA[ContractionType.N]?.isConflicting(
-        cB[ContractionType.P] as Contraction,
-      ),
-    ).toBe(true);
-    expect(
-      cA[ContractionType.N]?.isConflicting(
-        cC[ContractionType.N] as Contraction,
-      ),
-    ).toBe(true);
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    const configurations = new ConfigurationGenerator().run(dcel);
+    const edgeA = dcel.halfEdges.get("10.5|7->10.5|8");
+    const cA = configurations.get(edgeA?.uuid ?? "");
+
+    const edgeB = dcel.halfEdges.get("10.5|8->10|8");
+    const cB = configurations.get(edgeB?.uuid ?? "");
+
+    if (!cA || !cB || !cB[ContractionType.N] || !cB[ContractionType.N]) {
+      throw new Error("Configurations or contractions undefined.");
+    }
+
+    expect(cA[ContractionType.N]?.isConflicting(cB[ContractionType.N])).toBe(
+      true,
+    );
   });
 });
 
 describe("getCompensationShift() returns", function () {
   it("for a rectangular compensation area.", function () {
     const s = configurationCases.negConvexParallelTracks;
-    const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
+    const configurations = new ConfigurationGenerator().run(s.dcel);
+    const c = configurations.get(s.innerEdge.uuid);
+
+    if (!c || !c[ContractionType.N]) {
+      throw new Error("Configuration or contraction undefined.");
+    }
 
     expect(c[ContractionType.N]?.getCompensationHeight(2)).toBe(0.5);
     expect(c[ContractionType.N]?.getCompensationHeight(4)).toBe(1);
@@ -87,14 +130,24 @@ describe("getCompensationShift() returns", function () {
 
   it("for an inwards trapezoid compensation area.", function () {
     const s = configurationCases.posReflex;
-    const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
+    const configurations = new ConfigurationGenerator().run(s.dcel);
+    const c = configurations.get(s.innerEdge.uuid);
+
+    if (!c || !c[ContractionType.P]) {
+      throw new Error("Configuration or contraction undefined.");
+    }
 
     expect(c[ContractionType.P]?.getCompensationHeight(5)).toBe(1);
   });
 
   it("for an outwards trapezoid compensation area.", function () {
     const s = configurationCases.negConvex;
-    const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
+    const configurations = new ConfigurationGenerator().run(s.dcel);
+    const c = configurations.get(s.innerEdge.uuid);
+
+    if (!c || !c[ContractionType.N]) {
+      throw new Error("Configuration or contraction undefined.");
+    }
 
     expect(c[ContractionType.N]?.getCompensationHeight(5)).toBe(1);
     expect(c[ContractionType.N]?.getCompensationHeight(8.25)).toBe(1.5);
@@ -102,7 +155,12 @@ describe("getCompensationShift() returns", function () {
 
   it("for a inwards trapezoid compensation area.", function () {
     const s = configurationCases.posReflex;
-    const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
+    const configurations = new ConfigurationGenerator().run(s.dcel);
+    const c = configurations.get(s.innerEdge.uuid);
+
+    if (!c || !c[ContractionType.P]) {
+      throw new Error("Configuration or contraction undefined.");
+    }
 
     expect(c[ContractionType.P]?.getCompensationHeight(5)).toBe(1);
   });
@@ -115,7 +173,12 @@ describe("getCompensationShift() returns", function () {
       new Point(4, 0),
       [new Point(4, 6), new Point(-4, 6)],
     );
-    const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
+    const configurations = new ConfigurationGenerator().run(s.dcel);
+    const c = configurations.get(s.innerEdge.uuid);
+
+    if (!c || !c[ContractionType.P]) {
+      throw new Error("Configuration or contraction undefined.");
+    }
 
     expect(c[ContractionType.P]?.getCompensationHeight(4.5)).toBe(1);
   });
@@ -128,7 +191,12 @@ describe("getCompensationShift() returns", function () {
       new Point(2, 0),
       [new Point(4, 6), new Point(-4, 4)],
     );
-    const c = (s.innerEdge.configuration = new Configuration(s.innerEdge));
+    const configurations = new ConfigurationGenerator().run(s.dcel);
+    const c = configurations.get(s.innerEdge.uuid);
+
+    if (!c || !c[ContractionType.P]) {
+      throw new Error("Configuration or contraction undefined.");
+    }
 
     expect(c[ContractionType.P]?.getCompensationHeight(4.5)).toBe(1);
   });
