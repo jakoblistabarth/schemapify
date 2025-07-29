@@ -50,7 +50,7 @@ class FaceFaceBoundary {
         contractionCandidate.type === ContractionType.N
           ? pContractions
           : nContractions;
-      const compensationCandidate = compensationCandidates
+      const compensationCandidateList = compensationCandidates
         .reduce((solutions: CompensationCandidate[], candidate) => {
           // console.log(
           //   contractionCandidate.configuration.innerEdge.uuid,
@@ -77,10 +77,19 @@ class FaceFaceBoundary {
             });
           return solutions;
         }, [])
-        .sort((a, b) => a.distance - b.distance)[0];
+        .sort((a, b) => a.distance - b.distance);
+      console.log(
+        compensationCandidateList.map(({ contraction, distance }) => ({
+          edge: contraction.configuration.innerEdge.uuid,
+          distance,
+        })),
+      );
+      const compensationCandidate = compensationCandidateList[0];
+      // TODO: check whether the check for contractions with area 0 is still necessary
       if (contractionCandidate.area === 0 || compensationCandidate) {
         contraction = contractionCandidate;
         compensation =
+          // if contractionCandidate.area === 0, no compensation is needed
           contractionCandidate.area > 0
             ? compensationCandidate.contraction
             : undefined;

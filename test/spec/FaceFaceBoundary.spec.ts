@@ -1,7 +1,8 @@
 import Dcel from "@/src/Dcel/Dcel";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
-import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
+import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
+import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import Subdivision from "@/src/geometry/Subdivision";
 import fs from "fs";
 import path from "path";
@@ -68,7 +69,7 @@ describe("The Face-Face-Boundary", function () {
 });
 
 describe("getMinimalConfigurationPair()", function () {
-  xit("on a test file returns the expected contraction pair.", function () {
+  it("on a test file returns the expected contraction pair.", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction.json"),
@@ -76,19 +77,19 @@ describe("getMinimalConfigurationPair()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const schematization = new CSchematization();
-    schematization.createConfigurations(dcel);
-    const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
-    const boundary = ffb.boundaries.values().next().value;
-    const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
+    const ffb = new FaceFaceBoundaryList(dcel);
+    const configurations = new ConfigurationGenerator().run(dcel);
+    const pair = ffb.getMinimalConfigurationPair(configurations);
 
-    expect(pair.contraction.area).toBe(0.5);
-    expect(pair.contraction.configuration.innerEdge.uuid).toBe("9.5|7->9.5|8");
-    expect(pair.compensation?.area).toBeGreaterThan(0.5);
-    expect(pair.compensation?.configuration.innerEdge.uuid).toBe("11|0->11|1");
+    expect(pair?.contraction.area).toBe(0.5);
+    expect(pair?.contraction.configuration.innerEdge.uuid).toBe("9.5|7->9.5|8");
+    expect(pair?.compensation?.area).toBeGreaterThan(0.5);
+    expect(pair?.compensation?.configuration.innerEdge.uuid).toBe(
+      "10|8->10|10",
+    );
   });
 
-  xit("on a test file returns the expected contraction pair.", function () {
+  it("on a test file returns the expected contraction pair.", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction-2.json"),
@@ -96,18 +97,18 @@ describe("getMinimalConfigurationPair()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const schematization = new CSchematization();
-    schematization.createConfigurations(dcel);
-    const ffb = (dcel.faceFaceBoundaryList = new FaceFaceBoundaryList(dcel));
-    const boundary = ffb.boundaries.values().next().value;
-    const pair = boundary.getMinimalConfigurationPair() as ConfigurationPair;
+    const configurations = new ConfigurationGenerator().run(dcel);
+    const ffb = new FaceFaceBoundaryListGenerator().run(dcel);
+    const pair = ffb.getMinimalConfigurationPair(configurations);
 
-    expect(pair.contraction.area).toBe(0.5);
-    expect(pair.contraction.configuration.innerEdge.uuid).toBe(
+    expect(pair?.contraction.area).toBe(0.5);
+    expect(pair?.contraction.configuration.innerEdge.uuid).toBe(
       "10.5|7->10.5|8",
     );
-    expect(pair.compensation?.area).toBeGreaterThan(0.5);
-    expect(pair.compensation?.configuration.innerEdge.uuid).toBe("9|2->9|3");
+    expect(pair?.compensation?.area).toBeGreaterThan(0.5);
+    expect(pair?.compensation?.configuration.innerEdge.uuid).toBe(
+      "10|8->10|10",
+    );
   });
 
   //TODO: add test where no complementary exists for smallest contraction

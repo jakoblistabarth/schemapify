@@ -89,10 +89,24 @@ class Contraction {
       complementaryX[0],
       complementaryX[2],
     ];
-    if (!overlappingEdges.length) return false;
+    const hasOverlappingEdges = overlappingEdges.length > 0;
+    if (!hasOverlappingEdges) return false;
+    // "Two configurations conflict when they share an edge, unless they share only outer edges and one of these has a convex and a reflex vertex."
+    const overlappingInnerEdges = overlappingEdges.filter((overlappingEdge) =>
+      [
+        this.configuration.innerEdge.uuid,
+        complementary.configuration.innerEdge.uuid,
+      ].includes(overlappingEdge.uuid),
+    );
+    // isConflicting if overlapping edges are inner edge
+    if (overlappingInnerEdges.length > 0) return true;
+    const overlappingOuterEdges = overlappingEdges.filter((overlappingEdge) =>
+      outerEdges.map((edge) => edge.uuid).includes(overlappingEdge.uuid),
+    );
     if (
-      overlappingEdges.length === 1 &&
-      outerEdges.some((edge) => edge.getInflectionType() === InflectionType.B)
+      overlappingOuterEdges.some(
+        (edge) => edge.getInflectionType() === InflectionType.B,
+      )
     )
       return false;
     return true;
