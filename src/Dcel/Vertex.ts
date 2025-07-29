@@ -201,7 +201,6 @@ class Vertex extends Point {
    * @returns The moved {@link Vertex}.
    */
   moveTo(x: number, y: number) {
-    console.log("moving vertex", this.uuid, "to", `${x}|${y}`);
     if (this.x === x && this.y === y) return this;
     // TODO: check whether this actually needs to be handled here
     //  merge vertices, if a vertex on this (new) position already exists

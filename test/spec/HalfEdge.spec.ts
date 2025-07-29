@@ -496,8 +496,6 @@ describe("move().", function () {
       .findHalfEdge(new Point(1.5, 0), new Point(1.5, 0.25))
       ?.moveTo(new Point(1, 0), new Point(1, 0.25));
 
-    // console.log(dcel.getVertices().map((v) => v.uuid));
-
     expect(dcel.findVertex(0, 0)).toBeInstanceOf(Vertex);
     expect(dcel.findVertex(1, 0)).toBeInstanceOf(Vertex);
     expect(dcel.findVertex(1, 0.25)).toBeInstanceOf(Vertex);

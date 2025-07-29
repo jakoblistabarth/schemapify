@@ -52,18 +52,6 @@ class FaceFaceBoundary {
           : nContractions;
       const compensationCandidateList = compensationCandidates
         .reduce((solutions: CompensationCandidate[], candidate) => {
-          // console.log(
-          //   contractionCandidate.configuration.innerEdge.uuid,
-          //   contractionCandidate.area,
-          //   "->",
-          //   contractionCandidate.point.xy(),
-          //   candidate.configuration.innerEdge.uuid,
-          //   candidate.area,
-          //   "->",
-          //   candidate.point.xy(),
-          //   "not conflicts:",
-          //   !candidate.isConflicting(contractionCandidate)
-          // );
           if (
             !candidate.isConflicting(contractionCandidate) &&
             contractionCandidate.area <= candidate.area
@@ -78,12 +66,6 @@ class FaceFaceBoundary {
           return solutions;
         }, [])
         .sort((a, b) => a.distance - b.distance);
-      console.log(
-        compensationCandidateList.map(({ contraction, distance }) => ({
-          edge: contraction.configuration.innerEdge.uuid,
-          distance,
-        })),
-      );
       const compensationCandidate = compensationCandidateList[0];
       // TODO: check whether the check for contractions with area 0 is still necessary
       if (contractionCandidate.area === 0 || compensationCandidate) {

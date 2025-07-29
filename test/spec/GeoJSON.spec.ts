@@ -58,7 +58,6 @@ describe("If the input data is not a region i.e., it contains features of type o
         "utf8",
       ),
     );
-    console.log({ json });
     expect(() => Dcel.fromGeoJSON(json)).toThrow("invalid input");
   });
 });

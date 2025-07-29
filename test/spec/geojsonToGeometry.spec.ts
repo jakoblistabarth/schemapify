@@ -70,15 +70,6 @@ describe("geojsonToGeometry parses a geojson feature collection of a simple encl
   });
 
   it("with 2 multipolygons", function () {
-    // console.log(
-    //   geometry
-    //     .map((multipolygons) =>
-    //       multipolygons.polygons.map((polygon) =>
-    //         polygon.rings.map((ring) => ring.points.map((p) => p.xy())),
-    //       ),
-    //     )
-    //     .flat(3),
-    // );
     expect(subdivision.multiPolygons.length).toBe(2);
   });
 
