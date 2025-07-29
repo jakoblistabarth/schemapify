@@ -50,12 +50,7 @@ describe("geojsonToGeometry parses a geojson feature collection of Austria into 
         multipolygons.polygons.map((polygon) => polygon.rings),
       )
       .flat(2);
-    expect(
-      rings.every((r) => {
-        if (r.isClockwise) console.log(r.points);
-        return !r.isClockwise;
-      }),
-    ).toBeTruthy();
+    expect(rings.every((r) => !r.isClockwise)).toBe(true);
   });
 });
 

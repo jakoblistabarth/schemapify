@@ -64,7 +64,7 @@ describe("The Face-Face-Boundary", function () {
     const faces = ffbl
       .getBoundaries()
       .map((ffb) => new Set(ffb.edges.map((e) => e.face?.uuid)));
-    expect(faces.every((face) => face.size === 1)).toBeTruthy();
+    expect(faces.every((face) => face.size === 1)).toBe(true);
   });
 });
 

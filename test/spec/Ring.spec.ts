@@ -16,11 +16,11 @@ describe("isClockwise() returns the correct boolean", function () {
       [1, 0],
     ];
 
-    expect(Ring.fromCoordinates(clockwise).isClockwise).toBeTruthy();
-    expect(Ring.fromCoordinates(counterclockwise).isClockwise).toBeFalsy();
+    expect(Ring.fromCoordinates(clockwise).isClockwise).toBe(true);
+    expect(Ring.fromCoordinates(counterclockwise).isClockwise).toBe(false);
     expect(
       Ring.fromCoordinates([...counterclockwise].reverse()).isClockwise,
-    ).toBeTruthy();
+    ).toBe(true);
   });
 
   it("for a triangle", function () {
@@ -30,10 +30,8 @@ describe("isClockwise() returns the correct boolean", function () {
       [1, 3],
     ];
 
-    expect(Ring.fromCoordinates(points).isClockwise).toBeFalsy();
-    expect(
-      Ring.fromCoordinates([...points].reverse()).isClockwise,
-    ).toBeTruthy();
+    expect(Ring.fromCoordinates(points).isClockwise).toBe(false);
+    expect(Ring.fromCoordinates([...points].reverse()).isClockwise).toBe(true);
   });
 
   it("for a triangle", function () {
@@ -43,7 +41,7 @@ describe("isClockwise() returns the correct boolean", function () {
       [0, 4],
     ];
 
-    expect(Ring.fromCoordinates(points).isClockwise).toBeFalsy();
+    expect(Ring.fromCoordinates(points).isClockwise).toBe(false);
   });
 
   it("for a triangle", function () {
@@ -55,10 +53,8 @@ describe("isClockwise() returns the correct boolean", function () {
 
     const ring = Ring.fromCoordinates(points);
 
-    expect(ring.isClockwise).toBeFalsy();
-    expect(
-      Ring.fromCoordinates([...points].reverse()).isClockwise,
-    ).toBeTruthy();
+    expect(ring.isClockwise).toBe(false);
+    expect(Ring.fromCoordinates([...points].reverse()).isClockwise).toBe(true);
   });
 
   it("for concave shapes", function () {
@@ -70,10 +66,8 @@ describe("isClockwise() returns the correct boolean", function () {
       [0, 1],
     ];
 
-    expect(Ring.fromCoordinates(points).isClockwise).toBeFalsy();
-    expect(
-      Ring.fromCoordinates([...points].reverse()).isClockwise,
-    ).toBeTruthy();
+    expect(Ring.fromCoordinates(points).isClockwise).toBe(false);
+    expect(Ring.fromCoordinates([...points].reverse()).isClockwise).toBe(true);
   });
 });
 
