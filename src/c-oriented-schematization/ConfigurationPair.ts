@@ -67,7 +67,7 @@ class ConfigurationPair {
 
     const movedPositions: Point[] = [];
 
-    // 2.1 Calculate new positions for contaction edge
+    // 2.1 Calculate new positions for contraction edge
     const pointA = this.contraction.point;
     const pointB =
       this.contraction.areaPoints[this.contraction.areaPoints.length - 1];

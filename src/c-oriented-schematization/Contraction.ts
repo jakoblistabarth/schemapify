@@ -75,7 +75,7 @@ class Contraction {
   }
 
   /**
-   * Determines whetere or not not the contraction conflicts with the specified complementary contraction.
+   * Determines whether or not the contraction conflicts with the specified complementary contraction.
    * @param complementary The complementary {@link Contraction} of the {@link ConfigurationPair}.
    * @returns A boolean, indicating whether or not the pair of contractions conflict.
    */
