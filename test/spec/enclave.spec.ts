@@ -22,7 +22,7 @@ describe("A Dcel from a geojson with a simplified enclave model", function () {
     expect(dcel.faces.length).toBe(3);
   });
 
-  xit("returns a subdivision with 2 polygons", function () {
+  it("returns a subdivision with 2 polygons", function () {
     const subdivision = dcel.toSubdivision();
     expect(subdivision.multiPolygons.length).toBe(2);
   });
@@ -71,7 +71,7 @@ describe("A Dcel from multipolygons of a simplified enclave model", function () 
     expect(dcel.faces.length).toBe(3);
   });
 
-  xit("returns a subdivision with 2 polygons", function () {
+  it("returns a subdivision with 2 polygons", function () {
     const subdivision = dcel.toSubdivision();
     expect(subdivision.multiPolygons.length).toBe(2);
   });
