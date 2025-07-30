@@ -1,7 +1,7 @@
 "use client";
 
 import { useHotkeys } from "react-hotkeys-hook";
-import { handleSimplify } from "../helpers/handleSimplify";
+// import { handleSimplify } from "../helpers/handleSimplify";
 import useAppStore from "../helpers/store";
 
 const Hotkeys = () => {
@@ -20,9 +20,11 @@ const Hotkeys = () => {
     () =>
       dcel &&
       snapshotList &&
-      //TODO: ideally I could write something like this:
+      //TODO: reimplement step by step simplification
+      // ideally I could write something like this:
       // schematization.doEdgeMove();
-      handleSimplify(dcel, snapshotList, setActiveSnapshot),
+      // handleSimplify(dcel, snapshotList, setActiveSnapshot),
+      console.log("Simplifying..."),
   );
   useHotkeys(["ctrl+c"], () => removeSource());
   useHotkeys(["ctrl+1"], () => setSource("AUT_adm0-s0_5.json"));

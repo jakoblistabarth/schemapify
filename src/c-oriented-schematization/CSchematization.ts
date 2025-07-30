@@ -184,7 +184,7 @@ class CSchematization implements Schematization {
       forSnapshots: { snapshotList: this.snapshots, triggeredAt: start },
     });
 
-    // TODO: check wether loop is correct
+    // TODO: check whether loop is correct
     let dcel: Dcel;
     do {
       const { dcel: newDcel } = new EdgeMoveProcessor(

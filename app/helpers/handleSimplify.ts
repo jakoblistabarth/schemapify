@@ -2,10 +2,13 @@ import Dcel from "@/src/Dcel/Dcel";
 import Snapshot from "@/src/Snapshot/Snapshot";
 import SnapshotList from "@/src/Snapshot/SnapshotList";
 import { LABEL } from "@/src/c-oriented-schematization/CSchematization";
+import Configuration from "@/src/c-oriented-schematization/Configuration";
 import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
 
 export const handleSimplify = (
   dcel: Dcel,
+  configurations: Map<string, Configuration>,
+  contractions: Map<string, Configuration>,
   faceFaceBoundaryList: FaceFaceBoundaryList,
   snapshotList: SnapshotList,
   setActiveSnapshot: (id: string) => void,
