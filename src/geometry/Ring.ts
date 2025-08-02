@@ -46,7 +46,10 @@ class Ring {
   }
 
   /**
-   * Returns the area of the ring.
+   * Calculates the area of the {@link Ring}.
+   * #TODO: add credits!
+   * The array of Points need to be sorted (either clockwise or counter-clockwise).
+   * @returns A number indicating the area of the {@link Ring}.
    */
   get area() {
     return this.points.reduce((acc, point, i, points) => {

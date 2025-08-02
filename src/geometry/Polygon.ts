@@ -21,10 +21,9 @@ class Polygon {
   }
 
   /**
-   * Calculates the area of the irregular polyon defined by a set of points.
-   * TODO: add credits!
-   * @param points An array of Points, which has to be sorted (either clockwise or counter-clockwise).
-   * @returns A number indicating the area of the polygon.
+   * Get the area of the polygon.
+   * Calculates the area of the {@link Polygon} by adding (or subtracting) the {@link Ring}s' areas.
+   * @returns A number indicating the area of the {@link Polygon}.
    */
   get area() {
     return this.rings.reduce((sum, ring, idx) => {
