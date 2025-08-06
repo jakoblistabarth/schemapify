@@ -74,12 +74,30 @@ class HalfEdge {
     let currentEdge: HalfEdge = this;
     const initialEdge: HalfEdge = currentEdge;
     const halfEdges: HalfEdge[] = [];
+    // Use a Set to track visited edges and prevent infinite loops or non-simple cycles
+    const visited = new Set<HalfEdge>();
 
     do {
+      if (visited.has(currentEdge) && currentEdge !== initialEdge) {
+        throw new Error(
+          `Cycle is broken or not simple: revisited edge before completing cycle.
+          Current edge: ${currentEdge.uuid} (initial: ${initialEdge.uuid})`,
+        );
+      }
+      visited.add(currentEdge);
       halfEdges.push(currentEdge);
-      if (currentEdge.next && currentEdge.prev)
-        currentEdge = forwards ? currentEdge.next : currentEdge.prev;
-    } while (currentEdge != initialEdge);
+      if (forwards) {
+        if (!currentEdge.next) {
+          throw new Error("Cycle is broken (forwards): missing next pointer");
+        }
+        currentEdge = currentEdge.next;
+      } else {
+        if (!currentEdge.prev) {
+          throw new Error("Cycle is broken (backwards): missing prev pointer");
+        }
+        currentEdge = currentEdge.prev;
+      }
+    } while (currentEdge !== initialEdge);
 
     return halfEdges;
   }
