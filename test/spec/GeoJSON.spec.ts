@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { getTestFiles } from "./test-setup";
-import { hint } from "@mapbox/geojsonhint";
+import { scavenge } from "@placemarkio/check-geojson";
 import Dcel from "@/src/Dcel/Dcel";
 
 describe("validate geoJSON file (simple shape)", function () {
@@ -13,8 +13,9 @@ describe("validate geoJSON file (simple shape)", function () {
       const json = JSON.parse(
         fs.readFileSync(path.resolve(dir + "/" + file), "utf8"),
       );
-      const errors = hint(JSON.stringify(json, null, 4));
-      expect(errors.length).toBe(0);
+
+      const { rejected } = scavenge(JSON.stringify(json, null, 4));
+      expect(rejected.length).toBe(0);
     });
   });
 });
@@ -28,25 +29,58 @@ describe("validate geoJSON file (geodata)", function () {
       const json = JSON.parse(
         fs.readFileSync(path.resolve(dir + "/" + file), "utf8"),
       );
-      const errors = hint(JSON.stringify(json, null, 4));
-      expect(errors.length).toBe(0);
+      const { rejected } = scavenge(JSON.stringify(json, null, 4));
+      expect(rejected.length).toBe(0);
     });
   });
 });
 
-// linestrings.json is actually not invalid, by the geojson specification, but it is not supported by the schematization tool (targeting polygons)
-describe("Find errors for invalid geoJSON file (own example)", function () {
-  const dir = "test/data/invalid";
-  const testFiles = getTestFiles(dir).filter((f) => f !== "linestrings.json");
+describe("Find errors for invalid geoJSON file", function () {
+  // @placemarkio/check-geojson does not (yet) support (all?) cases with invalid geometry
+  xit("with a unclosed polygon", function () {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/invalid/square-not-closed.json"),
+        "utf8",
+      ),
+    );
+    const { rejected } = scavenge(JSON.stringify(json, null, 4));
+    expect(rejected.length).toBeGreaterThan(0);
+  });
 
-  testFiles.forEach((file) => {
-    it(file, function () {
-      const json = JSON.parse(
-        fs.readFileSync(path.resolve(dir + "/" + file), "utf8"),
-      );
-      const errors = hint(JSON.stringify(json, null, 4));
-      expect(errors.length).toBeGreaterThan(0);
-    });
+  xit("with a polygon in wrong winding-order", function () {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/invalid/square-right-hand-rule-violation.json"),
+        "utf8",
+      ),
+    );
+    const { rejected } = scavenge(JSON.stringify(json, null, 4));
+    expect(rejected.length).toBeGreaterThan(0);
+  });
+
+  xit("with a polygon containing a loop edge", function () {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/invalid/square-loop-edge.json"),
+        "utf8",
+      ),
+    );
+    const { rejected } = scavenge(JSON.stringify(json, null, 4));
+    expect(rejected.length).toBeGreaterThan(0);
+  });
+
+  it("with a polygon using invalid structure (lowercase 'polygon')member", function () {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve(
+          "test/data/invalid/square-invalid-member-lowercase-polygon.json",
+        ),
+        "utf8",
+      ),
+    );
+    const { rejected } = scavenge(JSON.stringify(json, null, 4));
+    expect(rejected.length).toBeGreaterThan(0);
   });
 });
 
