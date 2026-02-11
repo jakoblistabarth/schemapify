@@ -55,9 +55,9 @@ class ConfigurationPair {
       //   contraction.configuration.innerEdge.uuid,
       //   contraction.blockingNumber
       // );
-      Object.values(contractions).forEach((d) =>
-        d.decrementBlockingNumber(this.x1x2, configurations),
-      ); // FIXME: fix blocking Number!! Done?
+      Object.values(contractions)
+        .filter(Boolean) // only needed if one of the contractions can be undefined
+        .forEach((d) => d.decrementBlockingNumber(this.x1x2, configurations)); // FIXME: fix blocking Number!! Done?
       // console.log(
       //   "blockingNumber after",
       //   contraction.configuration.innerEdge.uuid,
