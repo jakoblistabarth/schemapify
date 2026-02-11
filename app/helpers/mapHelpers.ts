@@ -8,15 +8,15 @@ const baseStyle = (feature: Feature): PathOptions => ({
 });
 
 export const onEachFeature = (feature: Feature, layer: Path) => {
-  layer.setStyle(baseStyle(feature)),
-    layer.bindTooltip(
-      feature.properties
-        ? `<div>${Object.entries(feature.properties)
-            .map(([k, v]) => `<div>${k}: ${v}</div>`)
-            .join("")}</div>`
-        : "no properties",
-      { sticky: true, opacity: 1 },
-    );
+  layer.setStyle(baseStyle(feature));
+  layer.bindTooltip(
+    feature.properties
+      ? `<div>${Object.entries(feature.properties)
+          .map(([k, v]) => `<div>${k}: ${v}</div>`)
+          .join("")}</div>`
+      : "no properties",
+    { sticky: true, opacity: 1 },
+  );
   layer.on({
     mouseover: (e) => {
       e.target.setStyle({ weight: 6, fillOpacity: 0.5 });

@@ -205,7 +205,7 @@ class Contraction {
       ];
       if (this.point.equals(prev.tail)) {
         const point = c.getTrack(OuterEdge.NEXT)?.intersectsLine(innerEdge_);
-        point && areaPoints.push(point);
+        if (point) areaPoints.push(point);
       }
     } else {
       areaPoints = [
@@ -215,7 +215,7 @@ class Contraction {
       ];
       if (this.point.equals(nextHead)) {
         const point = c.getTrack(OuterEdge.PREV)?.intersectsLine(innerEdge_);
-        point && areaPoints.push(point);
+        if (point) areaPoints.push(point);
       }
     }
 

@@ -18,7 +18,8 @@ class MultiPolygon {
     id?: string,
     properties?: GeoJsonProperties,
   ) {
-    (this.id = id), (this.polygons = polygons);
+    this.id = id;
+    this.polygons = polygons;
     this.properties = properties;
   }
 

@@ -50,8 +50,9 @@ class HalfEdgeClassGenerator implements Generator {
         const assignedDirection = this.assignedDirections.get(edge.uuid);
         if (orientation && (assignedDirection || assignedDirection === 0)) {
           acc.set(edge.uuid, { orientation, assignedDirection });
-          edge.twin &&
+          if (edge.twin) {
             acc.set(edge.twin.uuid, { orientation, assignedDirection });
+          }
         }
         return acc;
       }, new Map());
