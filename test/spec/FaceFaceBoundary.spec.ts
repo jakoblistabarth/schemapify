@@ -59,8 +59,8 @@ describe("The Face-Face-Boundary", function () {
       ]),
     );
     const schematization = new CSchematization();
-    schematization.run(dcel);
-    const ffbl = new FaceFaceBoundaryList(dcel);
+    const constrained = schematization.constrainAngles(dcel);
+    const ffbl = new FaceFaceBoundaryList(constrained);
     const faces = ffbl
       .getBoundaries()
       .map((ffb) => new Set(ffb.edges.map((e) => e.face?.uuid)));
