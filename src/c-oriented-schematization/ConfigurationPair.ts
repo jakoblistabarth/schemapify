@@ -232,7 +232,7 @@ class ConfigurationPair {
 
   /**
    * Update the configuration of the in the edge move involved HalfEdges.
-   * @param involvedEdges An array of {@link HalfEdges} which are left from the {@link ConfigurationPair}.
+   * @param involvedEdges An array of {@link HalfEdge}s which are left from the {@link ConfigurationPair}.
    * @returns void, if the {@link Dcel}'s links are not complete.
    */
   updateConfigurations(
