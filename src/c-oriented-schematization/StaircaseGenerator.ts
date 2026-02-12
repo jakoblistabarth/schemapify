@@ -1,6 +1,5 @@
 import Dcel from "../Dcel/Dcel";
 import HalfEdge from "../Dcel/HalfEdge";
-import Vertex from "../Dcel/Vertex";
 import Generator from "../Schematization/Generator";
 import { Orientation } from "./HalfEdgeClassGenerator";
 import { getAssociatedSector, getSignificantVertex } from "./HalfEdgeUtils";
@@ -8,17 +7,17 @@ import Staircase from "./Staircase";
 import { CStyle } from "./schematization.style";
 
 class StaircaseGenerator implements Generator {
-  sigificantVertices: string[];
+  sigificantVertices: number[];
   halfEdgeClassifications: Map<
-    string,
+    number,
     { orientation: Orientation; assignedDirection: number }
   >;
   style: CStyle;
 
   constructor(
-    significantVertices: string[],
+    significantVertices: number[],
     halfEdgeClassifications: Map<
-      string,
+      number,
       { orientation: Orientation; assignedDirection: number }
     >,
     style: CStyle,
@@ -36,17 +35,19 @@ class StaircaseGenerator implements Generator {
     // create staircase for every pair of edges
     const staircases = input
       .getHalfEdges(true)
-      .reduce<Map<string, Staircase>>((acc, edge) => {
+      .reduce<Map<number, Staircase>>((acc, edge) => {
         const significantVertex = getSignificantVertex(
           edge,
           this.sigificantVertices,
         );
-        const edgeClass = this.halfEdgeClassifications.get(
-          edge.uuid,
-        )?.orientation;
-        const assignedDirection = this.halfEdgeClassifications.get(
-          edge.uuid,
-        )?.assignedDirection;
+        const edgeClass =
+          edge.id !== undefined
+            ? this.halfEdgeClassifications.get(edge.id)?.orientation
+            : undefined;
+        const assignedDirection =
+          edge.id !== undefined
+            ? this.halfEdgeClassifications.get(edge.id)?.assignedDirection
+            : undefined;
         if (
           !edgeClass ||
           edgeClass === Orientation.AB ||
@@ -54,13 +55,15 @@ class StaircaseGenerator implements Generator {
         )
           return acc;
         if (
-          this.sigificantVertices.includes(edge.uuid) &&
+          edge.id !== undefined &&
+          this.sigificantVertices.includes(edge.id) &&
           significantVertex !== edge.tail &&
           edge.twin
         )
           edge = edge.twin;
+        if (edge.id === undefined) return acc;
         return acc.set(
-          edge.uuid,
+          edge.id,
           new Staircase(
             edge,
             edgeClass,
@@ -78,16 +81,16 @@ class StaircaseGenerator implements Generator {
   }
 
   /**
-   * Gets the modified tail {@link Vertex}, which is used for calculating the edgeDistance between HalfEdges sharing one Vertex.
+   * Gets the position ({@link Point}), which is used for calculating the edgeDistance between HalfEdges sharing one Vertex.
    * @param offsetEdge The {@link HalfEdge} of which a part should be ignored.
    * @param offset The distance the offset Vertex should be moved in respect to its (original) tail {@link Vertex}.
-   * @returns The Vertex on the edge of which a part should be ignored and from where the edge is considered for calculating the edgeDistance.
+   * @returns The {@link Point} on the edge of which a part should be ignored and from where the edge is considered for calculating the edgeDistance.
    */
-  private getOffsetVertex(offsetEdge: HalfEdge, offset: number) {
+  private getOffsetPoint(offsetEdge: HalfEdge, offset: number) {
     const angle = offsetEdge.getAngle();
     if (typeof angle !== "number") return;
     const pointOffset = offsetEdge.tail.getNewPoint(offset, angle);
-    return new Vertex(pointOffset.x, pointOffset.y, offsetEdge.dcel);
+    return pointOffset;
   }
 
   /**
@@ -95,15 +98,17 @@ class StaircaseGenerator implements Generator {
    * @param input The {@link Dcel} to calculate staircases for.
    */
   //TODO: rename to calculateStaircaseParameters
-  private calculateStaircases(staircases: Map<string, Staircase>) {
+  private calculateStaircases(staircases: Map<number, Staircase>) {
     // calculate edgedistance and stepnumber for deviating edges first (p. 18)
     const staircasesOfDeviatingEdges = new Map(
       [...staircases.entries()].filter(
         ([, staircase]) =>
-          this.halfEdgeClassifications.get(staircase.edge.uuid)?.orientation ===
-            Orientation.AD ||
-          this.halfEdgeClassifications.get(staircase.edge.uuid)?.orientation ===
-            Orientation.UD,
+          (staircase.edge.id !== undefined &&
+            this.halfEdgeClassifications.get(staircase.edge.id)?.orientation ===
+              Orientation.AD) ||
+          (staircase.edge.id !== undefined &&
+            this.halfEdgeClassifications.get(staircase.edge.id)?.orientation ===
+              Orientation.UD),
       ),
     );
     this.setEdgeDistances(staircasesOfDeviatingEdges);
@@ -117,10 +122,13 @@ class StaircaseGenerator implements Generator {
     const staircasesOther = new Map(
       [...staircases.entries()].filter(
         ([, staircase]) =>
-          this.halfEdgeClassifications.get(staircase.edge.uuid)?.orientation !==
-            Orientation.AD &&
-          this.halfEdgeClassifications.get(staircase.edge.uuid)?.orientation !==
-            Orientation.UD,
+          !(
+            staircase.edge.id !== undefined &&
+            (this.halfEdgeClassifications.get(staircase.edge.id)
+              ?.orientation === Orientation.AD ||
+              this.halfEdgeClassifications.get(staircase.edge.id)
+                ?.orientation === Orientation.UD)
+          ),
       ),
     );
     this.setEdgeDistances(staircasesOther);
@@ -135,7 +143,7 @@ class StaircaseGenerator implements Generator {
    * Set the edgedistance for each staircase of a given array of staircases.
    * @param staircases The array of staircases to set the edgedistance for.
    */
-  private setEdgeDistances(staircases: Map<string, Staircase>) {
+  private setEdgeDistances(staircases: Map<number, Staircase>) {
     // TODO: make sure the edgedistance cannot be too small?
     // To account for topology error ("Must Be Larger Than Cluster tolerance"), when minimum distance between points is too small
     // see: https://pro.arcgis.com/en/pro-app/latest/help/editing/geodatabase-topology-rules-for-polygon-features.htm
@@ -154,7 +162,8 @@ class StaircaseGenerator implements Generator {
         let e = staircase.edge;
         let e_ = staircase_.edge;
         const eStaircaseEpsilon = this.style.staircaseEpsilon;
-        const e_staircaseSe = staircases.get(e_.uuid)?.se;
+        const e_staircaseSe =
+          e_.id !== undefined ? staircases.get(e_.id)?.se : undefined;
         const eLength = e.getLength();
         if (
           e.tail !== e_.tail &&
@@ -176,6 +185,8 @@ class StaircaseGenerator implements Generator {
           ); // get common vertex
           e = e.tail !== v && e.twin ? e.twin : e;
           e_ = e_.tail !== v && e_.twin ? e_.twin : e_;
+          const eLineSegment = e.toLineSegment();
+          const e_lineSegment = e_.toLineSegment();
           const e_angle = e_.getAngle();
           if (
             typeof e_angle !== "number" ||
@@ -188,12 +199,14 @@ class StaircaseGenerator implements Generator {
 
           // "However, if e and e' do share a vertex, then we must again look at the classification."
           let de = undefined;
-          const orientation = this.halfEdgeClassifications.get(
-            e.uuid,
-          )?.orientation;
-          const orientation_ = this.halfEdgeClassifications.get(
-            e_.uuid,
-          )?.orientation;
+          const orientation =
+            e.id !== undefined
+              ? this.halfEdgeClassifications.get(e.id)?.orientation
+              : undefined;
+          const orientation_ =
+            e_.id !== undefined
+              ? this.halfEdgeClassifications.get(e_.id)?.orientation
+              : undefined;
           switch (orientation) {
             case Orientation.UB: {
               // "If e' is aligned, then we ignore a fraction of (1 − ε)/2 of e'."
@@ -201,13 +214,15 @@ class StaircaseGenerator implements Generator {
               // "In other words, we ignore a fraction of 1/(se' − 1) [of e']."
               if (orientation_ === Orientation.AD) {
                 const offset = (1 - eStaircaseEpsilon) / 2;
-                const vertexOffset = this.getOffsetVertex(e_, offset);
-                de = vertexOffset?.distanceToEdge(e);
+                const pointOffset = this.getOffsetPoint(e_, offset);
+                if (!eLineSegment || !pointOffset) return;
+                de = pointOffset?.distanceToLineSegment(eLineSegment);
               } else {
                 if (!e_staircaseSe) return;
                 const offset = 1 / (e_staircaseSe - 1);
-                const vertexOffset = this.getOffsetVertex(e_, offset);
-                de = vertexOffset?.distanceToEdge(e);
+                const pointOffset = this.getOffsetPoint(e_, offset);
+                if (!eLineSegment || !pointOffset) return;
+                de = pointOffset?.distanceToLineSegment(eLineSegment);
               }
               break;
             }
@@ -216,27 +231,31 @@ class StaircaseGenerator implements Generator {
               // "If e' is a deviating edge, we treat it as if e were an unaligned basic edge."
               if (typeof eLength !== "number") return;
               if (orientation_ === Orientation.E) {
-                const vertexOffset = this.getOffsetVertex(e, (eLength * 1) / 2);
-                de = vertexOffset?.distanceToEdge(e_);
+                const pointOffset = this.getOffsetPoint(e, (eLength * 1) / 2);
+                if (!e_lineSegment || !pointOffset) return;
+                de = pointOffset?.distanceToLineSegment(e_lineSegment);
               } else {
                 // AD or UD
                 if (typeof e_staircaseSe !== "number") return;
                 const offset = 1 / (e_staircaseSe - 1);
-                const vertexOffset = this.getOffsetVertex(e_, offset);
-                de = vertexOffset?.distanceToEdge(e);
+                const pointOffset = this.getOffsetPoint(e_, offset);
+                if (!e_lineSegment || !pointOffset) return;
+                de = pointOffset?.distanceToLineSegment(e_lineSegment);
               }
               break;
             }
             case Orientation.AD: {
               const offset = (1 - eStaircaseEpsilon) / 2;
-              const vertexOffset = this.getOffsetVertex(e, offset);
-              de = vertexOffset?.distanceToEdge(e_);
+              const pointOffset = this.getOffsetPoint(e, offset);
+              if (!e_lineSegment || !pointOffset) return;
+              de = pointOffset?.distanceToLineSegment(e_lineSegment);
               break;
             }
             case Orientation.UD: {
               if (typeof eLength !== "number") return;
-              const vertexOffset = this.getOffsetVertex(e, (eLength * 1) / 3);
-              de = vertexOffset?.distanceToEdge(e_);
+              const pointOffset = this.getOffsetPoint(e, (eLength * 1) / 3);
+              if (!e_lineSegment || !pointOffset) return;
+              de = pointOffset?.distanceToLineSegment(e_lineSegment);
               break;
             }
           }

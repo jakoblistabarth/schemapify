@@ -18,8 +18,10 @@ class VertexClassGenerator implements Generator {
    * By doing so it is guaranteed that every HalfEdge has at most one significant Vertex.
    */
   public run(input: Dcel) {
-    return input.getVertices().reduce<Array<string>>((acc, v) => {
-      return this.isSignificant(v, this.sectors) ? [...acc, v.uuid] : acc;
+    return input.getVertices().reduce<number[]>((acc, v) => {
+      return this.isSignificant(v, this.sectors) && v.id !== undefined
+        ? [...acc, v.id]
+        : acc;
     }, []);
   }
 

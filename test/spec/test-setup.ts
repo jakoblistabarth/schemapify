@@ -33,27 +33,26 @@ export type TestSetup = {
 
 export const createEdgeVertexSetup = () => {
   const dcel = new Dcel();
-  const origin = new Vertex(0, 0, dcel);
-  dcel.addVertex(origin.x, origin.y);
+  const origin = dcel.addVertex(0, 0);
 
   const destinations: { [key: string]: Vertex } = {
-    d0: new Vertex(4, 0, dcel),
-    d14: new Vertex(4, 1, dcel),
-    d37: new Vertex(4, 3, dcel),
-    d53: new Vertex(3, 4, dcel),
-    d76: new Vertex(1, 4, dcel),
-    d90: new Vertex(0, 4, dcel),
-    d104: new Vertex(-1, 4, dcel),
-    d143: new Vertex(-4, 3, dcel),
-    d153: new Vertex(-4, 2, dcel),
-    d166: new Vertex(-4, 1, dcel),
-    d180: new Vertex(-4, 0, dcel),
-    d217: new Vertex(-4, -3, dcel),
-    d243: new Vertex(-2, -4, dcel),
-    d270: new Vertex(0, -4, dcel),
-    d284: new Vertex(1, -4, dcel),
-    d315: new Vertex(4, -4, dcel),
-    d333: new Vertex(4, -2, dcel),
+    d0: dcel.addVertex(4, 0),
+    d14: dcel.addVertex(4, 1),
+    d37: dcel.addVertex(4, 3),
+    d53: dcel.addVertex(3, 4),
+    d76: dcel.addVertex(1, 4),
+    d90: dcel.addVertex(0, 4),
+    d104: dcel.addVertex(-1, 4),
+    d143: dcel.addVertex(-4, 3),
+    d153: dcel.addVertex(-4, 2),
+    d166: dcel.addVertex(-4, 1),
+    d180: dcel.addVertex(-4, 0),
+    d217: dcel.addVertex(-4, -3),
+    d243: dcel.addVertex(-2, -4),
+    d270: dcel.addVertex(0, -4),
+    d284: dcel.addVertex(1, -4),
+    d315: dcel.addVertex(4, -4),
+    d333: dcel.addVertex(4, -2),
   };
 
   const directions: Directions = {};
@@ -64,25 +63,46 @@ export const createEdgeVertexSetup = () => {
     edge.twin.twin = edge;
     directions["o" + key] = edge;
   });
-
   const setup: TestSetup = { dcel, origin, directions };
   return setup;
 };
 
 const createDcel = (origin: Vertex, edges: HalfEdge[]) => {
   const dcel = edges[0].dcel;
+  // Register provided HalfEdge fixtures directly into the DCEL to preserve
+  // object identity and ordering expected by tests (pre-migration behavior).
   edges.forEach((direction) => {
-    const head = new Vertex(
-      direction.head?.x ?? 0,
-      direction.head?.y ?? 0,
-      dcel,
-    );
     const tail = origin;
-    dcel.addVertex(head.x, head.y);
-    const halfEdge = dcel.addHalfEdge(tail, head);
-    const halfEdgeTwin = dcel.addHalfEdge(head, tail);
+    const head = dcel.addVertex(direction.head?.x ?? 0, direction.head?.y ?? 0);
+
+    // create canonical half-edges if not already registered
+    const key = HalfEdge.getKey(tail, head);
+    let halfEdge = dcel.halfEdges.get(key);
+    if (!halfEdge) {
+      // use the provided fixture object if its dcel matches
+      halfEdge = direction;
+      if (halfEdge.id === undefined) halfEdge.id = dcel.nextHalfEdgeId++;
+      dcel.halfEdges.set(key, halfEdge);
+      // ensure it's in the tail's incident edges
+      if (tail.edges.indexOf(halfEdge) === -1) tail.edges.push(halfEdge);
+    }
+
+    const twinKey = HalfEdge.getKey(head, tail);
+    let halfEdgeTwin = dcel.halfEdges.get(twinKey);
+    if (!halfEdgeTwin) {
+      halfEdgeTwin = halfEdge.twin ?? new HalfEdge(head, dcel);
+      if (halfEdgeTwin.id === undefined)
+        halfEdgeTwin.id = dcel.nextHalfEdgeId++;
+      dcel.halfEdges.set(twinKey, halfEdgeTwin);
+      if (head.edges.indexOf(halfEdgeTwin) === -1)
+        head.edges.push(halfEdgeTwin);
+    }
+
     halfEdge.twin = halfEdgeTwin;
     halfEdgeTwin.twin = halfEdge;
+    // sort incident edges so angle-based ordering is consistent
+    tail.sortEdges();
+    head.sortEdges();
   });
 };
 
@@ -90,29 +110,30 @@ export const createStaircaseSetup = (
   destination: Position,
   assignedDirection: number,
   orientation: Orientation,
-  options: { style?: CStyle; significantVertices?: string[] } = {},
+  options: { style?: CStyle; significantVertices?: number[] } = {},
 ) => {
   const { style = cStyle, significantVertices = [] } = options;
   const dcel = new Dcel();
-  const o = new Vertex(0, 0, dcel);
-  const d = new Vertex(destination[0], destination[1], dcel);
+  const o = dcel.addVertex(0, 0);
+  const d = dcel.addVertex(destination[0], destination[1]);
   const edge = dcel.addHalfEdge(o, d);
   const twin = dcel.addHalfEdge(d, o);
   edge.twin = twin;
   twin.twin = edge;
   o.edges.push(edge);
+  const key = edge.id ?? -1;
   const generator = new StaircaseGenerator(
     significantVertices,
-    new Map([[edge.uuid, { orientation, assignedDirection }]]),
+    new Map([[key, { orientation, assignedDirection }]]),
     style,
   );
   const staircases = generator.run(dcel);
-  return staircases.get(edge.uuid);
+  return key !== -1 ? staircases.get(key) : undefined;
 };
 
 type Options = {
   c?: CRegular | CIrregular;
-  significantVertices?: string[];
+  significantVertices?: number[];
 };
 
 export const getClassification = (
@@ -123,13 +144,14 @@ export const getClassification = (
 ) => {
   const { dcel, origin } = testSetup;
   const { c = cStyle.c, significantVertices = [] } = options;
+  // register only the provided subset of fixture directions for this test
   createDcel(origin, edges);
   const assignedDirections = new HalfEdgeClassGenerator(
     c,
     significantVertices,
   ).run(dcel);
   const directionSolution = origin.edges.map(
-    (edge) => assignedDirections.get(edge.uuid)?.[classficationProperty],
+    (edge) => assignedDirections.get(edge.id ?? -1)?.[classficationProperty],
   );
   return directionSolution;
 };
@@ -150,7 +172,7 @@ export function createConfigurationSetup(
 ): ConfigurationSetup {
   const dcel = new Dcel();
   const points = [pointA, pointB, pointC, pointD, ...otherPoints];
-  const vertices = points.map((point) => new Vertex(point.x, point.y, dcel));
+  const vertices = points.map((point) => dcel.addVertex(point.x, point.y));
   const innerFace = new Face();
   const outerFace = new Face();
 
@@ -169,13 +191,19 @@ export function createConfigurationSetup(
     if (!edge.twin) return;
     edge.twin.prev = crawlArray(edges, idx, -1).twin;
     edge.twin.next = crawlArray(edges, idx, +1).twin;
-    dcel.halfEdges.set(edge.uuid, edge);
+    // ensure half-edges have numeric ids and are registered in the dcel
+    if (edge.id === undefined) edge.id = dcel.nextHalfEdgeId++;
+    if (edge.twin.id === undefined) edge.twin.id = dcel.nextHalfEdgeId++;
+    dcel.halfEdges.set(HalfEdge.getKey(edge.tail, edge.head!), edge);
+    dcel.halfEdges.set(
+      HalfEdge.getKey(edge.twin!.tail, edge.twin!.head!),
+      edge.twin!,
+    );
   });
 
   vertices.forEach((vertex, idx) => {
     const edge = edges[idx];
     if (edge.prev?.twin) vertex.edges.push(edge, edge.prev.twin);
-    dcel.vertices.set(vertex.uuid, vertex);
   });
 
   const configuration: ConfigurationSetup = {

@@ -14,7 +14,7 @@ describe("getInteriorAngle() and getExteriorAngle()", function () {
     );
     const dcel = Dcel.fromGeoJSON(json);
 
-    const v = dcel.vertices.get("0|1");
+    const v = dcel.findVertex(0, 1);
     const dartFace = dcel.getBoundedFaces()[0];
     const interior = v?.getInteriorAngle(dartFace) as number;
     const exterior = v?.getExteriorAngle(dartFace) as number;
@@ -29,7 +29,7 @@ describe("getInteriorAngle() and getExteriorAngle()", function () {
     );
     const dcel = Dcel.fromGeoJSON(json);
 
-    const v = dcel.vertices.get("2|2");
+    const v = dcel.findVertex(2, 2);
     const dartFace = dcel.getBoundedFaces()[0];
     const interior = v?.getInteriorAngle(dartFace) as number;
     const exterior = v?.getExteriorAngle(dartFace) as number;

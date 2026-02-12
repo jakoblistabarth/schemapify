@@ -6,7 +6,7 @@ abstract class Generator {
 
   public abstract run(
     input: Dcel,
-  ): Map<string, object | string> | string[] | FaceFaceBoundaryList;
+  ): Map<string | number, object | string> | number[] | FaceFaceBoundaryList;
 }
 
 export default Generator;

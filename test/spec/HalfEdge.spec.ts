@@ -517,7 +517,11 @@ describe("move().", function () {
       .getEdges()[1]
       .moveTo(new Point(10.5, 0), new Point(10.5, 1));
 
-    expect(dcel.getBoundedFaces()[0].getEdges()[1].uuid).toBe("10.5|0->10.5|1");
+    const moved = dcel.getBoundedFaces()[0].getEdges()[1];
+    expect(moved.tail?.x).toBe(10.5);
+    expect(moved.tail?.y).toBe(0);
+    expect(moved.head?.x).toBe(10.5);
+    expect(moved.head?.y).toBe(1);
   });
 
   it("deletes (merges) a vertex if target point is existing.", function () {
@@ -537,7 +541,11 @@ describe("move().", function () {
     expect(dcel.findVertex(11, 1)).toBeUndefined();
     expect(dcel.findVertex(10, 0)).toBeDefined();
     expect(dcel.findVertex(10, 1)).toBeDefined();
-    expect(dcel.getBoundedFaces()[0].getEdges()[1].uuid).toBe("10|0->10|1");
+    const movedEdge = dcel.getBoundedFaces()[0].getEdges()[1];
+    expect(movedEdge.tail?.x).toBe(10);
+    expect(movedEdge.tail?.y).toBe(0);
+    expect(movedEdge.head?.x).toBe(10);
+    expect(movedEdge.head?.y).toBe(1);
   });
 
   it("deletes (merges) vertices if target points are existing.", function () {
@@ -553,8 +561,20 @@ describe("move().", function () {
       .getEdges()[5]
       .moveTo(new Point(10, 7), new Point(10, 8));
 
-    expect(dcel.getBoundedFaces()[0].getEdges()[3].uuid).toBe("10|1->10|7");
-    expect(dcel.getBoundedFaces()[0].getEdges()[4].uuid).toBe("10|7->10|8");
-    expect(dcel.getBoundedFaces()[0].getEdges()[5].uuid).toBe("10|8->10|10");
+    const e3 = dcel.getBoundedFaces()[0].getEdges()[3];
+    const e4 = dcel.getBoundedFaces()[0].getEdges()[4];
+    const e5 = dcel.getBoundedFaces()[0].getEdges()[5];
+    expect(e3.tail?.x).toBe(10);
+    expect(e3.tail?.y).toBe(1);
+    expect(e3.head?.x).toBe(10);
+    expect(e3.head?.y).toBe(7);
+    expect(e4.tail?.x).toBe(10);
+    expect(e4.tail?.y).toBe(7);
+    expect(e4.head?.x).toBe(10);
+    expect(e4.head?.y).toBe(8);
+    expect(e5.tail?.x).toBe(10);
+    expect(e5.tail?.y).toBe(8);
+    expect(e5.head?.x).toBe(10);
+    expect(e5.head?.y).toBe(10);
   });
 });

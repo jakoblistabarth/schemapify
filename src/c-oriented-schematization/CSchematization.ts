@@ -231,16 +231,24 @@ class CSchematization implements Schematization {
    * @returns An array of {@link MultiPolygon}s representing the staircase regions.
    */
   staircaseRegionsToGeometry(
-    staircases: Map<string, Staircase>,
-    orientations: Map<string, Orientation>,
+    staircases: Map<number, Staircase>,
+    orientations: Map<number, Orientation>,
   ) {
     return [...staircases.entries()].map(([, staircase]): MultiPolygon => {
       const region = staircase.region.exteriorRing;
 
       const properties = {
-        uuid: staircase.edge.uuid,
-        class: orientations.get(staircase.edge.uuid),
-        interferesWith: staircase.interferesWith.map((e) => e.uuid).join(" ,"),
+        uuid:
+          staircase.edge.id !== undefined
+            ? staircase.edge.id.toString()
+            : undefined,
+        class:
+          staircase.edge.id !== undefined
+            ? orientations.get(staircase.edge.id)
+            : undefined,
+        interferesWith: staircase.interferesWith
+          .map((e) => (e.id !== undefined ? e.id : undefined))
+          .join(" ,"),
       };
 
       return new MultiPolygon(
@@ -257,9 +265,10 @@ class CSchematization implements Schematization {
    * @param dcel The DCEL to get the contractions from.
    * @returns An array of {@link Contraction}s.
    */
-  getContractions(dcel: Dcel, configurations: Map<string, Configuration>) {
+  getContractions(dcel: Dcel, configurations: Map<number, Configuration>) {
     return dcel.getHalfEdges().reduce((acc: Contraction[], edge) => {
-      const configuration = configurations.get(edge.uuid);
+      const configuration =
+        edge.id !== undefined ? configurations.get(edge.id) : undefined;
       if (!configuration) return acc;
       const n = configuration[ContractionType.N];
       const p = configuration[ContractionType.P];

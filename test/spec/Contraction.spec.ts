@@ -21,11 +21,11 @@ describe("isConflicting() returns", function () {
   it("false for 2 non-conflicting contractions. (1.1)", function () {
     const configurations = new ConfigurationGenerator().run(dcel);
 
-    const edgeA = dcel.halfEdges.get("5|0->5|1");
-    const cA = configurations.get(edgeA?.uuid ?? "");
+    const edgeA = dcel.findHalfEdge(new Point(5, 0), new Point(5, 1));
+    const cA = configurations.get(edgeA?.id ?? -1);
 
-    const edgeB = dcel.halfEdges.get("4|1->4|3");
-    const cB = configurations.get(edgeB?.uuid ?? "");
+    const edgeB = dcel.findHalfEdge(new Point(4, 1), new Point(4, 3));
+    const cB = configurations.get(edgeB?.id ?? -1);
 
     if (!cA || !cB || !cB[ContractionType.N]) {
       throw new Error("Configurations or contractions undefined.");
@@ -39,11 +39,11 @@ describe("isConflicting() returns", function () {
   it("true for 2 conflicting contractions, due to 2 overlapping Edges. (1.2)", function () {
     const configurations = new ConfigurationGenerator().run(dcel);
 
-    const edgeA = dcel.halfEdges.get("0|0->2|0");
-    const cA = configurations.get(edgeA?.uuid ?? "");
+    const edgeA = dcel.findHalfEdge(new Point(0, 0), new Point(2, 0));
+    const cA = configurations.get(edgeA?.id ?? -1);
 
-    const edgeB = dcel.halfEdges.get("2|0->2|1");
-    const cB = configurations.get(edgeB?.uuid ?? "");
+    const edgeB = dcel.findHalfEdge(new Point(2, 0), new Point(2, 1));
+    const cB = configurations.get(edgeB?.id ?? -1);
 
     if (!cA || !cB || !cB[ContractionType.N]) {
       throw new Error("Configurations or contractions undefined.");
@@ -57,14 +57,14 @@ describe("isConflicting() returns", function () {
   it("true for 2 conflicting contractions, due to wrong inflectionType of the overlapping Edge. (1.3)", function () {
     const configurations = new ConfigurationGenerator().run(dcel);
 
-    const edgeA = dcel.halfEdges.get("0|0->2|0");
-    const cA = configurations.get(edgeA?.uuid ?? "");
+    const edgeA = dcel.findHalfEdge(new Point(0, 0), new Point(2, 0));
+    const cA = configurations.get(edgeA?.id ?? -1);
 
-    const edgeB = dcel.halfEdges.get("2|1->1|1");
-    const cB = configurations.get(edgeB?.uuid ?? "");
+    const edgeB = dcel.findHalfEdge(new Point(2, 1), new Point(1, 1));
+    const cB = configurations.get(edgeB?.id ?? -1);
 
-    const edgeC = dcel.halfEdges.get("1|2->0|3");
-    const cC = configurations.get(edgeC?.uuid ?? "");
+    const edgeC = dcel.findHalfEdge(new Point(1, 2), new Point(0, 3));
+    const cC = configurations.get(edgeC?.id ?? -1);
 
     if (
       !cA ||
@@ -97,11 +97,11 @@ describe("isConflicting() returns", function () {
     );
     const dcel = Dcel.fromGeoJSON(json);
     const configurations = new ConfigurationGenerator().run(dcel);
-    const edgeA = dcel.halfEdges.get("10.5|7->10.5|8");
-    const cA = configurations.get(edgeA?.uuid ?? "");
+    const edgeA = dcel.findHalfEdge(new Point(10.5, 7), new Point(10.5, 8));
+    const cA = configurations.get(edgeA?.id ?? -1);
 
-    const edgeB = dcel.halfEdges.get("10.5|8->10|8");
-    const cB = configurations.get(edgeB?.uuid ?? "");
+    const edgeB = dcel.findHalfEdge(new Point(10.5, 8), new Point(10, 8));
+    const cB = configurations.get(edgeB?.id ?? -1);
 
     if (!cA || !cB || !cB[ContractionType.N] || !cB[ContractionType.N]) {
       throw new Error("Configurations or contractions undefined.");
@@ -117,7 +117,7 @@ describe("getCompensationShift() returns", function () {
   it("for a rectangular compensation area.", function () {
     const s = configurationCases.negConvexParallelTracks;
     const configurations = new ConfigurationGenerator().run(s.dcel);
-    const c = configurations.get(s.innerEdge.uuid);
+    const c = configurations.get(s.innerEdge.id ?? -1);
 
     if (!c || !c[ContractionType.N]) {
       throw new Error("Configuration or contraction undefined.");
@@ -131,7 +131,7 @@ describe("getCompensationShift() returns", function () {
   it("for an inwards trapezoid compensation area.", function () {
     const s = configurationCases.posReflex;
     const configurations = new ConfigurationGenerator().run(s.dcel);
-    const c = configurations.get(s.innerEdge.uuid);
+    const c = configurations.get(s.innerEdge.id ?? -1);
 
     if (!c || !c[ContractionType.P]) {
       throw new Error("Configuration or contraction undefined.");
@@ -143,7 +143,7 @@ describe("getCompensationShift() returns", function () {
   it("for an outwards trapezoid compensation area.", function () {
     const s = configurationCases.negConvex;
     const configurations = new ConfigurationGenerator().run(s.dcel);
-    const c = configurations.get(s.innerEdge.uuid);
+    const c = configurations.get(s.innerEdge.id ?? -1);
 
     if (!c || !c[ContractionType.N]) {
       throw new Error("Configuration or contraction undefined.");
@@ -156,7 +156,7 @@ describe("getCompensationShift() returns", function () {
   it("for a inwards trapezoid compensation area.", function () {
     const s = configurationCases.posReflex;
     const configurations = new ConfigurationGenerator().run(s.dcel);
-    const c = configurations.get(s.innerEdge.uuid);
+    const c = configurations.get(s.innerEdge.id ?? -1);
 
     if (!c || !c[ContractionType.P]) {
       throw new Error("Configuration or contraction undefined.");
@@ -174,7 +174,7 @@ describe("getCompensationShift() returns", function () {
       [new Point(4, 6), new Point(-4, 6)],
     );
     const configurations = new ConfigurationGenerator().run(s.dcel);
-    const c = configurations.get(s.innerEdge.uuid);
+    const c = configurations.get(s.innerEdge.id ?? -1);
 
     if (!c || !c[ContractionType.P]) {
       throw new Error("Configuration or contraction undefined.");
@@ -192,7 +192,7 @@ describe("getCompensationShift() returns", function () {
       [new Point(4, 6), new Point(-4, 4)],
     );
     const configurations = new ConfigurationGenerator().run(s.dcel);
-    const c = configurations.get(s.innerEdge.uuid);
+    const c = configurations.get(s.innerEdge.id ?? -1);
 
     if (!c || !c[ContractionType.P]) {
       throw new Error("Configuration or contraction undefined.");

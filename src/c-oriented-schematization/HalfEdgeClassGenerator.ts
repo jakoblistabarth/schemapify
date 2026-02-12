@@ -21,11 +21,11 @@ export enum Orientation {
 
 class HalfEdgeClassGenerator implements Generator {
   c: C;
-  significantVertices: string[];
-  halfEdgeClasses: Map<string, Orientation>;
-  assignedDirections: Map<string, number>;
+  significantVertices: number[];
+  halfEdgeClasses: Map<number, Orientation>;
+  assignedDirections: Map<number, number>;
 
-  constructor(c: C, significantVertices: string[]) {
+  constructor(c: C, significantVertices: number[]) {
     this.c = c;
     this.significantVertices = significantVertices;
     this.halfEdgeClasses = new Map();
@@ -40,18 +40,22 @@ class HalfEdgeClassGenerator implements Generator {
     return input
       .getHalfEdges()
       .reduce<
-        Map<string, { orientation: Orientation; assignedDirection: number }>
+        Map<number, { orientation: Orientation; assignedDirection: number }>
       >((acc, edge) => {
         const orientation = this.classify(
           edge,
           this.c,
           this.significantVertices,
         );
-        const assignedDirection = this.assignedDirections.get(edge.uuid);
+        const assignedDirection =
+          edge.id !== undefined
+            ? this.assignedDirections.get(edge.id)
+            : undefined;
         if (orientation && (assignedDirection || assignedDirection === 0)) {
-          acc.set(edge.uuid, { orientation, assignedDirection });
-          if (edge.twin) {
-            acc.set(edge.twin.uuid, { orientation, assignedDirection });
+          if (edge.id !== undefined)
+            acc.set(edge.id, { orientation, assignedDirection });
+          if (edge.twin && edge.twin.id !== undefined) {
+            acc.set(edge.twin.id, { orientation, assignedDirection });
           }
         }
         return acc;
@@ -66,7 +70,7 @@ class HalfEdgeClassGenerator implements Generator {
    * @param significantVertices The significant Vertices of the DCEL.
    * @returns The classification of the HalfEdge.
    */
-  private classify(halfEdge: HalfEdge, c: C, significantVertices: string[]) {
+  private classify(halfEdge: HalfEdge, c: C, significantVertices: number[]) {
     this.assignDirections(halfEdge.tail, c);
 
     // do not overwrite classification
@@ -74,15 +78,21 @@ class HalfEdgeClassGenerator implements Generator {
 
     // do not classify a HalfEdge which has a significant head
     const head = halfEdge.head;
-    if (head && significantVertices.includes(head.uuid)) return;
-    const assignedDirection = this.assignedDirections.get(halfEdge.uuid);
+    if (head && significantVertices.includes(head.id ?? -1)) return;
+    const assignedDirection =
+      halfEdge.id !== undefined
+        ? this.assignedDirections.get(halfEdge.id)
+        : undefined;
     if (!assignedDirection && assignedDirection !== 0) return;
     const associatedSector = getAssociatedSector(halfEdge, c.sectors);
     const sector = associatedSector[0];
     const significantVertex =
       getSignificantVertex(halfEdge, this.significantVertices) || halfEdge.tail;
     const edges = getEdgesInSector(significantVertex, sector).filter((edge) => {
-      const direction = this.assignedDirections.get(edge.uuid);
+      const direction =
+        edge.id !== undefined
+          ? this.assignedDirections.get(edge.id)
+          : undefined;
       if (typeof direction !== "number") return;
       const edgeIsAligned = isAligned(edge, c.sectors);
       const edgeIsDeviating = isDeviating(edge, c.sectors, direction);
@@ -111,7 +121,9 @@ class HalfEdgeClassGenerator implements Generator {
    * @returns The assigned angle of the {@link HalfEdge}, if it exists.
    * */
   private getClass(halfEdge: HalfEdge) {
-    return this.halfEdgeClasses.get(halfEdge.uuid);
+    return halfEdge.id !== undefined
+      ? this.halfEdgeClasses.get(halfEdge.id)
+      : undefined;
   }
 
   /**
@@ -152,9 +164,10 @@ class HalfEdgeClassGenerator implements Generator {
       }
     });
 
-    edges.forEach((edge, idx) =>
-      this.assignedDirections.set(edge.uuid, solution[idx]),
-    );
+    edges.forEach((edge, idx) => {
+      if (edge.id !== undefined)
+        this.assignedDirections.set(edge.id, solution[idx]);
+    });
     return solution;
   }
 }

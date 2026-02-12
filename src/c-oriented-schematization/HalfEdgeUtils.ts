@@ -9,11 +9,13 @@ import Sector from "./Sector";
  */
 export const getSignificantVertex = (
   halfEdge: HalfEdge,
-  significantVertices: string[],
+  significantVertices: number[],
 ) => {
   const endPoints = halfEdge.endpoints;
   if (endPoints)
-    return endPoints.find((v) => significantVertices.includes(v.uuid));
+    return endPoints.find(
+      (v) => v.id !== undefined && significantVertices.includes(v.id),
+    );
 };
 
 /**
@@ -94,13 +96,17 @@ export const isDeviating = (
   let assignedAngle = getAssignedAngle(assignedDirection, sectors);
   if (typeof assignedAngle !== "number") return false;
   if (isAligned(halfEdge, sectors)) {
+    // if edge is aligned, it is deviating
+    // if the assigned angle is not the same as the associated angle
     return (
       getAssociatedAngles(halfEdge, sectors)[0] !==
       getAssignedAngle(assignedDirection, sectors)
     );
   } else {
+    // if edge is not aligned, it is deviating
+    // if the assigned angle is not enclosed by the associated sector
     const sector = getAssociatedSector(halfEdge, sectors)[0];
-    //TODO: refactor find better solution for last sector (idx=0)
+    //TODO: refactor find better solution for last sector (idx = 0)
     if (sector.idx === sectors.length - 1 && assignedAngle === 0)
       assignedAngle = Math.PI * 2;
     return !sector.encloses(assignedAngle);

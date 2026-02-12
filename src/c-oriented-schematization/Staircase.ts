@@ -1,5 +1,4 @@
 import ConvexHullGrahamScan from "graham_scan";
-import Dcel from "../Dcel/Dcel";
 import HalfEdge from "../Dcel/HalfEdge";
 import Vertex from "../Dcel/Vertex";
 import Line from "../geometry/Line";
@@ -58,7 +57,7 @@ class Staircase {
     this.interferesWith = [];
   }
 
-  // TODO: fix typing, infere type if possible
+  // TODO: fix typing, infer type if possible
   get de(): number | undefined {
     return this._de;
   }
@@ -92,12 +91,12 @@ class Staircase {
       }
       case Orientation.UD: {
         if (typeof this.de !== "number" || typeof length !== "number") return;
-        const maxVertices = this.getStaircasePoints() // TODO: use points property instead
-          .slice(1, 2)
-          .map((point) => new Vertex(point.x, point.y, new Dcel()));
-        const distances = maxVertices.map((vertex) => {
-          const distance = vertex.distanceToEdge(edge);
-          return distance ? distance : Infinity; // QUESTION: is it ok to return infinity here?
+        const maxPoints = this.points.slice(1, 2);
+        const lineSegment = edge.toLineSegment();
+        const distances = maxPoints.map((point) => {
+          if (!lineSegment) return Infinity;
+          const distance = point.distanceToLineSegment(lineSegment);
+          return distance ? distance : Infinity; // QUESTION: is it OK to return infinity here?
         });
         const d1 = Math.min(...distances);
         let se = Math.ceil((2 * d1 * length) / this.de + 1);

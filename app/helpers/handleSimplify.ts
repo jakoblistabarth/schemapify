@@ -7,8 +7,8 @@ import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBounda
 
 export const handleSimplify = (
   dcel: Dcel,
-  configurations: Map<string, Configuration>,
-  contractions: Map<string, Configuration>,
+  configurations: Map<number, Configuration>,
+  contractions: Map<number, Configuration>,
   faceFaceBoundaryList: FaceFaceBoundaryList,
   snapshotList: SnapshotList,
   setActiveSnapshot: (id: string) => void,

@@ -4,9 +4,9 @@ import Point from "../geometry/Point";
 import Staircase from "./Staircase";
 
 class StaircaseProcessor implements Processor {
-  staircases: Map<string, Staircase>;
+  staircases: Map<number, Staircase>;
 
-  constructor(staircases: Map<string, Staircase>) {
+  constructor(staircases: Map<number, Staircase>) {
     this.staircases = staircases;
   }
 
@@ -22,7 +22,8 @@ class StaircaseProcessor implements Processor {
    */
   private replaceEdgesWithStaircases(input: Dcel) {
     input.getHalfEdges().forEach((edge) => {
-      const staircase = this.staircases.get(edge.uuid);
+      const staircase =
+        edge.id !== undefined ? this.staircases.get(edge.id) : undefined;
       if (!staircase) return;
       const stepPoints = staircase.getStaircasePoints().slice(1, -1); // TODO: use .points instead
       let edgeToSubdivide = edge;

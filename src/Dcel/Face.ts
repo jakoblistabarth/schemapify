@@ -2,6 +2,7 @@ import Polygon from "../geometry/Polygon";
 import HalfEdge from "./HalfEdge";
 
 class Face {
+  id?: number;
   /**
    * Pointer to an arbitrary edge of the outer connected component (boundary).
    * The edge is undefined for the unbounded face.
@@ -61,7 +62,8 @@ class Face {
    * @returns the edge's uuid
    */
   get uuid() {
-    // fallback string for unbounded face
+    // prefer numeric id when available
+    if (this.id !== undefined) return `f${this.id}`;
     const edgeId = this.edge?.uuid ?? "unbounded";
     return `${edgeId}-${this.associatedFeatures.join("-")}`;
   }

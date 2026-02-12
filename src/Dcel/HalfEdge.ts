@@ -16,6 +16,7 @@ export enum InflectionType {
 class HalfEdge {
   tail: Vertex;
   dcel: Dcel;
+  id?: number;
   twin?: HalfEdge;
   face?: Face;
   prev?: HalfEdge;
@@ -33,7 +34,11 @@ class HalfEdge {
    * @returns A string, representing the HalfEdge's key.
    */
   static getKey(tail: Vertex, head: Vertex): string {
-    return `${tail.uuid}->${head.uuid}`;
+    const tailId =
+      tail.id !== undefined ? `v${tail.id}` : Vertex.getKey(tail.x, tail.y);
+    const headId =
+      head.id !== undefined ? `v${head.id}` : Vertex.getKey(head.x, head.y);
+    return `${tailId}->${headId}`;
   }
 
   /**
@@ -42,6 +47,8 @@ class HalfEdge {
    * @returns the edge's uuid
    */
   get uuid() {
+    // prefer numeric id when available
+    if (this.id !== undefined) return `e${this.id}`;
     if (!this.head) return `${this.tail.uuid}->na`;
     return HalfEdge.getKey(this.tail, this.head);
   }
@@ -285,9 +292,12 @@ class HalfEdge {
     if (head) head.moveTo(newHead.x, newHead.y);
 
     // 2. After both moves, check if tail and head now coincide (but are different objects)
-    const tailKey = this.tail.uuid;
-    const headKey = head?.uuid;
-    if (head && this.tail !== head && tailKey === headKey) {
+    if (
+      head &&
+      this.tail !== head &&
+      this.tail.x === head.x &&
+      this.tail.y === head.y
+    ) {
       // 3. Merge vertices using DCEL logic
       const merged = this.dcel.mergeVertices(this.tail, head);
       // Update references

@@ -13,16 +13,26 @@ import Ring from "../geometry/Ring";
 
 class Dcel {
   name?: string;
-  vertices: Map<string, Vertex>;
+  // vertices are stored by numeric id; use `vertexBuckets` for spatial lookup
+  vertices: Map<number, Vertex>;
   halfEdges: Map<string, HalfEdge>;
   faces: Face[];
   featureProperties: geojson.GeoJsonProperties;
+  nextVertexId: number;
+  nextHalfEdgeId: number;
+  nextFaceId: number;
+  // fixed-size-hash-with-buckets spatial index for coordinate lookups
+  vertexBuckets: Map<string, Vertex[]>;
 
   constructor() {
     this.vertices = new Map();
     this.halfEdges = new Map();
     this.faces = [];
     this.featureProperties = {};
+    this.nextVertexId = 1;
+    this.nextHalfEdgeId = 1;
+    this.nextFaceId = 1;
+    this.vertexBuckets = new Map();
   }
 
   /**
@@ -32,12 +42,16 @@ class Dcel {
    * @returns The created {@link Vertex}.
    */
   addVertex(x: number, y: number) {
-    const key = Vertex.getKey(x, y);
-    const existingVertex = this.vertices.get(key);
-    if (existingVertex) return existingVertex;
+    const bucketKey = this.coordHash(x, y);
+    const bucket = this.vertexBuckets.get(bucketKey) ?? [];
+    const existing = bucket.find((v) => v.x === x && v.y === y);
+    if (existing) return existing;
 
     const vertex = new Vertex(x, y, this);
-    this.vertices.set(key, vertex);
+    vertex.id = this.nextVertexId++;
+    this.vertices.set(vertex.id, vertex);
+    bucket.push(vertex);
+    this.vertexBuckets.set(bucketKey, bucket);
     return vertex;
   }
 
@@ -53,9 +67,10 @@ class Dcel {
     if (existingHalfEdge) return existingHalfEdge;
 
     const halfEdge = new HalfEdge(tail, this);
+    halfEdge.id = this.nextHalfEdgeId++;
     this.halfEdges.set(key, halfEdge);
     tail.edges.push(halfEdge);
-    tail.edges.sort();
+    tail.sortEdges();
     return halfEdge;
   }
 
@@ -65,6 +80,7 @@ class Dcel {
    */
   addFace() {
     const face = new Face();
+    face.id = this.nextFaceId++;
     this.faces.push(face);
     return face;
   }
@@ -154,7 +170,10 @@ class Dcel {
    * @returns A {@link Vertex} if one exists on this position, otherwise undefined.
    */
   findVertex(x: number, y: number) {
-    return this.vertices.get(Vertex.getKey(x, y));
+    const bucketKey = this.coordHash(x, y);
+    const bucket = this.vertexBuckets.get(bucketKey);
+    if (!bucket) return undefined;
+    return bucket.find((v) => v.x === x && v.y === y);
   }
 
   /**
@@ -178,9 +197,43 @@ class Dcel {
    * @returns The remaining {@link Vertex|Vertices} in the DCEL.
    */
   removeVertex(vertex: Vertex) {
-    const key = Vertex.getKey(vertex.x, vertex.y);
-    this.vertices.delete(key);
+    // remove from id map
+    if (vertex.id !== undefined) this.vertices.delete(vertex.id);
+
+    // remove from bucket index
+    const bucketKey = this.coordHash(vertex.x, vertex.y);
+    const bucket = this.vertexBuckets.get(bucketKey);
+    if (bucket) {
+      const idx = bucket.indexOf(vertex);
+      if (idx > -1) bucket.splice(idx, 1);
+      if (bucket.length === 0) this.vertexBuckets.delete(bucketKey);
+    }
     return this.vertices;
+  }
+
+  /**
+   * Update internal spatial and compatibility maps when a vertex moves position.
+   */
+  updateVertexPosition(
+    vertex: Vertex,
+    oldX: number,
+    oldY: number,
+    newX: number,
+    newY: number,
+  ) {
+    const oldBucketKey = this.coordHash(oldX, oldY);
+    const oldBucket = this.vertexBuckets.get(oldBucketKey);
+    if (oldBucket) {
+      const idx = oldBucket.indexOf(vertex);
+      if (idx > -1) oldBucket.splice(idx, 1);
+      if (oldBucket.length === 0) this.vertexBuckets.delete(oldBucketKey);
+    }
+
+    const newBucketKey = this.coordHash(newX, newY);
+    const newBucket = this.vertexBuckets.get(newBucketKey) ?? [];
+    newBucket.push(vertex);
+    this.vertexBuckets.set(newBucketKey, newBucket);
+    return vertex;
   }
 
   /**
@@ -206,6 +259,17 @@ class Dcel {
       //   boundaryEdges.splice(boundaryEdges.indexOf(edge), 1);
     }
     return this.halfEdges;
+  }
+
+  // simple DJB2 hash of coordinate string, returned as hex (bounded length)
+  private coordHash(x: number, y: number) {
+    const s = `${x},${y}`;
+    let h = 5381;
+    for (let i = 0; i < s.length; i++) {
+      h = (h * 33) ^ s.charCodeAt(i);
+    }
+    // convert to unsigned and hex
+    return (h >>> 0).toString(16);
   }
 
   /**
@@ -386,7 +450,7 @@ class Dcel {
               // TODO: think of a clever condition which excludes rings which are inner holes for the respective ring
               (face.isHole &&
                 face.outerRing &&
-                !faces.map(({ uuid }) => uuid).includes(face.outerRing?.uuid)),
+                !faces.map(({ id }) => id).includes(face.outerRing?.id)),
           )
           .map((face) => {
             const outerRing = this.getRingCoordinates(face.edge);
@@ -464,7 +528,7 @@ class Dcel {
     );
     const groups = Object.groupBy(explodedFaces, ({ id }) => id);
     return Object.entries(groups).map(([id, faces]) => ({
-      id,
+      id: Number(id),
       faces: faces?.map(({ face }) => face),
     }));
   }
@@ -474,7 +538,86 @@ class Dcel {
    * @returns A deep copy of the DCEL.
    */
   public clone() {
-    return this.toSubdivision().toDcel();
+    // Create a fresh DCEL from the subdivision representation
+    const clone = this.toSubdivision().toDcel();
+
+    // Helper to build a coord-key for vertices
+    const coordKey = (x: number, y: number) => `${x}|${y}`;
+
+    // Map original vertices by coordinate -> id
+    const origVertexIdByCoord = new Map<string, number>();
+    this.getVertices().forEach((v) => {
+      if (v.id !== undefined)
+        origVertexIdByCoord.set(coordKey(v.x, v.y), v.id!);
+    });
+
+    // Reassign ids on cloned vertices to match original where possible
+    const newVertices = new Map<number, Vertex>();
+    clone.getVertices().forEach((v) => {
+      const key = coordKey(v.x, v.y);
+      const origId = origVertexIdByCoord.get(key);
+      if (origId !== undefined) v.id = origId;
+      else v.id = clone.nextVertexId++;
+      newVertices.set(v.id, v);
+    });
+    clone.vertices = newVertices;
+
+    // Map original half-edges by tail->head coordinate key -> id
+    const origEdgeIdByCoords = new Map<string, number>();
+    this.getHalfEdges().forEach((e) => {
+      const t = e.tail;
+      const h = e.head;
+      if (t && h && e.id !== undefined) {
+        origEdgeIdByCoords.set(
+          `${coordKey(t.x, t.y)}->${coordKey(h.x, h.y)}`,
+          e.id,
+        );
+      }
+    });
+
+    // Reassign ids on cloned half-edges and rebuild halfEdges map
+    const newHalfEdges = new Map<string, HalfEdge>();
+    clone.getHalfEdges().forEach((e) => {
+      const t = e.tail;
+      const h = e.head;
+      if (!t || !h) return;
+      const coordsKey = `${coordKey(t.x, t.y)}->${coordKey(h.x, h.y)}`;
+      const origId = origEdgeIdByCoords.get(coordsKey);
+      if (origId !== undefined) e.id = origId;
+      else e.id = clone.nextHalfEdgeId++;
+      const key = HalfEdge.getKey(t, h);
+      newHalfEdges.set(key, e);
+    });
+    clone.halfEdges = newHalfEdges;
+
+    // Map original faces by an identifying edge coordinate (if available) -> id
+    const origFaceIdByEdgeCoords = new Map<string, number>();
+    this.getBoundedFaces().forEach((f) => {
+      const e = f.edge;
+      if (!e || f.id === undefined) return;
+      const t = e.tail;
+      const h = e.head;
+      if (!t || !h) return;
+      origFaceIdByEdgeCoords.set(
+        `${coordKey(t.x, t.y)}->${coordKey(h.x, h.y)}`,
+        f.id,
+      );
+    });
+
+    // Reassign ids on cloned faces where possible
+    clone.faces.forEach((f) => {
+      const e = f.edge;
+      if (!e) return;
+      const t = e.tail;
+      const h = e.head;
+      if (!t || !h) return;
+      const coordsKey = `${coordKey(t.x, t.y)}->${coordKey(h.x, h.y)}`;
+      const origId = origFaceIdByEdgeCoords.get(coordsKey);
+      if (origId !== undefined) f.id = origId;
+      else f.id = clone.nextFaceId++;
+    });
+
+    return clone;
   }
 
   /**

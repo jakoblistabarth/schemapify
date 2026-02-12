@@ -18,7 +18,7 @@ class Contraction {
     configuration: Configuration,
     contractionType: ContractionType,
     point: Point,
-    configurations: Map<string, Configuration>,
+    configurations: Map<number, Configuration>,
   ) {
     this.type = contractionType;
     this.configuration = configuration;
@@ -35,7 +35,7 @@ class Contraction {
   static initialize(
     configuration: Configuration,
     contractionType: ContractionType,
-    configurations: Map<string, Configuration>,
+    configurations: Map<number, Configuration>,
   ): Contraction | undefined {
     const point = this.getPoint(configuration, contractionType);
     return point
@@ -94,14 +94,14 @@ class Contraction {
     // "Two configurations conflict when they share an edge, unless they share only outer edges and one of these has a convex and a reflex vertex."
     const overlappingInnerEdges = overlappingEdges.filter((overlappingEdge) =>
       [
-        this.configuration.innerEdge.uuid,
-        complementary.configuration.innerEdge.uuid,
-      ].includes(overlappingEdge.uuid),
+        this.configuration.innerEdge.id,
+        complementary.configuration.innerEdge.id,
+      ].includes(overlappingEdge.id),
     );
     // isConflicting if overlapping edges are inner edge
     if (overlappingInnerEdges.length > 0) return true;
     const overlappingOuterEdges = overlappingEdges.filter((overlappingEdge) =>
-      outerEdges.map((edge) => edge.uuid).includes(overlappingEdge.uuid),
+      outerEdges.map((edge) => edge.id).includes(overlappingEdge.id),
     );
     if (
       overlappingOuterEdges.some(
@@ -235,11 +235,12 @@ class Contraction {
    * @param edge The {@link HalfEdge}
    * @returns A boolean, indicating whether or not the {@link Contraction} is blocked by the specified {@link HalfEdge}.
    */
-  isBlockedBy(edge: HalfEdge, configurations: Map<string, Configuration>) {
+  isBlockedBy(edge: HalfEdge, configurations: Map<number, Configuration>) {
     const x = this.configuration.x;
     const twin = this.configuration.innerEdge.twin;
     if (!twin) return;
-    const x_ = configurations.get(twin.uuid)?.x;
+    const x_ =
+      twin.id !== undefined ? configurations.get(twin.id)?.x : undefined;
     if (x_) x.push(...x_);
     if (x.includes(edge)) return false;
     const edgeLine = edge.toLineSegment();
@@ -274,7 +275,7 @@ class Contraction {
    * Initializes the blocking number of the Contraction.
    * @returns A number, indicating how many {@link HalfEdge}s block the {@link Contraction}.
    */
-  initializeBlockingNumber(configurations: Map<string, Configuration>) {
+  initializeBlockingNumber(configurations: Map<number, Configuration>) {
     let blockingNumber = 0;
     if (!this.point) return blockingNumber;
 
@@ -293,7 +294,7 @@ class Contraction {
    */
   decrementBlockingNumber(
     x1x2: HalfEdge[],
-    configurations: Map<string, Configuration>,
+    configurations: Map<number, Configuration>,
   ) {
     if (this.blockingNumber === 0) return; // skip check for interference when no blocking point exists
     const decrement = x1x2.reduce((acc: number, edge) => {
@@ -309,7 +310,7 @@ class Contraction {
    */
   incrementBlockingNumber(
     x1x2: HalfEdge[],
-    configurations: Map<string, Configuration>,
+    configurations: Map<number, Configuration>,
   ) {
     const increment = x1x2.reduce((acc: number, edge) => {
       // console.log("---->", this.configuration.innerEdge.uuid);

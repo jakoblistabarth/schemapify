@@ -10,7 +10,6 @@ import {
 import { style } from "@/src/c-oriented-schematization/schematization.style";
 import VertexClassGenerator from "@/src/c-oriented-schematization/VertexClassGenerator";
 import Dcel from "@/src/Dcel/Dcel";
-import Vertex from "@/src/Dcel/Vertex";
 import fs from "fs";
 import path from "path";
 import {
@@ -133,6 +132,33 @@ describe("isDeviating()", function () {
     );
     expect(edgeIsDeviating).toBe(false);
   });
+
+  it("returns true for a for a deviating aligned edge", function () {
+    const edgeIsDeviating = isDeviating(
+      s.directions.od90,
+      new CRegular(2).sectors,
+      2,
+    );
+    expect(edgeIsDeviating).toBe(true);
+  });
+
+  it("returns false for a for a basic aligned edge", function () {
+    const edgeIsDeviating = isDeviating(
+      s.directions.od90,
+      new CRegular(4).sectors,
+      2,
+    );
+    expect(edgeIsDeviating).toBe(false);
+  });
+
+  it("returns false for a for a basic aligned edge", function () {
+    const edgeIsDeviating = isDeviating(
+      s.directions.od315,
+      new CRegular(4).sectors,
+      7,
+    );
+    expect(edgeIsDeviating).toBe(false);
+  });
 });
 
 describe("getSignificantVertex()", function () {
@@ -143,9 +169,9 @@ describe("getSignificantVertex()", function () {
 
   it("returns an significant endpoint if one is specified", function () {
     const significantVertex = getSignificantVertex(s.directions.od53, [
-      s.origin.uuid,
+      s.origin.id!,
     ]);
-    expect(significantVertex?.uuid).toBe(Vertex.getKey(0, 0));
+    expect(significantVertex?.id).toBe(s.origin.id!);
   });
   it("returns null if none of its endpoints are significant", function () {
     const significantVertex = getSignificantVertex(s.directions.od53, []);
@@ -187,7 +213,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
       s,
       [s.directions.od37, s.directions.od90, s.directions.od104],
       "orientation",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(orientations).toEqual([
       Orientation.UB,
@@ -201,7 +227,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
       s,
       [s.directions.od37, s.directions.od53],
       "orientation",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(orientations).toEqual([Orientation.E, Orientation.E]);
   });
@@ -211,7 +237,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
       s,
       [s.directions.od37, s.directions.od53, s.directions.od76],
       "orientation",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(orientations).toEqual([
       Orientation.E,
@@ -230,7 +256,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
         s.directions.od76,
       ],
       "orientation",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(orientations).toEqual([
       Orientation.AD,
@@ -250,7 +276,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
         s.directions.od333,
       ],
       "orientation",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(orientations).toEqual([
       Orientation.UB,
@@ -289,7 +315,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
       s,
       [s.directions.od53, s.directions.od90, s.directions.od104],
       "orientation",
-      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
+      { significantVertices: [s.origin.id!] },
     );
     expect(orientations).toEqual([
       Orientation.UB,
@@ -303,7 +329,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
       s,
       [s.directions.od37, s.directions.od53],
       "orientation",
-      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
+      { significantVertices: [s.origin.id!], c: new CRegular(4) },
     );
     expect(orientations).toEqual([Orientation.UB, Orientation.UB]);
   });
@@ -313,7 +339,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
       s,
       [s.directions.od37, s.directions.od53, s.directions.od76],
       "orientation",
-      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
+      { significantVertices: [s.origin.id!], c: new CRegular(4) },
     );
     expect(orientations).toEqual([
       Orientation.UB,
@@ -332,7 +358,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
         s.directions.od76,
       ],
       "orientation",
-      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
+      { significantVertices: [s.origin.id!], c: new CRegular(4) },
     );
     expect(orientations).toEqual([
       Orientation.AD,
@@ -352,7 +378,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
         s.directions.od333,
       ],
       "orientation",
-      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
+      { significantVertices: [s.origin.id!], c: new CRegular(4) },
     );
     expect(orientations).toEqual([
       Orientation.E,
@@ -389,8 +415,8 @@ describe("classifyEdges() in a classification where all edges are classified and
       .filter(
         (edge) =>
           edge.twin &&
-          classifications.get(edge.uuid)?.orientation !==
-            classifications.get(edge.twin.uuid)?.orientation,
+          classifications.get(edge.id ?? -1)?.orientation !==
+            classifications.get(edge.twin?.id ?? -1)?.orientation,
       );
 
     expect(edgesWithoutAssignedAngles.length).toBe(0);
@@ -426,8 +452,8 @@ describe("classifyEdges() in a classification where all edges are classified and
       .filter(
         (edge) =>
           edge.twin &&
-          classifications.get(edge.uuid)?.orientation !==
-            classifications.get(edge.twin.uuid)?.orientation,
+          classifications.get(edge.id ?? -1)?.orientation !==
+            classifications.get(edge.twin?.id ?? -1)?.orientation,
       );
 
     expect(edgesWithoutAssignedAngles.length).toBe(0);

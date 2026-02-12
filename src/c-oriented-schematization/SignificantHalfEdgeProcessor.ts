@@ -2,9 +2,9 @@ import Dcel from "../Dcel/Dcel";
 import Processor from "../Schematization/Processor";
 
 class SignificantHalfEdgeProcessor implements Processor {
-  significantVertices: string[];
+  significantVertices: number[];
 
-  constructor(significantVertices: string[]) {
+  constructor(significantVertices: number[]) {
     this.significantVertices = significantVertices;
   }
 
@@ -18,8 +18,10 @@ class SignificantHalfEdgeProcessor implements Processor {
     output.getHalfEdges(true).forEach((edge) => {
       const [tail, head] = edge.endpoints;
       if (
-        this.significantVertices.includes(tail.uuid) &&
-        this.significantVertices.includes(head.uuid)
+        tail.id !== undefined &&
+        head.id !== undefined &&
+        this.significantVertices.includes(tail.id) &&
+        this.significantVertices.includes(head.id)
       )
         edge.subdivide();
     });

@@ -82,11 +82,19 @@ describe("getMinimalConfigurationPair()", function () {
     const pair = ffb.getMinimalConfigurationPair(configurations);
 
     expect(pair?.contraction.area).toBe(0.5);
-    expect(pair?.contraction.configuration.innerEdge.uuid).toBe("9.5|7->9.5|8");
+    const inner = pair?.contraction.configuration.innerEdge;
+    expect(inner).toBeDefined();
+    expect(inner?.tail?.x).toBe(9.5);
+    expect(inner?.tail?.y).toBe(7);
+    expect(inner?.head?.x).toBe(9.5);
+    expect(inner?.head?.y).toBe(8);
     expect(pair?.compensation?.area).toBeGreaterThan(0.5);
-    expect(pair?.compensation?.configuration.innerEdge.uuid).toBe(
-      "10|8->10|10",
-    );
+    const compensationInner = pair?.compensation?.configuration.innerEdge;
+    expect(compensationInner).toBeDefined();
+    expect(compensationInner?.tail?.x).toBe(10);
+    expect(compensationInner?.tail?.y).toBe(8);
+    expect(compensationInner?.head?.x).toBe(10);
+    expect(compensationInner?.head?.y).toBe(10);
   });
 
   it("on a test file returns the expected contraction pair.", function () {
@@ -102,13 +110,19 @@ describe("getMinimalConfigurationPair()", function () {
     const pair = ffb.getMinimalConfigurationPair(configurations);
 
     expect(pair?.contraction.area).toBe(0.5);
-    expect(pair?.contraction.configuration.innerEdge.uuid).toBe(
-      "10.5|7->10.5|8",
-    );
+    const inner2 = pair?.contraction.configuration.innerEdge;
+    expect(inner2).toBeDefined();
+    expect(inner2?.tail?.x).toBe(10.5);
+    expect(inner2?.tail?.y).toBe(7);
+    expect(inner2?.head?.x).toBe(10.5);
+    expect(inner2?.head?.y).toBe(8);
     expect(pair?.compensation?.area).toBeGreaterThan(0.5);
-    expect(pair?.compensation?.configuration.innerEdge.uuid).toBe(
-      "10|8->10|10",
-    );
+    const compensationInner2 = pair?.compensation?.configuration.innerEdge;
+    expect(compensationInner2).toBeDefined();
+    expect(compensationInner2?.tail?.x).toBe(10);
+    expect(compensationInner2?.tail?.y).toBe(8);
+    expect(compensationInner2?.head?.x).toBe(10);
+    expect(compensationInner2?.head?.y).toBe(10);
   });
 
   //TODO: add test where no complementary exists for smallest contraction

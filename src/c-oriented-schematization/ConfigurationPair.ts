@@ -4,7 +4,6 @@ import HalfEdge from "../Dcel/HalfEdge";
 import Point from "../geometry/Point";
 import { ContractionType } from "./ContractionType";
 import Dcel from "../Dcel/Dcel";
-import Vertex from "../Dcel/Vertex";
 
 /**
  * A pair of {@link Contraction}s, which are complementary and non-conflicting.
@@ -35,10 +34,10 @@ class ConfigurationPair {
   doEdgeMove(
     dcel: Dcel,
     contractions: Map<
-      string,
+      number,
       { [ContractionType.P]?: Contraction; [ContractionType.N]?: Contraction }
     >,
-    configurations: Map<string, Configuration>,
+    configurations: Map<number, Configuration>,
   ) {
     const contractionEdge = this.contraction.configuration.innerEdge;
     const contractionHead = contractionEdge.head;
@@ -111,10 +110,10 @@ class ConfigurationPair {
       ? contractionEdge.moveTo(pointA, pointB)
       : contractionEdge.moveTo(pointB, pointA);
 
-    if (newEdge) {
+    if (newEdge && newEdge.id !== undefined) {
       const newConfiguration = new Configuration(newEdge);
       newConfiguration.initialize(configurations);
-      configurations.set(newEdge.uuid, newConfiguration);
+      configurations.set(newEdge.id, newConfiguration);
       // TODO: add newEdge to facefaceBoundaryList
       // newEdge?.dcel.faceFaceBoundaryList?.addEdge(newEdge);
     }
@@ -133,8 +132,7 @@ class ConfigurationPair {
 
     const remainingEdges = movedPositions.reduce(
       (acc: HalfEdge[], pos: Point) => {
-        const key = Vertex.getKey(pos.x, pos.y);
-        const vertex = dcel.vertices.get(key);
+        const vertex = dcel.findVertex(pos.x, pos.y);
         if (!vertex) return acc;
         vertex.edges.forEach((edge) => {
           if (edge.face === contractionEdge.face) acc.push(edge);
@@ -202,7 +200,7 @@ class ConfigurationPair {
     if (newHeadComp) compensationEdge.moveTo(newTailComp, newHeadComp);
   }
 
-  doSimpleEdgeMove(configurations: Map<string, Configuration>) {
+  doSimpleEdgeMove(configurations: Map<number, Configuration>) {
     // console.log("simple contraction", this.contraction.point.xy());
     const contractionEdge = this.contraction.configuration.innerEdge;
     const prevAngle = contractionEdge.prev?.getAngle();
@@ -237,11 +235,15 @@ class ConfigurationPair {
    */
   updateConfigurations(
     involvedEdges: HalfEdge[],
-    configurations: Map<string, Configuration>,
+    configurations: Map<number, Configuration>,
   ) {
     involvedEdges.forEach((edge) => {
-      if (edge.endpoints.every((vertex) => vertex.edges.length <= 3))
-        configurations.set(edge.uuid, new Configuration(edge));
+      if (!edge) return;
+      if (
+        edge.endpoints.every((vertex) => vertex.edges.length <= 3) &&
+        edge.id !== undefined
+      )
+        configurations.set(edge.id, new Configuration(edge));
     });
   }
 }

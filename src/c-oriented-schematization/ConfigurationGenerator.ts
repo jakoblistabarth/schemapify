@@ -13,10 +13,11 @@ class ConfigurationGenerator implements Generator {
   private generateConfigurations(input: Dcel) {
     const configurations = input
       .getHalfEdges()
-      .reduce<Map<string, Configuration>>((acc, edge) => {
+      .reduce<Map<number, Configuration>>((acc, edge) => {
         if (edge.endpoints.some((vertex) => vertex.edges.length > 3))
           return acc;
-        acc.set(edge.uuid, new Configuration(edge));
+        if (edge.id === undefined) return acc;
+        acc.set(edge.id, new Configuration(edge));
         return acc;
       }, new Map());
 

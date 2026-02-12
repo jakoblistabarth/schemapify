@@ -65,7 +65,7 @@ class FaceFaceBoundaryList {
    * Gets the overall minimal configuration pair of a Face-Face-Boundary structure.
    * @returns A tuple, containing 2 complementary, non-conflicting {@link Contraction}s, the minimal Configuration Pair.
    */
-  getMinimalConfigurationPair(configurations: Map<string, Configuration>) {
+  getMinimalConfigurationPair(configurations: Map<number, Configuration>) {
     return this.getBoundaries().reduce(
       (minimum: ConfigurationPair | undefined, boundary) => {
         const boundaryPair =

@@ -10,12 +10,12 @@ class MultiPolygon {
    * An array of {@link Polygon}s.
    */
   polygons: Polygon[];
-  id?: string;
+  id?: number | string;
   properties?: GeoJsonProperties;
 
   constructor(
     polygons: Polygon[],
-    id?: string,
+    id?: number | string,
     properties?: GeoJsonProperties,
   ) {
     this.id = id;

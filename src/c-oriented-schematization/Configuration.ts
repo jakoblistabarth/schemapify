@@ -25,7 +25,7 @@ class Configuration {
     this.innerEdge = edge;
   }
 
-  initialize(configurations: Map<string, Configuration>) {
+  initialize(configurations: Map<number, Configuration>) {
     this[ContractionType.P] = Contraction.initialize(
       this,
       ContractionType.P,

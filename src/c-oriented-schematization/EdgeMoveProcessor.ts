@@ -7,11 +7,11 @@ import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
 // class EdgeMoveProcessor implements Processor {
 class EdgeMoveProcessor {
   faceFaceBoundaryList: FaceFaceBoundaryList;
-  configurations: Map<string, Configuration>;
+  configurations: Map<number, Configuration>;
 
   constructor(
     faceFaceBoundaryList: FaceFaceBoundaryList,
-    configurations: Map<string, Configuration>,
+    configurations: Map<number, Configuration>,
   ) {
     this.faceFaceBoundaryList = faceFaceBoundaryList;
     this.configurations = configurations;
@@ -42,8 +42,8 @@ class EdgeMoveProcessor {
   private get contractions() {
     return new Map(
       Array.from(this.configurations.entries()).map(
-        ([edgeUuid, configuration]) => {
-          return [edgeUuid, configuration.contractions];
+        ([edgeId, configuration]) => {
+          return [edgeId, configuration.contractions];
         },
       ),
     );

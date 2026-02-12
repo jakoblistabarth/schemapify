@@ -6,6 +6,7 @@ import HalfEdge from "./HalfEdge";
 class Vertex extends Point {
   dcel: Dcel;
   edges: HalfEdge[];
+  id?: number;
 
   constructor(x: number, y: number, dcel: Dcel) {
     super(x, y);
@@ -27,7 +28,10 @@ class Vertex extends Point {
    * Gets the unique ID of a Vertex.
    */
   get uuid() {
-    return Vertex.getKey(this.x, this.y);
+    // use numeric id based uuid
+    return this.id !== undefined
+      ? `v${this.id}`
+      : Vertex.getKey(this.x, this.y);
   }
 
   /**
@@ -204,22 +208,23 @@ class Vertex extends Point {
     if (this.x === x && this.y === y) return this;
     // TODO: check whether this actually needs to be handled here
     //  merge vertices, if a vertex on this (new) position already exists
-    const key = Vertex.getKey(x, y);
-    if (this.dcel.vertices.has(key)) {
-      const v = this.dcel.vertices.get(key);
-      console.log("merging vertices", v?.uuid, "already exists");
-      if (!v) return this;
+    const existing = this.dcel.findVertex(x, y);
+    if (existing) {
+      console.log("merging vertices", existing?.uuid, "already exists");
+      if (!existing) return this;
       this.edges.forEach((edge) => {
-        // edge.head = v;
-        v.edges.push(edge);
+        existing.edges.push(edge);
       });
       this.remove();
-      return v;
+      return existing;
     }
-    this.dcel.vertices.set(Vertex.getKey(x, y), this);
-    this.dcel.vertices.delete(Vertex.getKey(this.x, this.y));
+
+    const oldX = this.x;
+    const oldY = this.y;
     this.x = x;
     this.y = y;
+    if (this.id !== undefined) this.dcel.vertices.set(this.id, this);
+    this.dcel.updateVertexPosition(this, oldX, oldY, x, y);
     return this;
   }
 

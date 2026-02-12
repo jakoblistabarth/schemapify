@@ -20,7 +20,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
       [s.directions.od53, s.directions.od217],
       "assignedDirection",
       {
-        significantVertices: [s.origin.uuid],
+        significantVertices: [s.origin.id!],
       },
     );
     expect(assignedDirections).toEqual([1, 2]);
@@ -33,7 +33,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
       s,
       [s.directions.od53, s.directions.od180, s.directions.od270],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(assignedDirections).toEqual([1, 2, 3]);
   });
@@ -44,7 +44,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
       s,
       [s.directions.od37, s.directions.od90, s.directions.od143],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(assignedDirections).toEqual([0, 1, 2]);
   });
@@ -55,7 +55,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
       [s.directions.od37, s.directions.od76],
       "assignedDirection",
       {
-        significantVertices: [s.origin.uuid],
+        significantVertices: [s.origin.id!],
       },
     );
     expect(assignedDirections).toEqual([0, 1]);
@@ -66,7 +66,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
       s,
       [s.directions.od37, s.directions.od53, s.directions.od76],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(assignedDirections).toEqual([0, 1, 2]);
   });
@@ -81,7 +81,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
         s.directions.od76,
       ],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(assignedDirections).toEqual([3, 0, 1, 2]);
   });
@@ -96,7 +96,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
         s.directions.od76,
       ],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(assignedDirections).toEqual([1, 2, 3, 0]);
   });
@@ -110,7 +110,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
       "assignedDirection",
       {
         c: new CRegular(4),
-        significantVertices: [s.origin.uuid],
+        significantVertices: [s.origin.id!],
       },
     );
 
@@ -124,7 +124,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
       s,
       [s.directions.od53, s.directions.od180, s.directions.od270],
       "assignedDirection",
-      { c: new CRegular(4), significantVertices: [s.origin.uuid] },
+      { c: new CRegular(4), significantVertices: [s.origin.id!] },
     );
 
     expect(assignedDirections).toEqual([1, 4, 6]);
@@ -135,7 +135,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
       s,
       [s.directions.od37, s.directions.od90, s.directions.od143],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
+      { significantVertices: [s.origin.id!], c: new CRegular(4) },
     );
 
     expect(assignedDirections).toEqual([1, 2, 3]);
@@ -147,7 +147,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
       [s.directions.od37, s.directions.od76],
       "assignedDirection",
       {
-        significantVertices: [s.origin.uuid],
+        significantVertices: [s.origin.id!],
         c: new CRegular(4),
       },
     );
@@ -160,7 +160,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
       s,
       [s.directions.od37, s.directions.od53, s.directions.od76],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
+      { significantVertices: [s.origin.id!], c: new CRegular(4) },
     );
 
     expect(assignedDirections).toEqual([0, 1, 2]);
@@ -176,7 +176,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
         s.directions.od76,
       ],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
+      { significantVertices: [s.origin.id!], c: new CRegular(4) },
     );
 
     expect(assignedDirections).toEqual([7, 0, 1, 2]);
@@ -192,7 +192,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
         s.directions.od76,
       ],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid], c: new CRegular(4) },
+      { significantVertices: [s.origin.id!], c: new CRegular(4) },
     );
 
     expect(assignedDirections).toEqual([1, 2, 7, 0]);
@@ -216,7 +216,7 @@ describe("assignDirections(config.c) on own examples", function () {
         s.directions.od217,
       ],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(assignedDirections).toEqual([0, 1, 2, 3]);
   });
@@ -231,7 +231,7 @@ describe("assignDirections(config.c) on own examples", function () {
         s.directions.od217,
       ],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(assignedDirections).toEqual([0, 1, 2, 3]);
   });
@@ -246,7 +246,7 @@ describe("assignDirections(config.c) on own examples", function () {
         s.directions.od243,
       ],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(assignedDirections).toEqual([0, 1, 2, 3]);
   });
@@ -261,7 +261,7 @@ describe("assignDirections(config.c) on own examples", function () {
         s.directions.od243,
       ],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(assignedDirections).toEqual([0, 1, 2, 3]);
   });
@@ -276,7 +276,7 @@ describe("assignDirections(config.c) on own examples", function () {
         s.directions.od243,
       ],
       "assignedDirection",
-      { c: new CRegular(3), significantVertices: [s.origin.uuid] },
+      { c: new CRegular(3), significantVertices: [s.origin.id!] },
     );
     expect(assignedDirections).toEqual([1, 2, 3, 4]);
   });
@@ -286,7 +286,7 @@ describe("assignDirections(config.c) on own examples", function () {
       s,
       [s.directions.od0, s.directions.od14, s.directions.od333],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(assignedDirections).toEqual([0, 1, 3]);
   });
@@ -301,7 +301,7 @@ describe("assignDirections(config.c) on own examples", function () {
         s.directions.od333,
       ],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(assignedDirections).toEqual([0, 1, 2, 3]);
   });
@@ -311,7 +311,7 @@ describe("assignDirections(config.c) on own examples", function () {
       s,
       [s.directions.od14, s.directions.od243, s.directions.od284],
       "assignedDirection",
-      { significantVertices: [s.origin.uuid] },
+      { significantVertices: [s.origin.id!] },
     );
     expect(assignedDirections).toEqual([0, 2, 3]);
   });

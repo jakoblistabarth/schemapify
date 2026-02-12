@@ -67,12 +67,12 @@ describe("encloses()", function () {
     sector = new Sector(new CRegular(2), 0, 0, Math.PI * 0.5);
   });
 
-  it("returns true sector bounds", function () {
+  it("returns true for sector bounds", function () {
     expect(sector.encloses(0)).toBe(true);
     expect(sector.encloses(Math.PI * 0.5)).toBe(true);
   });
 
-  it("returns true enclosed values", function () {
+  it("returns true for enclosed values", function () {
     expect(sector.encloses(Math.PI * 0.25)).toBe(true);
   });
 
@@ -111,7 +111,7 @@ describe("isSignficant()", function () {
     const significantVertices = new VertexClassGenerator(style.c.sectors).run(
       dcel,
     );
-    return significantVertices.includes(origin.uuid);
+    return significantVertices.includes(origin.id!);
   };
 
   it("classifies a vertex correctly (A)", function () {
