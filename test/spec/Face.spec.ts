@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import HalfEdge from "@/src/Dcel/HalfEdge";
-import Vertex from "@/src/Dcel/Vertex";
 import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
 
@@ -20,7 +19,10 @@ describe("replaceOuterRingEdge()", function () {
 
   it("only changes outerRing if edge which should be replaced is set as outerRing", function () {
     const existingHalfEdge = innerRing.outerRing?.edge as HalfEdge;
-    const testEdge = new HalfEdge(new Vertex(10, 10, new Dcel()), new Dcel());
+    const dcel = new Dcel();
+    const v = dcel.addVertex(10, 10);
+    const v2 = dcel.addVertex(11, 11);
+    const testEdge = dcel.addHalfEdge(v, v2);
 
     innerRing.replaceOuterRingEdge(existingHalfEdge, testEdge);
     expect(innerRing.outerRing?.edge).toEqual(testEdge);
@@ -28,7 +30,10 @@ describe("replaceOuterRingEdge()", function () {
 
   it("does not change outerRing if edge which should be replaced is not set as outerRing", function () {
     const existingHalfEdge = innerRing.outerRing?.edge;
-    const testEdge = new HalfEdge(new Vertex(10, 10, new Dcel()), new Dcel());
+    const dcel = new Dcel();
+    const v = dcel.addVertex(10, 10);
+    const v2 = dcel.addVertex(11, 11);
+    const testEdge = dcel.addHalfEdge(v, v2);
 
     innerRing.replaceOuterRingEdge(testEdge, testEdge);
     expect(innerRing.outerRing?.edge).toEqual(existingHalfEdge);

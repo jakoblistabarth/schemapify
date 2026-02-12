@@ -237,17 +237,17 @@ class CSchematization implements Schematization {
     return [...staircases.entries()].map(([, staircase]): MultiPolygon => {
       const region = staircase.region.exteriorRing;
 
+      const edgeId =
+        typeof staircase.edge.id === "number" && staircase.edge.id > 0
+          ? staircase.edge.id
+          : undefined;
       const properties = {
-        uuid:
-          staircase.edge.id !== undefined
-            ? staircase.edge.id.toString()
-            : undefined,
-        class:
-          staircase.edge.id !== undefined
-            ? orientations.get(staircase.edge.id)
-            : undefined,
+        uuid: edgeId !== undefined ? edgeId.toString() : undefined,
+        class: edgeId !== undefined ? orientations.get(edgeId) : undefined,
         interferesWith: staircase.interferesWith
-          .map((e) => (e.id !== undefined ? e.id : undefined))
+          .map((e) =>
+            typeof e.id === "number" && e.id > 0 ? e.id : undefined,
+          )
           .join(" ,"),
       };
 
@@ -267,8 +267,9 @@ class CSchematization implements Schematization {
    */
   getContractions(dcel: Dcel, configurations: Map<number, Configuration>) {
     return dcel.getHalfEdges().reduce((acc: Contraction[], edge) => {
-      const configuration =
-        edge.id !== undefined ? configurations.get(edge.id) : undefined;
+      const edgeId =
+        typeof edge.id === "number" && edge.id > 0 ? edge.id : undefined;
+      const configuration = edgeId !== undefined ? configurations.get(edgeId) : undefined;
       if (!configuration) return acc;
       const n = configuration[ContractionType.N];
       const p = configuration[ContractionType.P];

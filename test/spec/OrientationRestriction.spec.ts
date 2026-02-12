@@ -10,7 +10,7 @@ import Sector from "@/src/c-oriented-schematization/Sector";
 import VertexClassGenerator from "@/src/c-oriented-schematization/VertexClassGenerator";
 import { getEdgesInSector } from "@/src/c-oriented-schematization/VertexUtils";
 import { crawlArray } from "@/src/utilities";
-import { createEdgeVertexSetup, TestSetup } from "./test-setup";
+import { createEdgeVertexSetup, TestSetup, idOr } from "./test-setup";
 
 describe("isAligned() works properly", function () {
   let s: TestSetup;
@@ -111,7 +111,7 @@ describe("isSignficant()", function () {
     const significantVertices = new VertexClassGenerator(style.c.sectors).run(
       dcel,
     );
-    return significantVertices.includes(origin.id!);
+    return significantVertices.includes(idOr(origin));
   };
 
   it("classifies a vertex correctly (A)", function () {

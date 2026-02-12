@@ -22,7 +22,9 @@ class FaceFaceBoundary {
     const pContractions = this.edges
       .reduce((contractions: Contraction[], edge) => {
         const configuration =
-          edge.id !== undefined ? configurations.get(edge.id) : undefined;
+          typeof edge.id === "number" && edge.id > 0
+            ? configurations.get(edge.id)
+            : undefined;
         const pContraction = configuration?.[ContractionType.P];
         if (pContraction?.isFeasible) contractions.push(pContraction);
         return contractions;
@@ -32,7 +34,9 @@ class FaceFaceBoundary {
     const nContractions = this.edges
       .reduce((contractions: Contraction[], edge) => {
         const configuration =
-          edge.id !== undefined ? configurations.get(edge.id) : undefined;
+          typeof edge.id === "number" && edge.id > 0
+            ? configurations.get(edge.id)
+            : undefined;
         const nContraction = configuration?.[ContractionType.N];
         if (nContraction?.isFeasible) contractions.push(nContraction);
         return contractions;

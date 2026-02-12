@@ -92,17 +92,25 @@ class Contraction {
     const hasOverlappingEdges = overlappingEdges.length > 0;
     if (!hasOverlappingEdges) return false;
     // "Two configurations conflict when they share an edge, unless they share only outer edges and one of these has a convex and a reflex vertex."
-    const overlappingInnerEdges = overlappingEdges.filter((overlappingEdge) =>
-      [
-        this.configuration.innerEdge.id,
-        complementary.configuration.innerEdge.id,
-      ].includes(overlappingEdge.id),
-    );
+    const overlappingInnerEdges = overlappingEdges.filter((overlappingEdge) => {
+      const oeid = overlappingEdge.id;
+      if (!(typeof oeid === "number" && oeid > 0)) return false;
+      const a = this.configuration.innerEdge.id;
+      const b = complementary.configuration.innerEdge.id;
+      return (
+        (typeof a === "number" && a > 0 && a === oeid) ||
+        (typeof b === "number" && b > 0 && b === oeid)
+      );
+    });
     // isConflicting if overlapping edges are inner edge
     if (overlappingInnerEdges.length > 0) return true;
-    const overlappingOuterEdges = overlappingEdges.filter((overlappingEdge) =>
-      outerEdges.map((edge) => edge.id).includes(overlappingEdge.id),
-    );
+    const overlappingOuterEdges = overlappingEdges.filter((overlappingEdge) => {
+      const oeid = overlappingEdge.id;
+      if (!(typeof oeid === "number" && oeid > 0)) return false;
+      return outerEdges
+        .map((edge) => edge.id)
+        .some((id) => typeof id === "number" && id > 0 && id === oeid);
+    });
     if (
       overlappingOuterEdges.some(
         (edge) => edge.getInflectionType() === InflectionType.B,
@@ -240,7 +248,9 @@ class Contraction {
     const twin = this.configuration.innerEdge.twin;
     if (!twin) return;
     const x_ =
-      twin.id !== undefined ? configurations.get(twin.id)?.x : undefined;
+      typeof twin.id === "number" && twin.id > 0
+        ? configurations.get(twin.id)?.x
+        : undefined;
     if (x_) x.push(...x_);
     if (x.includes(edge)) return false;
     const edgeLine = edge.toLineSegment();

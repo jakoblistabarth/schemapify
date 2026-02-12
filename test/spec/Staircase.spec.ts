@@ -1,7 +1,6 @@
 // import fs from "fs";
 // import path from "path";
 import Dcel from "@/src/Dcel/Dcel";
-import Vertex from "@/src/Dcel/Vertex";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
 import { Orientation } from "@/src/c-oriented-schematization/HalfEdgeClassGenerator";
 import { getClosestAssociatedAngle } from "@/src/c-oriented-schematization/Staircase";
@@ -187,8 +186,8 @@ describe("getStepArea(),", function () {
 describe("getClosestAssociatedAngle() returns closest associated angle for an edge", function () {
   it("when edge is in sector 0 and the assigned Direction is 3", function () {
     const dcel = new Dcel();
-    const o = new Vertex(0, 0, dcel);
-    const d = new Vertex(10, 4, dcel);
+    const o = dcel.addVertex(0, 0);
+    const d = dcel.addVertex(10, 4);
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
@@ -200,8 +199,8 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
 
   it("when edge is in sector 0 and the assigned direction is 2", function () {
     const dcel = new Dcel();
-    const o = new Vertex(0, 0, dcel);
-    const d = new Vertex(10, 4, dcel);
+    const o = dcel.addVertex(0, 0);
+    const d = dcel.addVertex(10, 4);
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
@@ -213,8 +212,8 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
 
   it("when edge is in sector 1 and the assigned direction is 0", function () {
     const dcel = new Dcel();
-    const o = new Vertex(0, 0, dcel);
-    const d = new Vertex(-10, 4, dcel);
+    const o = dcel.addVertex(0, 0);
+    const d = dcel.addVertex(-10, 4);
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
@@ -226,8 +225,8 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
 
   it("when edge is in sector 1 and the assigned direction is 3", function () {
     const dcel = new Dcel();
-    const o = new Vertex(0, 0, dcel);
-    const d = new Vertex(-10, 4, dcel);
+    const o = dcel.addVertex(0, 0);
+    const d = dcel.addVertex(-10, 4);
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
@@ -239,8 +238,8 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
 
   it("when edge is in sector 2 and the assigned direction is 1", function () {
     const dcel = new Dcel();
-    const o = new Vertex(0, 0, dcel);
-    const d = new Vertex(-10, -4, dcel);
+    const o = dcel.addVertex(0, 0);
+    const d = dcel.addVertex(-10, -4);
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
@@ -252,8 +251,8 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
 
   it("when edge is in sector 2 and the assigned direction is 0", function () {
     const dcel = new Dcel();
-    const o = new Vertex(0, 0, dcel);
-    const d = new Vertex(-10, -4, dcel);
+    const o = dcel.addVertex(0, 0);
+    const d = dcel.addVertex(-10, -4);
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;
@@ -265,8 +264,8 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
 
   it("when edge is in sector 3 and the assigned direction is 2", function () {
     const dcel = new Dcel();
-    const o = new Vertex(0, 0, dcel);
-    const d = new Vertex(10, -4, dcel);
+    const o = dcel.addVertex(0, 0);
+    const d = dcel.addVertex(10, -4);
     const edge = dcel.addHalfEdge(o, d);
     edge.twin = dcel.addHalfEdge(d, o);
     edge.twin.twin = edge;

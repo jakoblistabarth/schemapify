@@ -1,16 +1,15 @@
 import fs from "fs";
 import path from "path";
-import Vertex from "@/src/Dcel/Vertex";
-import HalfEdge from "@/src/Dcel/HalfEdge";
 import Dcel from "@/src/Dcel/Dcel";
 import { getTestFiles } from "./test-setup";
 
 describe("distanceToVertex()", function () {
   it("returns the correct distance between 2 vertices", function () {
-    const a = new Vertex(0, 0, new Dcel());
-    const b = new Vertex(4, 0, new Dcel());
-    const c = new Vertex(4, 4, new Dcel());
-    const d = new Vertex(-4, -4, new Dcel());
+    const dcel = new Dcel();
+    const a = dcel.addVertex(0, 0);
+    const b = dcel.addVertex(4, 0);
+    const c = dcel.addVertex(4, 4);
+    const d = dcel.addVertex(-4, -4);
 
     expect(b.distanceToVertex(a)).toEqual(b.distanceToVertex(a));
     expect(a.distanceToVertex(b)).toEqual(4);
@@ -21,13 +20,15 @@ describe("distanceToVertex()", function () {
 
 describe("distanceToEdge()", function () {
   it("returns the minimum distance between a vertex and an edge", function () {
-    const a = new Vertex(0, 0, new Dcel());
-    const v = new Vertex(-1, -2, new Dcel());
-    const w = new Vertex(2, 1, new Dcel());
+    const dcel = new Dcel();
+    const a = dcel.addVertex(0, 0);
+    const v = dcel.addVertex(-1, -2);
+    const w = dcel.addVertex(2, 1);
 
-    const edge = new HalfEdge(v, new Dcel());
-    edge.twin = new HalfEdge(w, new Dcel());
-    edge.twin.twin = edge;
+    const edge = dcel.addHalfEdge(v, w);
+    const twin = dcel.addHalfEdge(w, v);
+    edge.twin = twin;
+    twin.twin = edge;
 
     expect(a.distanceToEdge(edge)).toEqual(Math.sqrt(0.5));
     expect(v.distanceToEdge(edge)).toEqual(0);
@@ -38,32 +39,42 @@ describe("sortEdges()", function () {
   // TODO: use before each to test more cases based on the same 4 edges
 
   it("sorts 4 radial edges in clockwise order", function () {
-    const center = new Vertex(0, 0, new Dcel());
+    const dcel = new Dcel();
+    const center = dcel.addVertex(0, 0);
 
-    const headRight = new Vertex(4, 0, new Dcel());
-    const edgeRight = new HalfEdge(center, new Dcel());
-    edgeRight.twin = new HalfEdge(headRight, new Dcel());
-    edgeRight.twin.twin = edgeRight;
+    const headRight = dcel.addVertex(4, 0);
+    const edgeRight = dcel.addHalfEdge(center, headRight);
+    const edgeRightTwin = dcel.addHalfEdge(headRight, center);
+    edgeRight.twin = edgeRightTwin;
+    edgeRightTwin.twin = edgeRight;
 
-    const headBottom = new Vertex(0, -1, new Dcel());
-    const edgeBottom = new HalfEdge(center, new Dcel());
-    edgeBottom.twin = new HalfEdge(headBottom, new Dcel());
-    edgeBottom.twin.twin = edgeBottom;
+    const headBottom = dcel.addVertex(0, -1);
+    const edgeBottom = dcel.addHalfEdge(center, headBottom);
+    const edgeBottomTwin = dcel.addHalfEdge(headBottom, center);
+    edgeBottom.twin = edgeBottomTwin;
+    edgeBottomTwin.twin = edgeBottom;
 
-    const headLeft = new Vertex(-20, 0, new Dcel());
-    const edgeLeft = new HalfEdge(center, new Dcel());
-    edgeLeft.twin = new HalfEdge(headLeft, new Dcel());
-    edgeLeft.twin.twin = edgeLeft;
+    const headLeft = dcel.addVertex(-20, 0);
+    const edgeLeft = dcel.addHalfEdge(center, headLeft);
+    const edgeLeftTwin = dcel.addHalfEdge(headLeft, center);
+    edgeLeft.twin = edgeLeftTwin;
+    edgeLeftTwin.twin = edgeLeft;
 
-    const headTop = new Vertex(0, 100, new Dcel());
-    const edgeTop = new HalfEdge(center, new Dcel());
-    edgeTop.twin = new HalfEdge(headTop, new Dcel());
-    edgeTop.twin.twin = edgeTop;
+    const headTop = dcel.addVertex(0, 100);
+    const edgeTop = dcel.addHalfEdge(center, headTop);
+    const edgeTopTwin = dcel.addHalfEdge(headTop, center);
+    edgeTop.twin = edgeTopTwin;
+    edgeTopTwin.twin = edgeTop;
 
     center.edges.push(edgeRight, edgeLeft, edgeBottom, edgeTop);
     center.sortEdges();
 
-    expect(center.edges).toEqual([edgeBottom, edgeLeft, edgeTop, edgeRight]);
+    expect(center.edges.map((e) => e.uuid)).toEqual([
+      edgeBottom,
+      edgeLeft,
+      edgeTop,
+      edgeRight,
+    ].map((e) => e.uuid));
   });
 
   it("sorts outgoing edges of all vertices in clockwise order", function () {
@@ -226,15 +237,17 @@ describe("remove() on all vertices of a square with a hole", function () {
 
 describe("equals() on a vertex", function () {
   it("returns true for 2 vertices sharing the same position", function () {
-    const vertexA = new Vertex(10, 10, new Dcel());
-    const vertexB = new Vertex(10, 10, new Dcel());
+    const dcel = new Dcel();
+    const vertexA = dcel.addVertex(10, 10);
+    const vertexB = dcel.addVertex(10, 10);
 
     expect(vertexA.equals(vertexB)).toBe(true);
   });
 
   it("returns true for one vertex and one point sharing the same position", function () {
-    const vertexA = new Vertex(0.25, -3, new Dcel());
-    const pointA = new Vertex(0.25, -3, new Dcel());
+    const dcel = new Dcel();
+    const vertexA = dcel.addVertex(0.25, -3);
+    const pointA = dcel.addVertex(0.25, -3);
 
     expect(pointA.equals(vertexA)).toBe(true);
   });

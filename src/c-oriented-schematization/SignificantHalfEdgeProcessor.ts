@@ -18,8 +18,10 @@ class SignificantHalfEdgeProcessor implements Processor {
     output.getHalfEdges(true).forEach((edge) => {
       const [tail, head] = edge.endpoints;
       if (
-        tail.id !== undefined &&
-        head.id !== undefined &&
+        typeof tail.id === "number" &&
+        tail.id > 0 &&
+        typeof head.id === "number" &&
+        head.id > 0 &&
         this.significantVertices.includes(tail.id) &&
         this.significantVertices.includes(head.id)
       )

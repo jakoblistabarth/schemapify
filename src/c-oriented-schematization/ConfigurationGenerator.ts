@@ -14,9 +14,12 @@ class ConfigurationGenerator implements Generator {
     const configurations = input
       .getHalfEdges()
       .reduce<Map<number, Configuration>>((acc, edge) => {
-        if (edge.endpoints.some((vertex) => vertex.edges.length > 3))
+        if (
+          edge.endpoints.some((vertex) => vertex.edges.length > 3) ||
+          !edge.id
+        ) {
           return acc;
-        if (edge.id === undefined) return acc;
+        }
         acc.set(edge.id, new Configuration(edge));
         return acc;
       }, new Map());

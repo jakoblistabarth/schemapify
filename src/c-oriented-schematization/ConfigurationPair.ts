@@ -110,7 +110,7 @@ class ConfigurationPair {
       ? contractionEdge.moveTo(pointA, pointB)
       : contractionEdge.moveTo(pointB, pointA);
 
-    if (newEdge && newEdge.id !== undefined) {
+    if (newEdge && typeof newEdge.id === "number" && newEdge.id > 0) {
       const newConfiguration = new Configuration(newEdge);
       newConfiguration.initialize(configurations);
       configurations.set(newEdge.id, newConfiguration);
@@ -241,7 +241,8 @@ class ConfigurationPair {
       if (!edge) return;
       if (
         edge.endpoints.every((vertex) => vertex.edges.length <= 3) &&
-        edge.id !== undefined
+        typeof edge.id === "number" &&
+        edge.id > 0
       )
         configurations.set(edge.id, new Configuration(edge));
     });

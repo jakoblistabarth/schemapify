@@ -13,11 +13,13 @@ import Subdivision from "@/src/geometry/Subdivision";
 
 describe("getLength()", function () {
   it("returns the correct length for a single halfEdge", function () {
-    const a = new Vertex(0, 0, new Dcel());
-    const b = new Vertex(2, 0, new Dcel());
-    const edge = new HalfEdge(a, new Dcel());
-    edge.twin = new HalfEdge(b, new Dcel());
-    edge.twin.twin = edge;
+    const dcel = new Dcel();
+    const a = dcel.addVertex(0, 0);
+    const b = dcel.addVertex(2, 0);
+    const edge = dcel.addHalfEdge(a, b);
+    const edgeTwin = dcel.addHalfEdge(b, a);
+    edge.twin = edgeTwin;
+    edgeTwin.twin = edge;
 
     expect(edge.getLength()).toEqual(2);
   });
@@ -54,16 +56,19 @@ describe("getLength()", function () {
 
 describe("getMidpoint()", function () {
   it("returns the correct length", function () {
-    const a = new Vertex(0, 0, new Dcel());
-    const b = new Vertex(2, 0, new Dcel());
-    const edge = new HalfEdge(a, new Dcel());
-    edge.twin = new HalfEdge(b, new Dcel());
-    edge.twin.twin = edge;
+    const dcel = new Dcel();
+    const a = dcel.addVertex(0, 0);
+    const b = dcel.addVertex(2, 0);
+    const edge = dcel.addHalfEdge(a, b);
+    const edgeTwin = dcel.addHalfEdge(b, a);
+    edge.twin = edgeTwin;
+    edgeTwin.twin = edge;
 
-    const c = new Vertex(0, 10, new Dcel());
-    const edge2 = new HalfEdge(a, new Dcel());
-    edge2.twin = new HalfEdge(c, new Dcel());
-    edge2.twin.twin = edge2;
+    const c = dcel.addVertex(0, 10);
+    const edge2 = dcel.addHalfEdge(a, c);
+    const edge2Twin = dcel.addHalfEdge(c, a);
+    edge2.twin = edge2Twin;
+    edge2Twin.twin = edge2;
 
     expect(edge.getMidpoint()).toEqual(new Point(1, 0));
     expect(edge2.getMidpoint()).toEqual(new Point(0, 5));
@@ -72,18 +77,21 @@ describe("getMidpoint()", function () {
 
 describe("distanceToEdge()", function () {
   it("returns the minimum distance between 2 edges", function () {
-    const a = new Vertex(0, 0, new Dcel());
-    const b = new Vertex(-10, 10, new Dcel());
-    const v = new Vertex(-1, -2, new Dcel());
-    const w = new Vertex(2, 1, new Dcel());
+    const dcel = new Dcel();
+    const a = dcel.addVertex(0, 0);
+    const b = dcel.addVertex(-10, 10);
+    const v = dcel.addVertex(-1, -2);
+    const w = dcel.addVertex(2, 1);
 
-    const ab = new HalfEdge(a, new Dcel());
-    ab.twin = new HalfEdge(b, new Dcel());
-    ab.twin.twin = ab;
+    const ab = dcel.addHalfEdge(a, b);
+    const abTwin = dcel.addHalfEdge(b, a);
+    ab.twin = abTwin;
+    abTwin.twin = ab;
 
-    const vw = new HalfEdge(v, new Dcel());
-    vw.twin = new HalfEdge(w, new Dcel());
-    vw.twin.twin = vw;
+    const vw = dcel.addHalfEdge(v, w);
+    const vwTwin = dcel.addHalfEdge(w, v);
+    vw.twin = vwTwin;
+    vwTwin.twin = vw;
 
     expect(ab.distanceToEdge(vw)).toEqual(Math.sqrt(0.5));
     expect(vw.distanceToEdge(ab)).toEqual(Math.sqrt(0.5));
@@ -92,27 +100,32 @@ describe("distanceToEdge()", function () {
 
 describe("getAngle()", function () {
   it("returns the correct angle", function () {
-    const center = new Vertex(0, 0, new Dcel());
+    const dcel = new Dcel();
+    const center = dcel.addVertex(0, 0);
 
-    const headRight = new Vertex(4, 0, new Dcel());
-    const edgeRight = new HalfEdge(center, new Dcel());
-    edgeRight.twin = new HalfEdge(headRight, new Dcel());
-    edgeRight.twin.twin = edgeRight;
+    const headRight = dcel.addVertex(4, 0);
+    const edgeRight = dcel.addHalfEdge(center, headRight);
+    const edgeRightTwin = dcel.addHalfEdge(headRight, center);
+    edgeRight.twin = edgeRightTwin;
+    edgeRightTwin.twin = edgeRight;
 
-    const headBottom = new Vertex(0, -1, new Dcel());
-    const edgeBottom = new HalfEdge(center, new Dcel());
-    edgeBottom.twin = new HalfEdge(headBottom, new Dcel());
-    edgeBottom.twin.twin = edgeBottom;
+    const headBottom = dcel.addVertex(0, -1);
+    const edgeBottom = dcel.addHalfEdge(center, headBottom);
+    const edgeBottomTwin = dcel.addHalfEdge(headBottom, center);
+    edgeBottom.twin = edgeBottomTwin;
+    edgeBottomTwin.twin = edgeBottom;
 
-    const headLeft = new Vertex(-20, 0, new Dcel());
-    const edgeLeft = new HalfEdge(center, new Dcel());
-    edgeLeft.twin = new HalfEdge(headLeft, new Dcel());
-    edgeLeft.twin.twin = edgeLeft;
+    const headLeft = dcel.addVertex(-20, 0);
+    const edgeLeft = dcel.addHalfEdge(center, headLeft);
+    const edgeLeftTwin = dcel.addHalfEdge(headLeft, center);
+    edgeLeft.twin = edgeLeftTwin;
+    edgeLeftTwin.twin = edgeLeft;
 
-    const headTop = new Vertex(0, 100, new Dcel());
-    const edgeTop = new HalfEdge(center, new Dcel());
-    edgeTop.twin = new HalfEdge(headTop, new Dcel());
-    edgeTop.twin.twin = edgeTop;
+    const headTop = dcel.addVertex(0, 100);
+    const edgeTop = dcel.addHalfEdge(center, headTop);
+    const edgeTopTwin = dcel.addHalfEdge(headTop, center);
+    edgeTop.twin = edgeTopTwin;
+    edgeTopTwin.twin = edgeTop;
 
     expect(edgeRight.getAngle()).toBe(0);
     expect(edgeTop.getAngle()).toBe(Math.PI * 0.5);
@@ -362,8 +375,13 @@ describe("subdivideToThreshold()", function () {
 
 describe("intersectsLine()", function () {
   it("returns the intersection point if the halfedge intersects with a line", function () {
-    const halfEdge = new HalfEdge(new Vertex(0, 0, new Dcel()), new Dcel());
-    halfEdge.twin = new HalfEdge(new Vertex(2, 2, new Dcel()), new Dcel());
+    const dcel = new Dcel();
+    const a = dcel.addVertex(0, 0);
+    const b = dcel.addVertex(2, 2);
+    const halfEdge = dcel.addHalfEdge(a, b);
+    const halfEdgeTwin = dcel.addHalfEdge(b, a);
+    halfEdge.twin = halfEdgeTwin;
+    halfEdgeTwin.twin = halfEdge;
     const line = new Line(new Point(1, 1), 0);
 
     expect(halfEdge.intersectsLine(line)?.x).toBeCloseTo(1);
@@ -371,8 +389,13 @@ describe("intersectsLine()", function () {
   });
 
   it("returns the intersection point if the halfedge intersects with a line", function () {
-    const halfEdge = new HalfEdge(new Vertex(2, 0, new Dcel()), new Dcel());
-    halfEdge.twin = new HalfEdge(new Vertex(0, 2, new Dcel()), new Dcel());
+    const dcel = new Dcel();
+    const a = dcel.addVertex(2, 0);
+    const b = dcel.addVertex(0, 2);
+    const halfEdge = dcel.addHalfEdge(a, b);
+    const halfEdgeTwin = dcel.addHalfEdge(b, a);
+    halfEdge.twin = halfEdgeTwin;
+    halfEdgeTwin.twin = halfEdge;
     const line = new Line(new Point(2, 1), 0);
 
     expect(halfEdge.intersectsLine(line)?.x).toBeCloseTo(1);
@@ -380,24 +403,39 @@ describe("intersectsLine()", function () {
   });
 
   it("returns undefined if the halfedge and the line are parallel and do not share a vertex", function () {
-    const halfEdge = new HalfEdge(new Vertex(0, 0, new Dcel()), new Dcel());
-    halfEdge.twin = new HalfEdge(new Vertex(2, 0, new Dcel()), new Dcel());
+    const dcel = new Dcel();
+    const a = dcel.addVertex(0, 0);
+    const b = dcel.addVertex(2, 0);
+    const halfEdge = dcel.addHalfEdge(a, b);
+    const halfEdgeTwin = dcel.addHalfEdge(b, a);
+    halfEdge.twin = halfEdgeTwin;
+    halfEdgeTwin.twin = halfEdge;
     const line = new Line(new Point(0, 4), 0);
 
     expect(halfEdge.intersectsLine(line)).toBeUndefined();
   });
 
   it("returns ? if the halfedge is in line with the line", function () {
-    const halfEdge = new HalfEdge(new Vertex(0, 0, new Dcel()), new Dcel());
-    halfEdge.twin = new HalfEdge(new Vertex(2, 0, new Dcel()), new Dcel());
+    const dcel = new Dcel();
+    const a = dcel.addVertex(0, 0);
+    const b = dcel.addVertex(2, 0);
+    const halfEdge = dcel.addHalfEdge(a, b);
+    const halfEdgeTwin = dcel.addHalfEdge(b, a);
+    halfEdge.twin = halfEdgeTwin;
+    halfEdgeTwin.twin = halfEdge;
     const line = new Line(new Point(-2, 0), 0);
 
     expect(halfEdge.intersectsLine(line)).toBeUndefined();
   });
 
   it("returns undefined if the halfedge does not intersect with a line", function () {
-    const halfEdge = new HalfEdge(new Vertex(0, 0, new Dcel()), new Dcel());
-    halfEdge.twin = new HalfEdge(new Vertex(2, 2, new Dcel()), new Dcel());
+    const dcel = new Dcel();
+    const a = dcel.addVertex(0, 0);
+    const b = dcel.addVertex(2, 2);
+    const halfEdge = dcel.addHalfEdge(a, b);
+    const halfEdgeTwin = dcel.addHalfEdge(b, a);
+    halfEdge.twin = halfEdgeTwin;
+    halfEdgeTwin.twin = halfEdge;
     const line = new Line(new Point(0, 3), 0);
 
     expect(halfEdge.intersectsLine(line)).toBeUndefined();

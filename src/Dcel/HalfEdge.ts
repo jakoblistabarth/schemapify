@@ -34,10 +34,8 @@ class HalfEdge {
    * @returns A string, representing the HalfEdge's key.
    */
   static getKey(tail: Vertex, head: Vertex): string {
-    const tailId =
-      tail.id !== undefined ? `v${tail.id}` : Vertex.getKey(tail.x, tail.y);
-    const headId =
-      head.id !== undefined ? `v${head.id}` : Vertex.getKey(head.x, head.y);
+    const tailId = typeof tail.id === "number" && tail.id > 0 ? `v${tail.id}` : Vertex.getKey(tail.x, tail.y);
+    const headId = typeof head.id === "number" && head.id > 0 ? `v${head.id}` : Vertex.getKey(head.x, head.y);
     return `${tailId}->${headId}`;
   }
 
@@ -48,7 +46,7 @@ class HalfEdge {
    */
   get uuid() {
     // prefer numeric id when available
-    if (this.id !== undefined) return `e${this.id}`;
+    if (typeof this.id === "number" && this.id > 0) return `e${this.id}`;
     if (!this.head) return `${this.tail.uuid}->na`;
     return HalfEdge.getKey(this.tail, this.head);
   }
@@ -141,7 +139,7 @@ class HalfEdge {
   }
 
   /**
-   * Gets the angle of an HalfEdge in respect to the unit circle.
+   * Gets the angle of a HalfEdge in respect to the unit circle.
    * @returns The angle in radians.
    */
   getAngle() {
@@ -152,7 +150,7 @@ class HalfEdge {
   }
 
   /**
-   * Gets the length of the Halfedge.
+   * Gets the length of the HalfEdge.
    * @returns The Length.
    */
   getLength() {

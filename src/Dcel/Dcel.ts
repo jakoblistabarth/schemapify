@@ -86,6 +86,113 @@ class Dcel {
   }
 
   /**
+   * Register an existing {@link Vertex} instance with this DCEL.
+   * Assigns a numeric id if missing and adds it to buckets/map.
+   */
+  registerVertex(vertex: Vertex) {
+    const bucketKey = this.coordHash(vertex.x, vertex.y);
+    const bucket = this.vertexBuckets.get(bucketKey) ?? [];
+    const existing = bucket.find((v) => v.x === vertex.x && v.y === vertex.y);
+    if (existing) return existing.id;
+
+    // assign id if missing
+    if (vertex.id === undefined) {
+      vertex.id = this.nextVertexId++;
+    } else {
+      // validate provided id
+      if (!Number.isInteger(vertex.id) || vertex.id <= 0)
+        throw new Error(`Invalid vertex id ${vertex.id}`);
+      if (this.vertices.has(vertex.id))
+        throw new Error(`Vertex id ${vertex.id} is already registered`);
+    }
+
+    vertex.dcel = this;
+    this.vertices.set(vertex.id, vertex);
+    bucket.push(vertex);
+    this.vertexBuckets.set(bucketKey, bucket);
+    return vertex.id;
+  }
+
+  /**
+   * Register an existing {@link HalfEdge} instance with this DCEL.
+   * Ensures its endpoints are registered, assigns an id if missing and
+   * inserts the half-edge into the DCEL halfEdges map and the tail's edges.
+   */
+  registerHalfEdge(edge: HalfEdge) {
+    // determine head (may come from twin)
+    const head = edge.head ?? edge.twin?.tail;
+    if (!head)
+      throw new Error(
+        "registerHalfEdge: cannot register halfedge without head",
+      );
+
+    // ensure endpoints are registered
+    this.registerVertex(edge.tail);
+    this.registerVertex(head);
+
+    const key = HalfEdge.getKey(edge.tail, head);
+    const existing = this.halfEdges.get(key);
+    if (existing) return existing.id;
+
+    // assign id if missing, otherwise validate and ensure uniqueness
+    if (edge.id === undefined) {
+      edge.id = this.nextHalfEdgeId++;
+    } else {
+      if (!Number.isInteger(edge.id) || edge.id <= 0)
+        throw new Error(`Invalid halfedge id ${edge.id}`);
+      for (const he of this.halfEdges.values()) {
+        if (he.id === edge.id) throw new Error(`HalfEdge id ${edge.id} is already registered`);
+      }
+    }
+
+    edge.dcel = this;
+    this.halfEdges.set(key, edge);
+    if (edge.tail.edges.indexOf(edge) === -1) edge.tail.edges.push(edge);
+    edge.tail.sortEdges();
+
+    // ensure twin is registered too (but avoid infinite recursion)
+    if (edge.twin) {
+      const twinKey = HalfEdge.getKey(
+        edge.twin.tail,
+        edge.twin.head ?? edge.tail,
+      );
+      if (!this.halfEdges.get(twinKey)) {
+        if (!(typeof edge.twin.id === "number" && edge.twin.id > 0))
+          edge.twin.id = this.nextHalfEdgeId++;
+        edge.twin.dcel = this;
+        this.halfEdges.set(twinKey, edge.twin);
+        if (edge.twin.tail.edges.indexOf(edge.twin) === -1)
+          edge.twin.tail.edges.push(edge.twin);
+        edge.twin.tail.sortEdges();
+      }
+      edge.twin.twin = edge;
+      edge.twin.dcel = this;
+    }
+
+    return edge.id;
+  }
+
+  /**
+   * Register an existing {@link Face} instance with this DCEL.
+   */
+  registerFace(face: Face) {
+    // idempotent: if face already registered, return its id
+    if (this.faces.includes(face)) return face.id;
+
+    if (face.id === undefined) {
+      face.id = this.nextFaceId++;
+    } else {
+      if (!Number.isInteger(face.id) || face.id <= 0)
+        throw new Error(`Invalid face id ${face.id}`);
+      // ensure no other face uses this id
+      if (this.faces.some((f) => f !== face && f.id === face.id))
+        throw new Error(`Face id ${face.id} is already registered`);
+    }
+    this.faces.push(face);
+    return face.id;
+  }
+
+  /**
    * Gets all Faces of the DCEL.
    * @returns An array of {@link Face}s.
    */
@@ -198,7 +305,7 @@ class Dcel {
    */
   removeVertex(vertex: Vertex) {
     // remove from id map
-    if (vertex.id !== undefined) this.vertices.delete(vertex.id);
+    if (typeof vertex.id === "number" && vertex.id > 0) this.vertices.delete(vertex.id);
 
     // remove from bucket index
     const bucketKey = this.coordHash(vertex.x, vertex.y);
@@ -547,8 +654,8 @@ class Dcel {
     // Map original vertices by coordinate -> id
     const origVertexIdByCoord = new Map<string, number>();
     this.getVertices().forEach((v) => {
-      if (v.id !== undefined)
-        origVertexIdByCoord.set(coordKey(v.x, v.y), v.id!);
+      if (typeof v.id === "number" && v.id > 0)
+        origVertexIdByCoord.set(coordKey(v.x, v.y), v.id);
     });
 
     // Reassign ids on cloned vertices to match original where possible
@@ -556,7 +663,7 @@ class Dcel {
     clone.getVertices().forEach((v) => {
       const key = coordKey(v.x, v.y);
       const origId = origVertexIdByCoord.get(key);
-      if (origId !== undefined) v.id = origId;
+      if (typeof origId === "number" && origId > 0) v.id = origId;
       else v.id = clone.nextVertexId++;
       newVertices.set(v.id, v);
     });
@@ -567,7 +674,7 @@ class Dcel {
     this.getHalfEdges().forEach((e) => {
       const t = e.tail;
       const h = e.head;
-      if (t && h && e.id !== undefined) {
+      if (t && h && typeof e.id === "number" && e.id > 0) {
         origEdgeIdByCoords.set(
           `${coordKey(t.x, t.y)}->${coordKey(h.x, h.y)}`,
           e.id,
@@ -583,7 +690,7 @@ class Dcel {
       if (!t || !h) return;
       const coordsKey = `${coordKey(t.x, t.y)}->${coordKey(h.x, h.y)}`;
       const origId = origEdgeIdByCoords.get(coordsKey);
-      if (origId !== undefined) e.id = origId;
+      if (typeof origId === "number" && origId > 0) e.id = origId;
       else e.id = clone.nextHalfEdgeId++;
       const key = HalfEdge.getKey(t, h);
       newHalfEdges.set(key, e);
@@ -594,7 +701,7 @@ class Dcel {
     const origFaceIdByEdgeCoords = new Map<string, number>();
     this.getBoundedFaces().forEach((f) => {
       const e = f.edge;
-      if (!e || f.id === undefined) return;
+      if (!e || !(typeof f.id === "number" && f.id > 0)) return;
       const t = e.tail;
       const h = e.head;
       if (!t || !h) return;
@@ -613,7 +720,7 @@ class Dcel {
       if (!t || !h) return;
       const coordsKey = `${coordKey(t.x, t.y)}->${coordKey(h.x, h.y)}`;
       const origId = origFaceIdByEdgeCoords.get(coordsKey);
-      if (origId !== undefined) f.id = origId;
+      if (typeof origId === "number" && origId > 0) f.id = origId;
       else f.id = clone.nextFaceId++;
     });
 

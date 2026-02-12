@@ -1,10 +1,8 @@
 import fs from "fs";
 import path from "path";
 import Point from "@/src/geometry/Point";
-import Face from "@/src/Dcel/Face";
 import Dcel from "@/src/Dcel/Dcel";
-import HalfEdge, { InflectionType } from "@/src/Dcel/HalfEdge";
-import Vertex from "@/src/Dcel/Vertex";
+import { InflectionType } from "@/src/Dcel/HalfEdge";
 import { createConfigurationSetup } from "./test-setup";
 
 describe("getInteriorAngle() and getExteriorAngle()", function () {
@@ -41,23 +39,38 @@ describe("getInteriorAngle() and getExteriorAngle()", function () {
 
 describe("getInflectionType()", function () {
   it("returns the correct inflection type", function () {
-    const A = new Vertex(2, 2, new Dcel());
-    const B = new Vertex(0, 0, new Dcel());
-    const C = new Vertex(2, -4, new Dcel());
-    const D = new Vertex(4, -3, new Dcel());
-    const E = new Vertex(6, -4, new Dcel());
-    const F = new Vertex(5, -6, new Dcel());
+    const dcel = new Dcel();
+    const A = dcel.addVertex(2, 2);
+    const B = dcel.addVertex(0, 0);
+    const C = dcel.addVertex(2, -4);
+    const D = dcel.addVertex(4, -3);
+    const E = dcel.addVertex(6, -4);
+    const F = dcel.addVertex(5, -6);
 
-    const a = new HalfEdge(A, new Dcel());
-    a.twin = new HalfEdge(B, new Dcel());
-    const b = new HalfEdge(B, new Dcel());
-    b.twin = new HalfEdge(C, new Dcel());
-    const c = new HalfEdge(C, new Dcel());
-    c.twin = new HalfEdge(D, new Dcel());
-    const d = new HalfEdge(D, new Dcel());
-    d.twin = new HalfEdge(E, new Dcel());
-    const e = new HalfEdge(E, new Dcel());
-    e.twin = new HalfEdge(F, new Dcel());
+    const a = dcel.addHalfEdge(A, B);
+    const aTwin = dcel.addHalfEdge(B, A);
+    a.twin = aTwin;
+    aTwin.twin = a;
+
+    const b = dcel.addHalfEdge(B, C);
+    const bTwin = dcel.addHalfEdge(C, B);
+    b.twin = bTwin;
+    bTwin.twin = b;
+
+    const c = dcel.addHalfEdge(C, D);
+    const cTwin = dcel.addHalfEdge(D, C);
+    c.twin = cTwin;
+    cTwin.twin = c;
+
+    const d = dcel.addHalfEdge(D, E);
+    const dTwin = dcel.addHalfEdge(E, D);
+    d.twin = dTwin;
+    dTwin.twin = d;
+
+    const e = dcel.addHalfEdge(E, F);
+    const eTwin = dcel.addHalfEdge(F, E);
+    e.twin = eTwin;
+    eTwin.twin = e;
 
     a.next = b;
     b.next = c;
@@ -74,7 +87,8 @@ describe("getInflectionType()", function () {
     D.edges = [c.twin, d];
     E.edges = [d.twin, e];
 
-    a.face = b.face = c.face = e.face = d.face = e.face = new Face();
+    const fface = dcel.addFace();
+    a.face = b.face = c.face = e.face = d.face = fface;
 
     expect(b.getInflectionType()).toBe(InflectionType.C);
     expect(c.getInflectionType()).toBe(InflectionType.B);

@@ -63,7 +63,7 @@ class Face {
    */
   get uuid() {
     // prefer numeric id when available
-    if (this.id !== undefined) return `f${this.id}`;
+    if (typeof this.id === "number" && this.id > 0) return `f${this.id}`;
     const edgeId = this.edge?.uuid ?? "unbounded";
     return `${edgeId}-${this.associatedFeatures.join("-")}`;
   }

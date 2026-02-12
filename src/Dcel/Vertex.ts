@@ -7,6 +7,7 @@ class Vertex extends Point {
   dcel: Dcel;
   edges: HalfEdge[];
   id?: number;
+  private _sorting?: boolean;
 
   constructor(x: number, y: number, dcel: Dcel) {
     super(x, y);
@@ -28,8 +29,8 @@ class Vertex extends Point {
    * Gets the unique ID of a Vertex.
    */
   get uuid() {
-    // use numeric id based uuid
-    return this.id !== undefined
+    // use numeric id based uuid when available
+    return typeof this.id === "number" && this.id > 0
       ? `v${this.id}`
       : Vertex.getKey(this.x, this.y);
   }
@@ -61,12 +62,29 @@ class Vertex extends Point {
    * @returns An array containing the sorted {@link HalfEdge}s.
    */
   sortEdges(clockwise: boolean = true) {
-    this.edges.sort((a, b) => {
-      const [angleA, angleB] = [a.getAngle(), b.getAngle()];
-      if (typeof angleA !== "number" || typeof angleB !== "number") return 0;
-      if (clockwise) return angleB - angleA;
-      else return angleA - angleB;
+    if (this._sorting) return this.edges;
+
+    this._sorting = true;
+
+    // remove duplicate references if any (tests sometimes push duplicates)
+    this.edges = Array.from(new Set(this.edges));
+
+    const edgesWithAngles = this.edges.map((e) => ({
+      edge: e,
+      angle: e.getAngle(),
+    }));
+
+    edgesWithAngles.sort((a, b) => {
+      const aIsNumber = typeof a.angle === "number";
+      const bIsNumber = typeof b.angle === "number";
+      if (!aIsNumber && !bIsNumber) return 0;
+      if (!aIsNumber) return 1;
+      if (!bIsNumber) return -1;
+      return clockwise ? b.angle! - a.angle! : a.angle! - b.angle!;
     });
+
+    this.edges = edgesWithAngles.map((x) => x.edge);
+    this._sorting = false;
     return this.edges;
   }
 
@@ -210,7 +228,7 @@ class Vertex extends Point {
     //  merge vertices, if a vertex on this (new) position already exists
     const existing = this.dcel.findVertex(x, y);
     if (existing) {
-      console.log("merging vertices", existing?.uuid, "already exists");
+      // console.log("merging vertices", existing?.uuid, "already exists");
       if (!existing) return this;
       this.edges.forEach((edge) => {
         existing.edges.push(edge);
@@ -223,7 +241,8 @@ class Vertex extends Point {
     const oldY = this.y;
     this.x = x;
     this.y = y;
-    if (this.id !== undefined) this.dcel.vertices.set(this.id, this);
+    if (typeof this.id === "number" && this.id > 0)
+      this.dcel.vertices.set(this.id, this);
     this.dcel.updateVertexPosition(this, oldX, oldY, x, y);
     return this;
   }

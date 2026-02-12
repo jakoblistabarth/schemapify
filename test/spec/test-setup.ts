@@ -8,7 +8,6 @@ import cStyle, {
 } from "@/src/c-oriented-schematization/schematization.style";
 import StaircaseGenerator from "@/src/c-oriented-schematization/StaircaseGenerator";
 import Dcel from "@/src/Dcel/Dcel";
-import Face from "@/src/Dcel/Face";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
 import Point from "@/src/geometry/Point";
@@ -58,11 +57,16 @@ export const createEdgeVertexSetup = () => {
   const directions: Directions = {};
 
   Object.entries(destinations).forEach(([key, vertex]) => {
-    const edge = new HalfEdge(origin, dcel);
-    edge.twin = new HalfEdge(vertex, dcel);
-    edge.twin.twin = edge;
+    const edge = dcel.addHalfEdge(origin, vertex);
+    const twin = dcel.addHalfEdge(vertex, origin);
+    edge.twin = twin;
+    twin.twin = edge;
     directions["o" + key] = edge;
   });
+  // Workaround to make current test setup work:
+  // Clear any auto-registered outgoing edges on origin
+  // so tests can control `origin.edges` ordering
+  origin.edges = [];
   const setup: TestSetup = { dcel, origin, directions };
   return setup;
 };
@@ -74,35 +78,23 @@ const createDcel = (origin: Vertex, edges: HalfEdge[]) => {
   edges.forEach((direction) => {
     const tail = origin;
     const head = dcel.addVertex(direction.head?.x ?? 0, direction.head?.y ?? 0);
-
-    // create canonical half-edges if not already registered
-    const key = HalfEdge.getKey(tail, head);
-    let halfEdge = dcel.halfEdges.get(key);
-    if (!halfEdge) {
-      // use the provided fixture object if its dcel matches
-      halfEdge = direction;
-      if (halfEdge.id === undefined) halfEdge.id = dcel.nextHalfEdgeId++;
-      dcel.halfEdges.set(key, halfEdge);
-      // ensure it's in the tail's incident edges
-      if (tail.edges.indexOf(halfEdge) === -1) tail.edges.push(halfEdge);
+    const halfEdge = direction;
+    halfEdge.tail = tail;
+    if (halfEdge.twin) {
+      // register twin using DCEL factories to ensure ids and head/tail linkage
+      const twin = dcel.addHalfEdge(head, tail);
+      halfEdge.twin = twin;
+      twin.twin = halfEdge;
     }
+    dcel.registerHalfEdge(halfEdge);
+  });
 
-    const twinKey = HalfEdge.getKey(head, tail);
-    let halfEdgeTwin = dcel.halfEdges.get(twinKey);
-    if (!halfEdgeTwin) {
-      halfEdgeTwin = halfEdge.twin ?? new HalfEdge(head, dcel);
-      if (halfEdgeTwin.id === undefined)
-        halfEdgeTwin.id = dcel.nextHalfEdgeId++;
-      dcel.halfEdges.set(twinKey, halfEdgeTwin);
-      if (head.edges.indexOf(halfEdgeTwin) === -1)
-        head.edges.push(halfEdgeTwin);
-    }
-
-    halfEdge.twin = halfEdgeTwin;
-    halfEdgeTwin.twin = halfEdge;
-    // sort incident edges so angle-based ordering is consistent
-    tail.sortEdges();
-    head.sortEdges();
+  // ensure origin.edges contains only the provided subset in the given order
+  origin.edges = edges.map((direction) => {
+    const head = direction.head ?? direction.twin?.tail;
+    if (!head) return direction;
+    const key = HalfEdge.getKey(origin, head);
+    return dcel.halfEdges.get(key) ?? direction;
   });
 };
 
@@ -121,15 +113,24 @@ export const createStaircaseSetup = (
   edge.twin = twin;
   twin.twin = edge;
   o.edges.push(edge);
-  const key = edge.id ?? -1;
-  const generator = new StaircaseGenerator(
-    significantVertices,
-    new Map([[key, { orientation, assignedDirection }]]),
-    style,
-  );
+  const key = edge.id;
+  const mapping =
+    typeof key === "number"
+      ? new Map<
+          number,
+          { orientation: Orientation; assignedDirection: number }
+        >([[key, { orientation, assignedDirection }]])
+      : new Map<
+          number,
+          { orientation: Orientation; assignedDirection: number }
+        >();
+  const generator = new StaircaseGenerator(significantVertices, mapping, style);
   const staircases = generator.run(dcel);
-  return key !== -1 ? staircases.get(key) : undefined;
+  return typeof key === "number" ? staircases.get(key) : undefined;
 };
+
+export const idOr = (v?: { id?: number } | undefined) =>
+  typeof v?.id === "number" ? v.id : -1;
 
 type Options = {
   c?: CRegular | CIrregular;
@@ -151,7 +152,7 @@ export const getClassification = (
     significantVertices,
   ).run(dcel);
   const directionSolution = origin.edges.map(
-    (edge) => assignedDirections.get(edge.id ?? -1)?.[classficationProperty],
+    (edge) => assignedDirections.get(idOr(edge))?.[classficationProperty],
   );
   return directionSolution;
 };
@@ -173,15 +174,17 @@ export function createConfigurationSetup(
   const dcel = new Dcel();
   const points = [pointA, pointB, pointC, pointD, ...otherPoints];
   const vertices = points.map((point) => dcel.addVertex(point.x, point.y));
-  const innerFace = new Face();
-  const outerFace = new Face();
+  const innerFace = dcel.addFace();
+  const outerFace = dcel.addFace();
 
   const edges = vertices.map((vertex, idx) => {
-    const edge = new HalfEdge(vertex, dcel);
-    edge.twin = new HalfEdge(crawlArray(vertices, idx, +1), dcel);
-    edge.twin.twin = edge;
+    const head = crawlArray(vertices, idx, +1);
+    const edge = dcel.addHalfEdge(vertex, head);
+    const twin = dcel.addHalfEdge(head, vertex);
+    edge.twin = twin;
+    twin.twin = edge;
     edge.face = outerFace;
-    edge.twin.face = innerFace;
+    twin.face = innerFace;
     return edge;
   });
 
@@ -191,19 +194,40 @@ export function createConfigurationSetup(
     if (!edge.twin) return;
     edge.twin.prev = crawlArray(edges, idx, -1).twin;
     edge.twin.next = crawlArray(edges, idx, +1).twin;
-    // ensure half-edges have numeric ids and are registered in the dcel
-    if (edge.id === undefined) edge.id = dcel.nextHalfEdgeId++;
-    if (edge.twin.id === undefined) edge.twin.id = dcel.nextHalfEdgeId++;
-    dcel.halfEdges.set(HalfEdge.getKey(edge.tail, edge.head!), edge);
-    dcel.halfEdges.set(
-      HalfEdge.getKey(edge.twin!.tail, edge.twin!.head!),
-      edge.twin!,
-    );
+  });
+
+  // register faces with the DCEL so ids are consistent
+  dcel.registerFace(innerFace);
+  dcel.registerFace(outerFace);
+
+  // ensure face.edge pointers so faces are considered bounded
+  if (edges[0]) {
+    outerFace.edge = edges[0];
+    if (edges[0].twin) innerFace.edge = edges[0].twin;
+  }
+
+  // ensure halfedges are registered in the DCEL maps (safe-guard)
+  edges.forEach((edge) => {
+    if (edge.twin) dcel.registerHalfEdge(edge.twin);
+    dcel.registerHalfEdge(edge);
+  });
+
+  // Rebuild incident edge lists per vertex from the DCEL to ensure correctness
+  vertices.forEach((v) => {
+    // collect only half-edges for which this vertex is the tail (outgoing edges)
+    const incident = dcel.getHalfEdges().filter((e) => e.tail === v);
+    // unique
+    v.edges = incident.filter((e, i) => incident.indexOf(e) === i);
+    v.sortEdges();
   });
 
   vertices.forEach((vertex, idx) => {
     const edge = edges[idx];
-    if (edge.prev?.twin) vertex.edges.push(edge, edge.prev.twin);
+    if (edge.prev?.twin) {
+      if (vertex.edges.indexOf(edge) === -1) vertex.edges.push(edge);
+      if (vertex.edges.indexOf(edge.prev.twin) === -1)
+        vertex.edges.push(edge.prev.twin);
+    }
   });
 
   const configuration: ConfigurationSetup = {

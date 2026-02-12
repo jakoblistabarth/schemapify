@@ -48,13 +48,13 @@ class HalfEdgeClassGenerator implements Generator {
           this.significantVertices,
         );
         const assignedDirection =
-          edge.id !== undefined
+          typeof edge.id === "number" && edge.id > 0
             ? this.assignedDirections.get(edge.id)
             : undefined;
         if (orientation && (assignedDirection || assignedDirection === 0)) {
-          if (edge.id !== undefined)
+          if (typeof edge.id === "number" && edge.id > 0)
             acc.set(edge.id, { orientation, assignedDirection });
-          if (edge.twin && edge.twin.id !== undefined) {
+          if (edge.twin && typeof edge.twin.id === "number" && edge.twin.id > 0) {
             acc.set(edge.twin.id, { orientation, assignedDirection });
           }
         }
@@ -78,9 +78,9 @@ class HalfEdgeClassGenerator implements Generator {
 
     // do not classify a HalfEdge which has a significant head
     const head = halfEdge.head;
-    if (head && significantVertices.includes(head.id ?? -1)) return;
+    if (head && typeof head.id === "number" && significantVertices.includes(head.id)) return;
     const assignedDirection =
-      halfEdge.id !== undefined
+      typeof halfEdge.id === "number" && halfEdge.id > 0
         ? this.assignedDirections.get(halfEdge.id)
         : undefined;
     if (!assignedDirection && assignedDirection !== 0) return;
@@ -90,7 +90,7 @@ class HalfEdgeClassGenerator implements Generator {
       getSignificantVertex(halfEdge, this.significantVertices) || halfEdge.tail;
     const edges = getEdgesInSector(significantVertex, sector).filter((edge) => {
       const direction =
-        edge.id !== undefined
+        typeof edge.id === "number" && edge.id > 0
           ? this.assignedDirections.get(edge.id)
           : undefined;
       if (typeof direction !== "number") return;
@@ -121,7 +121,7 @@ class HalfEdgeClassGenerator implements Generator {
    * @returns The assigned angle of the {@link HalfEdge}, if it exists.
    * */
   private getClass(halfEdge: HalfEdge) {
-    return halfEdge.id !== undefined
+    return typeof halfEdge.id === "number" && halfEdge.id > 0
       ? this.halfEdgeClasses.get(halfEdge.id)
       : undefined;
   }
@@ -165,7 +165,7 @@ class HalfEdgeClassGenerator implements Generator {
     });
 
     edges.forEach((edge, idx) => {
-      if (edge.id !== undefined)
+      if (typeof edge.id === "number" && edge.id > 0)
         this.assignedDirections.set(edge.id, solution[idx]);
     });
     return solution;
