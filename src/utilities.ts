@@ -91,6 +91,20 @@ export function copyInstance<T>(original: T): T {
   );
 }
 
+/**
+ * Return all permutations of `arr`.
+ *
+ * Exponential O(n!) — intended for small arrays (n <= 8).
+ * @param arr input values
+ * @returns list of permutations
+ */
+export const permute = <T>(arr: T[]): T[][] => {
+  if (arr.length === 0) return [[]];
+  return arr.flatMap((v, i) =>
+    permute([...arr.slice(0, i), ...arr.slice(i + 1)]).map((p) => [v, ...p]),
+  );
+};
+
 export const geoJsonToGeometry = (
   geoJson: geojson.FeatureCollection<geojson.Polygon | geojson.MultiPolygon>,
 ) => {
@@ -117,3 +131,13 @@ export const geoJsonToGeometry = (
 };
 
 // TODO: implement geometryToGeoJSON
+
+/**
+ * Normalizes an angle to be between 0 and 2π.
+ * @param a the angle in radians to normalize
+ * @returns the normalized angle in radians
+ */
+export const normalizeAngle = (a: number) => {
+  const twoPi = Math.PI * 2;
+  return ((a % twoPi) + twoPi) % twoPi;
+};

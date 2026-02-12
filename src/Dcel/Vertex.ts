@@ -7,7 +7,6 @@ class Vertex extends Point {
   dcel: Dcel;
   edges: HalfEdge[];
   id?: number;
-  private _sorting?: boolean;
 
   constructor(x: number, y: number, dcel: Dcel) {
     super(x, y);
@@ -62,29 +61,12 @@ class Vertex extends Point {
    * @returns An array containing the sorted {@link HalfEdge}s.
    */
   sortEdges(clockwise: boolean = true) {
-    if (this._sorting) return this.edges;
-
-    this._sorting = true;
-
-    // remove duplicate references if any (tests sometimes push duplicates)
-    this.edges = Array.from(new Set(this.edges));
-
-    const edgesWithAngles = this.edges.map((e) => ({
-      edge: e,
-      angle: e.getAngle(),
-    }));
-
-    edgesWithAngles.sort((a, b) => {
-      const aIsNumber = typeof a.angle === "number";
-      const bIsNumber = typeof b.angle === "number";
-      if (!aIsNumber && !bIsNumber) return 0;
-      if (!aIsNumber) return 1;
-      if (!bIsNumber) return -1;
-      return clockwise ? b.angle! - a.angle! : a.angle! - b.angle!;
+    this.edges.sort((a, b) => {
+      const [angleA, angleB] = [a.getAngle(), b.getAngle()];
+      if (typeof angleA !== "number" || typeof angleB !== "number") return 0;
+      if (clockwise) return angleB - angleA;
+      else return angleA - angleB;
     });
-
-    this.edges = edgesWithAngles.map((x) => x.edge);
-    this._sorting = false;
     return this.edges;
   }
 

@@ -2,6 +2,28 @@ import fs from "fs";
 import path from "path";
 import Dcel from "@/src/Dcel/Dcel";
 import { getTestFiles } from "./test-setup";
+import HalfEdge from "@/src/Dcel/HalfEdge";
+import Vertex from "@/src/Dcel/Vertex";
+import { permute, normalizeAngle } from "@/src/utilities";
+
+const isCircularlySortedByAngle = (
+  edges: HalfEdge[],
+  clockwise = true,
+  eps = 1e-9,
+) => {
+  const angles = edges.map((e) => {
+    const a = e.getAngle();
+    return typeof a === "number" ? normalizeAngle(a) : NaN;
+  });
+  if (angles.some(Number.isNaN)) return false;
+  return Array.from({ length: angles.length }).some((_, rotation) =>
+    Array.from({ length: Math.max(0, angles.length - 1) }).every((__, i) => {
+      const a = angles[(rotation + i) % angles.length];
+      const b = angles[(rotation + i + 1) % angles.length];
+      return clockwise ? a + eps >= b : a <= b + eps;
+    }),
+  );
+};
 
 describe("distanceToVertex()", function () {
   it("returns the correct distance between 2 vertices", function () {
@@ -36,45 +58,58 @@ describe("distanceToEdge()", function () {
 });
 
 describe("sortEdges()", function () {
-  // TODO: use before each to test more cases based on the same 4 edges
+  let center: Vertex;
+  let edgeRight: HalfEdge;
+  let edgeBottom: HalfEdge;
+  let edgeLeft: HalfEdge;
+  let edgeTop: HalfEdge;
 
-  it("sorts 4 radial edges in clockwise order", function () {
+  beforeEach(function () {
     const dcel = new Dcel();
-    const center = dcel.addVertex(0, 0);
+    center = dcel.addVertex(0, 0);
 
     const headRight = dcel.addVertex(4, 0);
-    const edgeRight = dcel.addHalfEdge(center, headRight);
+    edgeRight = dcel.addHalfEdge(center, headRight);
     const edgeRightTwin = dcel.addHalfEdge(headRight, center);
     edgeRight.twin = edgeRightTwin;
     edgeRightTwin.twin = edgeRight;
 
     const headBottom = dcel.addVertex(0, -1);
-    const edgeBottom = dcel.addHalfEdge(center, headBottom);
+    edgeBottom = dcel.addHalfEdge(center, headBottom);
     const edgeBottomTwin = dcel.addHalfEdge(headBottom, center);
     edgeBottom.twin = edgeBottomTwin;
     edgeBottomTwin.twin = edgeBottom;
 
     const headLeft = dcel.addVertex(-20, 0);
-    const edgeLeft = dcel.addHalfEdge(center, headLeft);
+    edgeLeft = dcel.addHalfEdge(center, headLeft);
     const edgeLeftTwin = dcel.addHalfEdge(headLeft, center);
     edgeLeft.twin = edgeLeftTwin;
     edgeLeftTwin.twin = edgeLeft;
 
     const headTop = dcel.addVertex(0, 100);
-    const edgeTop = dcel.addHalfEdge(center, headTop);
+    edgeTop = dcel.addHalfEdge(center, headTop);
     const edgeTopTwin = dcel.addHalfEdge(headTop, center);
     edgeTop.twin = edgeTopTwin;
     edgeTopTwin.twin = edgeTop;
+  });
 
-    center.edges.push(edgeRight, edgeLeft, edgeBottom, edgeTop);
-    center.sortEdges();
+  const permutations = permute(["right", "left", "bottom", "top"]);
 
-    expect(center.edges.map((e) => e.uuid)).toEqual([
-      edgeBottom,
-      edgeLeft,
-      edgeTop,
-      edgeRight,
-    ].map((e) => e.uuid));
+  permutations.forEach((permutation, idx) => {
+    it(`sorts 4 radial edges in clockwise order (permutation ${idx + 1})`, function () {
+      const map: Record<string, HalfEdge> = {
+        right: edgeRight,
+        left: edgeLeft,
+        bottom: edgeBottom,
+        top: edgeTop,
+      };
+      center.edges = permutation.map((k) => map[k]);
+
+      center.sortEdges();
+
+      // verify circular order by angle (clockwise)
+      expect(isCircularlySortedByAngle(center.edges, true)).toBe(true);
+    });
   });
 
   it("sorts outgoing edges of all vertices in clockwise order", function () {
