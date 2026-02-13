@@ -9,6 +9,8 @@ import { permute, normalizeAngle } from "@/src/utilities";
 const isCircularlySortedByAngle = (
   edges: HalfEdge[],
   clockwise = true,
+  //TODO: use a more robust method instead of an epsilon threshold for angle comparisons
+  //see robust geometric predicates
   eps = 1e-9,
 ) => {
   const angles = edges.map((e) => {
