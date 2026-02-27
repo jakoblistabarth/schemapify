@@ -1,17 +1,18 @@
+import Dcel from "@/src/Dcel/Dcel";
+import { scavenge } from "@placemarkio/check-geojson";
+import booleanValid from "@turf/boolean-valid";
+import { featureReduce } from "@turf/meta";
 import fs from "fs";
 import path from "path";
+import { describe, expect, test } from "vitest";
 import { getTestFiles } from "./test-setup";
-import { scavenge } from "@placemarkio/check-geojson";
-import Dcel from "@/src/Dcel/Dcel";
-import { featureReduce } from "@turf/meta";
-import booleanValid from "@turf/boolean-valid";
 
 describe("validate geoJSON file (simple shape)", function () {
   const dir = "test/data/shapes";
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
-    it(file + " to return 0 errors, e.i., to be valid", function () {
+    test(file + " to return 0 errors, e.i., to be valid", function () {
       const json = JSON.parse(
         fs.readFileSync(path.resolve(dir + "/" + file), "utf8"),
       );
@@ -27,7 +28,7 @@ describe("validate geoJSON file (geodata)", function () {
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
-    it(file + " to return 0 errors, e.i., to be valid", function () {
+    test(file + " to return 0 errors, e.i., to be valid", function () {
       const json = JSON.parse(
         fs.readFileSync(path.resolve(dir + "/" + file), "utf8"),
       );
@@ -38,7 +39,7 @@ describe("validate geoJSON file (geodata)", function () {
 });
 
 describe("Find errors for invalid geoJSON file", function () {
-  it("with a unclosed polygon", function () {
+  test("with a unclosed polygon", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/invalid/not-closed.json"),
@@ -49,7 +50,7 @@ describe("Find errors for invalid geoJSON file", function () {
     expect(rejected.length).toBeGreaterThan(0);
   });
 
-  it("with a polygon using invalid structure (lowercase 'polygon')member", function () {
+  test("with a polygon using invalid structure (lowercase 'polygon')member", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve(
@@ -63,7 +64,7 @@ describe("Find errors for invalid geoJSON file", function () {
   });
 
   // use turf for validation with advanced geometry-checks
-  it("with a polygon containing a loop edge", function () {
+  test("with a polygon containing a loop edge", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/invalid/square-loop-edge.json"),
@@ -80,7 +81,7 @@ describe("Find errors for invalid geoJSON file", function () {
 });
 
 describe("If the input data is not a region i.e., it contains features of type other than polygon or multipolygon – the program shall exit and the user shall be informed.", function () {
-  it("An error is thrown for a file containing geometry of type 'LineString'.", function () {
+  test("An error is thrown for a file containing geometry of type 'LineString'.", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/invalid/linestrings.json"),

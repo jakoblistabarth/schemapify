@@ -1,8 +1,9 @@
-import fs from "fs";
-import path from "path";
 import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
 import Subdivision from "@/src/geometry/Subdivision";
+import fs from "fs";
+import path from "path";
+import { beforeEach, describe, expect, test } from "vitest";
 
 describe("A Dcel from a geojson with a simplified enclave model", function () {
   let dcel: Dcel;
@@ -14,15 +15,15 @@ describe("A Dcel from a geojson with a simplified enclave model", function () {
     dcel = Dcel.fromGeoJSON(polygon);
   });
 
-  it("has 1 unbounded face", function () {
+  test("has 1 unbounded face", function () {
     expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
-  it("has 3 faces", function () {
+  test("has 3 faces", function () {
     expect(dcel.faces.length).toBe(3);
   });
 
-  it("returns a subdivision with 2 polygons", function () {
+  test("returns a subdivision with 2 polygons", function () {
     const subdivision = dcel.toSubdivision();
     expect(subdivision.multiPolygons.length).toBe(2);
   });
@@ -63,15 +64,15 @@ describe("A Dcel from multipolygons of a simplified enclave model", function () 
     dcel = Dcel.fromSubdivision(s);
   });
 
-  it("has 1 unbounded face", function () {
+  test("has 1 unbounded face", function () {
     expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
-  it("has 3 faces", function () {
+  test("has 3 faces", function () {
     expect(dcel.faces.length).toBe(3);
   });
 
-  it("returns a subdivision with 2 polygons", function () {
+  test("returns a subdivision with 2 polygons", function () {
     const subdivision = dcel.toSubdivision();
     expect(subdivision.multiPolygons.length).toBe(2);
   });
@@ -87,15 +88,15 @@ describe("A Dcel of an simplified enclave model (reversed order)", function () {
     dcel = Dcel.fromGeoJSON(polygon);
   });
 
-  it("has 1 unbounded face", function () {
+  test("has 1 unbounded face", function () {
     expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
-  it("has 3 faces", function () {
+  test("has 3 faces", function () {
     expect(dcel.faces.length).toBe(3);
   });
 
-  it("returns a subdivision with 2 polygons", function () {
+  test("returns a subdivision with 2 polygons", function () {
     const subdivision = dcel.toSubdivision();
     expect(subdivision.multiPolygons.length).toBe(2);
   });

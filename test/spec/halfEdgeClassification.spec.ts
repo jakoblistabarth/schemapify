@@ -12,11 +12,12 @@ import VertexClassGenerator from "@/src/c-oriented-schematization/VertexClassGen
 import Dcel from "@/src/Dcel/Dcel";
 import fs from "fs";
 import path from "path";
+import { beforeEach, describe, expect, test } from "vitest";
 import {
   createEdgeVertexSetup,
   getClassification,
-  TestSetup,
   idOr,
+  TestSetup,
 } from "./test-setup";
 
 describe("isDeviating()", function () {
@@ -26,7 +27,7 @@ describe("isDeviating()", function () {
     s = createEdgeVertexSetup();
   });
 
-  it("returns true for an deviating edge", function () {
+  test("returns true for an deviating edge", function () {
     const edgeIsDeviating = isDeviating(
       s.directions.od76,
       new CRegular(2).sectors,
@@ -35,7 +36,7 @@ describe("isDeviating()", function () {
     expect(edgeIsDeviating).toBe(true);
   });
 
-  it("returns true for an deviating edge", function () {
+  test("returns true for an deviating edge", function () {
     const edgeIsDeviating = isDeviating(
       s.directions.od53,
       new CRegular(2).sectors,
@@ -44,7 +45,7 @@ describe("isDeviating()", function () {
     expect(edgeIsDeviating).toBe(true);
   });
 
-  it("returns true for an deviating edge", function () {
+  test("returns true for an deviating edge", function () {
     const edgeIsDeviatingC2 = isDeviating(
       s.directions.od53,
       new CRegular(2).sectors,
@@ -59,7 +60,7 @@ describe("isDeviating()", function () {
     expect(edgeIsDeviatingC4).toBe(true);
   });
 
-  it("returns false for a basic edge", function () {
+  test("returns false for a basic edge", function () {
     const edgeIsDeviatingC2 = isDeviating(
       s.directions.od53,
       new CRegular(2).sectors,
@@ -74,7 +75,7 @@ describe("isDeviating()", function () {
     expect(edgeIsDeviatingC4).toBe(false);
   });
 
-  it("returns false for a basic edge", function () {
+  test("returns false for a basic edge", function () {
     const edgeIsDeviatingC2 = isDeviating(
       s.directions.od333,
       new CRegular(2).sectors,
@@ -89,7 +90,7 @@ describe("isDeviating()", function () {
     expect(edgeIsDeviatingC4).toBe(false);
   });
 
-  it("returns false for a basic edge", function () {
+  test("returns false for a basic edge", function () {
     const edgeIsDeviating = isDeviating(
       s.directions.od53,
       new CRegular(2).sectors,
@@ -98,7 +99,7 @@ describe("isDeviating()", function () {
     expect(edgeIsDeviating).toBe(false);
   });
 
-  it("returns false for a for a basic aligned edge", function () {
+  test("returns false for a for a basic aligned edge", function () {
     const edgeIsDeviating = isDeviating(
       s.directions.od90,
       new CRegular(2).sectors,
@@ -107,7 +108,7 @@ describe("isDeviating()", function () {
     expect(edgeIsDeviating).toBe(false);
   });
 
-  it("returns true for a for a deviating aligned edge", function () {
+  test("returns true for a for a deviating aligned edge", function () {
     const edgeIsDeviating = isDeviating(
       s.directions.od90,
       new CRegular(2).sectors,
@@ -116,7 +117,7 @@ describe("isDeviating()", function () {
     expect(edgeIsDeviating).toBe(true);
   });
 
-  it("returns false for a for a basic aligned edge", function () {
+  test("returns false for a for a basic aligned edge", function () {
     const edgeIsDeviating = isDeviating(
       s.directions.od90,
       new CRegular(4).sectors,
@@ -125,7 +126,7 @@ describe("isDeviating()", function () {
     expect(edgeIsDeviating).toBe(false);
   });
 
-  it("returns false for a for a basic aligned edge", function () {
+  test("returns false for a for a basic aligned edge", function () {
     const edgeIsDeviating = isDeviating(
       s.directions.od315,
       new CRegular(4).sectors,
@@ -134,7 +135,7 @@ describe("isDeviating()", function () {
     expect(edgeIsDeviating).toBe(false);
   });
 
-  it("returns true for a for a deviating aligned edge", function () {
+  test("returns true for a for a deviating aligned edge", function () {
     const edgeIsDeviating = isDeviating(
       s.directions.od90,
       new CRegular(2).sectors,
@@ -143,7 +144,7 @@ describe("isDeviating()", function () {
     expect(edgeIsDeviating).toBe(true);
   });
 
-  it("returns false for a for a basic aligned edge", function () {
+  test("returns false for a for a basic aligned edge", function () {
     const edgeIsDeviating = isDeviating(
       s.directions.od90,
       new CRegular(4).sectors,
@@ -152,7 +153,7 @@ describe("isDeviating()", function () {
     expect(edgeIsDeviating).toBe(false);
   });
 
-  it("returns false for a for a basic aligned edge", function () {
+  test("returns false for a for a basic aligned edge", function () {
     const edgeIsDeviating = isDeviating(
       s.directions.od315,
       new CRegular(4).sectors,
@@ -168,13 +169,13 @@ describe("getSignificantVertex()", function () {
     s = createEdgeVertexSetup();
   });
 
-  it("returns an significant endpoint if one is specified", function () {
+  test("returns an significant endpoint if one is specified", function () {
     const significantVertex = getSignificantVertex(s.directions.od53, [
       idOr(s.origin),
     ]);
     expect(significantVertex?.id).toBe(idOr(s.origin));
   });
-  it("returns null if none of its endpoints are significant", function () {
+  test("returns null if none of its endpoints are significant", function () {
     const significantVertex = getSignificantVertex(s.directions.od53, []);
     expect(significantVertex).toBeUndefined();
   });
@@ -187,7 +188,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     s = createEdgeVertexSetup();
   });
 
-  it("a", function () {
+  test("a", function () {
     const orientations = getClassification(
       s,
       [s.directions.od53, s.directions.od217],
@@ -196,7 +197,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     expect(orientations).toEqual([Orientation.UB, Orientation.UB]);
   });
 
-  it("b", function () {
+  test("b", function () {
     const orientations = getClassification(
       s,
       [s.directions.od53, s.directions.od180, s.directions.od270],
@@ -209,7 +210,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     ]);
   });
 
-  it("c", function () {
+  test("c", function () {
     const orientations = getClassification(
       s,
       [s.directions.od37, s.directions.od90, s.directions.od104],
@@ -223,7 +224,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     ]);
   });
 
-  it("d", function () {
+  test("d", function () {
     const orientations = getClassification(
       s,
       [s.directions.od37, s.directions.od53],
@@ -233,7 +234,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     expect(orientations).toEqual([Orientation.E, Orientation.E]);
   });
 
-  it("e", function () {
+  test("e", function () {
     const orientations = getClassification(
       s,
       [s.directions.od37, s.directions.od53, s.directions.od76],
@@ -247,7 +248,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     ]);
   });
 
-  it("f", function () {
+  test("f", function () {
     const orientations = getClassification(
       s,
       [
@@ -267,7 +268,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     ]);
   });
 
-  it("g", function () {
+  test("g", function () {
     const orientations = getClassification(
       s,
       [
@@ -287,7 +288,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     ]);
   });
 
-  it("h", function () {
+  test("h", function () {
     const orientations = getClassification(
       s,
       [s.directions.od53, s.directions.od217],
@@ -297,7 +298,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     expect(orientations).toEqual([Orientation.UB, Orientation.UB]);
   });
 
-  it("i", function () {
+  test("i", function () {
     const orientations = getClassification(
       s,
       [s.directions.od53, s.directions.od180, s.directions.od270],
@@ -311,7 +312,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     ]);
   });
 
-  it("j", function () {
+  test("j", function () {
     const orientations = getClassification(
       s,
       [s.directions.od53, s.directions.od90, s.directions.od104],
@@ -325,7 +326,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     ]);
   });
 
-  it("k", function () {
+  test("k", function () {
     const orientations = getClassification(
       s,
       [s.directions.od37, s.directions.od53],
@@ -335,7 +336,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     expect(orientations).toEqual([Orientation.UB, Orientation.UB]);
   });
 
-  it("l", function () {
+  test("l", function () {
     const orientations = getClassification(
       s,
       [s.directions.od37, s.directions.od53, s.directions.od76],
@@ -349,7 +350,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     ]);
   });
 
-  it("m", function () {
+  test("m", function () {
     const orientations = getClassification(
       s,
       [
@@ -369,7 +370,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
     ]);
   });
 
-  it("n", function () {
+  test("n", function () {
     const orientations = getClassification(
       s,
       [
@@ -391,7 +392,7 @@ describe("Given the examples in the paper of Buchin et al., classify() works as 
 });
 
 describe("classifyEdges() in a classification where all edges are classified and a halfedge and its twin share the same class", function () {
-  it("on simple test data", function () {
+  test("on simple test data", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/edge-cases.json"), "utf8"),
     );
@@ -425,7 +426,7 @@ describe("classifyEdges() in a classification where all edges are classified and
     expect(edgesWithoutClassification.length).toBe(0);
   });
 
-  it("on geo data", function () {
+  test("on geo data", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/geodata/ne_50m_africa_admin0-s20.json"),

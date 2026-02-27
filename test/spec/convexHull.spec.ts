@@ -1,8 +1,9 @@
 import grahamScanConvexHull from "graham_scan";
 import Point from "@/src/geometry/Point";
+import { describe, test, expect } from "vitest";
 
 describe("ConvexHull()", function () {
-  it("returns a convex hull on an array of point arrays", function () {
+  test("returns a convex hull on an array of point arrays", function () {
     const points = [
       [0, 0],
       [2, 0],
@@ -20,7 +21,7 @@ describe("ConvexHull()", function () {
 });
 
 describe("ConvexHull()", function () {
-  it("returns a convex hull on an array of points", function () {
+  test("returns a convex hull on an array of points", function () {
     const points = [
       new Point(0, 0),
       new Point(2, 0),

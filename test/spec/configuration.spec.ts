@@ -1,23 +1,24 @@
-import fs from "fs";
-import path from "path";
 import Configuration, {
-  OuterEdge,
   Junction,
+  OuterEdge,
 } from "@/src/c-oriented-schematization/Configuration";
+import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 import Contraction from "@/src/c-oriented-schematization/Contraction";
+import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
 import Dcel from "@/src/Dcel/Dcel";
 import Point from "@/src/geometry/Point";
+import fs from "fs";
+import path from "path";
+import { beforeEach, describe, expect, test } from "vitest";
 import {
   configurationCases,
   ConfigurationSetup,
   createConfigurationSetup,
   idOr,
 } from "./test-setup";
-import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
-import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 
 describe("getTrack()", function () {
-  it("return the correct angles for the reflex point for a square shape", function () {
+  test("return the correct angles for the reflex point for a square shape", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -40,7 +41,7 @@ describe("getTrack()", function () {
 });
 
 describe("getX() for a configuration", function () {
-  it("returns 3 edges, forming the configuration.", function () {
+  test("returns 3 edges, forming the configuration.", function () {
     const s = configurationCases.bothNoBlockingPoint;
     const configurations = new ConfigurationGenerator().run(s.dcel);
 
@@ -53,7 +54,7 @@ describe("getX() for a configuration", function () {
 });
 
 describe("getContractionPoint() for a configuration", function () {
-  it("where one intersection Point lies on an edge of the boundary which is not part of the configuration, returns 2 intersection point", function () {
+  test("where one intersection Point lies on an edge of the boundary which is not part of the configuration, returns 2 intersection point", function () {
     const s = configurationCases.bothNoBlockingPoint;
     const configurations = new ConfigurationGenerator().run(s.dcel);
 
@@ -63,7 +64,7 @@ describe("getContractionPoint() for a configuration", function () {
     expect(c?.[ContractionType.P]?.point).toEqual(new Point(1, -2));
   });
 
-  it("where the innerEdge is reflex, returns 1 (positive) intersection point", function () {
+  test("where the innerEdge is reflex, returns 1 (positive) intersection point", function () {
     const s = configurationCases.posReflex;
     const configurations = new ConfigurationGenerator().run(s.dcel);
 
@@ -73,7 +74,7 @@ describe("getContractionPoint() for a configuration", function () {
     expect(c?.[ContractionType.P]?.point).toEqual(new Point(-4, 0));
   });
 
-  it("where the innerEdge is convex, returns 1 (negative) intersection point.", function () {
+  test("where the innerEdge is convex, returns 1 (negative) intersection point.", function () {
     const s = configurationCases.negConvex;
     const configurations = new ConfigurationGenerator().run(s.dcel);
 
@@ -83,7 +84,7 @@ describe("getContractionPoint() for a configuration", function () {
     expect(c?.[ContractionType.P]).toBeUndefined();
   });
 
-  it("where the negative contraction is not feasible (a point of ∂PX is in the contraction area), still returns 2 intersection points.", function () {
+  test("where the negative contraction is not feasible (a point of ∂PX is in the contraction area), still returns 2 intersection points.", function () {
     const s = configurationCases.bothBlockingPointNeg;
     const configurations = new ConfigurationGenerator().run(s.dcel);
 
@@ -93,7 +94,7 @@ describe("getContractionPoint() for a configuration", function () {
     expect(c?.[ContractionType.P]?.point).toEqual(new Point(1, -2));
   });
 
-  it("where one intersection Point lies on an edge of the boundary which is not part of the configuration, returns 2 intersection points.", function () {
+  test("where one intersection Point lies on an edge of the boundary which is not part of the configuration, returns 2 intersection points.", function () {
     const s = createConfigurationSetup(
       new Point(-4, 4),
       new Point(0, 0),
@@ -109,7 +110,7 @@ describe("getContractionPoint() for a configuration", function () {
     expect(c?.[ContractionType.P]?.point).toEqual(new Point(1, -1));
   });
 
-  it(" returns 2 contraction points, when one tracks intersects the configuration's first edge,", function () {
+  test(" returns 2 contraction points, when one tracks intersects the configuration's first edge,", function () {
     const s = configurationCases.bothContractionOnFirstEdge;
     const configurations = new ConfigurationGenerator().run(s.dcel);
     const c = configurations.get(idOr(s.innerEdge));
@@ -118,7 +119,7 @@ describe("getContractionPoint() for a configuration", function () {
     expect(c?.[ContractionType.N]?.point).toEqual(new Point(-2, 1.3333333333));
   });
 
-  it("returns 2 contraction points, when one track intersects the configuration's third edge.", function () {
+  test("returns 2 contraction points, when one track intersects the configuration's third edge.", function () {
     const s = configurationCases.bothContractionOnThirdEdge;
     const configurations = new ConfigurationGenerator().run(s.dcel);
 
@@ -128,7 +129,7 @@ describe("getContractionPoint() for a configuration", function () {
     expect(c?.[ContractionType.N]?.point).toEqual(new Point(2, 1.3333333333));
   });
 
-  it("returns 2 contraction points, when the edge is of inflection type both and the tracks are parallel.", function () {
+  test("returns 2 contraction points, when the edge is of inflection type both and the tracks are parallel.", function () {
     const s = configurationCases.bothParallelTracks;
     const configurations = new ConfigurationGenerator().run(s.dcel);
 
@@ -138,7 +139,7 @@ describe("getContractionPoint() for a configuration", function () {
     expect(c?.[ContractionType.N]?.point).toEqual(new Point(-2, 2));
   });
 
-  it("where the edge is convex and the tracks are parallel, returns 1 contractionPoint.", function () {
+  test("where the edge is convex and the tracks are parallel, returns 1 contractionPoint.", function () {
     const s = configurationCases.negConvexParallelTracks;
     const configurations = new ConfigurationGenerator().run(s.dcel);
     const c = configurations.get(idOr(s.innerEdge));
@@ -149,7 +150,7 @@ describe("getContractionPoint() for a configuration", function () {
 });
 
 describe("getContractionAreaPoints() returns the correct contraction area", function () {
-  it("given a negative contraction point.", function () {
+  test("given a negative contraction point.", function () {
     const s = configurationCases.bothBlockingPointNeg;
     const configurations = new ConfigurationGenerator().run(s.dcel);
     const c = configurations.get(idOr(s.innerEdge));
@@ -162,7 +163,7 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
     ]);
   });
 
-  it("given a positive contraction point.", function () {
+  test("given a positive contraction point.", function () {
     const s = configurationCases.bothBlockingPointNeg;
     const configurations = new ConfigurationGenerator().run(s.dcel);
     const c = configurations.get(idOr(s.innerEdge));
@@ -175,7 +176,7 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
     ]);
   });
 
-  it("given a negative contraction point on the configuration's first edge.", function () {
+  test("given a negative contraction point on the configuration's first edge.", function () {
     const s = configurationCases.bothContractionOnFirstEdge;
     const configurations = new ConfigurationGenerator().run(s.dcel);
     const c = configurations.get(idOr(s.innerEdge));
@@ -188,7 +189,7 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
     ]);
   });
 
-  it("given a negative contraction point on the configuration's third edge.", function () {
+  test("given a negative contraction point on the configuration's third edge.", function () {
     const s = configurationCases.bothContractionOnThirdEdge;
     const configurations = new ConfigurationGenerator().run(s.dcel);
     const c = configurations.get(idOr(s.innerEdge));
@@ -203,7 +204,7 @@ describe("getContractionAreaPoints() returns the correct contraction area", func
 });
 
 describe("x and x_ return the correct number of boundary edges", function () {
-  it("for a setup with one interference.", function () {
+  test("for a setup with one interference.", function () {
     const s = configurationCases.bothBlockingPointNeg;
     const configurations = new ConfigurationGenerator().run(s.dcel);
     const c = configurations.get(idOr(s.innerEdge));
@@ -218,7 +219,7 @@ describe("x and x_ return the correct number of boundary edges", function () {
 });
 
 describe("isBlockedBy() determines whether or not a contraction is blocked by an edge", function () {
-  it("for a negative contraction", function () {
+  test("for a negative contraction", function () {
     const s = createConfigurationSetup(
       new Point(-4, 2),
       new Point(-2, 0),
@@ -246,7 +247,7 @@ describe("isBlockedBy() determines whether or not a contraction is blocked by an
     ).toBe(true);
   });
 
-  it("for a positive contraction", function () {
+  test("for a positive contraction", function () {
     const s = createConfigurationSetup(
       new Point(-4, 0),
       new Point(-2, 2),
@@ -283,7 +284,7 @@ describe("isBlockedBy() determines whether or not a contraction is blocked by an
     ).toBe(false);
   });
 
-  it("and handles edges which are part of X correctly", function () {
+  test("and handles edges which are part of X correctly", function () {
     const s = createConfigurationSetup(
       new Point(-4, 0),
       new Point(-2, 2),
@@ -307,7 +308,7 @@ describe("isBlockedBy() determines whether or not a contraction is blocked by an
 });
 
 describe("initializeBlockingNumber() returns the number of interfering edges", function () {
-  it("for a setup with one interference (partially residing).", function () {
+  test("for a setup with one interference (partially residing).", function () {
     const s = configurationCases.bothBlockingPointNeg;
     const configurations = new ConfigurationGenerator().run(s.dcel);
     const c = configurations.get(idOr(s.innerEdge));
@@ -316,7 +317,7 @@ describe("initializeBlockingNumber() returns the number of interfering edges", f
     expect(c?.[ContractionType.P]?.blockingNumber).toBe(0);
   });
 
-  it("for a setup with 3 interferences (partially and entirely residing)", function () {
+  test("for a setup with 3 interferences (partially and entirely residing)", function () {
     const s = createConfigurationSetup(
       new Point(-4, 4),
       new Point(-2, 0),
@@ -332,7 +333,7 @@ describe("initializeBlockingNumber() returns the number of interfering edges", f
     expect(c?.[ContractionType.P]?.blockingNumber).toBe(0);
   });
 
-  it("for a setup with one interference (partially and entirely residing)", function () {
+  test("for a setup with one interference (partially and entirely residing)", function () {
     const s = createConfigurationSetup(
       new Point(-4, 4),
       new Point(-2, 0),
@@ -356,7 +357,7 @@ describe("initializeBlockingNumber() returns the number of interfering edges", f
     expect(c?.[ContractionType.P]?.blockingNumber).toBe(2);
   });
 
-  it("for a rectilinear setup", function () {
+  test("for a rectilinear setup", function () {
     const s = createConfigurationSetup(
       new Point(11, 0),
       new Point(11, 1),
@@ -373,7 +374,7 @@ describe("initializeBlockingNumber() returns the number of interfering edges", f
 });
 
 describe("The getter isFeasible returns", function () {
-  it("true for a contraction with a contraction point and a blockingnumber of 0, and false if the blocking number is > 0.", function () {
+  test("true for a contraction with a contraction point and a blockingnumber of 0, and false if the blocking number is > 0.", function () {
     const s = configurationCases.bothBlockingPointNeg;
 
     const configurations = new ConfigurationGenerator().run(s.dcel);
@@ -385,7 +386,7 @@ describe("The getter isFeasible returns", function () {
 });
 
 describe("getContractionArea() returns", function () {
-  it("the Area of an contraction area.", function () {
+  test("the Area of an contraction area.", function () {
     const s = configurationCases.bothBlockingPointNeg;
     const configurations = new ConfigurationGenerator().run(s.dcel);
     const c = configurations.get(idOr(s.innerEdge));
@@ -394,7 +395,7 @@ describe("getContractionArea() returns", function () {
     expect(c?.[ContractionType.N]?.area).toBe(24);
   });
 
-  it("the area of an contraction area for a collinear configuration.", function () {
+  test("the area of an contraction area for a collinear configuration.", function () {
     const s = createConfigurationSetup(
       new Point(-4, 0),
       new Point(-2, 0),
@@ -423,7 +424,7 @@ describe("is Complementary() returns", function () {
     neg = c?.[ContractionType.N];
   });
 
-  it("true, when the configuration has a contraction point of the complementary contraction type.", function () {
+  test("true, when the configuration has a contraction point of the complementary contraction type.", function () {
     if (!pos || !neg) {
       throw new Error("Contractions are undefined.");
     }
@@ -431,7 +432,7 @@ describe("is Complementary() returns", function () {
     expect(pos.isComplementary(neg)).toBe(true);
   });
 
-  it("false, when the configuration has no contraction point of the complementary contraction type.", function () {
+  test("false, when the configuration has no contraction point of the complementary contraction type.", function () {
     if (!pos || !neg) {
       throw new Error("Contractions are undefined.");
     }
@@ -452,7 +453,7 @@ describe("getJunctionType() determines the type of a junction in respect to the 
     dcel = Dcel.fromGeoJSON(json);
   });
 
-  it("for a junction of type A.", function () {
+  test("for a junction of type A.", function () {
     const edge = dcel.getHalfEdges()[2];
     const configurations = new ConfigurationGenerator().run(dcel);
     const c = configurations.get(idOr(edge));
@@ -465,7 +466,7 @@ describe("getJunctionType() determines the type of a junction in respect to the 
     expect(c?.getJunctionType(junction)).toBe(Junction.A);
   });
 
-  it("for a junction of type B.", function () {
+  test("for a junction of type B.", function () {
     const edge = dcel.getHalfEdges()[6];
     const configurations = new ConfigurationGenerator().run(dcel);
     const c = configurations.get(idOr(edge));
@@ -477,7 +478,7 @@ describe("getJunctionType() determines the type of a junction in respect to the 
     expect(c?.getJunctionType(junction)).toBe(Junction.B);
   });
 
-  it("for a configuration with junctions of type A and C.", function () {
+  test("for a configuration with junctions of type A and C.", function () {
     const edge = dcel.getHalfEdges()[14];
     const configurations = new ConfigurationGenerator().run(dcel);
     const c = configurations.get(idOr(edge));

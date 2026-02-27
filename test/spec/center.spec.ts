@@ -1,8 +1,9 @@
 import Dcel from "@/src/Dcel/Dcel";
 import Subdivision from "@/src/geometry/Subdivision";
+import { describe, expect, test } from "vitest";
 
 describe("center()", function () {
-  it("returns the correct coordinates", function () {
+  test("returns the correct coordinates", function () {
     const s = Subdivision.fromCoordinates([
       [
         [
@@ -17,7 +18,7 @@ describe("center()", function () {
     ]);
     expect(Dcel.fromSubdivision(s).center).toEqual([0, 0]);
   });
-  it("returns the correct coordinates", function () {
+  test("returns the correct coordinates", function () {
     const s = Subdivision.fromCoordinates([
       [
         [

@@ -3,12 +3,13 @@ import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPo
 import Subdivision from "@/src/geometry/Subdivision";
 import { readFileSync } from "fs";
 import path from "path";
+import { describe, expect, test } from "vitest";
 
-describe("removeSuperfluousVertices()", function () {
-  it("on a triangle-shaped DCEL of with superfluous vertices, results in a DCEL of 3 vertices", function () {
+describe("Removing collinear vertices", function () {
+  test("on a triangle-shaped DCEL of with colleinar vertices, results in a DCEL of 3 vertices", function () {
     const json = JSON.parse(
       readFileSync(
-        path.resolve("test/data/shapes/superfluous-vertices-triangle.json"),
+        path.resolve("test/data/shapes/collinear-vertices-triangle.json"),
         "utf8",
       ),
     );
@@ -18,10 +19,10 @@ describe("removeSuperfluousVertices()", function () {
     expect(result.vertices.size).toBe(3);
   });
 
-  it("on a square-shaped DCEL of with superfluous vertices, results in a DCEL of 4 vertices", function () {
+  test("on a square-shaped DCEL of with collinear vertices, results in a DCEL of 4 vertices", function () {
     const json = JSON.parse(
       readFileSync(
-        path.resolve("test/data/shapes/superfluous-vertices-square.json"),
+        path.resolve("test/data/shapes/collinear-vertices-square.json"),
         "utf8",
       ),
     );
@@ -31,7 +32,7 @@ describe("removeSuperfluousVertices()", function () {
     expect(result.vertices.size).toBe(4);
   });
 
-  it("removes 3 collinear points", function () {
+  test("removes 3 collinear points", function () {
     const json = JSON.parse(
       readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -44,7 +45,7 @@ describe("removeSuperfluousVertices()", function () {
     expect(result.vertices.size).toBe(4);
   });
 
-  it("removes 4 collinear points", function () {
+  test("removes 4 collinear points", function () {
     const json = JSON.parse(
       readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -57,7 +58,7 @@ describe("removeSuperfluousVertices()", function () {
     expect(result.vertices.size).toBe(4);
   });
 
-  it("removes any collinear points on a simples square", function () {
+  test("removes any collinear points on a simples square", function () {
     const dcel = Dcel.fromSubdivision(
       Subdivision.fromCoordinates([
         [

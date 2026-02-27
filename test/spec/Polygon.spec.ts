@@ -1,10 +1,11 @@
-import Polygon from "@/src/geometry/Polygon";
-import Point from "@/src/geometry/Point";
 import LineSegment from "@/src/geometry/LineSegment";
+import Point from "@/src/geometry/Point";
+import Polygon from "@/src/geometry/Polygon";
 import Ring from "@/src/geometry/Ring";
+import { describe, expect, test } from "vitest";
 
 describe("The Polygon's area getter", function () {
-  it("gets the correct area of simple squares", function () {
+  test("gets the correct area of simple squares", function () {
     const ringA = new Ring([
       new Point(0, 0),
       new Point(4, 0),
@@ -42,7 +43,7 @@ describe("The Polygon's area getter", function () {
     ).toBe(1);
   });
 
-  it("gets the correct area of shapes with holes", function () {
+  test("gets the correct area of shapes with holes", function () {
     const exteriorRing = new Ring([
       new Point(0, 0),
       new Point(4, 0),
@@ -86,7 +87,7 @@ describe("The Polygon's area getter", function () {
 });
 
 describe("The Polygon's exteriorLineSegments getter", function () {
-  it("gets the line segments of simple squares", function () {
+  test("gets the line segments of simple squares", function () {
     const polygon = Polygon.fromCoordinates([
       [
         [0, -1],
@@ -106,7 +107,7 @@ describe("The Polygon's exteriorLineSegments getter", function () {
 });
 
 describe("A polygon created from a set of coordinates", function () {
-  it("without holes is correct", function () {
+  test("without holes is correct", function () {
     const p = Polygon.fromCoordinates([
       [
         [2, 2],
@@ -119,7 +120,7 @@ describe("A polygon created from a set of coordinates", function () {
     expect(p.interiorRings.length).toEqual(0);
     expect(p.area).toEqual(1);
   });
-  it("with holes is correct", function () {
+  test("with holes is correct", function () {
     const p = Polygon.fromCoordinates([
       [
         [0, 0],

@@ -1,10 +1,11 @@
-import Ring from "@/src/geometry/Ring";
 import LineSegment from "@/src/geometry/LineSegment";
 import Point from "@/src/geometry/Point";
 import Polygon from "@/src/geometry/Polygon";
+import Ring from "@/src/geometry/Ring";
+import { describe, expect, test } from "vitest";
 
 describe("distanceToPoint()", function () {
-  it("returns the correct distance between 2 vertices", function () {
+  test("returns the correct distance between 2 vertices", function () {
     const a = new Point(0, 0);
     const b = new Point(4, 0);
     const c = new Point(4, 4);
@@ -18,7 +19,7 @@ describe("distanceToPoint()", function () {
 });
 
 describe("isInPolygon()", function () {
-  it("returns interference for 2 regions from AUT_adm1-simple.json.", function () {
+  test("returns interference for 2 regions from AUT_adm1-simple.json.", function () {
     const regionA = Polygon.fromCoordinates([
       [
         [10.172608375549316, 47.269916534423885],
@@ -51,7 +52,7 @@ describe("isInPolygon()", function () {
     expect(regionB.exteriorRing.points[4].isInPolygon(regionA)).toBe(false);
   });
 
-  it("returns interference for 1 regions and a Point of AUT_adm1-simple.json.", function () {
+  test("returns interference for 1 regions and a Point of AUT_adm1-simple.json.", function () {
     const polygon = Polygon.fromCoordinates([
       [
         [9.668785095214957, 47.49126052856445],
@@ -66,7 +67,7 @@ describe("isInPolygon()", function () {
     expect(point.isInPolygon(polygon)).toBe(true);
   });
 
-  it("returns false if it lies outside of a convex(!) Polygon", function () {
+  test("returns false if it lies outside of a convex(!) Polygon", function () {
     const A = Polygon.fromCoordinates([
       [
         [0, 0],
@@ -94,7 +95,7 @@ describe("isInPolygon()", function () {
     expect(c.isInPolygon(A)).toBe(false);
   });
 
-  it("returns true if it lies inside of a convex(!) Polygon", function () {
+  test("returns true if it lies inside of a convex(!) Polygon", function () {
     const A = Polygon.fromCoordinates([
       [
         [0, 0],
@@ -123,7 +124,7 @@ describe("isInPolygon()", function () {
   });
 });
 
-it("returns true if it lies inside of a convex(!) Polygon", function () {
+test("returns true if it lies inside of a convex(!) Polygon", function () {
   const a = new Point(1, 1);
   const b = new Point(2, 1);
   const c = new Point(2, 2);
@@ -137,7 +138,7 @@ it("returns true if it lies inside of a convex(!) Polygon", function () {
 });
 
 describe("getArea()", function () {
-  it("returns correct area for a given set of 4 Points (a square).", function () {
+  test("returns correct area for a given set of 4 Points (a square).", function () {
     const plgn = Polygon.fromCoordinates([
       [
         [0, 0],
@@ -149,7 +150,7 @@ describe("getArea()", function () {
     expect(plgn.area).toBe(1);
   });
 
-  it("returns correct area for a given set of 3 Points (a triangle).", function () {
+  test("returns correct area for a given set of 3 Points (a triangle).", function () {
     const plgn = Polygon.fromCoordinates([
       [
         [0, 0],
@@ -162,17 +163,17 @@ describe("getArea()", function () {
 });
 
 describe("equals()", function () {
-  it("returns true if two points reside on the exact same location.", function () {
+  test("returns true if two points reside on the exact same location.", function () {
     expect(new Point(0, 0).equals(new Point(0, 0))).toBe(true);
   });
 
-  it("returns false if two points reside on different locations.", function () {
+  test("returns false if two points reside on different locations.", function () {
     expect(new Point(0, 0).equals(new Point(0, 0.0000000001))).toBe(false);
   });
 });
 
 describe("isOnLineSegments()", function () {
-  it("returns true if the point lies on one of the given linesegments.", function () {
+  test("returns true if the point lies on one of the given linesegments.", function () {
     const lineSegments = [
       new LineSegment(new Point(0, 0), new Point(4, 4)),
       new LineSegment(new Point(4, 4), new Point(0, 8)),

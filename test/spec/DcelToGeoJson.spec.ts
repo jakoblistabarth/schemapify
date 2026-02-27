@@ -1,7 +1,8 @@
-import fs from "fs";
-import path from "path";
 import Dcel from "@/src/Dcel/Dcel";
 import Subdivision from "@/src/geometry/Subdivision";
+import fs from "fs";
+import path from "path";
+import { describe, expect, test } from "vitest";
 
 const getMultiPolygon = (
   subdivision: Subdivision,
@@ -23,11 +24,11 @@ const loadTestFile = (filePath: string) => {
 };
 
 describe("toSubdivision converts to a valid subdivision from a DCEL of test case", function () {
-  const test = "test/data/shapes/square-hole.json";
-  const input = loadTestFile(test);
+  const testFile = "test/data/shapes/square-hole.json";
+  const input = loadTestFile(testFile);
   const dcel = Dcel.fromGeoJSON(input.json);
 
-  it(`"${input.fileName}".`, function () {
+  test(`"${input.fileName}".`, function () {
     const subdivision = dcel.toSubdivision();
     const multiPolygons = subdivision.multiPolygons;
     // the subdivision consists of a single Multipolygon
@@ -42,11 +43,11 @@ describe("toSubdivision converts to a valid subdivision from a DCEL of test case
 });
 
 describe("toSubdivision converts to a valid subdivision from a DCEL of test case", function () {
-  const test = "test/data/geodata/AUT_adm1-simple.json";
-  const input = loadTestFile(test);
+  const testFile = "test/data/geodata/AUT_adm1-simple.json";
+  const input = loadTestFile(testFile);
   const dcel = Dcel.fromGeoJSON(input.json);
 
-  it(`"${input.fileName}".`, function () {
+  test(`"${input.fileName}".`, function () {
     const subdivision = dcel.toSubdivision();
     const lowerAustria = getMultiPolygon(
       subdivision,
@@ -67,11 +68,11 @@ describe("toSubdivision converts to a valid subdivision from a DCEL of test case
 });
 
 describe("toSubdivision converts to a valid subdivision from a DCEL of test case", function () {
-  const test = "test/data/shapes/edge-cases.json";
-  const input = loadTestFile(test);
+  const testFile = "test/data/shapes/edge-cases.json";
+  const input = loadTestFile(testFile);
   const dcel = Dcel.fromGeoJSON(input.json);
 
-  it(`"${input.fileName}".`, function () {
+  test(`"${input.fileName}".`, function () {
     const subdivision = dcel.toSubdivision();
     const withHole = getMultiPolygon(subdivision, "id", 1);
     const withLakes = getMultiPolygon(subdivision, "id", 2);
@@ -90,11 +91,11 @@ describe("toSubdivision converts to a valid subdivision from a DCEL of test case
 });
 
 describe("toSubdivision converts to a valid subdivision from a DCEL of test case", function () {
-  const test = "test/data/shapes/2plgn-islands-holes.json";
-  const input = loadTestFile(test);
+  const testFile = "test/data/shapes/2plgn-islands-holes.json";
+  const input = loadTestFile(testFile);
   const dcel = Dcel.fromGeoJSON(input.json);
 
-  it(`"${input.fileName}".`, function () {
+  test(`"${input.fileName}".`, function () {
     const subdivision = dcel.toSubdivision();
     const multiPolygon = getMultiPolygon(subdivision, "id", 1);
 
@@ -106,11 +107,11 @@ describe("toSubdivision converts to a valid subdivision from a DCEL of test case
 });
 
 describe("toSubdivision converts to a valid subdivision from a DCEL of test case", function () {
-  const test = "test/data/shapes/square-3-nested-islands.json";
-  const input = loadTestFile(test);
+  const testFile = "test/data/shapes/square-3-nested-islands.json";
+  const input = loadTestFile(testFile);
   const dcel = Dcel.fromGeoJSON(input.json);
 
-  it(`"${input.fileName}".`, function () {
+  test(`"${input.fileName}".`, function () {
     const subdivision = dcel.toSubdivision();
     const multiPolygon = getMultiPolygon(subdivision, "id", 1);
 

@@ -6,13 +6,14 @@ import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
 import Line from "@/src/geometry/Line";
 import Point from "@/src/geometry/Point";
+import Subdivision from "@/src/geometry/Subdivision";
 import fs from "fs";
 import path from "path";
+import { describe, expect, test } from "vitest";
 import { getTestFiles } from "./test-setup";
-import Subdivision from "@/src/geometry/Subdivision";
 
 describe("getLength()", function () {
-  it("returns the correct length for a single halfEdge", function () {
+  test("returns the correct length for a single halfEdge", function () {
     const dcel = new Dcel();
     const a = dcel.addVertex(0, 0);
     const b = dcel.addVertex(2, 0);
@@ -24,7 +25,7 @@ describe("getLength()", function () {
     expect(edge.getLength()).toEqual(2);
   });
 
-  it("returns the correct length for all sides of a square", function () {
+  test("returns the correct length for all sides of a square", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -38,7 +39,7 @@ describe("getLength()", function () {
       });
   });
 
-  it("returns the correct length for the sides of a triangle", function () {
+  test("returns the correct length for the sides of a triangle", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/triangle.json"), "utf8"),
     );
@@ -55,7 +56,7 @@ describe("getLength()", function () {
 });
 
 describe("getMidpoint()", function () {
-  it("returns the correct length", function () {
+  test("returns the correct length", function () {
     const dcel = new Dcel();
     const a = dcel.addVertex(0, 0);
     const b = dcel.addVertex(2, 0);
@@ -76,7 +77,7 @@ describe("getMidpoint()", function () {
 });
 
 describe("distanceToEdge()", function () {
-  it("returns the minimum distance between 2 edges", function () {
+  test("returns the minimum distance between 2 edges", function () {
     const dcel = new Dcel();
     const a = dcel.addVertex(0, 0);
     const b = dcel.addVertex(-10, 10);
@@ -99,7 +100,7 @@ describe("distanceToEdge()", function () {
 });
 
 describe("getAngle()", function () {
-  it("returns the correct angle", function () {
+  test("returns the correct angle", function () {
     const dcel = new Dcel();
     const center = dcel.addVertex(0, 0);
 
@@ -135,7 +136,7 @@ describe("getAngle()", function () {
 });
 
 describe("getAssignedDirection()", function () {
-  it("returns the correct angle", function () {
+  test("returns the correct angle", function () {
     const c = new CRegular(2);
     const { sectors } = c;
     expect(getAssignedAngle(1, sectors)).toBe(c.angles[1]);
@@ -146,7 +147,7 @@ describe("getAssignedDirection()", function () {
 });
 
 describe("getCycle()", function () {
-  it("returns the correct number of edges for square", function () {
+  test("returns the correct number of edges for square", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -156,7 +157,7 @@ describe("getCycle()", function () {
     expect(dcel.getBoundedFaces()[0].edge?.twin?.getCycle().length).toBe(4);
   });
 
-  it("returns the correct number of edges for a triangle", function () {
+  test("returns the correct number of edges for a triangle", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/triangle.json"), "utf8"),
     );
@@ -177,7 +178,7 @@ describe("subdivide() on geodata results in a Dcel", function () {
   ];
 
   testFiles.forEach((file) => {
-    it(
+    test(
       "with complete cycles for all faces in counter-clockwise and clockwise direction of file " +
         file,
       function () {
@@ -203,7 +204,7 @@ describe("subdivide() on simple shapes results in a Dcel", function () {
   const testFiles = getTestFiles(dir);
 
   testFiles.forEach((file) => {
-    it(
+    test(
       "with complete cycles for all faces in counter-clockwise and clockwise direction of file " +
         file,
       function () {
@@ -228,7 +229,7 @@ describe("subdivide() on simple shapes results in a Dcel", function () {
 });
 
 describe("subdivide()", function () {
-  it("on one edge of a triangle results in 4 linked halfEdges", function () {
+  test("on one edge of a triangle results in 4 linked halfEdges", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/triangle.json"), "utf8"),
     );
@@ -243,7 +244,7 @@ describe("subdivide()", function () {
     );
   });
 
-  it("on one edge of a square results in 5 linked outer halfEdges", function () {
+  test("on one edge of a square results in 5 linked outer halfEdges", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -256,7 +257,7 @@ describe("subdivide()", function () {
     );
   });
 
-  it("on one outer edge of a square results in 5 linked inner halfEdges", function () {
+  test("on one outer edge of a square results in 5 linked inner halfEdges", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -270,7 +271,7 @@ describe("subdivide()", function () {
     expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(5);
   });
 
-  it("on one inneredge of a square results in 5 linked outer halfEdges", function () {
+  test("on one inneredge of a square results in 5 linked outer halfEdges", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -286,7 +287,7 @@ describe("subdivide()", function () {
     );
   });
 
-  it("on a square with a specified point, which is not on the origina edge, results in a correct dcel", function () {
+  test("on a square with a specified point, which is not on the origina edge, results in a correct dcel", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -302,7 +303,7 @@ describe("subdivide()", function () {
     );
   });
 
-  it("on the 1st outer edge of the first of 2 adjacent triangles results in 4 and 3 linked inner and 5 linked outer halfEdges", function () {
+  test("on the 1st outer edge of the first of 2 adjacent triangles results in 4 and 3 linked inner and 5 linked outer halfEdges", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/2triangle-adjacent.json"),
@@ -325,7 +326,7 @@ describe("subdivide()", function () {
     );
   });
 
-  it("on the 2nd outer edge of the first of 2 adjacent triangles results in 4 and 3 linked inner and 5 linked outer halfEdges", function () {
+  test("on the 2nd outer edge of the first of 2 adjacent triangles results in 4 and 3 linked inner and 5 linked outer halfEdges", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/2triangle-adjacent.json"),
@@ -350,7 +351,7 @@ describe("subdivide()", function () {
 });
 
 describe("subdivideToThreshold()", function () {
-  it("turns a square with side length 20 into a dcel with 4 times more halfedges 8 edges (epsilon: 5.01, subdivides 2 times)", function () {
+  test("turns a square with side length 20 into a dcel with 4 times more halfedges 8 edges (epsilon: 5.01, subdivides 2 times)", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -360,7 +361,7 @@ describe("subdivideToThreshold()", function () {
     expect(result.halfEdges.size).toBe(dcel.halfEdges.size * 4);
   });
 
-  it("turns a square with sides of length 20 into a dcel with 64 edges (epsilon: 2.51)", function () {
+  test("turns a square with sides of length 20 into a dcel with 64 edges (epsilon: 2.51)", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -374,7 +375,7 @@ describe("subdivideToThreshold()", function () {
 });
 
 describe("intersectsLine()", function () {
-  it("returns the intersection point if the halfedge intersects with a line", function () {
+  test("returns the intersection point if the halfedge intersects with a line", function () {
     const dcel = new Dcel();
     const a = dcel.addVertex(0, 0);
     const b = dcel.addVertex(2, 2);
@@ -388,7 +389,7 @@ describe("intersectsLine()", function () {
     expect(halfEdge.intersectsLine(line)?.y).toBeCloseTo(1);
   });
 
-  it("returns the intersection point if the halfedge intersects with a line", function () {
+  test("returns the intersection point if the halfedge intersects with a line", function () {
     const dcel = new Dcel();
     const a = dcel.addVertex(2, 0);
     const b = dcel.addVertex(0, 2);
@@ -402,7 +403,7 @@ describe("intersectsLine()", function () {
     expect(halfEdge.intersectsLine(line)?.y).toBeCloseTo(1);
   });
 
-  it("returns undefined if the halfedge and the line are parallel and do not share a vertex", function () {
+  test("returns undefined if the halfedge and the line are parallel and do not share a vertex", function () {
     const dcel = new Dcel();
     const a = dcel.addVertex(0, 0);
     const b = dcel.addVertex(2, 0);
@@ -415,7 +416,7 @@ describe("intersectsLine()", function () {
     expect(halfEdge.intersectsLine(line)).toBeUndefined();
   });
 
-  it("returns ? if the halfedge is in line with the line", function () {
+  test("returns ? if the halfedge is in line with the line", function () {
     const dcel = new Dcel();
     const a = dcel.addVertex(0, 0);
     const b = dcel.addVertex(2, 0);
@@ -428,7 +429,7 @@ describe("intersectsLine()", function () {
     expect(halfEdge.intersectsLine(line)).toBeUndefined();
   });
 
-  it("returns undefined if the halfedge does not intersect with a line", function () {
+  test("returns undefined if the halfedge does not intersect with a line", function () {
     const dcel = new Dcel();
     const a = dcel.addVertex(0, 0);
     const b = dcel.addVertex(2, 2);
@@ -443,7 +444,7 @@ describe("intersectsLine()", function () {
 });
 
 describe("getMinimalCycleDistance()", function () {
-  it("returns the correct distance for a square.", function () {
+  test("returns the correct distance for a square.", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -457,8 +458,8 @@ describe("getMinimalCycleDistance()", function () {
   });
 });
 
-describe("move().", function () {
-  it("moves an edge where both new position are free.", function () {
+describe("moveTo().", function () {
+  test("moves an edge where both new position are free.", function () {
     const dcel = Dcel.fromSubdivision(
       Subdivision.fromCoordinates([
         [
@@ -485,7 +486,7 @@ describe("move().", function () {
     expect(dcel.vertices.size).toBe(4);
   });
 
-  it("moves an edge where both new position are free.", function () {
+  test("moves an edge where both new position are free.", function () {
     const dcel = Dcel.fromSubdivision(
       Subdivision.fromCoordinates([
         [
@@ -512,7 +513,7 @@ describe("move().", function () {
     expect(dcel.vertices.size).toBe(4);
   });
 
-  it("moves an edge where one position is free.", function () {
+  test("moves an edge where one position is free.", function () {
     const dcel = Dcel.fromSubdivision(
       Subdivision.fromCoordinates([
         [
@@ -542,7 +543,7 @@ describe("move().", function () {
     expect(dcel.vertices.size).toBe(5);
   });
 
-  it("moves an edge.", function () {
+  test("moves an edge.", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction.json"),
@@ -562,7 +563,8 @@ describe("move().", function () {
     expect(moved.head?.y).toBe(1);
   });
 
-  it("deletes (merges) a vertex if target point is existing.", function () {
+  test("deletes (merges) a vertex if one target point is already existing.", function () {
+    //TODO: does not yet handle removing collinear points (in this case the vertex at (10, 1) would be collinear and should be removed)
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction.json"),
@@ -580,13 +582,18 @@ describe("move().", function () {
     expect(dcel.findVertex(10, 0)).toBeDefined();
     expect(dcel.findVertex(10, 1)).toBeDefined();
     const movedEdge = dcel.getBoundedFaces()[0].getEdges()[1];
-    expect(movedEdge.tail?.x).toBe(10);
-    expect(movedEdge.tail?.y).toBe(0);
-    expect(movedEdge.head?.x).toBe(10);
-    expect(movedEdge.head?.y).toBe(1);
+    expect(movedEdge.tail.xy).toEqual([10, 0]);
+    expect(movedEdge.head?.xy).toEqual([10, 1]);
+    console.log(
+      "vertices",
+      Array.from(dcel.halfEdges.values())
+        .at(0)
+        ?.getCycle()
+        .map((e) => e.tail.xy),
+    );
   });
 
-  it("deletes (merges) vertices if target points are existing.", function () {
+  test("deletes (merges) vertices if both target points are existing.", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction.json"),
@@ -602,17 +609,11 @@ describe("move().", function () {
     const e3 = dcel.getBoundedFaces()[0].getEdges()[3];
     const e4 = dcel.getBoundedFaces()[0].getEdges()[4];
     const e5 = dcel.getBoundedFaces()[0].getEdges()[5];
-    expect(e3.tail?.x).toBe(10);
-    expect(e3.tail?.y).toBe(1);
-    expect(e3.head?.x).toBe(10);
-    expect(e3.head?.y).toBe(7);
-    expect(e4.tail?.x).toBe(10);
-    expect(e4.tail?.y).toBe(7);
-    expect(e4.head?.x).toBe(10);
-    expect(e4.head?.y).toBe(8);
-    expect(e5.tail?.x).toBe(10);
-    expect(e5.tail?.y).toBe(8);
-    expect(e5.head?.x).toBe(10);
-    expect(e5.head?.y).toBe(10);
+    expect(e3.tail.xy).toEqual([10, 1]);
+    expect(e3.head?.xy).toEqual([10, 7]);
+    expect(e4.tail.xy).toEqual([10, 7]);
+    expect(e4.head?.xy).toEqual([10, 8]);
+    expect(e5.tail.xy).toEqual([10, 8]);
+    expect(e5.head?.xy).toEqual([10, 10]);
   });
 });

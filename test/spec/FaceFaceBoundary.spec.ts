@@ -4,13 +4,14 @@ import ConfigurationGenerator from "@/src/c-oriented-schematization/Configuratio
 import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import Subdivision from "@/src/geometry/Subdivision";
-import fs from "fs";
+import { readFileSync } from "fs";
 import path from "path";
+import { describe, expect, test } from "vitest";
 
 describe("create()", function () {
-  it("on a dcel of 2 adjacent squares returns FaceFaceBoundaryList with 3 entries and the correct number of Edges", function () {
+  test("on a dcel of 2 adjacent squares returns FaceFaceBoundaryList with 3 entries and the correct number of Edges", function () {
     const json = JSON.parse(
-      fs.readFileSync(
+      readFileSync(
         path.resolve("test/data/shapes/2plgn-adjacent.json"),
         "utf8",
       ),
@@ -25,9 +26,9 @@ describe("create()", function () {
     expect(lengths).toEqual([1, 3, 3]);
   });
 
-  it("on a dcel of 3 adjacent squares returns 5 FaceFaceBoundaryList with 5 entries and the correct number of Edges", function () {
+  test("on a dcel of 3 adjacent squares returns 5 FaceFaceBoundaryList with 5 entries and the correct number of Edges", function () {
     const json = JSON.parse(
-      fs.readFileSync(
+      readFileSync(
         path.resolve("test/data/shapes/3plgn-adjacent.json"),
         "utf8",
       ),
@@ -44,7 +45,7 @@ describe("create()", function () {
 });
 
 describe("The Face-Face-Boundary", function () {
-  it("consists of edges which all belong to the same face", function () {
+  test("consists of edges which all belong to the same face", function () {
     const dcel = Dcel.fromSubdivision(
       Subdivision.fromCoordinates([
         [
@@ -69,9 +70,9 @@ describe("The Face-Face-Boundary", function () {
 });
 
 describe("getMinimalConfigurationPair()", function () {
-  it("on a test file returns the expected contraction pair.", function () {
+  test("on a test file returns the expected contraction pair.", function () {
     const json = JSON.parse(
-      fs.readFileSync(
+      readFileSync(
         path.resolve("test/data/shapes/smallest-contraction.json"),
         "utf8",
       ),
@@ -97,9 +98,9 @@ describe("getMinimalConfigurationPair()", function () {
     expect(compensationInner?.head?.y).toBe(10);
   });
 
-  it("on a test file returns the expected contraction pair.", function () {
+  test("on a test file returns the expected contraction pair.", function () {
     const json = JSON.parse(
-      fs.readFileSync(
+      readFileSync(
         path.resolve("test/data/shapes/smallest-contraction-2.json"),
         "utf8",
       ),

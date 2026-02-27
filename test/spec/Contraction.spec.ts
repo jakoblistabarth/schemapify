@@ -1,10 +1,15 @@
+import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
+import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
+import Dcel from "@/src/Dcel/Dcel";
+import Point from "@/src/geometry/Point";
 import fs from "fs";
 import path from "path";
-import Point from "@/src/geometry/Point";
-import Dcel from "@/src/Dcel/Dcel";
-import { configurationCases, createConfigurationSetup, idOr } from "./test-setup";
-import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
-import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
+import { beforeEach, describe, expect, test } from "vitest";
+import {
+  configurationCases,
+  createConfigurationSetup,
+  idOr,
+} from "./test-setup";
 
 describe("isConflicting() returns", function () {
   let dcel: Dcel;
@@ -18,7 +23,7 @@ describe("isConflicting() returns", function () {
     dcel = Dcel.fromGeoJSON(json);
   });
 
-  it("false for 2 non-conflicting contractions. (1.1)", function () {
+  test("false for 2 non-conflicting contractions. (1.1)", function () {
     const configurations = new ConfigurationGenerator().run(dcel);
 
     const edgeA = dcel.findHalfEdge(new Point(5, 0), new Point(5, 1));
@@ -36,7 +41,7 @@ describe("isConflicting() returns", function () {
     );
   });
 
-  it("true for 2 conflicting contractions, due to 2 overlapping Edges. (1.2)", function () {
+  test("true for 2 conflicting contractions, due to 2 overlapping Edges. (1.2)", function () {
     const configurations = new ConfigurationGenerator().run(dcel);
 
     const edgeA = dcel.findHalfEdge(new Point(0, 0), new Point(2, 0));
@@ -54,7 +59,7 @@ describe("isConflicting() returns", function () {
     );
   });
 
-  it("true for 2 conflicting contractions, due to wrong inflectionType of the overlapping Edge. (1.3)", function () {
+  test("true for 2 conflicting contractions, due to wrong inflectionType of the overlapping Edge. (1.3)", function () {
     const configurations = new ConfigurationGenerator().run(dcel);
 
     const edgeA = dcel.findHalfEdge(new Point(0, 0), new Point(2, 0));
@@ -88,7 +93,7 @@ describe("isConflicting() returns", function () {
     );
   });
 
-  it("true for 2 conflicting contractions, due to too many overlapping Edges. (1.4)", function () {
+  test("true for 2 conflicting contractions, due to too many overlapping Edges. (1.4)", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction-2.json"),
@@ -114,7 +119,7 @@ describe("isConflicting() returns", function () {
 });
 
 describe("getCompensationShift() returns", function () {
-  it("for a rectangular compensation area.", function () {
+  test("for a rectangular compensation area.", function () {
     const s = configurationCases.negConvexParallelTracks;
     const configurations = new ConfigurationGenerator().run(s.dcel);
     const c = configurations.get(idOr(s.innerEdge));
@@ -128,7 +133,7 @@ describe("getCompensationShift() returns", function () {
     expect(c[ContractionType.N]?.getCompensationHeight(6)).toBe(1.5);
   });
 
-  it("for an inwards trapezoid compensation area.", function () {
+  test("for an inwards trapezoid compensation area.", function () {
     const s = configurationCases.posReflex;
     const configurations = new ConfigurationGenerator().run(s.dcel);
     const c = configurations.get(idOr(s.innerEdge));
@@ -140,7 +145,7 @@ describe("getCompensationShift() returns", function () {
     expect(c[ContractionType.P]?.getCompensationHeight(5)).toBe(1);
   });
 
-  it("for an outwards trapezoid compensation area.", function () {
+  test("for an outwards trapezoid compensation area.", function () {
     const s = configurationCases.negConvex;
     const configurations = new ConfigurationGenerator().run(s.dcel);
     const c = configurations.get(idOr(s.innerEdge));
@@ -153,7 +158,7 @@ describe("getCompensationShift() returns", function () {
     expect(c[ContractionType.N]?.getCompensationHeight(8.25)).toBe(1.5);
   });
 
-  it("for a inwards trapezoid compensation area.", function () {
+  test("for a inwards trapezoid compensation area.", function () {
     const s = configurationCases.posReflex;
     const configurations = new ConfigurationGenerator().run(s.dcel);
     const c = configurations.get(idOr(s.innerEdge));
@@ -165,7 +170,7 @@ describe("getCompensationShift() returns", function () {
     expect(c[ContractionType.P]?.getCompensationHeight(5)).toBe(1);
   });
 
-  it("for a trapezoid compensation area with 2 90deg angles.", function () {
+  test("for a trapezoid compensation area with 2 90deg angles.", function () {
     const s = createConfigurationSetup(
       new Point(-2, 0),
       new Point(-2, 2),
@@ -183,7 +188,7 @@ describe("getCompensationShift() returns", function () {
     expect(c[ContractionType.P]?.getCompensationHeight(4.5)).toBe(1);
   });
 
-  it("for a trapezoid compensation area with 2 90deg angles.", function () {
+  test("for a trapezoid compensation area with 2 90deg angles.", function () {
     const s = createConfigurationSetup(
       new Point(-4, 0),
       new Point(-2, 2),

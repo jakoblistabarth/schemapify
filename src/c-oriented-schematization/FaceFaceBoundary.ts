@@ -73,21 +73,15 @@ class FaceFaceBoundary {
         }, [])
         .sort((a, b) => a.distance - b.distance);
       const compensationCandidate = compensationCandidateList[0];
-      // TODO: check whether the check for contractions with area 0 is still necessary
-      if (contractionCandidate.area === 0 || compensationCandidate) {
+      if (compensationCandidate) {
         contraction = contractionCandidate;
-        compensation =
-          // if contractionCandidate.area === 0, no compensation is needed
-          contractionCandidate.area > 0
-            ? compensationCandidate.contraction
-            : undefined;
+        compensation = compensationCandidate.contraction;
         break;
       }
     }
 
     if (contraction && compensation)
       return new ConfigurationPair(contraction, compensation);
-    if (contraction) return new ConfigurationPair(contraction);
   }
 }
 

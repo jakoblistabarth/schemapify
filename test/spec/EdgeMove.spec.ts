@@ -5,9 +5,10 @@ import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import fs from "fs";
 import path from "path";
+import { describe, expect, test } from "vitest";
 
 describe("createConfigurations()", function () {
-  it("adds configuration to all edges which are possible candidates for edge moves (which endpoints are of degree 3 or less).", function () {
+  test("adds configuration to all edges which are possible candidates for edge moves (which endpoints are of degree 3 or less).", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/aligned-deviating.json"),
@@ -38,33 +39,37 @@ describe("createConfigurations()", function () {
 });
 
 describe("doEdgeMove()", function () {
-  xit("(recursive) on respective minimal configurations returns the expected contraction pair for the second, third, and fourth edge move.", function () {
-    const json = JSON.parse(
-      fs.readFileSync(
-        path.resolve("test/data/shapes/smallest-contraction.json"),
-        "utf8",
-      ),
-    );
-    const dcel = Dcel.fromGeoJSON(json);
-    const configurations = new ConfigurationGenerator().run(dcel);
-    const ffb = new FaceFaceBoundaryListGenerator().run(dcel);
-    const contractionEdges: string[] = [];
+  // TODO: fix edgeMove first
+  test.fails(
+    "(recursive) on respective minimal configurations returns the expected contraction pair for the second, third, and fourth edge move.",
+    function () {
+      const json = JSON.parse(
+        fs.readFileSync(
+          path.resolve("test/data/shapes/smallest-contraction.json"),
+          "utf8",
+        ),
+      );
+      const dcel = Dcel.fromGeoJSON(json);
+      const configurations = new ConfigurationGenerator().run(dcel);
+      const ffb = new FaceFaceBoundaryListGenerator().run(dcel);
+      const contractionEdges: string[] = [];
 
-    for (let index = 0; index < 10; index++) {
-      const pair = ffb.getMinimalConfigurationPair(configurations);
-      const contractionEdge = pair?.contraction.configuration.innerEdge;
-      if (contractionEdge) contractionEdges.push(contractionEdge?.uuid);
-      // TODO: fix this
-      // pair?.doEdgeMove(dcel, configurations, ffb.configurations);
-    }
-    expect(contractionEdges).toEqual([
-      "9.5|7->9.5|8",
-      "10|1->10|7",
-      "10|8->10|10",
-    ]);
-  });
+      for (let index = 0; index < 10; index++) {
+        const pair = ffb.getMinimalConfigurationPair(configurations);
+        const contractionEdge = pair?.contraction.configuration.innerEdge;
+        if (contractionEdge) contractionEdges.push(contractionEdge?.uuid);
+        // TODO: fix this
+        // pair?.doEdgeMove(dcel, configurations, ffb.configurations);
+      }
+      expect(contractionEdges).toEqual([
+        "9.5|7->9.5|8",
+        "10|1->10|7",
+        "10|8->10|10",
+      ]);
+    },
+  );
 
-  xit("for the test case 'smallest-contraction'", function () {
+  test.fails("for the test case 'smallest-contraction'", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction.json"),
@@ -83,15 +88,19 @@ describe("doEdgeMove()", function () {
     );
     const newArea = newDcel.getArea();
 
-    expect(dcel.getBoundedFaces()[0].getEdges()[2].uuid).toBe("10.5|1->10|1");
-    expect(dcel.getBoundedFaces()[0].getEdges()[3].uuid).toBe("10|1->10|7");
-    expect(dcel.getBoundedFaces()[0].getEdges()[4].uuid).toBe("10|7->10|8");
-    expect(dcel.getBoundedFaces()[0].getEdges()[5].uuid).toBe("10|8->10|10");
+    expect(dcel.getBoundedFaces()[0].getEdges()[2].tail.xy).toEqual([10.5, 1]);
+    expect(dcel.getBoundedFaces()[0].getEdges()[2].head?.xy).toEqual([10, 1]);
+    expect(dcel.getBoundedFaces()[0].getEdges()[3].tail.xy).toEqual([10, 1]);
+    expect(dcel.getBoundedFaces()[0].getEdges()[3].head?.xy).toEqual([10, 7]);
+    expect(dcel.getBoundedFaces()[0].getEdges()[4].tail.xy).toEqual([10, 7]);
+    expect(dcel.getBoundedFaces()[0].getEdges()[4].head?.xy).toEqual([10, 8]);
+    expect(dcel.getBoundedFaces()[0].getEdges()[4].tail.xy).toEqual([10, 8]);
+    expect(dcel.getBoundedFaces()[0].getEdges()[4].head?.xy).toEqual([10, 10]);
     expect(pair?.contraction.area).toEqual(0.5);
     expect(originalArea).toEqual(newArea);
   });
 
-  xit("for the test case 'smallest-contraction-2", function () {
+  test.fails("for the test case 'smallest-contraction-2", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction-2.json"),
@@ -112,7 +121,7 @@ describe("doEdgeMove()", function () {
     expect(originalArea).toEqual(newArea);
   });
 
-  xit("for the test case 'contractions-equal'", function () {
+  test("for the test case 'contractions-equal'", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/contractions-equal.json"),
@@ -135,15 +144,22 @@ describe("doEdgeMove()", function () {
     const edges = newDcel
       .getBoundedFaces()[0]
       .getEdges()
-      .map((e) => e.uuid);
+      .map((e) => ({ tail: e.tail.xy, head: e.head?.xy }));
 
-    expect(edges[0]).toBe("0|0->4|0");
-    expect(edges[1]).toBe("4|0->4|2");
-    expect(edges[2]).toBe("4|2->2.5|2");
-    expect(edges[3]).toBe("2.5|2->2.5|3");
-    expect(edges[4]).toBe("2.5|3->2.5|4");
-    expect(edges[5]).toBe("2.5|4->0|4");
-    expect(edges[6]).toBe("0|4->0|0");
+    expect(edges[0].tail).toEqual([0, 0]);
+    expect(edges[0].head).toEqual([4, 0]);
+    expect(edges[1].tail).toEqual([4, 0]);
+    expect(edges[1].head).toEqual([4, 2]);
+    expect(edges[2].tail).toEqual([4, 2]);
+    expect(edges[2].head).toEqual([2.5, 2]);
+    expect(edges[3].tail).toEqual([2.5, 2]);
+    expect(edges[3].head).toEqual([2.5, 3]);
+    expect(edges[4].tail).toEqual([2.5, 3]);
+    expect(edges[4].head).toEqual([2.5, 4]);
+    expect(edges[5].tail).toEqual([2.5, 4]);
+    expect(edges[5].head).toEqual([0, 4]);
+    expect(edges[6].tail).toEqual([0, 4]);
+    expect(edges[6].head).toEqual([0, 0]);
     expect(originalContractionArea).toEqual(1);
     expect(originalArea).toEqual(newArea);
   });

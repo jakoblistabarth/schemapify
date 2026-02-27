@@ -3,6 +3,7 @@ import Face from "@/src/Dcel/Face";
 import Subdivision from "@/src/geometry/Subdivision";
 import fs from "fs";
 import path from "path";
+import { beforeEach, describe, expect, test } from "vitest";
 
 describe("A Dcel from a geojson feature collection of a single square with one square hole", function () {
   let dcel: Dcel;
@@ -17,19 +18,19 @@ describe("A Dcel from a geojson feature collection of a single square with one s
     dcel = Dcel.fromGeoJSON(polygon);
   });
 
-  it("has 1 unbounded face", function () {
+  test("has 1 unbounded face", function () {
     expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
-  it("has 3 faces (1 outer, 2 inner) in total", function () {
+  test("has 3 faces (1 outer, 2 inner) in total", function () {
     expect(dcel.getFaces().length).toBe(3);
   });
 
-  it("has 8 vertices", function () {
+  test("has 8 vertices", function () {
     expect(dcel.vertices.size).toBe(8);
   });
 
-  it("has 16 halfedges", function () {
+  test("has 16 halfedges", function () {
     expect(dcel.halfEdges.size).toBe(16);
   });
 });
@@ -59,19 +60,19 @@ describe("A Dcel from a list of MultiPolygons of a single square with one square
     dcel = Dcel.fromSubdivision(s);
   });
 
-  it("has 1 unbounded face", function () {
+  test("has 1 unbounded face", function () {
     expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
-  it("has 3 faces (1 outer, 2 inner) in total", function () {
+  test("has 3 faces (1 outer, 2 inner) in total", function () {
     expect(dcel.getFaces().length).toBe(3);
   });
 
-  it("has 8 vertices", function () {
+  test("has 8 vertices", function () {
     expect(dcel.vertices.size).toBe(8);
   });
 
-  it("has 16 halfedges", function () {
+  test("has 16 halfedges", function () {
     expect(dcel.halfEdges.size).toBe(16);
   });
 });

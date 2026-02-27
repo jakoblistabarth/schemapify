@@ -1,7 +1,8 @@
 import Ring from "@/src/geometry/Ring";
+import { describe, expect, test } from "vitest";
 
 describe("isClockwise() returns the correct boolean", function () {
-  it("for simple squares", function () {
+  test("for simple squares", function () {
     const counterclockwise: [number, number][] = [
       [0, 0],
       [1, 0],
@@ -23,7 +24,7 @@ describe("isClockwise() returns the correct boolean", function () {
     ).toBe(true);
   });
 
-  it("for a triangle", function () {
+  test("for a triangle", function () {
     const points: [number, number][] = [
       [0, 0],
       [3, 5],
@@ -34,7 +35,7 @@ describe("isClockwise() returns the correct boolean", function () {
     expect(Ring.fromCoordinates([...points].reverse()).isClockwise).toBe(true);
   });
 
-  it("for a triangle", function () {
+  test("for a triangle", function () {
     const points: [number, number][] = [
       [0, 0],
       [4, 0],
@@ -44,7 +45,7 @@ describe("isClockwise() returns the correct boolean", function () {
     expect(Ring.fromCoordinates(points).isClockwise).toBe(false);
   });
 
-  it("for a triangle", function () {
+  test("for a triangle", function () {
     const points: [number, number][] = [
       [15.99, 46.83],
       [17.07, 48.11],
@@ -57,7 +58,7 @@ describe("isClockwise() returns the correct boolean", function () {
     expect(Ring.fromCoordinates([...points].reverse()).isClockwise).toBe(true);
   });
 
-  it("for concave shapes", function () {
+  test("for concave shapes", function () {
     const points: [number, number][] = [
       [0, 0],
       [1, 0],
@@ -72,7 +73,7 @@ describe("isClockwise() returns the correct boolean", function () {
 });
 
 describe("The first and last point are the same", function () {
-  it("for a simple square.", function () {
+  test("for a simple square.", function () {
     const points: [number, number][] = [
       [0, 0],
       [1, 0],

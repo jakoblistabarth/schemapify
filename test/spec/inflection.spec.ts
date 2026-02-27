@@ -1,12 +1,13 @@
-import fs from "fs";
-import path from "path";
-import Point from "@/src/geometry/Point";
 import Dcel from "@/src/Dcel/Dcel";
 import { InflectionType } from "@/src/Dcel/HalfEdge";
+import Point from "@/src/geometry/Point";
+import fs from "fs";
+import path from "path";
+import { describe, expect, test } from "vitest";
 import { createConfigurationSetup } from "./test-setup";
 
 describe("getInteriorAngle() and getExteriorAngle()", function () {
-  it("return the correct angles for the reflex point for a dart shape", function () {
+  test("return the correct angles for the reflex point for a dart shape", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/dart.json"), "utf8"),
     );
@@ -21,7 +22,7 @@ describe("getInteriorAngle() and getExteriorAngle()", function () {
     expect(interior + exterior).toBe(Math.PI);
   });
 
-  it("return the correct angles for any of the convex points for a dart shape", function () {
+  test("return the correct angles for any of the convex points for a dart shape", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/dart.json"), "utf8"),
     );
@@ -38,7 +39,7 @@ describe("getInteriorAngle() and getExteriorAngle()", function () {
 });
 
 describe("getInflectionType()", function () {
-  it("returns the correct inflection type", function () {
+  test("returns the correct inflection type", function () {
     const dcel = new Dcel();
     const A = dcel.addVertex(2, 2);
     const B = dcel.addVertex(0, 0);
@@ -95,7 +96,7 @@ describe("getInflectionType()", function () {
     expect(d.getInflectionType()).toBe(InflectionType.R);
   });
 
-  it("returns the correct inflection type on a v-shape", function () {
+  test("returns the correct inflection type on a v-shape", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/v-shape.json"), "utf8"),
     );
@@ -113,7 +114,7 @@ describe("getInflectionType()", function () {
     ]);
   });
 
-  it("returns the correct inflection type on the irregular shape give in the paper by Buchin et al.", function () {
+  test("returns the correct inflection type on the irregular shape give in the paper by Buchin et al.", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/inflection-test.json"),
@@ -139,7 +140,7 @@ describe("getInflectionType()", function () {
 });
 
 describe("getInflectionType() on the inner edge of a configuration Setup", function () {
-  it("where the endpoints of the inner edge are both, reflex and convex", function () {
+  test("where the endpoints of the inner edge are both, reflex and convex", function () {
     const configurationSetup = createConfigurationSetup(
       new Point(-4, 4),
       new Point(-2, 0),
@@ -152,7 +153,7 @@ describe("getInflectionType() on the inner edge of a configuration Setup", funct
     );
   });
 
-  it("where the endpoints of the inner edge are both convex", function () {
+  test("where the endpoints of the inner edge are both convex", function () {
     const configurationSetup = createConfigurationSetup(
       new Point(-4, 4),
       new Point(-2, 0),
@@ -165,7 +166,7 @@ describe("getInflectionType() on the inner edge of a configuration Setup", funct
     );
   });
 
-  it("where the endpoints of the inner edge are both reflex", function () {
+  test("where the endpoints of the inner edge are both reflex", function () {
     const configurationSetup = createConfigurationSetup(
       new Point(-4, -2),
       new Point(-2, 0),

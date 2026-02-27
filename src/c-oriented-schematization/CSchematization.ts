@@ -160,7 +160,7 @@ class CSchematization implements Schematization {
   }
 
   /**
-   * Simplify a {@link Dcel} by removing superfluous vertices and applying edge moves.
+   * Simplify a {@link Dcel} by removing collinear vertices and applying edge moves.
    * @param input The {@link Dcel} to simplify.
    * @returns The simplified {@link Dcel}.
    */
@@ -245,9 +245,7 @@ class CSchematization implements Schematization {
         uuid: edgeId !== undefined ? edgeId.toString() : undefined,
         class: edgeId !== undefined ? orientations.get(edgeId) : undefined,
         interferesWith: staircase.interferesWith
-          .map((e) =>
-            typeof e.id === "number" && e.id > 0 ? e.id : undefined,
-          )
+          .map((e) => (typeof e.id === "number" && e.id > 0 ? e.id : undefined))
           .join(" ,"),
       };
 
@@ -269,7 +267,8 @@ class CSchematization implements Schematization {
     return dcel.getHalfEdges().reduce((acc: Contraction[], edge) => {
       const edgeId =
         typeof edge.id === "number" && edge.id > 0 ? edge.id : undefined;
-      const configuration = edgeId !== undefined ? configurations.get(edgeId) : undefined;
+      const configuration =
+        edgeId !== undefined ? configurations.get(edgeId) : undefined;
       if (!configuration) return acc;
       const n = configuration[ContractionType.N];
       const p = configuration[ContractionType.P];

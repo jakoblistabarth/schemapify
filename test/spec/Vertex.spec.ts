@@ -1,10 +1,11 @@
-import fs from "fs";
-import path from "path";
 import Dcel from "@/src/Dcel/Dcel";
-import { getTestFiles } from "./test-setup";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
-import { permute, normalizeAngle } from "@/src/utilities";
+import { normalizeAngle, permute } from "@/src/utilities";
+import fs from "fs";
+import path from "path";
+import { beforeEach, describe, expect, test } from "vitest";
+import { getTestFiles } from "./test-setup";
 
 const isCircularlySortedByAngle = (
   edges: HalfEdge[],
@@ -28,7 +29,7 @@ const isCircularlySortedByAngle = (
 };
 
 describe("distanceToVertex()", function () {
-  it("returns the correct distance between 2 vertices", function () {
+  test("returns the correct distance between 2 vertices", function () {
     const dcel = new Dcel();
     const a = dcel.addVertex(0, 0);
     const b = dcel.addVertex(4, 0);
@@ -43,7 +44,7 @@ describe("distanceToVertex()", function () {
 });
 
 describe("distanceToEdge()", function () {
-  it("returns the minimum distance between a vertex and an edge", function () {
+  test("returns the minimum distance between a vertex and an edge", function () {
     const dcel = new Dcel();
     const a = dcel.addVertex(0, 0);
     const v = dcel.addVertex(-1, -2);
@@ -98,7 +99,7 @@ describe("sortEdges()", function () {
   const permutations = permute(["right", "left", "bottom", "top"]);
 
   permutations.forEach((permutation, idx) => {
-    it(`sorts 4 radial edges in clockwise order (permutation ${idx + 1})`, function () {
+    test(`sorts 4 radial edges in clockwise order (permutation ${idx + 1})`, function () {
       const map: Record<string, HalfEdge> = {
         right: edgeRight,
         left: edgeLeft,
@@ -114,7 +115,7 @@ describe("sortEdges()", function () {
     });
   });
 
-  it("sorts outgoing edges of all vertices in clockwise order", function () {
+  test("sorts outgoing edges of all vertices in clockwise order", function () {
     const dir = "test/data/shapes";
     const testFiles = getTestFiles(dir);
 
@@ -133,7 +134,7 @@ describe("sortEdges()", function () {
 });
 
 describe("remove() on a vertex", function () {
-  it("generates a correct triangle dcel when removing one vertex of a square shape", function () {
+  test("generates a correct triangle dcel when removing one vertex of a square shape", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -149,7 +150,7 @@ describe("remove() on a vertex", function () {
     expect(dcel.vertices.size).toBe(3);
   });
 
-  it("generates a correct triangle dcel when removing one vertex of a square shape with 4 collinear vertices", function () {
+  test("generates a correct triangle dcel when removing one vertex of a square shape with 4 collinear vertices", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/square-with-collinear-vertices.json"),
@@ -170,7 +171,7 @@ describe("remove() on a vertex", function () {
     expect(newEdge?.head?.xy).toEqual([0, 0]);
   });
 
-  it("returns a correctly linked halfedge when removing one vertex of a square shape", function () {
+  test("returns a correctly linked halfedge when removing one vertex of a square shape", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -194,7 +195,7 @@ describe("remove() on a vertex", function () {
     expect(newEdge?.next?.prev?.head?.xy).toEqual([20, 0]);
   });
 
-  it("returns any of the just created halfedges if no face is given", function () {
+  test("returns any of the just created halfedges if no face is given", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -207,7 +208,7 @@ describe("remove() on a vertex", function () {
     expect(e?.head?.xy).toEqual([0, 20]);
   });
 
-  it("returns the specific halfedge if a face is given", function () {
+  test("returns the specific halfedge if a face is given", function () {
     const json = JSON.parse(
       fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
     );
@@ -250,7 +251,7 @@ describe("remove() on all vertices of a square with a hole", function () {
   ];
 
   for (const coordinates of outerVertices) {
-    it("return a correct triangular dcel when removing one outer vertex", function () {
+    test("return a correct triangular dcel when removing one outer vertex", function () {
       const outerSquare = dcel.getBoundedFaces()[0];
       const [x, y] = coordinates;
       dcel.findVertex(x, y)?.remove();
@@ -261,7 +262,7 @@ describe("remove() on all vertices of a square with a hole", function () {
   }
 
   for (const coordinates of innerVertices) {
-    it("return a correct triangular dcel when removing one inner vertex", function () {
+    test("return a correct triangular dcel when removing one inner vertex", function () {
       const innerSquare = dcel.getBoundedFaces()[1];
       const [x, y] = coordinates;
       dcel.findVertex(x, y)?.remove();
@@ -273,7 +274,7 @@ describe("remove() on all vertices of a square with a hole", function () {
 });
 
 describe("equals() on a vertex", function () {
-  it("returns true for 2 vertices sharing the same position", function () {
+  test("returns true for 2 vertices sharing the same position", function () {
     const dcel = new Dcel();
     const vertexA = dcel.addVertex(10, 10);
     const vertexB = dcel.addVertex(10, 10);
@@ -281,7 +282,7 @@ describe("equals() on a vertex", function () {
     expect(vertexA.equals(vertexB)).toBe(true);
   });
 
-  it("returns true for one vertex and one point sharing the same position", function () {
+  test("returns true for one vertex and one point sharing the same position", function () {
     const dcel = new Dcel();
     const vertexA = dcel.addVertex(0.25, -3);
     const pointA = dcel.addVertex(0.25, -3);

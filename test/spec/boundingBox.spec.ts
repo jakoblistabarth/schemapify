@@ -1,7 +1,8 @@
 import BoundingBox from "@/src/helpers/BoundingBox";
+import { describe, expect, test } from "vitest";
 
 describe("boundingBox()", function () {
-  it("returns the correct bbox for a square", function () {
+  test("returns the correct bbox for a square", function () {
     expect(
       new BoundingBox([
         [-2, -2],
@@ -11,7 +12,7 @@ describe("boundingBox()", function () {
       ]).bounds,
     ).toEqual([-2, 2, -2, 2]);
   });
-  it("returns the correct bbox for a rotated rectangle", function () {
+  test("returns the correct bbox for a rotated rectangle", function () {
     expect(
       new BoundingBox([
         [-2, -1],

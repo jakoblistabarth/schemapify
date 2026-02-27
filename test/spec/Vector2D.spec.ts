@@ -1,7 +1,8 @@
 import Vector2D from "@/src/geometry/Vector2D";
+import { describe, expect, test } from "vitest";
 
 describe("dot() returns the correct scalar", function () {
-  it("for 2 simple vectors", function () {
+  test("for 2 simple vectors", function () {
     const a = new Vector2D(0, 2);
     const b = new Vector2D(4, 2);
 
@@ -9,7 +10,7 @@ describe("dot() returns the correct scalar", function () {
     expect(a.dot(b)).toBe(4);
   });
 
-  it("for 2 simple vectors", function () {
+  test("for 2 simple vectors", function () {
     const a = new Vector2D(1, 2);
     const b = new Vector2D(2, 1);
 
@@ -17,7 +18,7 @@ describe("dot() returns the correct scalar", function () {
     expect(a.dot(b)).toBe(4);
   });
 
-  it("for 2 simple vectors", function () {
+  test("for 2 simple vectors", function () {
     const a = new Vector2D(-2, 4);
     const b = new Vector2D(6, -3);
 
@@ -27,7 +28,7 @@ describe("dot() returns the correct scalar", function () {
 });
 
 describe("The getter invers() returns the correct inverted vector", function () {
-  it("for a simple vector", function () {
+  test("for a simple vector", function () {
     expect(new Vector2D(2, 0).invers).toEqual(new Vector2D(-2, -0));
     expect(new Vector2D(-1, -5).invers).toEqual(new Vector2D(1, 5));
     expect(new Vector2D(-1, 5).invers).toEqual(new Vector2D(1, -5));
@@ -36,7 +37,7 @@ describe("The getter invers() returns the correct inverted vector", function () 
 });
 
 describe("times() returns the correct vector", function () {
-  it("for a simple vector", function () {
+  test("for a simple vector", function () {
     expect(new Vector2D(2, 0).times(2)).toEqual(new Vector2D(4, 0));
     expect(new Vector2D(3, -1).times(2)).toEqual(new Vector2D(6, -2));
     expect(new Vector2D(3, 5).times(-2)).toEqual(new Vector2D(-6, -10));
@@ -44,7 +45,7 @@ describe("times() returns the correct vector", function () {
 });
 
 describe("The getter unitVector() returns the correct vector", function () {
-  it("for a simple vector", function () {
+  test("for a simple vector", function () {
     expect(new Vector2D(2, 0).unitVector).toEqual(new Vector2D(1, 0));
     expect(new Vector2D(-2, 0).unitVector).toEqual(new Vector2D(-1, 0));
     expect(new Vector2D(2, 4).unitVector.dx).toBeCloseTo(0.44721);

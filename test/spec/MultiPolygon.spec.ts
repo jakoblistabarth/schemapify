@@ -1,10 +1,11 @@
-import Polygon from "@/src/geometry/Polygon";
-import Point from "@/src/geometry/Point";
 import MultiPolygon from "@/src/geometry/MultiPolygon";
+import Point from "@/src/geometry/Point";
+import Polygon from "@/src/geometry/Polygon";
 import Ring from "@/src/geometry/Ring";
+import { describe, expect, test } from "vitest";
 
 describe("The MultiPolygon's area getter", function () {
-  it("gets the correct area of simple shapes", function () {
+  test("gets the correct area of simple shapes", function () {
     const coordinates: [number, number][][][] = [
       [
         [

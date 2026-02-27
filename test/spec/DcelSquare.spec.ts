@@ -1,7 +1,8 @@
-import fs from "fs";
-import path from "path";
 import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
+import fs from "fs";
+import path from "path";
+import { beforeEach, describe, expect, test } from "vitest";
 
 describe("A Dcel of a single square", function () {
   let dcel: Dcel;
@@ -13,23 +14,23 @@ describe("A Dcel of a single square", function () {
     dcel = Dcel.fromGeoJSON(polygon);
   });
 
-  it("has 1 unbounded face", function () {
+  test("has 1 unbounded face", function () {
     expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
-  it("has 2 faces", function () {
+  test("has 2 faces", function () {
     expect(dcel.faces.length).toBe(2);
   });
 
-  it("has 4 vertices", function () {
+  test("has 4 vertices", function () {
     expect(dcel.vertices.size).toBe(4);
   });
 
-  it("has 8 edges", function () {
+  test("has 8 edges", function () {
     expect(dcel.halfEdges.size).toBe(8);
   });
 
-  it("has 4 linked inner edges", function () {
+  test("has 4 linked inner edges", function () {
     expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(4);
     expect(dcel.getBoundedFaces()[0].edge?.twin?.getCycle().length).toBe(4);
     expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(4);

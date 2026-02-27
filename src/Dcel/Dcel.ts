@@ -141,7 +141,8 @@ class Dcel {
       if (!Number.isInteger(edge.id) || edge.id <= 0)
         throw new Error(`Invalid halfedge id ${edge.id}`);
       for (const he of this.halfEdges.values()) {
-        if (he.id === edge.id) throw new Error(`HalfEdge id ${edge.id} is already registered`);
+        if (he.id === edge.id)
+          throw new Error(`HalfEdge id ${edge.id} is already registered`);
       }
     }
 
@@ -305,7 +306,8 @@ class Dcel {
    */
   removeVertex(vertex: Vertex) {
     // remove from id map
-    if (typeof vertex.id === "number" && vertex.id > 0) this.vertices.delete(vertex.id);
+    if (typeof vertex.id === "number" && vertex.id > 0)
+      this.vertices.delete(vertex.id);
 
     // remove from bucket index
     const bucketKey = this.coordHash(vertex.x, vertex.y);

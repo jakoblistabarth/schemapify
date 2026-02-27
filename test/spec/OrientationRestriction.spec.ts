@@ -10,7 +10,8 @@ import Sector from "@/src/c-oriented-schematization/Sector";
 import VertexClassGenerator from "@/src/c-oriented-schematization/VertexClassGenerator";
 import { getEdgesInSector } from "@/src/c-oriented-schematization/VertexUtils";
 import { crawlArray } from "@/src/utilities";
-import { createEdgeVertexSetup, TestSetup, idOr } from "./test-setup";
+import { beforeEach, describe, expect, test } from "vitest";
+import { createEdgeVertexSetup, idOr, TestSetup } from "./test-setup";
 
 describe("isAligned() works properly", function () {
   let s: TestSetup;
@@ -19,7 +20,7 @@ describe("isAligned() works properly", function () {
     s = createEdgeVertexSetup();
   });
 
-  it("for an aligned edge in a rectilinear schematization.", function () {
+  test("for an aligned edge in a rectilinear schematization.", function () {
     const sectors = new CRegular(2).sectors;
     expect(isAligned(s.directions.od0, sectors)).toBe(true);
     expect(isAligned(s.directions.od90, sectors)).toBe(true);
@@ -27,7 +28,7 @@ describe("isAligned() works properly", function () {
     expect(isAligned(s.directions.od270, sectors)).toBe(true);
   });
 
-  it("for an aligned edge in an octilinear schematization.", function () {
+  test("for an aligned edge in an octilinear schematization.", function () {
     const sectors = new CRegular(4).sectors;
     expect(isAligned(s.directions.od0, sectors)).toBe(true);
     expect(isAligned(s.directions.od90, sectors)).toBe(true);
@@ -35,7 +36,7 @@ describe("isAligned() works properly", function () {
     expect(isAligned(s.directions.od270, sectors)).toBe(true);
   });
 
-  it("for an unaligned edge in a rectilinear schematization.", function () {
+  test("for an unaligned edge in a rectilinear schematization.", function () {
     const sectors = new CRegular(2).sectors;
     expect(isAligned(s.directions.od37, sectors)).toBe(false);
     expect(isAligned(s.directions.od53, sectors)).toBe(false);
@@ -44,7 +45,7 @@ describe("isAligned() works properly", function () {
     expect(isAligned(s.directions.od217, sectors)).toBe(false);
   });
 
-  it("for an unaligned edge in an octilinear schematization.", function () {
+  test("for an unaligned edge in an octilinear schematization.", function () {
     const sectors = new CRegular(4).sectors;
     expect(isAligned(s.directions.od37, sectors)).toBe(false);
     expect(isAligned(s.directions.od53, sectors)).toBe(false);
@@ -54,7 +55,7 @@ describe("isAligned() works properly", function () {
 });
 
 describe("getNeighbors() returns the neighboring sectors of the sector", function () {
-  it("for the 'last' sector.", function () {
+  test("for the 'last' sector.", function () {
     const sector0 = new CRegular(2).getSector(0) as Sector;
     const neighbors = sector0.getNeighbors().map((neighbor) => neighbor.idx);
     expect(neighbors).toEqual([3, 1]);
@@ -67,16 +68,16 @@ describe("encloses()", function () {
     sector = new Sector(new CRegular(2), 0, 0, Math.PI * 0.5);
   });
 
-  it("returns true for sector bounds", function () {
+  test("returns true for sector bounds", function () {
     expect(sector.encloses(0)).toBe(true);
     expect(sector.encloses(Math.PI * 0.5)).toBe(true);
   });
 
-  it("returns true for enclosed values", function () {
+  test("returns true for enclosed values", function () {
     expect(sector.encloses(Math.PI * 0.25)).toBe(true);
   });
 
-  it("returns false for values outside of sector", function () {
+  test("returns false for values outside of sector", function () {
     expect(sector.encloses(Math.PI * 0.5 + 0.01)).toBe(false);
   });
 });
@@ -87,13 +88,13 @@ describe("getEdgesInSector()", function () {
     s = createEdgeVertexSetup();
   });
 
-  it("get correct edges in specified sector", function () {
+  test("get correct edges in specified sector", function () {
     s.origin.edges.push(s.directions.od0, s.directions.od90);
     const sector0 = new CRegular(2).getSector(0) as Sector;
     expect(getEdgesInSector(s.origin, sector0).length).toBe(2);
   });
 
-  it("get correct edges in specified sector", function () {
+  test("get correct edges in specified sector", function () {
     s.origin.edges.push(s.directions.od0, s.directions.od90);
     const sector0 = new CRegular(4).getSector(0) as Sector;
     expect(getEdgesInSector(s.origin, sector0).length).toBe(1);
@@ -114,32 +115,32 @@ describe("isSignficant()", function () {
     return significantVertices.includes(idOr(origin));
   };
 
-  it("classifies a vertex correctly (A)", function () {
+  test("classifies a vertex correctly (A)", function () {
     s.dcel.getVertices()[0].edges.push(s.directions.od0, s.directions.od90);
     expect(isSignificant()).toBe(false);
   });
 
-  it("classifies a vertex correctly (B)", function () {
+  test("classifies a vertex correctly (B)", function () {
     s.dcel.getVertices()[0].edges.push(s.directions.od37, s.directions.od284);
     expect(isSignificant()).toBe(true);
   });
 
-  it("classifies a vertex correctly", function () {
+  test("classifies a vertex correctly", function () {
     s.dcel.getVertices()[0].edges.push(s.directions.od0, s.directions.od180);
     expect(isSignificant()).toBe(false);
   });
 
-  it("classifies a vertex correctly", function () {
+  test("classifies a vertex correctly", function () {
     s.dcel.getVertices()[0].edges.push(s.directions.od0, s.directions.od37);
     expect(isSignificant()).toBe(true);
   });
 
-  it("classifies a vertex correctly", function () {
+  test("classifies a vertex correctly", function () {
     s.dcel.getVertices()[0].edges.push(s.directions.od104, s.directions.od37);
     expect(isSignificant()).toBe(true);
   });
 
-  it("classifies a vertex with edges in disjoint sectors as not significant.", function () {
+  test("classifies a vertex with edges in disjoint sectors as not significant.", function () {
     s.dcel.getVertices()[0].edges.push(s.directions.od217, s.directions.od37);
     expect(isSignificant()).toBe(false);
   });
@@ -153,7 +154,7 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
     ({ c } = style);
   });
 
-  it("using getAssociatedSector() for C2", function () {
+  test("using getAssociatedSector() for C2", function () {
     expect(getAssociatedSector(s.directions.od0, c.sectors)).toEqual([
       new CRegular(2).getSector(0) as Sector,
       new CRegular(2).getSector(3) as Sector,
@@ -172,7 +173,7 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
     ]);
   });
 
-  it("using getAssociatedSector() for C4", function () {
+  test("using getAssociatedSector() for C4", function () {
     const sectors = new CRegular(4).sectors;
     expect(getAssociatedSector(s.directions.od0, sectors)).toEqual([
       new CRegular(4).getSector(0) as Sector,
@@ -192,7 +193,7 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
     ]);
   });
 
-  it("using getAssociatedAngles() for C2", function () {
+  test("using getAssociatedAngles() for C2", function () {
     expect(getAssociatedAngles(s.directions.od0, c.sectors)).toEqual([0]);
     expect(getAssociatedAngles(s.directions.od90, c.sectors)).toEqual([
       Math.PI * 0.5,
@@ -213,7 +214,7 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
     ]);
   });
 
-  it("using getAssociatedAngles() for C4", function () {
+  test("using getAssociatedAngles() for C4", function () {
     expect(
       getAssociatedAngles(s.directions.od0, new CRegular(4).sectors),
     ).toEqual([0]);
@@ -241,19 +242,19 @@ describe("crawlArray()", function () {
     arr = ["first", "second", 2, 3, 4, 5, "secondlast", "last"];
   });
 
-  it("crawls forward +2", function () {
+  test("crawls forward +2", function () {
     expect(crawlArray(arr, 6, +2)).toBe("first");
   });
 
-  it("crawls forward +1", function () {
+  test("crawls forward +1", function () {
     expect(crawlArray(arr, 7, +1)).toBe("first");
   });
 
-  it("crawls backward -1", function () {
+  test("crawls backward -1", function () {
     expect(crawlArray(arr, 0, -1)).toBe("last");
   });
 
-  it("crawls backward -2", function () {
+  test("crawls backward -2", function () {
     expect(crawlArray(arr, 0, -2)).toBe("secondlast");
   });
 });

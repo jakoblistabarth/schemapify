@@ -1,7 +1,8 @@
-import fs from "fs";
-import path from "path";
 import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
+import fs from "fs";
+import path from "path";
+import { beforeEach, describe, expect, test } from "vitest";
 
 describe("A Dcel of a single triangle with one triangular hole", function () {
   let dcel: Dcel;
@@ -16,30 +17,30 @@ describe("A Dcel of a single triangle with one triangular hole", function () {
     dcel = Dcel.fromGeoJSON(polygon);
   });
 
-  it("has 1 unbounded face", function () {
+  test("has 1 unbounded face", function () {
     expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
-  it("has 3 faces (1 outer, 2 inner) in total", function () {
+  test("has 3 faces (1 outer, 2 inner) in total", function () {
     expect(dcel.getFaces().length).toBe(3);
   });
 
-  it("has 6 vertices", function () {
+  test("has 6 vertices", function () {
     expect(dcel.vertices.size).toBe(6);
   });
 
-  it("has 12 halfedges", function () {
+  test("has 12 halfedges", function () {
     expect(dcel.halfEdges.size).toBe(12);
   });
 
-  it("a counterclockwise halfedge of the hole has edges with a pointer to an outer Ring", function () {
+  test("a counterclockwise halfedge of the hole has edges with a pointer to an outer Ring", function () {
     const innerFaces = dcel.getBoundedFaces();
     const innerRing = innerFaces.find((f) => f.outerRing);
     const holeLinkages = innerRing?.getEdges().every((e) => e.face?.outerRing);
     expect(holeLinkages).toBe(true);
   });
 
-  it("a counterclockwise halfedge of the outer ring has edges face with no pointer to an outer Ring", function () {
+  test("a counterclockwise halfedge of the outer ring has edges face with no pointer to an outer Ring", function () {
     const innerFaces = dcel.getBoundedFaces();
     const outerRing = innerFaces.find((f) => !f.outerRing);
     const holeLinkages = outerRing?.getEdges().every((e) => !e.face?.outerRing);

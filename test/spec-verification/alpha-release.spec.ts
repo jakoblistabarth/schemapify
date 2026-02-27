@@ -4,6 +4,7 @@ import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
 import type { GeoJsonProperties } from "geojson";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import { beforeEach, describe, expect, test } from "vitest";
 
 describe("2-a. The system shall be able to parse geoJSON as input data.", function () {
   const json = JSON.parse(
@@ -13,13 +14,13 @@ describe("2-a. The system shall be able to parse geoJSON as input data.", functi
     ),
   );
 
-  it("Parses a json object", function () {
+  test("Parses a json object", function () {
     expect(() => Dcel.fromGeoJSON(json)).not.toThrow();
   });
 });
 
 describe("3-a. If the input data is not a region i.e., it contains features of type other than polygon or multipolygon – the program shall exit and the user shall be informed.", function () {
-  it("An error is thrown for a file containing geometry of type 'LineString'.", function () {
+  test("An error is thrown for a file containing geometry of type 'LineString'.", function () {
     const json = JSON.parse(
       readFileSync(path.resolve("test/data/invalid/linestrings.json"), "utf8"),
     );
@@ -29,7 +30,7 @@ describe("3-a. If the input data is not a region i.e., it contains features of t
 
 // TODO: get new geojson parsing library. needs to be commented out because not compatible with testing gui
 describe("4-a. If the input data is not a valid geoJSON the program shall exit and the user shall be informed.", function () {
-  it.failing(
+  test.fails(
     "An error is thrown for a file containing polygons which are not closed.",
     function () {
       const json = JSON.parse(
@@ -39,7 +40,7 @@ describe("4-a. If the input data is not a valid geoJSON the program shall exit a
     },
   );
 
-  it.failing(
+  test.fails(
     "An error is thrown for a file containing geometry with a loop edge (same start end endpoint).",
     function () {
       const json = JSON.parse(
@@ -52,7 +53,7 @@ describe("4-a. If the input data is not a valid geoJSON the program shall exit a
     },
   );
 
-  it.failing(
+  test.fails(
     "An error is thrown for a file containing geometry which violates the geoJSON specification's 'right-hand rule'.",
     function () {
       const json = JSON.parse(
@@ -73,12 +74,12 @@ describe("5-a. If the input data is too detailed, i.e., if it exceeds a maximum 
     readFileSync(path.resolve("test/data/geodata/AUT_adm1.json"), "utf8"),
   );
 
-  it("An error is thrown when the region exceeds the total number of 5,000 edges.", function () {
+  test("An error is thrown when the region exceeds the total number of 5,000 edges.", function () {
     expect(() => Dcel.fromGeoJSON(json)).toThrow("invalid input");
   });
 });
 
-xdescribe("6-a. If the input data holds attributes attached to its features, the systems shall preserve these attributes in the output.", function () {
+describe.skip("6-a. If the input data holds attributes attached to its features, the systems shall preserve these attributes in the output.", function () {
   let inputProperties: GeoJsonProperties[];
   let outputProperties: (GeoJsonProperties | undefined)[];
 
@@ -97,17 +98,17 @@ xdescribe("6-a. If the input data holds attributes attached to its features, the
     outputProperties = output.multiPolygons.map((f) => f.properties);
   });
 
-  it("The number of feature properties needs to be the same for the input and the output.", function () {
+  test("The number of feature properties needs to be the same for the input and the output.", function () {
     expect(inputProperties.length).toEqual(outputProperties.length);
   });
 
-  it("The properties of a certain feature needs to be the same for the input and the output.", function () {
+  test("The properties of a certain feature needs to be the same for the input and the output.", function () {
     expect(inputProperties[3]).toEqual(outputProperties[3]);
   });
 });
 
-xdescribe("7-a. The system shall preserve the number of features of the input in the output.", function () {
-  it("The number of features needs to be the same for the input and the output.", function () {
+describe.skip("7-a. The system shall preserve the number of features of the input in the output.", function () {
+  test("The number of features needs to be the same for the input and the output.", function () {
     const json = JSON.parse(
       readFileSync(
         path.resolve("test/data/geodata/AUT_adm1-simple.json"),
@@ -135,17 +136,17 @@ describe("8-a The system shall be able to generate a DCEL from a geoJSON.", func
   );
   const dcel = Dcel.fromGeoJSON(json);
 
-  it("The DCEL has 1 unbounded face", function () {
+  test("The DCEL has 1 unbounded face", function () {
     expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);
   });
 
-  it("The DCEL has 10 bounded faces", function () {
+  test("The DCEL has 10 bounded faces", function () {
     expect(dcel.getBoundedFaces().length).toBe(10);
   });
 });
 
 describe("9-a. The system shall be able to generate a subdivision from a DCEL.", function () {
-  it("Is a valid subdivision.", function () {
+  test("Is a valid subdivision.", function () {
     const json = JSON.parse(
       readFileSync(
         path.resolve("test/data/geodata/AUT_adm1-simple.json"),

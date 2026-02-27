@@ -1,9 +1,10 @@
 import CRegular from "@/src/c-oriented-schematization/CRegular";
+import { beforeEach, describe, expect, test } from "vitest";
 import {
   createEdgeVertexSetup,
   getClassification,
-  TestSetup,
   idOr,
+  TestSetup,
 } from "./test-setup";
 
 describe("Given the examples in the paper of Buchin et al., directions are assigned, correctly on example", function () {
@@ -13,7 +14,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     s = createEdgeVertexSetup();
   });
 
-  it("a", () => {
+  test("a", () => {
     // this example needs a significant vertex even though it is not like this in the paper
     // however, whithout the significant vertex, the direction is not unambigous
     const assignedDirections = getClassification(
@@ -27,7 +28,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     expect(assignedDirections).toEqual([1, 2]);
   });
 
-  it("b", () => {
+  test("b", () => {
     // this example needs a significant vertex even though it is not like this in the paper
     // how
     const assignedDirections = getClassification(
@@ -40,7 +41,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
   });
 
   // TODO: fix test / assignment of directions
-  it("c", function () {
+  test("c", function () {
     const assignedDirections = getClassification(
       s,
       [s.directions.od37, s.directions.od90, s.directions.od143],
@@ -50,7 +51,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     expect(assignedDirections).toEqual([0, 1, 2]);
   });
 
-  it("d", function () {
+  test("d", function () {
     const assignedDirections = getClassification(
       s,
       [s.directions.od37, s.directions.od76],
@@ -62,7 +63,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     expect(assignedDirections).toEqual([0, 1]);
   });
 
-  it("e", function () {
+  test("e", function () {
     const assignedDirections = getClassification(
       s,
       [s.directions.od37, s.directions.od53, s.directions.od76],
@@ -72,7 +73,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     expect(assignedDirections).toEqual([0, 1, 2]);
   });
 
-  it("f", function () {
+  test("f", function () {
     const assignedDirections = getClassification(
       s,
       [
@@ -87,7 +88,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     expect(assignedDirections).toEqual([3, 0, 1, 2]);
   });
 
-  it("g", function () {
+  test("g", function () {
     const assignedDirections = getClassification(
       s,
       [
@@ -102,7 +103,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     expect(assignedDirections).toEqual([1, 2, 3, 0]);
   });
 
-  it("h", function () {
+  test("h", function () {
     // this example needs a significant vertex even though it is not like this in the paper
     // however, whithout the significant vertex, the direction is not unambigous
     const assignedDirections = getClassification(
@@ -118,7 +119,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     expect(assignedDirections).toEqual([1, 5]);
   });
 
-  it("i", function () {
+  test("i", function () {
     // this example needs a significant vertex even though it is not like this in the paper
     // however, whithout the significant vertex, the direction is not unambigous
     const assignedDirections = getClassification(
@@ -131,7 +132,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     expect(assignedDirections).toEqual([1, 4, 6]);
   });
 
-  it("j", function () {
+  test("j", function () {
     const assignedDirections = getClassification(
       s,
       [s.directions.od37, s.directions.od90, s.directions.od143],
@@ -142,7 +143,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     expect(assignedDirections).toEqual([1, 2, 3]);
   });
 
-  it("k", function () {
+  test("k", function () {
     const assignedDirections = getClassification(
       s,
       [s.directions.od37, s.directions.od76],
@@ -156,7 +157,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     expect(assignedDirections).toEqual([1, 2]);
   });
 
-  it("l", function () {
+  test("l", function () {
     const assignedDirections = getClassification(
       s,
       [s.directions.od37, s.directions.od53, s.directions.od76],
@@ -167,7 +168,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     expect(assignedDirections).toEqual([0, 1, 2]);
   });
 
-  it("m", function () {
+  test("m", function () {
     const assignedDirections = getClassification(
       s,
       [
@@ -183,7 +184,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     expect(assignedDirections).toEqual([7, 0, 1, 2]);
   });
 
-  it("n", function () {
+  test("n", function () {
     const assignedDirections = getClassification(
       s,
       [
@@ -207,7 +208,7 @@ describe("assignDirections(config.c) on own examples", function () {
     s = createEdgeVertexSetup();
   });
 
-  it("with 4 edges (A) in C(2)", function () {
+  test("with 4 edges (A) in C(2)", function () {
     const assignedDirections = getClassification(
       s,
       [
@@ -222,7 +223,7 @@ describe("assignDirections(config.c) on own examples", function () {
     expect(assignedDirections).toEqual([0, 1, 2, 3]);
   });
 
-  it("with 4 edges (B) in C(2)", function () {
+  test("with 4 edges (B) in C(2)", function () {
     const assignedDirections = getClassification(
       s,
       [
@@ -237,7 +238,7 @@ describe("assignDirections(config.c) on own examples", function () {
     expect(assignedDirections).toEqual([0, 1, 2, 3]);
   });
 
-  it("with 4 edges (C) in C(2)", function () {
+  test("with 4 edges (C) in C(2)", function () {
     const assignedDirections = getClassification(
       s,
       [
@@ -252,7 +253,7 @@ describe("assignDirections(config.c) on own examples", function () {
     expect(assignedDirections).toEqual([0, 1, 2, 3]);
   });
 
-  it("with 4 edges (D) in C(2)", function () {
+  test("with 4 edges (D) in C(2)", function () {
     const assignedDirections = getClassification(
       s,
       [
@@ -267,7 +268,7 @@ describe("assignDirections(config.c) on own examples", function () {
     expect(assignedDirections).toEqual([0, 1, 2, 3]);
   });
 
-  it("with 4 edges (E) in C(3)", function () {
+  test("with 4 edges (E) in C(3)", function () {
     const assignedDirections = getClassification(
       s,
       [
@@ -282,7 +283,7 @@ describe("assignDirections(config.c) on own examples", function () {
     expect(assignedDirections).toEqual([1, 2, 3, 4]);
   });
 
-  it("with 4 edges (F) in C(2)", function () {
+  test("with 4 edges (F) in C(2)", function () {
     const assignedDirections = getClassification(
       s,
       [s.directions.od0, s.directions.od14, s.directions.od333],
@@ -292,7 +293,7 @@ describe("assignDirections(config.c) on own examples", function () {
     expect(assignedDirections).toEqual([0, 1, 3]);
   });
 
-  it("with 4 edges (G) in C(2)", function () {
+  test("with 4 edges (G) in C(2)", function () {
     const assignedDirections = getClassification(
       s,
       [
@@ -307,7 +308,7 @@ describe("assignDirections(config.c) on own examples", function () {
     expect(assignedDirections).toEqual([0, 1, 2, 3]);
   });
 
-  it("with 3 edges (H) in C(2)", function () {
+  test("with 3 edges (H) in C(2)", function () {
     const assignedDirections = getClassification(
       s,
       [s.directions.od14, s.directions.od243, s.directions.od284],

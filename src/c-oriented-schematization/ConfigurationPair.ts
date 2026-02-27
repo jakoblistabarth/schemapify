@@ -11,9 +11,9 @@ import Dcel from "../Dcel/Dcel";
  */
 class ConfigurationPair {
   contraction: Contraction;
-  compensation?: Contraction;
+  compensation: Contraction;
 
-  constructor(contraction: Contraction, compensation?: Contraction) {
+  constructor(contraction: Contraction, compensation: Contraction) {
     this.contraction = contraction;
     this.compensation = compensation;
   }
@@ -35,17 +35,17 @@ class ConfigurationPair {
     dcel: Dcel,
     contractions: Map<
       number,
-      { [ContractionType.P]?: Contraction; [ContractionType.N]?: Contraction }
+      {
+        [ContractionType.P]: Contraction;
+        [ContractionType.N]: Contraction;
+      }
     >,
     configurations: Map<number, Configuration>,
   ) {
     const contractionEdge = this.contraction.configuration.innerEdge;
     const contractionHead = contractionEdge.head;
     if (!contractionHead) return;
-    const compensationEdge = this.compensation?.configuration.innerEdge;
-
-    if (!compensationEdge)
-      return console.error("compensation contraction is not defined");
+    const compensationEdge = this.compensation.configuration.innerEdge;
 
     // 1. Update (decrement) blocking edges
     contractions.forEach((contractions) => {
@@ -54,9 +54,9 @@ class ConfigurationPair {
       //   contraction.configuration.innerEdge.uuid,
       //   contraction.blockingNumber
       // );
-      Object.values(contractions)
-        .filter(Boolean) // only needed if one of the contractions can be undefined
-        .forEach((d) => d.decrementBlockingNumber(this.x1x2, configurations)); // FIXME: fix blocking Number!! Done?
+      Object.values(contractions).forEach((d) =>
+        d?.decrementBlockingNumber(this.x1x2, configurations),
+      ); // FIXME: fix blocking Number!! Done?
       // console.log(
       //   "blockingNumber after",
       //   contraction.configuration.innerEdge.uuid,
@@ -166,7 +166,7 @@ class ConfigurationPair {
     // TODO: 3. Update (increment) blocking numbers again
     contractions.forEach((contraction) => {
       Object.values(contraction).forEach((d) =>
-        d.incrementBlockingNumber(this.x1x2, configurations),
+        d?.incrementBlockingNumber(this.x1x2, configurations),
       );
     });
 
