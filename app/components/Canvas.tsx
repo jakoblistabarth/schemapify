@@ -31,6 +31,27 @@ type Props = {
 
 type HoverInfo = PickingInfo<Vertex | HalfEdge>;
 
+const getTooltipContent = (hoverInfo: HoverInfo) => {
+  const { object } = hoverInfo;
+  if (object instanceof Vertex) {
+    return {
+      type: "Vertex",
+      metadata: {
+        Coordinates: object.xy.join("·"),
+        Degree: object.edges.length,
+      },
+    };
+  } else if (object instanceof HalfEdge) {
+    return {
+      type: "HalfEdge",
+      metadata: {
+        Tail: object.tail.xy.join("·"),
+        Head: object.head?.xy.join("·"),
+      },
+    };
+  }
+};
+
 const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | undefined>(undefined);
   const [time, setTime] = useState(0);
@@ -68,29 +89,11 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
     [shiftPoint],
   );
 
-  const { layers, view, initialViewState } = useMemo(() => {
-    const halfedges = Array.from(dcel.getHalfEdges());
-    const vertices = Array.from(dcel.getVertices());
+  // Expensive computation — only recomputes when DCEL changes
+  const { baseLayers, view, initialViewState } = useMemo(() => {
     const gridPoints = range(-50, 50, 0.5)
       .map((i) => range(-50, 50, 0.5).map((j) => [i, j]))
       .flat();
-
-    const edgeLayer = new LineLayer({
-      id: "edges",
-      data: halfedges,
-      getSourcePosition: (e: HalfEdge) => shiftPoint(e, e.tail),
-      getTargetPosition: (e: HalfEdge) => shiftPoint(e, e.head),
-      pickable: true,
-      onHover: (info) => setHoverInfo(info),
-      getWidth: (e: HalfEdge) => (hoverInfo?.object?.uuid === e.uuid ? 5 : 1),
-      getColor: [0, 0, 255],
-      widthMinPixels: 2,
-      transitions: {
-        getWidth: {
-          duration: 100,
-        },
-      },
-    });
 
     const configurations = new ConfigurationGenerator().run(dcel);
 
@@ -100,42 +103,12 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
         .flatMap((c) => Object.values(c.contractions))
         .filter((c) => c?.configuration.innerEdge.face?.edge)
         .filter((c) => c?.isFeasible)
-        // .filter((c) => c.type === ContractionType.N)
         .map((c) => ({
           polygon: c?.areaPoints.map((p) => p.vector.toArray()),
           type: c?.type,
         })),
       getFillColor: (c: Contraction) =>
         c.type === ContractionType.N ? [255, 0, 0, 10] : [0, 255, 0, 10],
-    });
-
-    const edgeAnimationLayer = new TripsLayer({
-      id: "edges-animated",
-      data: halfedges,
-      getPath: (e: HalfEdge) => getShiftedPath(e).map((e) => e.coordinates),
-      getTimestamps: (e: HalfEdge) => getShiftedPath(e).map((e) => e.timestamp),
-      trailLength: 0.25,
-      getColor: [200, 200, 255],
-      widthMinPixels: 2,
-      widthMaxPixels: 2,
-      currentTime: time,
-    });
-
-    const pointsLayer = new ScatterplotLayer({
-      id: "vertices",
-      pickable: true,
-      data: vertices,
-      getPosition: (d) => [d.x, d.y],
-      radiusMinPixels: 1,
-      radiusMaxPixels: 5,
-      onHover: (info) => setHoverInfo(info),
-      stroked: true,
-      lineWidthUnits: "pixels",
-      lineWidthMinPixels: 1,
-      getLineColor: [0, 0, 0],
-      getLineWidth: (d) => (hoverInfo?.object?.uuid === d.uuid ? 3 : 1),
-      getFillColor: (d) =>
-        hoverInfo?.object?.uuid === d.uuid ? [0, 255, 0] : [255, 255, 255],
     });
 
     const gridLayer = new ScatterplotLayer({
@@ -153,15 +126,6 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       data: ffbList.getMinimalConfigurationPair(configurations),
     });
 
-    const layers = [
-      gridLayer,
-      configurationLayer,
-      contractionLayer,
-      edgeLayer,
-      edgeAnimationLayer,
-      pointsLayer,
-    ];
-
     const initialViewState: OrthographicViewState = {
       target: dcel.center,
       zoom: 6,
@@ -172,12 +136,67 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
     const view = new OrthographicView({ flipY: false });
 
     return {
-      layers,
+      baseLayers: [gridLayer, configurationLayer, contractionLayer],
       view,
       initialViewState,
     };
-  }, [getShiftedPath, hoverInfo, shiftPoint, time, dcel]);
+  }, [dcel]);
 
+  // Cheap — only hover/animation-sensitive layers recompute on mouse move or tick
+  const layers = useMemo(() => {
+    const halfedges = Array.from(dcel.getHalfEdges());
+    const vertices = Array.from(dcel.getVertices());
+    const hoveredUuid = hoverInfo?.object?.uuid;
+
+    const edgeAnimationLayer = new TripsLayer({
+      id: "edges-animated",
+      data: halfedges,
+      getPath: (e: HalfEdge) => getShiftedPath(e).map((e) => e.coordinates),
+      getTimestamps: (e: HalfEdge) => getShiftedPath(e).map((e) => e.timestamp),
+      trailLength: 0.25,
+      getColor: [200, 200, 255],
+      widthMinPixels: 2,
+      widthMaxPixels: 2,
+      currentTime: time,
+    });
+
+    const edgeLayer = new LineLayer({
+      id: "edges",
+      data: halfedges,
+      getSourcePosition: (e: HalfEdge) => shiftPoint(e, e.tail),
+      getTargetPosition: (e: HalfEdge) => shiftPoint(e, e.head),
+      pickable: true,
+      onHover: (info) => setHoverInfo(info),
+      getWidth: (e: HalfEdge) => (hoveredUuid === e.uuid ? 5 : 1),
+      getColor: [0, 0, 255],
+      widthMinPixels: 2,
+      transitions: { getWidth: { duration: 100 } },
+    });
+
+    const pointsLayer = new ScatterplotLayer({
+      id: "vertices",
+      pickable: true,
+      data: vertices,
+      getPosition: (d) => [d.x, d.y],
+      radiusMinPixels: 1,
+      radiusMaxPixels: 5,
+      onHover: (info) => setHoverInfo(info),
+      stroked: true,
+      lineWidthUnits: "pixels",
+      lineWidthMinPixels: 1,
+      getLineColor: [0, 0, 0],
+      getLineWidth: (d) => (hoveredUuid === d.uuid ? 3 : 1),
+      getFillColor: (d) =>
+        hoveredUuid === d.uuid ? [0, 255, 0] : [255, 255, 255],
+    });
+
+    return [...baseLayers, edgeAnimationLayer, edgeLayer, pointsLayer];
+  }, [baseLayers, hoverInfo, shiftPoint, getShiftedPath, time, dcel]);
+
+  const tooltipContent = useMemo(() => {
+    if (!hoverInfo) return null;
+    return getTooltipContent(hoverInfo);
+  }, [hoverInfo]);
   return (
     <>
       <DeckGL
@@ -188,12 +207,26 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       />
       {hoverInfo?.object && (
         <div
-          className="pointer-events-none absolute rounded bg-white p-3 shadow-lg"
+          className="pointer-events-none absolute rounded bg-white p-3 text-xs shadow-lg"
           style={{ left: hoverInfo.x + 10, top: hoverInfo.y + 10 }}
         >
-          {hoverInfo?.object?.uuid}
-          <br />
-          {hoverInfo?.object?.toString()}
+          <div className="flex gap-2 font-mono">
+            <span className="text-gray-400">
+              {tooltipContent?.type ?? "Unknown object"}
+            </span>
+            <span className="font-bold">{hoverInfo?.object?.uuid}</span>
+          </div>
+          <table>
+            <tbody>
+              {tooltipContent &&
+                Object.entries(tooltipContent.metadata).map(([key, value]) => (
+                  <tr key={key}>
+                    <td className="pr-2">{key}</td>
+                    <td className="font-mono">{value}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
         </div>
       )}
     </>
