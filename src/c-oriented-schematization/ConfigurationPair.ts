@@ -30,14 +30,19 @@ class ConfigurationPair {
 
   /**
    * Perform the edge move.
+   * @param dcel The {@link Dcel} to perform the edge move on.
+   * @param contractions A map of edge IDs to their corresponding {@link Contraction}s.
+   * @param configurations A map of edge IDs to their corresponding {@link Configuration}s.
+   * @returns An object containing the updated {@link Dcel}, contractions, and configurations.
    */
   doEdgeMove(
     dcel: Dcel,
+    // this contains all contractions no only the ones of the pair, hence, not all of them are complementary or feasible (undefined contractions)
     contractions: Map<
       number,
       {
-        [ContractionType.P]: Contraction;
-        [ContractionType.N]: Contraction;
+        [ContractionType.P]: Contraction | undefined;
+        [ContractionType.N]: Contraction | undefined;
       }
     >,
     configurations: Map<number, Configuration>,
@@ -183,9 +188,9 @@ class ConfigurationPair {
   doHalfEdgeMove() {
     // console.log("halfmove");
     const contractionEdge = this.contraction.configuration.innerEdge;
-    const compensationEdge = this.compensation?.configuration.innerEdge;
+    const compensationEdge = this.compensation.configuration.innerEdge;
     const compensationShift = this.compensationShift;
-    if (!compensationEdge || !compensationShift) return;
+    if (!compensationShift) return;
     const normal = compensationEdge
       .getVector()
       ?.unitVector.getNormal(this.compensation?.type === ContractionType.N)
