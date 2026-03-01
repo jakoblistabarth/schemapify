@@ -21,9 +21,7 @@ export const isCollinearVertex = (vertex: Vertex) => {
   const h1 = e1.head;
   const h2 = e2.head;
   if (!h1 || !h2) return false;
-  // robust orientation test: head1 -> vertex -> head2
   const o = orient2d(h1.x, h1.y, vertex.x, vertex.y, h2.x, h2.y);
-  // const isCollinear = o === 0 || Math.abs(o) < 1e-12;
   const isCollinear = o === 0;
   if (!isCollinear) return false;
   // Ensure the two incident edges point in opposite directions (straight line)
