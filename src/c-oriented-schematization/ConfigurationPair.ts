@@ -96,7 +96,7 @@ class ConfigurationPair {
     // console.log("contractionshift", contractionShift, "compensationshift", compensationShift);
 
     // Check whether one of new positions for the compensation edge are equal
-    // to one of the original positions of the contraction ege
+    // to one of the original positions of the contraction edge
     if (
       [contractionEdge.tail, contractionHead].some(
         (point) => point.equals(newTail) || point.equals(newHead),

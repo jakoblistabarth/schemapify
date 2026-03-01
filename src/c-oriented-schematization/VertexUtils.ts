@@ -26,7 +26,7 @@ export const isCollinearVertex = (vertex: Vertex) => {
   // const isCollinear = o === 0 || Math.abs(o) < 1e-12;
   const isCollinear = o === 0;
   if (!isCollinear) return false;
-  // ensure the two incident edges point in opposite directions (straight line)
+  // Ensure the two incident edges point in opposite directions (straight line)
   const v1x = h1.x - vertex.x;
   const v1y = h1.y - vertex.y;
   const v2x = h2.x - vertex.x;
