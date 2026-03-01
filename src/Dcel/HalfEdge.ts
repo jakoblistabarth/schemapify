@@ -34,8 +34,14 @@ class HalfEdge {
    * @returns A string, representing the HalfEdge's key.
    */
   static getKey(tail: Vertex, head: Vertex): string {
-    const tailId = typeof tail.id === "number" && tail.id > 0 ? `v${tail.id}` : Vertex.getKey(tail.x, tail.y);
-    const headId = typeof head.id === "number" && head.id > 0 ? `v${head.id}` : Vertex.getKey(head.x, head.y);
+    const tailId =
+      typeof tail.id === "number" && tail.id > 0
+        ? `v${tail.id}`
+        : Vertex.getKey(tail.x, tail.y);
+    const headId =
+      typeof head.id === "number" && head.id > 0
+        ? `v${head.id}`
+        : Vertex.getKey(head.x, head.y);
     return `${tailId}->${headId}`;
   }
 
@@ -75,7 +81,6 @@ class HalfEdge {
    * @returns An array of {@link HalfEdge}s.
    */
   getCycle(forwards: boolean = true) {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let currentEdge: HalfEdge = this;
     const initialEdge: HalfEdge = currentEdge;
     const halfEdges: HalfEdge[] = [];
@@ -191,7 +196,7 @@ class HalfEdge {
    */
   subdivide(newPoint: Point | undefined = this.getMidpoint()) {
     if (!newPoint) return;
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
+
     const e = this;
     const et = e.twin;
     if (!et) return;

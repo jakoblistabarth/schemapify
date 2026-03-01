@@ -1,4 +1,4 @@
-import DcelViewer from "@/app/components/DcelViewer";
+import DynamicDcelViewer from "@/app/components/DynamicDcelViewer";
 import DescriptionList from "@/app/components/DescriptionList";
 import Math from "@/app/components/Math";
 
@@ -52,7 +52,7 @@ export default function Page() {
           <Math>X</Math> to reach length zero.
         </p>
       </section>
-      <DcelViewer />
+      <DynamicDcelViewer />
     </div>
   );
 }

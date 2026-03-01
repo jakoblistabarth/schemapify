@@ -1,15 +1,11 @@
-import dynamic from "next/dynamic";
 import Brand from "./components/Brand";
 import Configurator from "./components/Configurator";
+import DynamicMap from "./components/DynamicMap";
 import Footer from "./components/Footer";
 import Hotkeys from "./components/Hotkeys";
 import SnapshotNavigator from "./components/SnapshotNavigator";
 import Teaser from "./components/Teaser";
 import getGroupedTestFiles from "./helpers/getGroupedTestFiles";
-
-const DynamicMap = dynamic(() => import("./components/Map/Map"), {
-  ssr: false,
-});
 
 const Home = async () => {
   const files = await getGroupedTestFiles();

@@ -37,7 +37,6 @@ class PreProcessor implements Processor {
    * @param threshold The value determining the maximum length of a subdivision of the original {@link HalfEdge}.
    */
   private subdivideToThreshold(halfEdge: HalfEdge, threshold: number) {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const initialHalfEdge: HalfEdge = halfEdge;
     let currentHalfEdge: HalfEdge = initialHalfEdge;
 
