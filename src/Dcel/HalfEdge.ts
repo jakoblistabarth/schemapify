@@ -81,6 +81,7 @@ class HalfEdge {
    * @returns An array of {@link HalfEdge}s.
    */
   getCycle(forwards: boolean = true) {
+    //eslint-disable-next-line @typescript-eslint/no-this-alias
     let currentEdge: HalfEdge = this;
     const initialEdge: HalfEdge = currentEdge;
     const halfEdges: HalfEdge[] = [];
@@ -197,6 +198,7 @@ class HalfEdge {
   subdivide(newPoint: Point | undefined = this.getMidpoint()) {
     if (!newPoint) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const e = this;
     const et = e.twin;
     if (!et) return;
