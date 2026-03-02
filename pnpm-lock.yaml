@@ -15,14 +15,14 @@ importers:
         specifier: 9.2.10
         version: 9.2.10(@deck.gl/core@9.2.10)(@luma.gl/core@9.2.6)
       '@fontsource-variable/dm-sans':
-        specifier: ^5.0.4
-        version: 5.0.4
+        specifier: ^5.2.8
+        version: 5.2.8
       '@fontsource-variable/inter':
-        specifier: ^5.0.17
-        version: 5.0.17
+        specifier: ^5.2.8
+        version: 5.2.8
       '@fontsource/dm-mono':
-        specifier: ^5.0.19
-        version: 5.0.19
+        specifier: ^5.2.7
+        version: 5.2.7
       '@placemarkio/check-geojson':
         specifier: ^0.1.14
         version: 0.1.14
@@ -558,14 +558,14 @@ packages:
   '@foliojs-fork/restructure@2.0.2':
     resolution: {integrity: sha512-59SgoZ3EXbkfSX7b63tsou/SDGzwUEK6MuB5sKqgVK1/XE0fxmpsOb9DQI8LXW3KfGnAjImCGhhEb7uPPAUVNA==}
 
-  '@fontsource-variable/dm-sans@5.0.4':
-    resolution: {integrity: sha512-vLSR2MTmilJuG4raJ/k/fufqjtlW/V1gHWdo1Hfw7ar/q3h3252o/0RT1mixrTqRlfN87NreLOTKDCYaewdl5Q==}
+  '@fontsource-variable/dm-sans@5.2.8':
+    resolution: {integrity: sha512-AxkvMTvNWgfrmlyjiV05vlHYJa+nRQCf1EfvIrQAPBpFJW0O9VTz7oAFr9S3lvbWdmnFoBk7yFqQL86u64nl2g==}
 
-  '@fontsource-variable/inter@5.0.17':
-    resolution: {integrity: sha512-sa80nNnqF8kzhBvqusWiL9vlPMVpdmOwMmDBup46Jggsr1VBqo+YuzwB36Ls+X6uHJtb8Yv3ALBHL/zGmT862A==}
+  '@fontsource-variable/inter@5.2.8':
+    resolution: {integrity: sha512-kOfP2D+ykbcX/P3IFnokOhVRNoTozo5/JxhAIVYLpea/UBmCQ/YWPBfWIDuBImXX/15KH+eKh4xpEUyS2sQQGQ==}
 
-  '@fontsource/dm-mono@5.0.19':
-    resolution: {integrity: sha512-he/hWl/7JwMgVDnWeuw0a4xh/06tozTXwhvb+/LzdrMlj3bqvrMs4Up4CbYBg7HlQcUtWUL6lPOUKHXWjq8Z/g==}
+  '@fontsource/dm-mono@5.2.7':
+    resolution: {integrity: sha512-Ma1az2atTVgQWuOWwjuxx26p/6A6CU9HBNKq1CFV6YKpKhpswnf9ry9Ql4+T6bTZzkdtSfS6tjJvqZOljVzIFQ==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -2483,8 +2483,8 @@ packages:
     resolution: {integrity: sha512-w+5mJ3GuFL+NjVtJlvydShqE1eN3h3PbI7/5LAsYJP/2qtuMXjfL2LpHSRqo4b4eSF5K/DH1JXKUAHSB2UW50g==}
     engines: {node: '>= 0.4'}
 
-  es-toolkit@1.44.0:
-    resolution: {integrity: sha512-6penXeZalaV88MM3cGkFZZfOoLGWshWWfdy0tWw/RlVVyhvMaWSBTOvXNeiW3e5FwdS5ePW0LGEu17zT139ktg==}
+  es-toolkit@1.45.0:
+    resolution: {integrity: sha512-RArCX+Zea16+R1jg4mH223Z8p/ivbJjIkU3oC6ld2bdUfmDxiCkFYSi9zLOR2anucWJUeH4Djnzgd0im0nD3dw==}
 
   esbuild@0.27.3:
     resolution: {integrity: sha512-8VwMnyGCONIs6cWue2IdpHxHnAjzxnw2Zr7MkVxB2vjmQ2ivqGFb4LEG3SMnv0Gb2F/G/2yA8zUaiL1gywDCCg==}
@@ -4683,7 +4683,7 @@ snapshots:
       '@types/sortablejs': 1.15.9
       color: 5.0.3
       composed-offset-position: 0.0.6(@floating-ui/utils@0.2.10)
-      es-toolkit: 1.44.0
+      es-toolkit: 1.45.0
       focus-trap: 7.8.0
       interactjs: 1.10.27
       lit: 3.3.2
@@ -4738,11 +4738,11 @@ snapshots:
 
   '@foliojs-fork/restructure@2.0.2': {}
 
-  '@fontsource-variable/dm-sans@5.0.4': {}
+  '@fontsource-variable/dm-sans@5.2.8': {}
 
-  '@fontsource-variable/inter@5.0.17': {}
+  '@fontsource-variable/inter@5.2.8': {}
 
-  '@fontsource/dm-mono@5.0.19': {}
+  '@fontsource/dm-mono@5.2.7': {}
 
   '@humanfs/core@0.19.1': {}
 
@@ -7019,7 +7019,7 @@ snapshots:
       is-date-object: 1.0.5
       is-symbol: 1.0.4
 
-  es-toolkit@1.44.0: {}
+  es-toolkit@1.45.0: {}
 
   esbuild@0.27.3:
     optionalDependencies:
