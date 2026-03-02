@@ -27,8 +27,6 @@
     "@tailwindcss/postcss": "^4.2.1",
     "@turf/boolean-valid": "^7.3.4",
     "@turf/meta": "^7.3.4",
-    "@types/geojson": "^7946.0.14",
-    "@types/node": "^25.3.3",
     "clsx": "^2.1.1",
     "d3": "^7.9.0",
     "deck.gl": "^9.2.10",
@@ -46,7 +44,9 @@
   },
   "devDependencies": {
     "@types/d3": "^7.4.3",
+    "@types/geojson": "^7946.0.16",
     "@types/graham_scan": "^1.0.32",
+    "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.27",
