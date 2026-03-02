@@ -14,7 +14,10 @@ export const getSignificantVertex = (
   const endPoints = halfEdge.endpoints;
   if (endPoints)
     return endPoints.find(
-      (v) => typeof v.id === "number" && v.id > 0 && significantVertices.includes(v.id),
+      (v) =>
+        typeof v.id === "number" &&
+        v.id > 0 &&
+        significantVertices.includes(v.id),
     );
 };
 

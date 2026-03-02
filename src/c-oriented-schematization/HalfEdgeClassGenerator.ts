@@ -54,7 +54,11 @@ class HalfEdgeClassGenerator implements Generator {
         if (orientation && (assignedDirection || assignedDirection === 0)) {
           if (typeof edge.id === "number" && edge.id > 0)
             acc.set(edge.id, { orientation, assignedDirection });
-          if (edge.twin && typeof edge.twin.id === "number" && edge.twin.id > 0) {
+          if (
+            edge.twin &&
+            typeof edge.twin.id === "number" &&
+            edge.twin.id > 0
+          ) {
             acc.set(edge.twin.id, { orientation, assignedDirection });
           }
         }
@@ -78,7 +82,12 @@ class HalfEdgeClassGenerator implements Generator {
 
     // do not classify a HalfEdge which has a significant head
     const head = halfEdge.head;
-    if (head && typeof head.id === "number" && significantVertices.includes(head.id)) return;
+    if (
+      head &&
+      typeof head.id === "number" &&
+      significantVertices.includes(head.id)
+    )
+      return;
     const assignedDirection =
       typeof halfEdge.id === "number" && halfEdge.id > 0
         ? this.assignedDirections.get(halfEdge.id)

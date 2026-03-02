@@ -42,8 +42,14 @@ class StaircaseGenerator implements Generator {
         );
         const edgeId =
           typeof edge.id === "number" && edge.id > 0 ? edge.id : undefined;
-        const edgeClass = edgeId !== undefined ? this.halfEdgeClassifications.get(edgeId)?.orientation : undefined;
-        const assignedDirection = edgeId !== undefined ? this.halfEdgeClassifications.get(edgeId)?.assignedDirection : undefined;
+        const edgeClass =
+          edgeId !== undefined
+            ? this.halfEdgeClassifications.get(edgeId)?.orientation
+            : undefined;
+        const assignedDirection =
+          edgeId !== undefined
+            ? this.halfEdgeClassifications.get(edgeId)?.assignedDirection
+            : undefined;
         if (
           !edgeClass ||
           edgeClass === Orientation.AB ||
@@ -98,10 +104,17 @@ class StaircaseGenerator implements Generator {
     // calculate edgedistance and stepnumber for deviating edges first (p. 18)
     const staircasesOfDeviatingEdges = new Map(
       [...staircases.entries()].filter(([, staircase]) => {
-        const id = typeof staircase.edge.id === "number" && staircase.edge.id > 0 ? staircase.edge.id : undefined;
+        const id =
+          typeof staircase.edge.id === "number" && staircase.edge.id > 0
+            ? staircase.edge.id
+            : undefined;
         return (
-          (id !== undefined && this.halfEdgeClassifications.get(id)?.orientation === Orientation.AD) ||
-          (id !== undefined && this.halfEdgeClassifications.get(id)?.orientation === Orientation.UD)
+          (id !== undefined &&
+            this.halfEdgeClassifications.get(id)?.orientation ===
+              Orientation.AD) ||
+          (id !== undefined &&
+            this.halfEdgeClassifications.get(id)?.orientation ===
+              Orientation.UD)
         );
       }),
     );
@@ -115,11 +128,16 @@ class StaircaseGenerator implements Generator {
     // calculate edgedistance and stepnumber for remaining edges
     const staircasesOther = new Map(
       [...staircases.entries()].filter(([, staircase]) => {
-        const id = typeof staircase.edge.id === "number" && staircase.edge.id > 0 ? staircase.edge.id : undefined;
+        const id =
+          typeof staircase.edge.id === "number" && staircase.edge.id > 0
+            ? staircase.edge.id
+            : undefined;
         return !(
           id !== undefined &&
-          (this.halfEdgeClassifications.get(id)?.orientation === Orientation.AD ||
-            this.halfEdgeClassifications.get(id)?.orientation === Orientation.UD)
+          (this.halfEdgeClassifications.get(id)?.orientation ===
+            Orientation.AD ||
+            this.halfEdgeClassifications.get(id)?.orientation ===
+              Orientation.UD)
         );
       }),
     );
@@ -155,7 +173,9 @@ class StaircaseGenerator implements Generator {
         let e_ = staircase_.edge;
         const eStaircaseEpsilon = this.style.staircaseEpsilon;
         const e_staircaseSe =
-          typeof e_.id === "number" && e_.id > 0 ? staircases.get(e_.id)?.se : undefined;
+          typeof e_.id === "number" && e_.id > 0
+            ? staircases.get(e_.id)?.se
+            : undefined;
         const eLength = e.getLength();
         if (
           e.tail !== e_.tail &&

@@ -19,7 +19,9 @@ class VertexClassGenerator implements Generator {
    */
   public run(input: Dcel) {
     return input.getVertices().reduce<number[]>((acc, v) => {
-      return this.isSignificant(v, this.sectors) && typeof v.id === "number" && v.id > 0
+      return this.isSignificant(v, this.sectors) &&
+        typeof v.id === "number" &&
+        v.id > 0
         ? [...acc, v.id]
         : acc;
     }, []);
