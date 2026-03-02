@@ -6,9 +6,11 @@ import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
 import Vector2D from "@/src/geometry/Vector2D";
+import DeckGL from "@deck.gl/react";
+import { ZoomWidget } from "@deck.gl/widgets";
+import "@deck.gl/widgets/stylesheet.css";
 import { range } from "d3";
 import {
-  DeckGL,
   LineLayer,
   OrthographicView,
   OrthographicViewState,
@@ -133,7 +135,7 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       maxZoom: 10,
     };
 
-    const view = new OrthographicView({ flipY: false });
+    const view = new OrthographicView({ flipY: false, id: "ortho" });
 
     return {
       baseLayers: [gridLayer, configurationLayer, contractionLayer],
@@ -197,6 +199,9 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
     if (!hoverInfo) return null;
     return getTooltipContent(hoverInfo);
   }, [hoverInfo]);
+
+  const widgets = useMemo(() => [new ZoomWidget()], []);
+
   return (
     <>
       <DeckGL
@@ -204,6 +209,7 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
         layers={layers}
         initialViewState={initialViewState}
         controller={true}
+        widgets={widgets}
       />
       {hoverInfo?.object && (
         <div
