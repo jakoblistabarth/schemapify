@@ -200,7 +200,10 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
     return getTooltipContent(hoverInfo);
   }, [hoverInfo]);
 
-  const widgets = useMemo(() => [new ZoomWidget()], []);
+  const widgets = useMemo(
+    () => [new ZoomWidget({ placement: "top-right" })],
+    [],
+  );
 
   return (
     <>

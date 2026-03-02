@@ -11,7 +11,7 @@ const Footer = () => {
         <div className="flex gap-5">
           <Link href={"/about"}>About</Link>
           <Link href={"/implementation/configuration"}>Algorithm</Link>
-          <div className="flex flex-grow justify-end">
+          <div className="flex grow justify-end">
             <Link
               className="flex items-center"
               href={"https://github.com/jakoblistabarth/schemapify"}

@@ -13,11 +13,10 @@ const Home = async () => {
   return (
     <>
       <Hotkeys />
-      <div className="relative grid h-screen grid-cols-1 grid-rows-1">
-        <main className="relative">
-          <div id="map" className="absolute inset-0">
-            <DynamicMap />
-          </div>
+      <div className="grid h-screen grid-rows-[1fr_auto]">
+        <main className="relative bg-gray-50">
+          <DynamicMap />
+
           <div className="grid h-full grid-cols-[2fr_5fr] grid-rows-[auto_6fr_auto] [grid-template-areas:'header_header'_'sidebar_main'_'bottom-nav_bottom-nav']">
             <div className="mt-5 self-start justify-self-center [grid-area:header]">
               <Brand />
