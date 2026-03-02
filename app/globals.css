@@ -1,11 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-h1 {
-  @apply text-4xl;
+/* Custom styles */
+@theme {
+  --font-sans: "Inter Variable", system-ui, sans-serif;
+  --font-display: "DM Sans Variable", serif;
+  --font-mono: "DM Mono", mono;
 }
 
-h2 {
-  @apply text-xl;
+@layer base {
+  h1 {
+    @apply font-display text-4xl;
+  }
+
+  h2 {
+    @apply font-display text-xl;
+  }
 }

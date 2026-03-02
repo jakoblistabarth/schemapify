@@ -18,17 +18,17 @@ const Home = async () => {
           <div id="map" className="absolute inset-0">
             <DynamicMap />
           </div>
-          <div className="grid h-full grid-cols-[2fr_5fr] grid-rows-[auto_6fr_auto] grid-areas-[header_header,sidebar_main,bottom-nav_bottom-nav]">
-            <div className="mt-5 self-start justify-self-center grid-in-[header]">
+          <div className="grid h-full grid-cols-[2fr_5fr] grid-rows-[auto_6fr_auto] [grid-template-areas:'header_header'_'sidebar_main'_'bottom-nav_bottom-nav']">
+            <div className="mt-5 self-start justify-self-center [grid-area:header]">
               <Brand />
             </div>
-            <div className="self-start justify-self-start grid-in-[sidebar]">
+            <div className="self-start justify-self-start [grid-area:sidebar]">
               <Configurator files={files} />
             </div>
-            <div className="self-center grid-in-[main]">
+            <div className="self-center [grid-area:main]">
               <Teaser />
             </div>
-            <div className="self-end justify-self-center grid-in-[bottom-nav]">
+            <div className="self-end justify-self-center [grid-area:bottom-nav]">
               <SnapshotNavigator />
             </div>
           </div>

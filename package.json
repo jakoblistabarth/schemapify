@@ -24,6 +24,7 @@
     "@placemarkio/check-geojson": "^0.1.14",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@tailwindcss/postcss": "^4.2.1",
     "@turf/boolean-valid": "^7.3.4",
     "@turf/meta": "^7.3.4",
     "@types/geojson": "^7946.0.14",
@@ -44,7 +45,6 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@savvywombat/tailwindcss-grid-areas": "^4.0.0",
     "@types/d3": "^7.4.3",
     "@types/graham_scan": "^1.0.32",
     "@types/react": "^19.2.14",
@@ -54,10 +54,10 @@
     "eslint-config-next": "^16.1.6",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.0.11",
-    "postcss": "^8.4.36",
+    "postcss": "^8.5.6",
     "prettier": "^3.2.5",
-    "prettier-plugin-tailwindcss": "^0.5.12",
-    "tailwindcss": "^3.4.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "tailwindcss": "^4.2.1",
     "typescript": "^5.7.3",
     "vitest": "^4.0.18"
   }

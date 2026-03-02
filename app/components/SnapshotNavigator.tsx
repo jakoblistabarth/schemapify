@@ -27,7 +27,7 @@ const SnapshotList: FC = () => {
   const snapshotsByStep = snapshotList?.getSnapshotByStep();
 
   return (
-    <div className="self-align-middle relative z-above-map mx-auto mb-5 flex items-center justify-between gap-2 rounded-md bg-white p-1 px-2">
+    <div className="self-align-middle relative mx-auto mb-5 flex items-center justify-between gap-2 rounded-md bg-white p-1 px-2">
       <h2 className="flex justify-between gap-1 text-xs font-bold">
         <RiCamera3Line size={15} />
         Snapshots
