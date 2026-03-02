@@ -64,6 +64,7 @@ const useAppStore = create<AppState>((set) => ({
       source: undefined,
       dcel: undefined,
       activeSnapshot: undefined,
+      snapshotList: undefined,
     }));
   },
   mapMode: "dcel",
