@@ -53,8 +53,19 @@ class HalfEdgeClassGenerator implements Generator {
         if (orientation && (assignedDirection || assignedDirection === 0)) {
           if (edge.coordKey)
             acc.set(edge.coordKey, { orientation, assignedDirection });
-          if (edge.twin?.coordKey)
-            acc.set(edge.twin.coordKey, { orientation, assignedDirection });
+          if (edge.twin?.coordKey) {
+            // Ensure the twin's tail vertex has its directions assigned before
+            // looking them up, since it may not have been visited yet.
+            this.assignDirections(edge.twin.tail, this.c);
+            const twinAssignedDirection = this.assignedDirections.get(
+              edge.twin.coordKey,
+            );
+            if (twinAssignedDirection !== undefined)
+              acc.set(edge.twin.coordKey, {
+                orientation,
+                assignedDirection: twinAssignedDirection,
+              });
+          }
         }
         return acc;
       }, new Map());

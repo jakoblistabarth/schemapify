@@ -278,7 +278,7 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
 });
 
 describe("Staircases for a diamond rotated square of side length 1)", function () {
-  test.fails("are bound within a reasonable area", function () {
+  test("are bound within a reasonable area", function () {
     console.log("Running test: are bound within a reasonable area");
     const subdivision = Subdivision.fromCoordinates([
       [
