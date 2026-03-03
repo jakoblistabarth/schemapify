@@ -46,6 +46,19 @@ class HalfEdge {
   }
 
   /**
+   * Get a stable coordinate-based key for the HalfEdge.
+   * Unlike {@link uuid}, this does not use numeric IDs and therefore remains
+   * consistent across serialization/deserialization cycles (e.g. Subdivision → Dcel).
+   * Returns `undefined` when the head vertex is unavailable (no twin set).
+   * @returns A string key based solely on coordinates, or `undefined`.
+   */
+  get coordKey(): string | undefined {
+    const head = this.head;
+    if (!head) return undefined;
+    return `${this.tail.x}|${this.tail.y}->${head.x}|${head.y}`;
+  }
+
+  /**
    * Get the unique identifier of the HalfEdge.
    * @param stop defines how many strings of the uuid are returned
    * @returns the edge's uuid

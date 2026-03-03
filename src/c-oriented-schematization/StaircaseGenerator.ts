@@ -9,7 +9,7 @@ import { CStyle } from "./schematization.style";
 class StaircaseGenerator implements Generator {
   sigificantVertices: number[];
   halfEdgeClassifications: Map<
-    number,
+    string,
     { orientation: Orientation; assignedDirection: number }
   >;
   style: CStyle;
@@ -17,7 +17,7 @@ class StaircaseGenerator implements Generator {
   constructor(
     significantVertices: number[],
     halfEdgeClassifications: Map<
-      number,
+      string,
       { orientation: Orientation; assignedDirection: number }
     >,
     style: CStyle,
@@ -42,13 +42,14 @@ class StaircaseGenerator implements Generator {
         );
         const edgeId =
           typeof edge.id === "number" && edge.id > 0 ? edge.id : undefined;
+        const edgeCoordKey = edge.coordKey;
         const edgeClass =
-          edgeId !== undefined
-            ? this.halfEdgeClassifications.get(edgeId)?.orientation
+          edgeCoordKey !== undefined
+            ? this.halfEdgeClassifications.get(edgeCoordKey)?.orientation
             : undefined;
         const assignedDirection =
-          edgeId !== undefined
-            ? this.halfEdgeClassifications.get(edgeId)?.assignedDirection
+          edgeCoordKey !== undefined
+            ? this.halfEdgeClassifications.get(edgeCoordKey)?.assignedDirection
             : undefined;
         if (
           !edgeClass ||
@@ -104,16 +105,13 @@ class StaircaseGenerator implements Generator {
     // calculate edgedistance and stepnumber for deviating edges first (p. 18)
     const staircasesOfDeviatingEdges = new Map(
       [...staircases.entries()].filter(([, staircase]) => {
-        const id =
-          typeof staircase.edge.id === "number" && staircase.edge.id > 0
-            ? staircase.edge.id
-            : undefined;
+        const coordKey = staircase.edge.coordKey;
         return (
-          (id !== undefined &&
-            this.halfEdgeClassifications.get(id)?.orientation ===
+          (coordKey !== undefined &&
+            this.halfEdgeClassifications.get(coordKey)?.orientation ===
               Orientation.AD) ||
-          (id !== undefined &&
-            this.halfEdgeClassifications.get(id)?.orientation ===
+          (coordKey !== undefined &&
+            this.halfEdgeClassifications.get(coordKey)?.orientation ===
               Orientation.UD)
         );
       }),
@@ -128,15 +126,12 @@ class StaircaseGenerator implements Generator {
     // calculate edgedistance and stepnumber for remaining edges
     const staircasesOther = new Map(
       [...staircases.entries()].filter(([, staircase]) => {
-        const id =
-          typeof staircase.edge.id === "number" && staircase.edge.id > 0
-            ? staircase.edge.id
-            : undefined;
+        const coordKey = staircase.edge.coordKey;
         return !(
-          id !== undefined &&
-          (this.halfEdgeClassifications.get(id)?.orientation ===
+          coordKey !== undefined &&
+          (this.halfEdgeClassifications.get(coordKey)?.orientation ===
             Orientation.AD ||
-            this.halfEdgeClassifications.get(id)?.orientation ===
+            this.halfEdgeClassifications.get(coordKey)?.orientation ===
               Orientation.UD)
         );
       }),
@@ -211,14 +206,12 @@ class StaircaseGenerator implements Generator {
 
           // "However, if e and e' do share a vertex, then we must again look at the classification."
           let de = undefined;
-          const orientation =
-            e.id !== undefined
-              ? this.halfEdgeClassifications.get(e.id)?.orientation
-              : undefined;
-          const orientation_ =
-            e_.id !== undefined
-              ? this.halfEdgeClassifications.get(e_.id)?.orientation
-              : undefined;
+          const orientation = e.coordKey
+            ? this.halfEdgeClassifications.get(e.coordKey)?.orientation
+            : undefined;
+          const orientation_ = e_.coordKey
+            ? this.halfEdgeClassifications.get(e_.coordKey)?.orientation
+            : undefined;
           switch (orientation) {
             case Orientation.UB: {
               // "If e' is aligned, then we ignore a fraction of (1 − ε)/2 of e'."

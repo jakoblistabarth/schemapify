@@ -113,19 +113,20 @@ export const createStaircaseSetup = (
   edge.twin = twin;
   twin.twin = edge;
   o.edges.push(edge);
-  const key = edge.id;
+  const coordKey = edge.coordKey;
   const mapping =
-    typeof key === "number"
+    coordKey !== undefined
       ? new Map<
-          number,
+          string,
           { orientation: Orientation; assignedDirection: number }
-        >([[key, { orientation, assignedDirection }]])
+        >([[coordKey, { orientation, assignedDirection }]])
       : new Map<
-          number,
+          string,
           { orientation: Orientation; assignedDirection: number }
         >();
   const generator = new StaircaseGenerator(significantVertices, mapping, style);
   const staircases = generator.run(dcel);
+  const key = edge.id;
   return typeof key === "number" ? staircases.get(key) : undefined;
 };
 
@@ -152,7 +153,7 @@ export const getClassification = (
     significantVertices,
   ).run(dcel);
   const directionSolution = origin.edges.map(
-    (edge) => assignedDirections.get(idOr(edge))?.[classficationProperty],
+    (edge) => assignedDirections.get(edge.coordKey ?? "")?.[classficationProperty],
   );
   return directionSolution;
 };

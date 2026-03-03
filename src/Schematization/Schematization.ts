@@ -1,11 +1,16 @@
 import Dcel from "@/src/Dcel/Dcel";
 import SnapshotList from "../Snapshot/SnapshotList";
 import { LABEL } from "../c-oriented-schematization/CSchematization";
+import { AdditionalData } from "../Snapshot/Snapshot";
 
 export type Callback = (args: {
   dcel: Dcel;
   label: LABEL;
-  forSnapshots?: { snapshotList: SnapshotList; triggeredAt: number };
+  forSnapshots?: {
+    snapshotList: SnapshotList;
+    triggeredAt: number;
+    additionalData?: AdditionalData;
+  };
 }) => void;
 export type LogLevel = "debug" | "visualize";
 export type Callbacks = { [key in LogLevel]?: Callback };

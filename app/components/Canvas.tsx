@@ -21,6 +21,9 @@ import {
 } from "deck.gl";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import ConfigurationLayer from "../helpers/ConfigurationLayer";
+import useAppStore from "../helpers/store";
+import Snapshot from "@/src/Snapshot/Snapshot";
+import { LABEL } from "@/src/c-oriented-schematization/CSchematization";
 
 const step = 0.005;
 const intervalMS = 24;
@@ -33,7 +36,7 @@ type Props = {
 
 type HoverInfo = PickingInfo<Vertex | HalfEdge>;
 
-const getTooltipContent = (hoverInfo: HoverInfo) => {
+const getTooltipContent = (hoverInfo: HoverInfo, activeSnapshot?: Snapshot) => {
   const { object } = hoverInfo;
   if (object instanceof Vertex) {
     return {
@@ -44,11 +47,20 @@ const getTooltipContent = (hoverInfo: HoverInfo) => {
       },
     };
   } else if (object instanceof HalfEdge) {
+    const additionalData = activeSnapshot?.additionalData;
+    const coordKey = object.coordKey;
+    const dataForObject =
+      additionalData?.halfEdgeClasses &&
+      activeSnapshot?.label === LABEL.CLASSIFY &&
+      coordKey !== undefined
+        ? additionalData.halfEdgeClasses.get(coordKey)
+        : {};
     return {
       type: "HalfEdge",
       metadata: {
         Tail: object.tail.xy.join("·"),
         Head: object.head?.xy.join("·"),
+        ...dataForObject,
       },
     };
   }
@@ -195,10 +207,12 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
     return [...baseLayers, edgeAnimationLayer, edgeLayer, pointsLayer];
   }, [baseLayers, hoverInfo, shiftPoint, getShiftedPath, time, dcel]);
 
+  const { activeSnapshot } = useAppStore();
+
   const tooltipContent = useMemo(() => {
     if (!hoverInfo) return null;
-    return getTooltipContent(hoverInfo);
-  }, [hoverInfo]);
+    return getTooltipContent(hoverInfo, activeSnapshot);
+  }, [hoverInfo, activeSnapshot]);
 
   const widgets = useMemo(
     () => [new ZoomWidget({ placement: "top-right" })],
@@ -231,7 +245,7 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
                 Object.entries(tooltipContent.metadata).map(([key, value]) => (
                   <tr key={key}>
                     <td className="pr-2">{key}</td>
-                    <td className="font-mono">{value}</td>
+                    <td className="font-mono">{String(value)}</td>
                   </tr>
                 ))}
             </tbody>

@@ -99,7 +99,6 @@ class CSchematization implements Schematization {
     const withSubdividedEdges = new SignificantHalfEdgeProcessor(
       significantVertices,
     ).run(input);
-    //TODO: add vertex classes map to snapshot
     this.doAction({
       level: "visualize",
       dcel: withSubdividedEdges,
@@ -107,11 +106,15 @@ class CSchematization implements Schematization {
       forSnapshots: {
         snapshotList: this.snapshots,
         triggeredAt: start,
+        additionalData: {
+          significantVertices: new Map(
+            significantVertices.map((d) => [d, true]),
+          ),
+        },
       },
     });
 
     start = performance.now();
-    //TODO: add halfedge classes to snapshot
     const halfEdgeClasses = new HalfEdgeClassGenerator(
       this.style.c,
       significantVertices,
@@ -123,6 +126,7 @@ class CSchematization implements Schematization {
       forSnapshots: {
         snapshotList: this.snapshots,
         triggeredAt: start,
+        additionalData: { halfEdgeClasses },
       },
     });
 

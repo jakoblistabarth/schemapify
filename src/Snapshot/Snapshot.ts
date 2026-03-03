@@ -2,7 +2,10 @@ import { v4 as uuid } from "uuid";
 import Dcel from "../Dcel/Dcel";
 import Subdivision from "../geometry/Subdivision";
 import { LABEL } from "../c-oriented-schematization/CSchematization";
-import MultiPolygon from "../geometry/MultiPolygon";
+
+//TODO: do not use any
+//eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AdditionalData = Record<string, Map<number | string, any>>;
 
 /**
  * Holds the current state of the schematized data as an array of GeoJSON Feature Collections.
@@ -13,13 +16,13 @@ class Snapshot {
   triggeredAt: number;
   recordedAt: number;
   subdivision: Subdivision;
-  additionalData?: Record<string, MultiPolygon[]>;
+  additionalData?: AdditionalData;
 
   constructor(
     subdivision: Subdivision,
     triggeredAt: number,
     label = LABEL.DEFAULT,
-    additionalData: Record<string, MultiPolygon[]> = {},
+    additionalData: AdditionalData = {},
   ) {
     this.id = uuid();
     this.subdivision = subdivision;
@@ -42,7 +45,7 @@ class Snapshot {
     }: {
       label: LABEL;
       triggeredAt: number;
-      additionalData?: Record<string, MultiPolygon[]>;
+      additionalData?: AdditionalData;
     },
   ) {
     return new this(dcel.toSubdivision(), triggeredAt, label, additionalData);

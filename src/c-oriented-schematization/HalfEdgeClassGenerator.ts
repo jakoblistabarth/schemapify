@@ -22,8 +22,8 @@ export enum Orientation {
 class HalfEdgeClassGenerator implements Generator {
   c: C;
   significantVertices: number[];
-  halfEdgeClasses: Map<number, Orientation>;
-  assignedDirections: Map<number, number>;
+  halfEdgeClasses: Map<string, Orientation>;
+  assignedDirections: Map<string, number>;
 
   constructor(c: C, significantVertices: number[]) {
     this.c = c;
@@ -40,27 +40,21 @@ class HalfEdgeClassGenerator implements Generator {
     return input
       .getHalfEdges()
       .reduce<
-        Map<number, { orientation: Orientation; assignedDirection: number }>
+        Map<string, { orientation: Orientation; assignedDirection: number }>
       >((acc, edge) => {
         const orientation = this.classify(
           edge,
           this.c,
           this.significantVertices,
         );
-        const assignedDirection =
-          typeof edge.id === "number" && edge.id > 0
-            ? this.assignedDirections.get(edge.id)
-            : undefined;
+        const assignedDirection = edge.coordKey
+          ? this.assignedDirections.get(edge.coordKey)
+          : undefined;
         if (orientation && (assignedDirection || assignedDirection === 0)) {
-          if (typeof edge.id === "number" && edge.id > 0)
-            acc.set(edge.id, { orientation, assignedDirection });
-          if (
-            edge.twin &&
-            typeof edge.twin.id === "number" &&
-            edge.twin.id > 0
-          ) {
-            acc.set(edge.twin.id, { orientation, assignedDirection });
-          }
+          if (edge.coordKey)
+            acc.set(edge.coordKey, { orientation, assignedDirection });
+          if (edge.twin?.coordKey)
+            acc.set(edge.twin.coordKey, { orientation, assignedDirection });
         }
         return acc;
       }, new Map());
@@ -88,20 +82,18 @@ class HalfEdgeClassGenerator implements Generator {
       significantVertices.includes(head.id)
     )
       return;
-    const assignedDirection =
-      typeof halfEdge.id === "number" && halfEdge.id > 0
-        ? this.assignedDirections.get(halfEdge.id)
-        : undefined;
+    const assignedDirection = halfEdge.coordKey
+      ? this.assignedDirections.get(halfEdge.coordKey)
+      : undefined;
     if (!assignedDirection && assignedDirection !== 0) return;
     const associatedSector = getAssociatedSector(halfEdge, c.sectors);
     const sector = associatedSector[0];
     const significantVertex =
       getSignificantVertex(halfEdge, this.significantVertices) || halfEdge.tail;
     const edges = getEdgesInSector(significantVertex, sector).filter((edge) => {
-      const direction =
-        typeof edge.id === "number" && edge.id > 0
-          ? this.assignedDirections.get(edge.id)
-          : undefined;
+      const direction = edge.coordKey
+        ? this.assignedDirections.get(edge.coordKey)
+        : undefined;
       if (typeof direction !== "number") return;
       const edgeIsAligned = isAligned(edge, c.sectors);
       const edgeIsDeviating = isDeviating(edge, c.sectors, direction);
@@ -130,8 +122,8 @@ class HalfEdgeClassGenerator implements Generator {
    * @returns The assigned angle of the {@link HalfEdge}, if it exists.
    * */
   private getClass(halfEdge: HalfEdge) {
-    return typeof halfEdge.id === "number" && halfEdge.id > 0
-      ? this.halfEdgeClasses.get(halfEdge.id)
+    return halfEdge.coordKey
+      ? this.halfEdgeClasses.get(halfEdge.coordKey)
       : undefined;
   }
 
@@ -174,8 +166,8 @@ class HalfEdgeClassGenerator implements Generator {
     });
 
     edges.forEach((edge, idx) => {
-      if (typeof edge.id === "number" && edge.id > 0)
-        this.assignedDirections.set(edge.id, solution[idx]);
+      if (edge.coordKey)
+        this.assignedDirections.set(edge.coordKey, solution[idx]);
     });
     return solution;
   }

@@ -417,8 +417,8 @@ describe("classifyEdges() in a classification where all edges are classified and
       .filter(
         (edge) =>
           edge.twin &&
-          classifications.get(idOr(edge))?.orientation !==
-            classifications.get(idOr(edge.twin))?.orientation,
+          classifications.get(edge.coordKey ?? "")?.orientation !==
+            classifications.get(edge.twin.coordKey ?? "")?.orientation,
       );
 
     expect(edgesWithoutAssignedAngles.length).toBe(0);
@@ -454,8 +454,8 @@ describe("classifyEdges() in a classification where all edges are classified and
       .filter(
         (edge) =>
           edge.twin &&
-          classifications.get(idOr(edge))?.orientation !==
-            classifications.get(idOr(edge.twin))?.orientation,
+          classifications.get(edge.coordKey ?? "")?.orientation !==
+            classifications.get(edge.twin.coordKey ?? "")?.orientation,
       );
 
     expect(edgesWithoutAssignedAngles.length).toBe(0);

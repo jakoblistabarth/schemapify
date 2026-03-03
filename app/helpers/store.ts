@@ -40,6 +40,7 @@ const useAppStore = create<AppState>((set) => ({
             args.dcel.toSubdivision(),
             args.forSnapshots.triggeredAt,
             args.label,
+            args.forSnapshots?.additionalData,
           ),
         );
       },

@@ -7,6 +7,8 @@ import Polygon from "@/src/geometry/Polygon";
 import Ring from "@/src/geometry/Ring";
 import { describe, expect, test } from "vitest";
 import { createStaircaseSetup } from "./test-setup";
+import Subdivision from "@/src/geometry/Subdivision";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("The staircase class", function () {
   test("returns a staircase region for a HalfEdge of class UB", function () {
@@ -272,5 +274,35 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
     expect(
       getClosestAssociatedAngle(edge, new CRegular(2), Orientation.UD, 2),
     ).toBe(((Math.PI * 2) / new CRegular(2).directions.length) * 3);
+  });
+});
+
+describe("Staircases for a diamond rotated square of side length 1)", function () {
+  test.fails("are bound within a reasonable area", function () {
+    console.log("Running test: are bound within a reasonable area");
+    const subdivision = Subdivision.fromCoordinates([
+      [
+        [
+          [
+            [1, 0],
+            [0, 1],
+            [-1, 0],
+            [0, -1],
+          ],
+        ],
+      ],
+    ]);
+    const dcel = Dcel.fromSubdivision(subdivision);
+    const schematization = new CSchematization();
+    const constrainedDcel = schematization.constrainAngles(dcel);
+    const { xMin, xMax, yMin, yMax } = constrainedDcel.getBbox();
+    expect(xMin).toBeGreaterThanOrEqual(-1);
+    expect(xMin).toBeLessThanOrEqual(0);
+    expect(xMax).toBeGreaterThanOrEqual(0);
+    expect(xMax).toBeLessThanOrEqual(1);
+    expect(yMin).toBeGreaterThanOrEqual(-1);
+    expect(yMin).toBeLessThanOrEqual(0);
+    expect(yMax).toBeGreaterThanOrEqual(0);
+    expect(yMax).toBeLessThanOrEqual(1);
   });
 });
