@@ -40,8 +40,15 @@ class StaircaseGenerator implements Generator {
           edge,
           this.sigificantVertices,
         );
-        const edgeId =
-          typeof edge.id === "number" && edge.id > 0 ? edge.id : undefined;
+        // Always process the edge whose head is NOT significant:
+        // those have geometrically valid direct classifications.
+        if (
+          edge.head &&
+          typeof edge.head.id === "number" &&
+          this.sigificantVertices.includes(edge.head.id) &&
+          edge.twin
+        )
+          edge = edge.twin;
         const edgeCoordKey = edge.coordKey;
         const edgeClass =
           edgeCoordKey !== undefined
@@ -57,13 +64,6 @@ class StaircaseGenerator implements Generator {
           typeof assignedDirection !== "number"
         )
           return acc;
-        if (
-          edgeId !== undefined &&
-          this.sigificantVertices.includes(edgeId) &&
-          significantVertex !== edge.tail &&
-          edge.twin
-        )
-          edge = edge.twin;
         if (edge.id === undefined) return acc;
         return acc.set(
           edge.id,

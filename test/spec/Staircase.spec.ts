@@ -279,7 +279,6 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
 
 describe("Staircases for a diamond rotated square of side length 1)", function () {
   test("are bound within a reasonable area", function () {
-    console.log("Running test: are bound within a reasonable area");
     const subdivision = Subdivision.fromCoordinates([
       [
         [
@@ -304,5 +303,24 @@ describe("Staircases for a diamond rotated square of side length 1)", function (
     expect(yMin).toBeLessThanOrEqual(0);
     expect(yMax).toBeGreaterThanOrEqual(0);
     expect(yMax).toBeLessThanOrEqual(1);
+  });
+
+  test("can be simplified without throwing an error", function () {
+    const subdivision = Subdivision.fromCoordinates([
+      [
+        [
+          [
+            [1, 0],
+            [0, 1],
+            [-1, 0],
+            [0, -1],
+          ],
+        ],
+      ],
+    ]);
+    const dcel = Dcel.fromSubdivision(subdivision);
+    const schematization = new CSchematization();
+    const constrained = schematization.constrainAngles(dcel);
+    expect(() => schematization.simplify(constrained)).not.toThrow();
   });
 });
