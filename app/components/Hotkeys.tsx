@@ -27,7 +27,7 @@ const Hotkeys = () => {
       console.log("Simplifying..."),
   );
   useHotkeys(["ctrl+c"], () => removeSource());
-  useHotkeys(["ctrl+1"], () => setSource("AUT_adm0-s0_5.json"));
+  useHotkeys(["ctrl+1"], () => setSource("diamond.json"));
   useHotkeys(["left"], () =>
     prevSnapshot ? setActiveSnapshot(prevSnapshot.id) : undefined,
   );
