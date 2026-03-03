@@ -7,6 +7,9 @@ class BoundingBox {
   yMax: number;
 
   constructor(points: [number, number][]) {
+    if (points.length === 0) {
+      throw new Error("BoundingBox cannot be created from an empty array of points.");
+    }
     [this.xMin, this.xMax, this.yMin, this.yMax] =
       BoundingBox.fromCoordinates(points);
   }
