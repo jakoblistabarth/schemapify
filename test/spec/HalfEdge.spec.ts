@@ -584,13 +584,6 @@ describe("moveTo().", function () {
     const movedEdge = dcel.getBoundedFaces()[0].getEdges()[1];
     expect(movedEdge.tail.xy).toEqual([10, 0]);
     expect(movedEdge.head?.xy).toEqual([10, 1]);
-    console.log(
-      "vertices",
-      Array.from(dcel.halfEdges.values())
-        .at(0)
-        ?.getCycle()
-        .map((e) => e.tail.xy),
-    );
   });
 
   test("deletes (merges) vertices if both target points are existing.", function () {
