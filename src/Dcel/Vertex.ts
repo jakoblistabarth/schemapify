@@ -206,16 +206,42 @@ class Vertex extends Point {
    */
   moveTo(x: number, y: number) {
     if (this.x === x && this.y === y) return this;
-    // TODO: check whether this actually needs to be handled here
-    //  merge vertices, if a vertex on this (new) position already exists
+    // If a vertex already exists at the target position, merge into it by
+    // reassigning all incident edges to the existing vertex, then removing
+    // this vertex from the DCEL.
+    // We can't call this.remove() here because it completely removes the vertex
+    // and rewires its edges. This would break any references to those edges that
+    // are needed within this method.
     const existing = this.dcel.findVertex(x, y);
     if (existing) {
-      // console.log("merging vertices", existing?.uuid, "already exists");
-      if (!existing) return this;
       this.edges.forEach((edge) => {
-        existing.edges.push(edge);
+        if (edge.tail === this) edge.tail = existing;
+        if (edge.twin && edge.twin.tail === this) edge.twin.tail = existing;
+        if (!existing.edges.includes(edge)) existing.edges.push(edge);
       });
-      this.remove();
+      this.edges = [];
+      this.dcel.removeVertex(this);
+
+      // Remove any self-loop edges created by the merge (tail === head === existing).
+      // prev and next pointer must be rewired manually before removal
+      // since HalfEdge.remove() does not touch those pointers.
+      const degenerate = existing.edges.filter((e) => e.head === existing);
+      degenerate.forEach((e) => {
+        if (e.prev) e.prev.next = e.next;
+        if (e.next) e.next.prev = e.prev;
+        if (e.face?.edge === e) e.face.edge = e.next ?? e.prev;
+        if (e.twin) {
+          if (e.twin.prev) e.twin.prev.next = e.twin.next;
+          if (e.twin.next) e.twin.next.prev = e.twin.prev;
+          if (e.twin.face?.edge === e.twin)
+            e.twin.face.edge = e.twin.next ?? e.twin.prev;
+          existing.removeIncidentEdge(e.twin);
+          this.dcel.removeHalfEdge(e.twin);
+        }
+        existing.removeIncidentEdge(e);
+        this.dcel.removeHalfEdge(e);
+      });
+
       return existing;
     }
 

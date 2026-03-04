@@ -303,27 +303,31 @@ class HalfEdge {
    * @returns The updated {@link HalfEdge} or null if removed.
    */
   moveTo(newTail: Point, newHead: Point) {
-    // 1. Move both endpoints to their new positions (no merging yet)
-    this.tail.moveTo(newTail.x, newTail.y);
-    const head = this.head;
-    if (head) head.moveTo(newHead.x, newHead.y);
+    // 1. Move both endpoints (no merging here), capturing the returned vertex because moveTo
+    // may return a different (pre-existing) vertex object when it merges.
+    this.tail = this.tail.moveTo(newTail.x, newTail.y);
 
-    // 2. After both moves, check if tail and head now coincide (but are different objects)
+    const head = this.head; // equals to this.twin?.tail (before any head move)
+    if (head && this.twin) {
+      this.twin.tail = head.moveTo(newHead.x, newHead.y);
+    }
+
+    // 2. If tail and head have ended up at the same position but are different
+    // objects, merge them now.
+    const updatedHead = this.head;
     if (
-      head &&
-      this.tail !== head &&
-      this.tail.x === head.x &&
-      this.tail.y === head.y
+      updatedHead &&
+      this.tail !== updatedHead &&
+      this.tail.x === updatedHead.x &&
+      this.tail.y === updatedHead.y
     ) {
-      // 3. Merge vertices using DCEL logic
-      const merged = this.dcel.mergeVertices(this.tail, head);
-      // Update references
+      const merged = this.dcel.mergeVertices(this.tail, updatedHead);
       this.tail = merged;
       if (this.twin) this.twin.tail = merged;
     }
 
-    // 4. If edge is now degenerate (tail === head), remove it
-    if (head && this.tail === head) {
+    // 3. If edge is now degenerate (tail === head), remove it.
+    if (this.head && this.tail === this.head) {
       this.remove();
       return null;
     }

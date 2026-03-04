@@ -541,9 +541,13 @@ describe("moveTo().", function () {
     expect(dcel.findVertex(1, 1)).toBeInstanceOf(Vertex);
     expect(dcel.findVertex(0, 1)).toBeInstanceOf(Vertex);
     expect(dcel.vertices.size).toBe(5);
+    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin?.getCycle().length).toBe(5);
+    expect(dcel.getBoundedFaces()[0].edge.twin?.getCycle(false).length).toBe(5);
   });
 
-  test("moves an edge.", function () {
+  test("Moves an edge, without affecting any other vertices or halfedges if both target points are new", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction.json"),
@@ -551,19 +555,21 @@ describe("moveTo().", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel
-      .getBoundedFaces()[0]
-      .getEdges()[1]
-      .moveTo(new Point(10.5, 0), new Point(10.5, 1));
+    const edgeToMove = dcel.getBoundedFaces()[0].getEdges()[1];
+    const movedReturned = edgeToMove.moveTo(
+      new Point(10.5, 0),
+      new Point(10.5, 1),
+    );
 
     const moved = dcel.getBoundedFaces()[0].getEdges()[1];
+    expect(moved).toBe(movedReturned);
     expect(moved.tail?.x).toBe(10.5);
     expect(moved.tail?.y).toBe(0);
     expect(moved.head?.x).toBe(10.5);
     expect(moved.head?.y).toBe(1);
   });
 
-  test("deletes (merges) a vertex if one target point is already existing.", function () {
+  test("moveTo() deletes (merges) a vertex if one target point is already existing.", function () {
     //TODO: does not yet handle removing collinear points (in this case the vertex at (10, 1) would be collinear and should be removed)
     const json = JSON.parse(
       fs.readFileSync(
@@ -572,18 +578,24 @@ describe("moveTo().", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    dcel
-      .getBoundedFaces()[0]
-      .getEdges()[1]
-      .moveTo(new Point(10, 0), new Point(10, 1));
+    const edgeToMove = dcel.getBoundedFaces()[0].getEdges()[1];
+    const movedReturned = edgeToMove.moveTo(new Point(10, 0), new Point(10, 1));
 
     expect(dcel.findVertex(11, 0)).toBeUndefined();
     expect(dcel.findVertex(11, 1)).toBeUndefined();
     expect(dcel.findVertex(10, 0)).toBeDefined();
     expect(dcel.findVertex(10, 1)).toBeDefined();
-    const movedEdge = dcel.getBoundedFaces()[0].getEdges()[1];
-    expect(movedEdge.tail.xy).toEqual([10, 0]);
-    expect(movedEdge.head?.xy).toEqual([10, 1]);
+    expect(dcel.vertices.size).toBe(9);
+    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(9);
+    expect(dcel.getBoundedFaces()[0].getEdges(false).length).toBe(9);
+    expect(dcel.getBoundedFaces()[0].edge.twin?.getCycle().length).toBe(9);
+    expect(dcel.getBoundedFaces()[0].edge.twin?.getCycle(false).length).toBe(9);
+
+    const movedEdge = dcel.findHalfEdge(new Point(10, 0), new Point(10, 1));
+    expect(movedEdge?.coordKey).toBe(movedReturned?.coordKey);
+    expect(movedEdge?.id).toBe(movedReturned?.id);
+    expect(movedEdge?.tail.xy).toEqual([10, 0]);
+    expect(movedEdge?.head?.xy).toEqual([10, 1]);
   });
 
   test("deletes (merges) vertices if both target points are existing.", function () {

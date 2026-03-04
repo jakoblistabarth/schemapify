@@ -22,7 +22,7 @@ describe("CSchematization's run() method does not throw.", function () {
     testFiles
       .filter((file) => file.match(/smallest-contraction/))
       .forEach((file) => {
-        test.fails(
+        test(
           "Running schematization on " + file + " does not throw",
           function () {
             const inputJson = JSON.parse(

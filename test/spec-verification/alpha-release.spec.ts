@@ -79,7 +79,7 @@ describe("5-a. If the input data is too detailed, i.e., if it exceeds a maximum 
   });
 });
 
-describe.skip("6-a. If the input data holds attributes attached to its features, the systems shall preserve these attributes in the output.", function () {
+describe("6-a. If the input data holds attributes attached to its features, the systems shall preserve these attributes in the output.", function () {
   let inputProperties: GeoJsonProperties[];
   let outputProperties: (GeoJsonProperties | undefined)[];
 
@@ -107,7 +107,7 @@ describe.skip("6-a. If the input data holds attributes attached to its features,
   });
 });
 
-describe.skip("7-a. The system shall preserve the number of features of the input in the output.", function () {
+describe("7-a. The system shall preserve the number of features of the input in the output.", function () {
   test("The number of features needs to be the same for the input and the output.", function () {
     const json = JSON.parse(
       readFileSync(
