@@ -1,11 +1,13 @@
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 import Contraction from "@/src/c-oriented-schematization/Contraction";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
+import { LABEL } from "@/src/c-oriented-schematization/CSchematization";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
 import Vector2D from "@/src/geometry/Vector2D";
+import Snapshot from "@/src/Snapshot/Snapshot";
 import DeckGL from "@deck.gl/react";
 import { ZoomWidget } from "@deck.gl/widgets";
 import "@deck.gl/widgets/stylesheet.css";
@@ -22,8 +24,7 @@ import {
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import ConfigurationLayer from "../helpers/ConfigurationLayer";
 import useAppStore from "../helpers/store";
-import Snapshot from "@/src/Snapshot/Snapshot";
-import { LABEL } from "@/src/c-oriented-schematization/CSchematization";
+import { getInitialZoom } from "../helpers/getInitialZoom";
 
 const step = 0.005;
 const intervalMS = 24;
@@ -120,11 +121,13 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       getFillColor: [0, 0, 0, 50],
     });
 
+    // --- Auto-fit DCEL with log2 zoom for DeckGL ---
+    const bbox = dcel.getBbox();
+    const zoom = getInitialZoom(bbox);
+
     const initialViewState: OrthographicViewState = {
-      target: dcel.center,
-      zoom: 6,
-      minZoom: 5,
-      maxZoom: 10,
+      target: bbox.center,
+      zoom,
     };
 
     const view = new OrthographicView({ flipY: false, id: "ortho" });
