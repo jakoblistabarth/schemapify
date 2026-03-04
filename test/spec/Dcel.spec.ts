@@ -1,13 +1,11 @@
 import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import Subdivision from "@/src/geometry/Subdivision";
 import fs from "fs";
 import * as geojson from "geojson";
 import path from "path";
 import { beforeEach, describe, expect, test } from "vitest";
 import shape from "../data/geodata/AUT_adm0-s1_epsg31287";
-import { getTestFiles } from "./test-setup";
 
 describe("A Dcel from multipolygons", function () {
   test("forming a square is parsed correctly.", function () {
@@ -435,38 +433,5 @@ describe("getArea()", function () {
   test("returns the correct area of Austria.", function () {
     const dcel = Dcel.fromSubdivision(new Subdivision([shape]));
     expect(dcel.getArea()).toBeCloseTo(83688201106.428);
-  });
-});
-
-describe.skip("schematize() returns a result which can be turned into a valid geojson", function () {
-  test("for simplified boundaries of Austria.", function () {
-    const inputJson = JSON.parse(
-      fs.readFileSync(
-        path.resolve("test/data/geodata/AUT_adm1-simple.json"),
-        "utf8",
-      ),
-    );
-    const dcel = Dcel.fromGeoJSON(inputJson);
-    const schematization = new CSchematization();
-    schematization.run(dcel);
-    //TODO: validate schematization
-  });
-});
-
-describe.skip("run() returns a result which can be turned into a valid geojson", function () {
-  const dir = "test/data/shapes";
-  const testFiles = getTestFiles(dir);
-
-  testFiles.forEach((file) => {
-    // TODO: run specs only on some of the shapes?
-    test("for the simple input " + file, function () {
-      const inputJson = JSON.parse(
-        fs.readFileSync(path.resolve(dir + "/" + file), "utf8"),
-      );
-      const dcel = Dcel.fromGeoJSON(inputJson);
-      const schematization = new CSchematization();
-      schematization.run(dcel);
-      //TODO: validate schematization
-    });
   });
 });
