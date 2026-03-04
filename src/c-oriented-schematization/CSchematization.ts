@@ -179,8 +179,6 @@ class CSchematization implements Schematization {
     });
 
     start = performance.now();
-    const faceFaceBoundaryList = new FaceFaceBoundaryListGenerator().run(input);
-    const configurations = new ConfigurationGenerator().run(input);
     this.doAction({
       level: "visualize",
       dcel: input,
@@ -189,13 +187,24 @@ class CSchematization implements Schematization {
     });
 
     // TODO: check whether loop is correct
-    let dcel: Dcel;
+    let dcel: Dcel = input;
+    let lastEdgeCount = dcel.halfEdges.size;
     do {
+      const faceFaceBoundaryList = new FaceFaceBoundaryListGenerator().run(
+        dcel,
+      );
+      const configurations = new ConfigurationGenerator().run(dcel);
       const { dcel: newDcel } = new EdgeMoveProcessor(
         faceFaceBoundaryList,
         configurations,
-      ).run(input);
+      ).run(dcel);
       dcel = newDcel;
+
+      // Break if no progress was made (prevents infinite loop)
+      if (dcel.halfEdges.size === lastEdgeCount) {
+        break;
+      }
+      lastEdgeCount = dcel.halfEdges.size;
     } while (debug ? !!debug : dcel.halfEdges.size >= this.style.k);
 
     this.doAction({
