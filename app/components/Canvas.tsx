@@ -70,6 +70,8 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | undefined>(undefined);
   const [time, setTime] = useState(0);
 
+  const { activeSnapshot } = useAppStore();
+
   const animate = useCallback(() => {
     // increment time by "step" on each loop
     if (!isAnimating) return;
@@ -109,6 +111,27 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       .map((i) => range(-50, 50, 0.5).map((j) => [i, j]))
       .flat();
 
+    const gridLayer = new ScatterplotLayer({
+      id: "grid",
+      data: gridPoints,
+      getPosition: (d) => d,
+      radiusMinPixels: 1,
+      radiusMaxPixels: 1,
+      getFillColor: [0, 0, 0, 50],
+    });
+
+    const initialViewState: OrthographicViewState = {
+      target: dcel.center,
+      zoom: 6,
+      minZoom: 5,
+      maxZoom: 10,
+    };
+
+    const view = new OrthographicView({ flipY: false, id: "ortho" });
+
+    if (activeSnapshot?.label !== LABEL.SIMPLIFY)
+      return { baseLayers: [gridLayer], view, initialViewState };
+
     const configurations = new ConfigurationGenerator().run(dcel);
 
     const contractionLayer = new SolidPolygonLayer({
@@ -125,36 +148,18 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
         c.type === ContractionType.N ? [255, 0, 0, 10] : [0, 255, 0, 10],
     });
 
-    const gridLayer = new ScatterplotLayer({
-      id: "grid",
-      data: gridPoints,
-      getPosition: (d) => d,
-      radiusMinPixels: 1,
-      radiusMaxPixels: 1,
-      getFillColor: [0, 0, 0, 50],
-    });
-
     const ffbList = new FaceFaceBoundaryListGenerator().run(dcel);
 
     const configurationLayer = new ConfigurationLayer({
       data: ffbList.getMinimalConfigurationPair(configurations),
     });
 
-    const initialViewState: OrthographicViewState = {
-      target: dcel.center,
-      zoom: 6,
-      minZoom: 5,
-      maxZoom: 10,
-    };
-
-    const view = new OrthographicView({ flipY: false, id: "ortho" });
-
     return {
       baseLayers: [gridLayer, configurationLayer, contractionLayer],
       view,
       initialViewState,
     };
-  }, [dcel]);
+  }, [dcel, activeSnapshot?.label]);
 
   // Cheap — only hover/animation-sensitive layers recompute on mouse move or tick
   const layers = useMemo(() => {
@@ -206,8 +211,6 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
 
     return [...baseLayers, edgeAnimationLayer, edgeLayer, pointsLayer];
   }, [baseLayers, hoverInfo, shiftPoint, getShiftedPath, time, dcel]);
-
-  const { activeSnapshot } = useAppStore();
 
   const tooltipContent = useMemo(() => {
     if (!hoverInfo) return null;
