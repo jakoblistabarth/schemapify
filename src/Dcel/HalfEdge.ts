@@ -89,8 +89,7 @@ class HalfEdge {
 
   /**
    * Gets all HalfEdges incident to the same face as the HalfEdge.
-   * @param forwards A Boolean indicating whether the {@link HalfEdge}s should be returned forward (counterclockwise)
-   * or backwards (clockwise). Default: true.
+   * @param forwards A Boolean indicating whether the {@link HalfEdge}s should be returned forward (counterclockwise) or backwards (clockwise). Defaults to `true`.
    * @returns An array of {@link HalfEdge}s.
    */
   getCycle(forwards: boolean = true) {

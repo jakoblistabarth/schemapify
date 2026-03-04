@@ -70,6 +70,7 @@ class Face {
 
   /**
    * Get the face's outer ring.
+   * @param counterclockwise whether the edges should be returned in counterclockwise order. Defaults to `true`.
    * @returns the face's outer ring
    */
   getEdges(counterclockwise: boolean = true) {
@@ -78,6 +79,7 @@ class Face {
 
   /**
    * Remove the face's inner edge.
+   * @param the {@link HalfEdge} to be removed from the face's inner edges
    * @returns the face's remaining inner edges
    */
   removeInnerEdge(edge: HalfEdge) {
