@@ -69,9 +69,18 @@ This file contains concise, machine-readable guidance for coding agents working 
 
 - Prefer immutable, functional patterns and small pure helpers. Keep side effects explicit and limited to boundary layers.
 
+- Use double quotes for strings, and prefer template literals when interpolation is needed.
+
+  Example:
+
+  ```ts
+  const name = "Alice";
+  const greeting = `Hello, ${name}!`;
+  ```
+
 ## Formatting & linting
 
-- Run `pnpm lint` and `pnpm format` before committing. Follow existing Prettier / ESLint rules in the repo.
+- Run `pnpm lint` and `pnpm format` before testing or committing. Follow existing Prettier / ESLint rules in the repo.
 - If you add or change lint rules, update `package.json` scripts and add notes here.
 
 ## Testing
