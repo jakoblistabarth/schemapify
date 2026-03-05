@@ -1,6 +1,6 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import useAppStore from "../helpers/store";
 import { MdClose } from "react-icons/md";
 import FileSelect from "./FileSelect";
@@ -11,7 +11,21 @@ type Props = {
 };
 
 const Configurator: FC<Props> = ({ files }) => {
-  const { source, removeSource } = useAppStore();
+  const { source, removeSource, activeSnapshot } = useAppStore();
+  const dcel = useMemo(() => {
+    if (!activeSnapshot) return undefined;
+    return activeSnapshot.subdivision.toDcel();
+  }, [activeSnapshot]);
+
+  const info = useMemo(() => {
+    if (!dcel) return undefined;
+    return {
+      duration: activeSnapshot?.duration,
+      vertices: dcel.vertices.size,
+      halfEdges: dcel.halfEdges.size,
+      faces: dcel.getBoundedFaces().length,
+    };
+  }, [dcel, activeSnapshot]);
 
   return (
     <>
@@ -30,6 +44,25 @@ const Configurator: FC<Props> = ({ files }) => {
                 <MdClose />
               </button>
             )}
+          </div>
+        )}
+        {activeSnapshot && (
+          <div className="mt-2 rounded-md bg-white p-2">
+            <div className="text-sm text-gray-500">
+              Snapshot{" "}
+              <pre className="inline font-black">{activeSnapshot.label}</pre>
+            </div>
+            <table>
+              <tbody>
+                {info &&
+                  Object.entries(info).map(([key, value]) => (
+                    <tr key={key}>
+                      <td>{key}</td>
+                      <td>{value}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

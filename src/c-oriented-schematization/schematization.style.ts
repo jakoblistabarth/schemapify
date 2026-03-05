@@ -19,7 +19,7 @@ export interface CStyle {
 
 export const style = {
   lambda: 1,
-  k: 100, // TODO: set meaningful value
+  k: 8,
   c: new CRegular(2),
   // c: new CIrregular([Math.PI * 0.25, Math.PI * 1, Math.PI * (5 / 3)]),
   staircaseEpsilon: 0.1,

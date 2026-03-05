@@ -9,9 +9,9 @@ import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBounda
 
 export const handleSimplify = (
   dcel: Dcel,
-  configurations: Map<number, Configuration>,
+  configurations: Map<string, Configuration>,
   contractions: Map<
-    number,
+    string,
     {
       [ContractionType.P]: Contraction | undefined;
       [ContractionType.N]: Contraction | undefined;

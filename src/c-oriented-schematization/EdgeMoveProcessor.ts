@@ -7,11 +7,11 @@ import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
 // class EdgeMoveProcessor implements Processor {
 class EdgeMoveProcessor {
   faceFaceBoundaryList: FaceFaceBoundaryList;
-  configurations: Map<number, Configuration>;
+  configurations: Map<string, Configuration>;
 
   constructor(
     faceFaceBoundaryList: FaceFaceBoundaryList,
-    configurations: Map<number, Configuration>,
+    configurations: Map<string, Configuration>,
   ) {
     this.faceFaceBoundaryList = faceFaceBoundaryList;
     this.configurations = configurations;

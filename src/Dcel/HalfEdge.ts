@@ -196,6 +196,14 @@ class HalfEdge {
    * Remove links of the halfEdge within the DCEL linkages.
    */
   remove() {
+    // Also remove the twin if it exists
+    if (this.twin) {
+      this.twin.tail.removeIncidentEdge(this.twin);
+      if (this.twin.face?.outerRing)
+        this.twin.face.outerRing.removeInnerEdge(this.twin);
+      this.dcel?.removeHalfEdge(this.twin);
+    }
+
     this.tail.removeIncidentEdge(this);
     if (this.face?.outerRing) this.face.outerRing.removeInnerEdge(this);
     this.dcel?.removeHalfEdge(this);
@@ -327,9 +335,15 @@ class HalfEdge {
     }
 
     // 3. If edge is now degenerate (tail === head), remove it.
-    if (this.head && this.tail === this.head) {
-      this.remove();
-      return null;
+    const finalHead = this.head;
+    if (finalHead) {
+      const isDegen = this.tail === finalHead;
+      const hasSameCoords =
+        this.tail.x === finalHead.x && this.tail.y === finalHead.y;
+      if (isDegen || hasSameCoords) {
+        this.remove();
+        return null;
+      }
     }
 
     return this;

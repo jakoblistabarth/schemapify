@@ -4,6 +4,7 @@ import HalfEdge from "../Dcel/HalfEdge";
 import Point from "../geometry/Point";
 import { ContractionType } from "./ContractionType";
 import Dcel from "../Dcel/Dcel";
+import { isCollinearVertex } from "./VertexUtils";
 
 /**
  * A pair of {@link Contraction}s, which are complementary and non-conflicting.
@@ -39,34 +40,65 @@ class ConfigurationPair {
     dcel: Dcel,
     // this contains all contractions no only the ones of the pair, hence, not all of them are complementary or feasible (undefined contractions)
     contractions: Map<
-      number,
+      string,
       {
         [ContractionType.P]: Contraction | undefined;
         [ContractionType.N]: Contraction | undefined;
       }
     >,
-    configurations: Map<number, Configuration>,
+    configurations: Map<string, Configuration>,
   ) {
-    const contractionEdge = this.contraction.configuration.innerEdge;
+    const DEBUG = false; // Set to true to enable detailed logging
+
+    // Fetch fresh edge references from DCEL using coordKey, not stale object references
+    // This ensures we're working with edges that are actually in the current DCEL
+    const configContractionEdge = this.contraction.configuration.innerEdge;
+    const configCompensationEdge = this.compensation.configuration.innerEdge;
+
+    const contractionEdge = configContractionEdge.coordKey
+      ? dcel
+          .getHalfEdges()
+          .find((e) => e.coordKey === configContractionEdge.coordKey)
+      : undefined;
+    const compensationEdge = configCompensationEdge.coordKey
+      ? dcel
+          .getHalfEdges()
+          .find((e) => e.coordKey === configCompensationEdge.coordKey)
+      : undefined;
+
+    // If we can't find fresh edge references, the configuration is stale
+    if (!contractionEdge || !compensationEdge) {
+      if (DEBUG) {
+        console.log("EARLY RETURN: couldn't find fresh edge references");
+      }
+      return;
+    }
+
     const contractionHead = contractionEdge.head;
-    if (!contractionHead) return;
-    const compensationEdge = this.compensation.configuration.innerEdge;
+
+    if (DEBUG) {
+      console.log("\n=== doEdgeMove called ===");
+      console.log("Contraction edge:", contractionEdge.coordKey);
+      console.log("  Tail:", contractionEdge.tail.xy);
+      console.log("  Head:", contractionEdge.head?.xy);
+      console.log("  Head is null?", !contractionHead);
+    }
+    if (!contractionHead) {
+      if (DEBUG) console.log("EARLY RETURN: no contraction head");
+      return;
+    }
+
+    if (DEBUG) {
+      console.log("Compensation edge:", compensationEdge.coordKey);
+      console.log("  Tail:", compensationEdge.tail.xy);
+      console.log("  Head:", compensationEdge.head?.xy);
+    }
 
     // 1. Update (decrement) blocking edges
     contractions.forEach((contractions) => {
-      // console.log(
-      //   "blockingNumber before",
-      //   contraction.configuration.innerEdge.uuid,
-      //   contraction.blockingNumber
-      // );
       Object.values(contractions).forEach((d) =>
         d?.decrementBlockingNumber(this.x1x2, configurations),
-      ); // FIXME: fix blocking Number!! Done?
-      // console.log(
-      //   "blockingNumber after",
-      //   contraction.configuration.innerEdge.uuid,
-      //   contraction.blockingNumber
-      // );
+      );
     });
 
     const movedPositions: Point[] = [];
@@ -76,22 +108,52 @@ class ConfigurationPair {
     const pointB =
       this.contraction.areaPoints[this.contraction.areaPoints.length - 1];
     const contractionSegment = contractionEdge.toLineSegment();
-    if (!contractionSegment) return;
-    //const contractionShift = pointA.distanceToLineSegment(contractionSegment);
+    if (!contractionSegment) {
+      if (DEBUG) console.log("EARLY RETURN: no contraction segment");
+      return;
+    }
 
     // 2.2 Calculate compensation trapeze height
     const compensationShift = this.compensationShift;
-    if (!compensationShift) return;
+    if (!compensationShift) {
+      if (DEBUG) console.log("EARLY RETURN: no compensation shift");
+      return;
+    }
 
     // 2.3 Calculate new positions for compensation edge
     const normal = compensationEdge
       .getVector()
       ?.unitVector.getNormal(this.compensation?.type === ContractionType.N)
       .times(compensationShift);
-    if (!normal) return;
+    if (!normal) {
+      if (DEBUG) console.log("EARLY RETURN: no normal vector");
+      return;
+    }
     const newTail = compensationEdge.tail.vector.plus(normal).toPoint();
     const newHead = compensationEdge.head?.vector.plus(normal).toPoint();
-    if (!newHead) return;
+    if (!newHead) {
+      if (DEBUG) console.log("EARLY RETURN: no new head for compensation");
+      return;
+    }
+
+    if (DEBUG) {
+      console.log("New compensation positions:");
+      console.log("  newTail:", newTail.xy);
+      console.log("  newHead:", newHead.xy);
+      console.log(
+        "Checking if compensation touches contraction edge positions:",
+      );
+      console.log(
+        "  newTail matches tail?",
+        newTail.equals(contractionEdge.tail),
+      );
+      console.log("  newTail matches head?", newTail.equals(contractionHead));
+      console.log(
+        "  newHead matches tail?",
+        newHead.equals(contractionEdge.tail),
+      );
+      console.log("  newHead matches head?", newHead.equals(contractionHead));
+    }
 
     // console.log("contractionshift", contractionShift, "compensationshift", compensationShift);
 
@@ -102,8 +164,19 @@ class ConfigurationPair {
         (point) => point.equals(newTail) || point.equals(newHead),
       )
     ) {
+      if (DEBUG) {
+        console.log("Taking doHalfEdgeMove path");
+      }
       this.doHalfEdgeMove();
-      return; // TODO: remove this return
+      // Return the modified dcel (doHalfEdgeMove modifies in-place)
+      return { dcel, contractions, configurations };
+    }
+
+    if (DEBUG) {
+      console.log("Taking normal contraction + compensation path");
+      console.log("Contraction will move to pointA or pointB:");
+      console.log("  pointA:", pointA.xy);
+      console.log("  pointB:", pointB.xy);
     }
 
     // 2.3 Do the contraction and the compensation
@@ -115,10 +188,21 @@ class ConfigurationPair {
       ? contractionEdge.moveTo(pointA, pointB)
       : contractionEdge.moveTo(pointB, pointA);
 
-    if (newEdge && typeof newEdge.id === "number" && newEdge.id > 0) {
+    if (DEBUG) {
+      console.log("After moving contraction edge:");
+      console.log("  newEdge:", newEdge?.coordKey);
+      console.log("  Old tail:", contractionEdge.tail.xy);
+      console.log("  Old head:", contractionEdge.head?.xy);
+      if (newEdge) {
+        console.log("  New tail:", newEdge.tail.xy);
+        console.log("  New head:", newEdge.head?.xy);
+      }
+    }
+
+    if (newEdge && newEdge.coordKey) {
       const newConfiguration = new Configuration(newEdge);
       newConfiguration.initialize(configurations);
-      configurations.set(newEdge.id, newConfiguration);
+      configurations.set(newEdge.coordKey, newConfiguration);
       // TODO: add newEdge to facefaceBoundaryList
       // newEdge?.dcel.faceFaceBoundaryList?.addEdge(newEdge);
     }
@@ -126,10 +210,18 @@ class ConfigurationPair {
     movedPositions.push(contractionEdge.tail.toPoint());
     movedPositions.push(contractionHead.toPoint());
 
-    compensationEdge.moveTo(newTail, newHead);
+    const compensationAfterMove = compensationEdge.moveTo(newTail, newHead);
 
-    movedPositions.push(compensationEdge.tail.toPoint());
-    const compensationHead = compensationEdge.head?.toPoint();
+    // If compensation edge became degenerate, we can't continue
+    if (!compensationAfterMove) {
+      if (DEBUG) {
+        console.log("Compensation edge became degenerate - skipping this move");
+      }
+      return;
+    }
+
+    movedPositions.push(compensationAfterMove.tail.toPoint());
+    const compensationHead = compensationAfterMove.head?.toPoint();
     if (compensationHead) movedPositions.push(compensationHead);
 
     // console.log("moved Positions", movedPositions.length);
@@ -174,6 +266,42 @@ class ConfigurationPair {
         d?.incrementBlockingNumber(this.x1x2, configurations),
       );
     });
+
+    // Remove any collinear vertices created by the edge move
+    // Collect all vertices incident to edges that were affected by the move
+    const affectedVertices = remainingEdges.reduce(
+      (vertices: Set<number>, edge) => {
+        if (typeof edge.tail.id === "number") vertices.add(edge.tail.id);
+        if (edge.head && typeof edge.head.id === "number")
+          vertices.add(edge.head.id);
+        // Also check neighbors of affected vertices
+        edge.tail.edges.forEach((e) => {
+          if (e.head && typeof e.head.id === "number") vertices.add(e.head.id);
+        });
+        if (edge.head) {
+          edge.head.edges.forEach((e) => {
+            if (e.head && typeof e.head.id === "number")
+              vertices.add(e.head.id);
+          });
+        }
+        return vertices;
+      },
+      new Set<number>(),
+    );
+
+    // Remove collinear vertices, repeating until no more are found
+    // (removing one might make others collinear)
+    let foundCollinear = true;
+    while (foundCollinear) {
+      foundCollinear = false;
+      affectedVertices.forEach((vertexId: number) => {
+        const vertex = dcel.vertices.get(vertexId);
+        if (vertex && isCollinearVertex(vertex)) {
+          vertex.remove();
+          foundCollinear = true;
+        }
+      });
+    }
 
     //TODO: update uuids of maps?
     return { dcel, contractions, configurations };
@@ -227,9 +355,10 @@ class ConfigurationPair {
     const newEdge = vertexToDelete.remove(contractionEdge.face);
     if (!newEdge || !newEdge.prev || !newEdge.next) return;
     // console.log(newEdge.prev.uuid, newEdge.uuid, newEdge.next.uuid);
+    // updateConfigurations expects Map<string, Configuration>
     this.updateConfigurations(
       [newEdge, newEdge.prev, newEdge.next],
-      configurations,
+      configurations as unknown as Map<string, Configuration>,
     );
   }
 
@@ -240,16 +369,15 @@ class ConfigurationPair {
    */
   updateConfigurations(
     involvedEdges: HalfEdge[],
-    configurations: Map<number, Configuration>,
+    configurations: Map<string, Configuration>,
   ) {
     involvedEdges.forEach((edge) => {
       if (!edge) return;
       if (
         edge.endpoints.every((vertex) => vertex.edges.length <= 3) &&
-        typeof edge.id === "number" &&
-        edge.id > 0
+        edge.coordKey
       )
-        configurations.set(edge.id, new Configuration(edge));
+        configurations.set(edge.coordKey, new Configuration(edge));
     });
   }
 }

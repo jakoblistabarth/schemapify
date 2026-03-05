@@ -133,6 +133,14 @@ export const createStaircaseSetup = (
 export const idOr = (v?: { id?: number } | undefined) =>
   typeof v?.id === "number" ? v.id : -1;
 
+/**
+ * Extract coordKey from a HalfEdge for stable configuration lookups.
+ * @param edge HalfEdge to extract coordKey from
+ * @returns coordKey if available, empty string otherwise
+ */
+export const coordKeyOr = (edge?: { coordKey?: string } | undefined) =>
+  edge?.coordKey ?? "";
+
 type Options = {
   c?: CRegular | CIrregular;
   significantVertices?: number[];
@@ -153,7 +161,8 @@ export const getClassification = (
     significantVertices,
   ).run(dcel);
   const directionSolution = origin.edges.map(
-    (edge) => assignedDirections.get(edge.coordKey ?? "")?.[classficationProperty],
+    (edge) =>
+      assignedDirections.get(edge.coordKey ?? "")?.[classficationProperty],
   );
   return directionSolution;
 };

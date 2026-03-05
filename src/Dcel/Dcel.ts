@@ -353,8 +353,39 @@ class Dcel {
   removeHalfEdge(edge: HalfEdge) {
     const head = edge.head;
     if (!head) return this.halfEdges;
+
+    // Try to remove using the numeric-ID-based key first
     const edgeKey = HalfEdge.getKey(edge.tail, head);
-    this.halfEdges.delete(edgeKey);
+    let deleted = this.halfEdges.delete(edgeKey);
+
+    // If that failed, try removing by coordinate-based key (for degenerate or merged edges)
+    if (!deleted && edge.coordKey) {
+      deleted = this.halfEdges.delete(edge.coordKey);
+    }
+
+    // If still not deleted, search through all keys as a last resort
+    if (!deleted) {
+      for (const key of this.halfEdges.keys()) {
+        const storedEdge = this.halfEdges.get(key);
+        if (storedEdge === edge) {
+          this.halfEdges.delete(key);
+          deleted = true;
+          break;
+        }
+      }
+    }
+
+    if (
+      process.env.NODE_ENV !== "production" &&
+      process.env.VERBOSE_DEBUG &&
+      !deleted
+    ) {
+      console.warn(
+        "removeHalfEdge: Could not find edge to remove:",
+        edge.coordKey,
+      );
+    }
+
     if (edge.face && edge.twin?.face) {
       // const boundaryKey = FaceFaceBoundaryList.getKey(
       //   edge.face,

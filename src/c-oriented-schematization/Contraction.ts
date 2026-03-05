@@ -18,7 +18,7 @@ class Contraction {
     configuration: Configuration,
     contractionType: ContractionType,
     point: Point,
-    configurations: Map<number, Configuration>,
+    configurations: Map<string, Configuration>,
   ) {
     this.type = contractionType;
     this.configuration = configuration;
@@ -35,7 +35,7 @@ class Contraction {
   static initialize(
     configuration: Configuration,
     contractionType: ContractionType,
-    configurations: Map<number, Configuration>,
+    configurations: Map<string, Configuration>,
   ): Contraction | undefined {
     const point = this.getPoint(configuration, contractionType);
     return point
@@ -45,13 +45,13 @@ class Contraction {
 
   /**
    * Determines whether or not the Contraction is feasible.
+   * A contraction must have positive area to be feasible, since zero-area
+   * contractions (where a vertex is collinear) don't simplify the geometry.
    * @returns A boolean, indicating whether or not the Contraction is feasible.
    */
   get isFeasible() {
     if (!this.point) return false;
-    return this.area === 0 || (this.area > 0 && this.blockingNumber === 0)
-      ? true
-      : false;
+    return this.area > 0 && this.blockingNumber === 0 ? true : false;
   }
 
   /**
@@ -243,14 +243,11 @@ class Contraction {
    * @param edge The {@link HalfEdge}
    * @returns A boolean, indicating whether or not the {@link Contraction} is blocked by the specified {@link HalfEdge}.
    */
-  isBlockedBy(edge: HalfEdge, configurations: Map<number, Configuration>) {
+  isBlockedBy(edge: HalfEdge, configurations: Map<string, Configuration>) {
     const x = this.configuration.x;
     const twin = this.configuration.innerEdge.twin;
     if (!twin) return;
-    const x_ =
-      typeof twin.id === "number" && twin.id > 0
-        ? configurations.get(twin.id)?.x
-        : undefined;
+    const x_ = twin.coordKey ? configurations.get(twin.coordKey)?.x : undefined;
     if (x_) x.push(...x_);
     if (x.includes(edge)) return false;
     const edgeLine = edge.toLineSegment();
@@ -285,7 +282,7 @@ class Contraction {
    * Initializes the blocking number of the Contraction.
    * @returns A number, indicating how many {@link HalfEdge}s block the {@link Contraction}.
    */
-  initializeBlockingNumber(configurations: Map<number, Configuration>) {
+  initializeBlockingNumber(configurations: Map<string, Configuration>) {
     let blockingNumber = 0;
     if (!this.point) return blockingNumber;
 
@@ -304,7 +301,7 @@ class Contraction {
    */
   decrementBlockingNumber(
     x1x2: HalfEdge[],
-    configurations: Map<number, Configuration>,
+    configurations: Map<string, Configuration>,
   ) {
     if (this.blockingNumber === 0) return; // skip check for interference when no blocking point exists
     const decrement = x1x2.reduce((acc: number, edge) => {
@@ -320,7 +317,7 @@ class Contraction {
    */
   incrementBlockingNumber(
     x1x2: HalfEdge[],
-    configurations: Map<number, Configuration>,
+    configurations: Map<string, Configuration>,
   ) {
     const increment = x1x2.reduce((acc: number, edge) => {
       // console.log("---->", this.configuration.innerEdge.uuid);

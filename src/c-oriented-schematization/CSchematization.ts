@@ -3,7 +3,6 @@ import Schematization, {
   Callback,
   Callbacks,
 } from "@/src/Schematization/Schematization";
-import SnapshotList from "@/src/Snapshot/SnapshotList";
 import MultiPolygon from "@/src/geometry/MultiPolygon";
 import Polygon from "@/src/geometry/Polygon";
 import HalfEdgeClassGenerator, { Orientation } from "./HalfEdgeClassGenerator";
@@ -37,15 +36,12 @@ export enum LABEL {
 /**
  * A C-oriented schematization process.
  */
-class CSchematization implements Schematization {
+class CSchematization extends Schematization {
   style: CStyle;
-  callbacks: Callbacks;
-  snapshots: SnapshotList;
 
   constructor(style: CStyle = defaultStyle, callbacks: Callbacks = {}) {
+    super({ style, options: { callbacks } });
     this.style = style;
-    this.callbacks = callbacks;
-    this.snapshots = new SnapshotList();
   }
 
   doAction({
@@ -178,18 +174,10 @@ class CSchematization implements Schematization {
       forSnapshots: { snapshotList: this.snapshots, triggeredAt: start },
     });
 
-    start = performance.now();
-    this.doAction({
-      level: "visualize",
-      dcel: input,
-      label: LABEL.SIMPLIFY,
-      forSnapshots: { snapshotList: this.snapshots, triggeredAt: start },
-    });
-
     // TODO: check whether loop is correct
-    let dcel: Dcel = input;
-    let lastEdgeCount = dcel.halfEdges.size;
+    let dcel: Dcel = withoutCollinearPoints;
     do {
+      const edgeCountBeforeMove = dcel.halfEdges.size;
       const faceFaceBoundaryList = new FaceFaceBoundaryListGenerator().run(
         dcel,
       );
@@ -200,19 +188,19 @@ class CSchematization implements Schematization {
       ).run(dcel);
       dcel = newDcel;
 
+      start = performance.now();
+      this.doAction({
+        level: "visualize",
+        dcel,
+        label: LABEL.SIMPLIFY,
+        forSnapshots: { snapshotList: this.snapshots, triggeredAt: start },
+      });
+
       // Break if no progress was made (prevents infinite loop)
-      if (dcel.halfEdges.size === lastEdgeCount) {
+      if (dcel.halfEdges.size === edgeCountBeforeMove) {
         break;
       }
-      lastEdgeCount = dcel.halfEdges.size;
     } while (debug ? !!debug : dcel.halfEdges.size >= this.style.k);
-
-    this.doAction({
-      level: "visualize",
-      dcel,
-      label: LABEL.SIMPLIFY,
-      forSnapshots: { snapshotList: this.snapshots, triggeredAt: start },
-    });
     // TODO: is it possible to return here a simplification function
     // which I can then use for handling simplifying e.g. with hotkeys?
     return dcel;
@@ -276,12 +264,11 @@ class CSchematization implements Schematization {
    * @param dcel The DCEL to get the contractions from.
    * @returns An array of {@link Contraction}s.
    */
-  getContractions(dcel: Dcel, configurations: Map<number, Configuration>) {
+  getContractions(dcel: Dcel, configurations: Map<string, Configuration>) {
     return dcel.getHalfEdges().reduce((acc: Contraction[], edge) => {
-      const edgeId =
-        typeof edge.id === "number" && edge.id > 0 ? edge.id : undefined;
-      const configuration =
-        edgeId !== undefined ? configurations.get(edgeId) : undefined;
+      const configuration = edge.coordKey
+        ? configurations.get(edge.coordKey)
+        : undefined;
       if (!configuration) return acc;
       const n = configuration[ContractionType.N];
       const p = configuration[ContractionType.P];
