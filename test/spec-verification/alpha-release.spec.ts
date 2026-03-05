@@ -4,7 +4,7 @@ import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
 import type { GeoJsonProperties } from "geojson";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
-import { beforeEach, describe, expect, test } from "vitest";
+import { beforeAll, describe, expect, test } from "vitest";
 
 describe("2-a. The system shall be able to parse geoJSON as input data.", function () {
   const json = JSON.parse(
@@ -83,7 +83,7 @@ describe("6-a. If the input data holds attributes attached to its features, the 
   let inputProperties: GeoJsonProperties[];
   let outputProperties: (GeoJsonProperties | undefined)[];
 
-  beforeEach(() => {
+  beforeAll(() => {
     const json = JSON.parse(
       readFileSync(
         path.resolve("test/data/geodata/AUT_adm1-simple.json"),
