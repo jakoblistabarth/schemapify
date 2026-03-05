@@ -333,35 +333,6 @@ class ConfigurationPair {
     if (newHeadComp) compensationEdge.moveTo(newTailComp, newHeadComp);
   }
 
-  doSimpleEdgeMove(configurations: Map<number, Configuration>) {
-    // console.log("simple contraction", this.contraction.point.xy());
-    const contractionEdge = this.contraction.configuration.innerEdge;
-    const prevAngle = contractionEdge.prev?.getAngle();
-
-    // console.log(
-    //   contractionEdge.prev?.uuid,
-    //   prevAngle,
-    //   contractionEdge.next?.uuid,
-    //   contractionEdge.next?.getAngle(),
-    //   contractionEdge.getAngle()
-    // );
-
-    const vertexToDelete =
-      typeof prevAngle === "number" && prevAngle === contractionEdge.getAngle()
-        ? contractionEdge.tail
-        : contractionEdge.head;
-    if (!vertexToDelete) return;
-    // console.log("toDelete", vertexToDelete);
-    const newEdge = vertexToDelete.remove(contractionEdge.face);
-    if (!newEdge || !newEdge.prev || !newEdge.next) return;
-    // console.log(newEdge.prev.uuid, newEdge.uuid, newEdge.next.uuid);
-    // updateConfigurations expects Map<string, Configuration>
-    this.updateConfigurations(
-      [newEdge, newEdge.prev, newEdge.next],
-      configurations as unknown as Map<string, Configuration>,
-    );
-  }
-
   /**
    * Update the configuration of the in the edge move involved HalfEdges.
    * @param involvedEdges An array of {@link HalfEdge}s which are left from the {@link ConfigurationPair}.
