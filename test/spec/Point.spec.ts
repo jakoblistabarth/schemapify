@@ -183,9 +183,11 @@ describe("isOnLineSegments()", function () {
     const pointB = new Point(-2, -2);
     const pointC = new Point(4, 4);
     const pointD = new Point(0, -8);
+    const pointE = new Point(10, 10);
     expect(pointA.isOnLineSegments(lineSegments)).toBe(true);
     expect(pointB.isOnLineSegments(lineSegments)).toBe(false);
     expect(pointC.isOnLineSegments(lineSegments)).toBe(true);
     expect(pointD.isOnLineSegments(lineSegments)).toBe(true);
+    expect(pointE.isOnLineSegments(lineSegments)).toBe(false);
   });
 });
