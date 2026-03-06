@@ -1,6 +1,7 @@
 import Point from "./Point";
 import Polygon from "./Polygon";
 import Vector2D from "./Vector2D";
+import { orient2d } from "robust-predicates";
 
 /**
  * Class representing a 2-dimensional finite line.
@@ -23,13 +24,16 @@ class LineSegment {
    * Determines whether or not the line segment intersects with another.
    * @credits Adapted from [codeproject.com](https://www.codeproject.com/tips/862988/find-the-intersection-point-of-two-line-segments)
    * @param lineSegment
-   * @param considerCollinearOverlap
-   * @returns
+   * @param considerCollinearOverlap. Whether to consider collinear overlaps as intersections. Defaults to `false`, meaning that collinear overlaps are not considered intersections.
+   * @returns A {@link Point} representing the intersection point, if the line segments intersect, and `undefined` otherwise. If the line segments are collinear and `considerCollinearOverlap` is set to `true`, a `Point` with coordinates `(NaN, NaN)` is returned.
    */
   intersectsLineSegment(
     lineSegment: LineSegment,
     considerCollinearOverlap: boolean = false,
   ) {
+    // Early exit for degenerate segments
+    if (this.length === 0 || lineSegment.length === 0) return;
+
     const p1 = new Vector2D(this.endPoint1.x, this.endPoint1.y);
     const p2 = new Vector2D(this.endPoint2.x, this.endPoint2.y);
     const q1 = new Vector2D(lineSegment.endPoint1.x, lineSegment.endPoint1.y);
@@ -38,40 +42,35 @@ class LineSegment {
     const r = p2.minus(p1);
     const s = q2.minus(q1);
     const rxs = r.cross(s);
-    const q1p1xr = q1.minus(p1).cross(r);
+    const q1p1 = q1.minus(p1);
+    const q1p1xr = q1p1.cross(r);
 
-    if (rxs === 0 && q1p1xr === 0) {
-      // 1. If either  0 <= (q - p) * r <= r * r or 0 <= (p - q) * s <= * s
-      // then the two lines are overlapping,
+    // Use robust orientation tests for collinearity checks
+    const p1_q1_q2_orient = orient2d(p1.dx, p1.dy, q1.dx, q1.dy, q2.dx, q2.dy);
+    const q1_p1_p2_orient = orient2d(q1.dx, q1.dy, p1.dx, p1.dy, p2.dx, p2.dy);
+
+    // If all four points form collinear relationships, check for overlap
+    if (p1_q1_q2_orient === 0 && q1_p1_p2_orient === 0) {
       if (considerCollinearOverlap)
         if (
-          (0 <= q1.minus(p1).dot(r) && q1.minus(p1).dot(r) <= r.dot(r)) ||
+          (0 <= q1p1.dot(r) && q1p1.dot(r) <= r.dot(r)) ||
           (0 <= p1.minus(q1).dot(s) && p1.minus(q1).dot(s) <= s.dot(s))
         )
           return new Point(NaN, NaN);
-
-      // 2. If neither 0 <= (q - p) * r = r * r nor 0 <= (p - q) * s <= s * s
-      // then the two lines are collinear but disjoint.
-      // No need to implement this expression, as it follows from the expression above.
       return;
     }
 
-    // 3. If r x s = 0 and (q - p) x r != 0, then the two lines are parallel and non-intersecting.
+    // Parallel and non-intersecting case
     if (rxs === 0 && q1p1xr !== 0) return;
 
-    const t = q1.minus(p1).cross(s) / rxs;
-    const u = q1.minus(p1).cross(r) / rxs;
+    const t = q1p1.cross(s) / rxs;
+    const u = q1p1.cross(r) / rxs;
 
-    // 4. If r x s != 0 and 0 <= t <= 1 and 0 <= u <= 1
-    // the two line segments meet at the point p + t r = q + u s.
+    // Check intersection with strict bounds
     if (rxs !== 0 && 0 <= t && t <= 1 && 0 <= u && u <= 1) {
-      // We can calculate the intersection point using either t or u.
       const intersectionV = p1.plus(r.times(t));
       return new Point(intersectionV.dx, intersectionV.dy);
     }
-
-    // 5. Otherwise, the two line segments are not parallel but do not intersect.
-    return;
   }
 
   /**
