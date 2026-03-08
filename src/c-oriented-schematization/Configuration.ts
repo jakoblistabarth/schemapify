@@ -50,6 +50,16 @@ class Configuration {
   }
 
   /**
+   * Gets both outer edges of the configuration.
+   * @returns An array of {@link HalfEdge}s representing the outer edges.
+   **/
+  getOuterEdges() {
+    const prev = this.getOuterEdge(OuterEdge.PREV);
+    const next = this.getOuterEdge(OuterEdge.NEXT);
+    return prev && next ? [prev, next] : [];
+  }
+
+  /**
    * Gets all 3 edges forming the configuration.
    * @returns An array of {@link HalfEdge}s.
    */

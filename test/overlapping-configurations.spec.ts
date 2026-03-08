@@ -22,54 +22,16 @@ describe("Overlapping configurations", function () {
       console.log(`  ${e.coordKey}: ${angleType}`);
     });
 
-    // Use full schematization pipeline which applies preprocessor and configuration generation
-    // const schematizer = new CSchematization({
-    //   lambda: 1,
-    //   k: 8,
-    //   c: new CRegular(2),
-    //   staircaseEpsilon: 0.1,
-    // });
-
     // Apply schematization preprocessing
     dcel = new CollinearPointProcessor().run(dcel);
-
-    const edgesAfterPreprocess = Array.from(dcel.getHalfEdges());
-    console.log("\n=== AFTER COLLINEAR REMOVAL ===");
-    console.log(`Edges: ${edgesAfterPreprocess.length}`);
-    edgesAfterPreprocess.forEach((e) => {
-      const angleType = e.getInflectionType();
-      console.log(`  ${e.coordKey}: ${angleType}`);
-    });
 
     // Get initial configuration pair
     let configurations = new ConfigurationGenerator().run(dcel);
     let ffbList = new FaceFaceBoundaryListGenerator().run(dcel);
 
-    // === FIRST EDGE MOVE ===
-    console.log("\n=== FIRST EDGE MOVE ===");
     let pair = ffbList.getMinimalConfigurationPair(configurations);
 
-    if (!pair) {
-      console.log("No configuration pair found for first move");
-      return;
-    }
-
-    console.log(`Pair found:`);
-    console.log(
-      `  Contraction: ${pair.contraction.configuration.innerEdge.coordKey} (area=${pair.contraction.area.toFixed(2)})`,
-    );
-    console.log(
-      `  Compensation: ${pair.compensation.configuration.innerEdge.coordKey} (area=${pair.compensation.area.toFixed(2)})`,
-    );
-
-    // Check for shared outer edges (overlapping configurations)
-    const overlapEdges = pair.contraction.getOverlappingEdges(
-      pair.compensation,
-    );
-    console.log(`  Overlapping edges: ${overlapEdges.length}`);
-    overlapEdges.forEach((e) => {
-      console.log(`    - ${e.coordKey}`);
-    });
+    if (!pair) return;
 
     const processor1 = new EdgeMoveProcessor(ffbList, configurations);
     const result1 = processor1.run(dcel);
@@ -78,36 +40,9 @@ describe("Overlapping configurations", function () {
     ffbList = result1.faceFaceBoundaryList;
 
     const edgesAfterMove1 = Array.from(dcel.getHalfEdges());
-    console.log(`\nAfter first move: ${edgesAfterMove1.length} edges`);
-    edgesAfterMove1.forEach((e) => {
-      const angleType = e.getInflectionType();
-      console.log(`  ${e.coordKey}: ${angleType}`);
-    });
-
-    // === SECOND EDGE MOVE ===
-    console.log("\n=== SECOND EDGE MOVE ===");
 
     pair = ffbList.getMinimalConfigurationPair(configurations);
-    if (!pair) {
-      console.log("No configuration pair found for second move");
-      return;
-    }
-
-    console.log(`Pair found:`);
-    console.log(
-      `  Contraction: ${pair.contraction.configuration.innerEdge.coordKey} (area=${pair.contraction.area.toFixed(2)})`,
-    );
-    console.log(
-      `  Compensation: ${pair.compensation.configuration.innerEdge.coordKey} (area=${pair.compensation.area.toFixed(2)})`,
-    );
-
-    const overlapEdges2 = pair.contraction.getOverlappingEdges(
-      pair.compensation,
-    );
-    console.log(`  Overlapping edges: ${overlapEdges2.length}`);
-    overlapEdges2.forEach((e) => {
-      console.log(`    - ${e.coordKey}: ${e.getInflectionType()}`);
-    });
+    if (!pair) return;
 
     // Track edge changes during second move
     const edgesBeforeMove2 = new Map(
@@ -122,7 +57,6 @@ describe("Overlapping configurations", function () {
     dcel = result2.dcel;
 
     const edgesAfterMove2 = Array.from(dcel.getHalfEdges());
-    console.log(`\nAfter second move: ${edgesAfterMove2.length} edges`);
 
     // Find edges that changed inflection type
     const orientationChanges: Array<{
@@ -141,25 +75,6 @@ describe("Overlapping configurations", function () {
         });
       }
     });
-
-    edgesAfterMove2.forEach((e) => {
-      const before = edgesBeforeMove2.get(e.coordKey);
-      const angleType = e.getInflectionType();
-      const changed = before && before.type !== angleType;
-      console.log(
-        `  ${e.coordKey}: ${angleType}${changed ? ` [CHANGED from ${before.type}]` : ""}`,
-      );
-    });
-
-    // Report orientation changes
-    if (orientationChanges.length > 0) {
-      console.log(
-        `\n⚠️  Found ${orientationChanges.length} orientation changes:`,
-      );
-      orientationChanges.forEach(({ key, before, after }) => {
-        console.log(`  ${key}: ${before} → ${after}`);
-      });
-    }
 
     expect(
       orientationChanges.length,

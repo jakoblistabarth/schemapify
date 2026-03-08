@@ -320,10 +320,7 @@ class Contraction {
     configurations: Map<string, Configuration>,
   ) {
     const increment = x1x2.reduce((acc: number, edge) => {
-      // console.log("---->", this.configuration.innerEdge.uuid);
-
       if (this.isBlockedBy(edge, configurations)) {
-        // console.log("blocking edge", edge.uuid);
         ++acc;
       }
       return acc;
