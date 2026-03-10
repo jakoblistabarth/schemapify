@@ -8,23 +8,25 @@ import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
 import Vector2D from "@/src/geometry/Vector2D";
 import Snapshot from "@/src/Snapshot/Snapshot";
+import {
+  OrthographicView,
+  OrthographicViewState,
+  PickingInfo,
+} from "@deck.gl/core";
+import { TripsLayer } from "@deck.gl/geo-layers";
+import {
+  LineLayer,
+  ScatterplotLayer,
+  SolidPolygonLayer,
+} from "@deck.gl/layers";
 import DeckGL from "@deck.gl/react";
 import { ZoomWidget } from "@deck.gl/widgets";
 import "@deck.gl/widgets/stylesheet.css";
 import { range } from "d3";
-import {
-  LineLayer,
-  OrthographicView,
-  OrthographicViewState,
-  PickingInfo,
-  ScatterplotLayer,
-  SolidPolygonLayer,
-  TripsLayer,
-} from "deck.gl";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import ConfigurationLayer from "../helpers/ConfigurationLayer";
-import useAppStore from "../helpers/store";
 import { getInitialZoom } from "../helpers/getInitialZoom";
+import useAppStore from "../helpers/store";
 
 const step = 0.005;
 const intervalMS = 24;

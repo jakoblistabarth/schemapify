@@ -16,6 +16,10 @@
   "author": "Jakob Listabarth",
   "license": "MIT",
   "dependencies": {
+    "@deck.gl/core": "^9.2.11",
+    "@deck.gl/extensions": "^9.2.11",
+    "@deck.gl/geo-layers": "^9.2.11",
+    "@deck.gl/layers": "^9.2.11",
     "@deck.gl/react": "^9.2.11",
     "@deck.gl/widgets": "9.2.11",
     "@fontsource-variable/dm-sans": "^5.2.8",
@@ -29,7 +33,6 @@
     "@turf/meta": "^7.3.4",
     "clsx": "^2.1.1",
     "d3": "^7.9.0",
-    "deck.gl": "^9.2.11",
     "graham_scan": "^1.0.5",
     "leaflet": "^1.9.4",
     "next": "^16.1.6",
