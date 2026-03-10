@@ -27,6 +27,7 @@ import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import ConfigurationLayer from "../helpers/ConfigurationLayer";
 import { getInitialZoom } from "../helpers/getInitialZoom";
 import useAppStore from "../helpers/store";
+import VertexLayer from "../helpers/VertexLayer";
 
 const step = 0.005;
 const intervalMS = 24;
@@ -37,16 +38,25 @@ type Props = {
   isAnimating?: boolean;
 };
 
-type HoverInfo = PickingInfo<Vertex | HalfEdge>;
+export type HoverInfo = PickingInfo<Vertex | HalfEdge>;
 
 const getTooltipContent = (hoverInfo: HoverInfo, activeSnapshot?: Snapshot) => {
   const { object } = hoverInfo;
   if (object instanceof Vertex) {
+    const additionalData = activeSnapshot?.additionalData;
+    const significantVertices =
+      additionalData?.significantVertices &&
+      activeSnapshot?.label === LABEL.CLASSIFY
+        ? additionalData.significantVertices
+        : undefined;
+    const isSignificant =
+      significantVertices?.get(Vertex.getKey(object.x, object.y)) ?? false;
     return {
       type: "Vertex",
       metadata: {
         Coordinates: object.xy.join("·"),
         Degree: object.edges.length,
+        Significant: isSignificant,
       },
     };
   } else if (object instanceof HalfEdge) {
@@ -170,6 +180,8 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
   const layers = useMemo(() => {
     const halfedges = Array.from(dcel.getHalfEdges());
     const vertices = Array.from(dcel.getVertices());
+    const significantVertices =
+      activeSnapshot?.additionalData?.significantVertices;
     const hoveredUuid = hoverInfo?.object?.uuid;
 
     const edgeAnimationLayer = new TripsLayer({
@@ -197,25 +209,23 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       transitions: { getWidth: { duration: 100 } },
     });
 
-    const pointsLayer = new ScatterplotLayer({
-      id: "vertices",
-      pickable: true,
-      data: vertices,
-      getPosition: (d) => [d.x, d.y],
-      radiusMinPixels: 1,
-      radiusMaxPixels: 5,
+    const vertexLayer = new VertexLayer({
+      id: "vertex-layer",
+      data: { vertices, significantVertices },
+      hoveredUuid,
       onHover: (info) => setHoverInfo(info),
-      stroked: true,
-      lineWidthUnits: "pixels",
-      lineWidthMinPixels: 1,
-      getLineColor: [0, 0, 0],
-      getLineWidth: (d) => (hoveredUuid === d.uuid ? 3 : 1),
-      getFillColor: (d) =>
-        hoveredUuid === d.uuid ? [0, 255, 0] : [255, 255, 255],
     });
 
-    return [...baseLayers, edgeAnimationLayer, edgeLayer, pointsLayer];
-  }, [baseLayers, hoverInfo, shiftPoint, getShiftedPath, time, dcel]);
+    return [...baseLayers, edgeAnimationLayer, edgeLayer, vertexLayer];
+  }, [
+    activeSnapshot,
+    baseLayers,
+    hoverInfo,
+    shiftPoint,
+    getShiftedPath,
+    time,
+    dcel,
+  ]);
 
   const tooltipContent = useMemo(() => {
     if (!hoverInfo) return null;

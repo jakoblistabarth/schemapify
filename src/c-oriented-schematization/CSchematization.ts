@@ -92,9 +92,8 @@ class CSchematization extends Schematization {
     const significantVertices = new VertexClassGenerator(
       this.style.c.sectors,
     ).run(input);
-    const withSubdividedEdges = new SignificantHalfEdgeProcessor(
-      significantVertices,
-    ).run(input);
+    const processor = new SignificantHalfEdgeProcessor(significantVertices);
+    const withSubdividedEdges = processor.run(input);
     this.doAction({
       level: "visualize",
       dcel: withSubdividedEdges,
@@ -103,9 +102,7 @@ class CSchematization extends Schematization {
         snapshotList: this.snapshots,
         triggeredAt: start,
         additionalData: {
-          significantVertices: new Map(
-            significantVertices.map((d) => [d, true]),
-          ),
+          significantVertices: processor.getSignificantVertexKeys(),
         },
       },
     });
@@ -122,7 +119,10 @@ class CSchematization extends Schematization {
       forSnapshots: {
         snapshotList: this.snapshots,
         triggeredAt: start,
-        additionalData: { halfEdgeClasses },
+        additionalData: {
+          halfEdgeClasses,
+          significantVertices: processor.getSignificantVertexKeys(),
+        },
       },
     });
 
