@@ -153,13 +153,11 @@ describe("doEdgeMove()", function () {
     expect(edges[2].tail).toEqual([4, 2]);
     expect(edges[2].head).toEqual([2.5, 2]);
     expect(edges[3].tail).toEqual([2.5, 2]);
-    expect(edges[3].head).toEqual([2.5, 3]);
-    expect(edges[4].tail).toEqual([2.5, 3]);
-    expect(edges[4].head).toEqual([2.5, 4]);
-    expect(edges[5].tail).toEqual([2.5, 4]);
-    expect(edges[5].head).toEqual([0, 4]);
-    expect(edges[6].tail).toEqual([0, 4]);
-    expect(edges[6].head).toEqual([0, 0]);
+    expect(edges[3].head).toEqual([2.5, 4]);
+    expect(edges[4].tail).toEqual([2.5, 4]);
+    expect(edges[4].head).toEqual([0, 4]);
+    expect(edges[5].tail).toEqual([0, 4]);
+    expect(edges[5].head).toEqual([0, 0]);
     expect(originalContractionArea).toEqual(1);
     expect(originalArea).toEqual(newArea);
   });

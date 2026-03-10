@@ -55,7 +55,9 @@ class HalfEdge {
   get coordKey(): string | undefined {
     const head = this.head;
     if (!head) return undefined;
-    return `${this.tail.x}|${this.tail.y}->${head.x}|${head.y}`;
+    const tailKey = Vertex.getKey(this.tail.x, this.tail.y);
+    const headKey = Vertex.getKey(head.x, head.y);
+    return `${tailKey}->${headKey}`;
   }
 
   /**
