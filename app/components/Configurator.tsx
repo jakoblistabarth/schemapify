@@ -24,6 +24,7 @@ const Configurator: FC<Props> = ({ files }) => {
       vertices: dcel.vertices.size,
       halfEdges: dcel.halfEdges.size,
       faces: dcel.getBoundedFaces().length,
+      area: dcel.getArea(),
     };
   }, [dcel, activeSnapshot]);
 
@@ -47,8 +48,8 @@ const Configurator: FC<Props> = ({ files }) => {
           </div>
         )}
         {activeSnapshot && (
-          <div className="mt-2 rounded-md bg-white p-2">
-            <div className="text-sm text-gray-500">
+          <div className="mt-2 rounded-md bg-white p-2 text-sm">
+            <div className="mb-2 text-gray-500">
               Snapshot{" "}
               <pre className="inline font-black">{activeSnapshot.label}</pre>
             </div>
@@ -57,8 +58,8 @@ const Configurator: FC<Props> = ({ files }) => {
                 {info &&
                   Object.entries(info).map(([key, value]) => (
                     <tr key={key}>
-                      <td>{key}</td>
-                      <td>{value}</td>
+                      <td className="pr-4">{key}</td>
+                      <td className="font-mono text-sm">{value}</td>
                     </tr>
                   ))}
               </tbody>
