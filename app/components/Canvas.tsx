@@ -14,20 +14,16 @@ import {
   PickingInfo,
 } from "@deck.gl/core";
 import { TripsLayer } from "@deck.gl/geo-layers";
-import {
-  LineLayer,
-  ScatterplotLayer,
-  SolidPolygonLayer,
-} from "@deck.gl/layers";
+import { LineLayer, SolidPolygonLayer } from "@deck.gl/layers";
 import DeckGL from "@deck.gl/react";
 import { ZoomWidget } from "@deck.gl/widgets";
 import "@deck.gl/widgets/stylesheet.css";
-import { range } from "d3";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import ConfigurationLayer from "../helpers/ConfigurationLayer";
 import { getInitialZoom } from "../helpers/getInitialZoom";
 import useAppStore from "../helpers/store";
 import VertexLayer from "../helpers/VertexLayer";
+import AdaptiveGridLayer from "../helpers/AdaptiveGridLayer";
 
 const step = 0.005;
 const intervalMS = 24;
@@ -82,6 +78,12 @@ const getTooltipContent = (hoverInfo: HoverInfo, activeSnapshot?: Snapshot) => {
 const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | undefined>(undefined);
   const [time, setTime] = useState(0);
+  // TODO: investigate why this happens and if there's a better solution
+  // Workaround to not make layer disappear when switching snapshots
+  // Create grid layer once and reuse it across all renders
+  const [gridLayer] = useState(
+    () => new AdaptiveGridLayer({ id: "adaptive-grid" }),
+  );
 
   const { activeSnapshot } = useAppStore();
 
@@ -120,20 +122,7 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
 
   // Expensive computation — only recomputes when DCEL changes
   const { baseLayers, view, initialViewState } = useMemo(() => {
-    const gridPoints = range(-50, 50, 0.5)
-      .map((i) => range(-50, 50, 0.5).map((j) => [i, j]))
-      .flat();
-
-    const gridLayer = new ScatterplotLayer({
-      id: "grid",
-      data: gridPoints,
-      getPosition: (d) => d,
-      radiusMinPixels: 1,
-      radiusMaxPixels: 1,
-      getFillColor: [0, 0, 0, 50],
-    });
-
-    // --- Auto-fit DCEL with log2 zoom for DeckGL ---
+    // Auto-fit DCEL with log2 zoom for DeckGL
     const bbox = dcel.getBbox();
     const zoom = getInitialZoom(bbox);
 
@@ -174,7 +163,7 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       view,
       initialViewState,
     };
-  }, [dcel, activeSnapshot?.label]);
+  }, [gridLayer, dcel, activeSnapshot?.label]);
 
   // Cheap — only hover/animation-sensitive layers recompute on mouse move or tick
   const layers = useMemo(() => {

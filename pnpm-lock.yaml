@@ -35,6 +35,9 @@ importers:
       '@fontsource/dm-mono':
         specifier: ^5.2.7
         version: 5.2.7
+      '@luma.gl/engine':
+        specifier: ^9.2.6
+        version: 9.2.6(@luma.gl/core@9.2.6)(@luma.gl/shadertools@9.2.6(@luma.gl/core@9.2.6))
       '@placemarkio/check-geojson':
         specifier: ^0.1.14
         version: 0.1.14
