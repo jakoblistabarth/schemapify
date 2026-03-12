@@ -1,14 +1,17 @@
 import Dcel from "@/src/Dcel/Dcel";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
 import { Orientation } from "@/src/c-oriented-schematization/HalfEdgeClassGenerator";
 import { getClosestAssociatedAngle } from "@/src/c-oriented-schematization/Staircase";
 import { style } from "@/src/c-oriented-schematization/schematization.style";
 import Polygon from "@/src/geometry/Polygon";
 import Ring from "@/src/geometry/Ring";
+import Subdivision from "@/src/geometry/Subdivision";
+import { readFileSync } from "fs";
+import path from "path";
 import { describe, expect, test } from "vitest";
 import { createStaircaseSetup } from "./test-setup";
-import Subdivision from "@/src/geometry/Subdivision";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 
 describe("The staircase class", function () {
   test("returns a staircase region for a HalfEdge of class UB", function () {
@@ -323,4 +326,30 @@ describe("Staircases for a diamond rotated square of side length 1)", function (
     const constrained = schematization.constrainAngles(dcel);
     expect(() => schematization.simplify(constrained)).not.toThrow();
   });
+});
+
+describe("Floating point precision in staircase generation", function () {
+  test.fails(
+    "Checks potentially affected staircase vertex in triangle.json",
+    function () {
+      const json = JSON.parse(
+        readFileSync(path.resolve("test/data/shapes/triangle.json"), "utf8"),
+      );
+
+      let dcel = Dcel.fromGeoJSON(json);
+      const schematization = new CSchematization();
+
+      dcel = schematization.preProcess(dcel);
+      dcel = schematization.constrainAngles(dcel);
+      const collinearPointRemover = new CollinearPointProcessor();
+      dcel = collinearPointRemover.run(dcel);
+
+      // Get all vertices
+      const vertices = Array.from(dcel.getVertices());
+      const affectedVertex = vertices.find(
+        (v) => v.x === 7.5 && v.y > 4.5 && v.y < 5.5,
+      );
+      expect(affectedVertex?.y).toBe(5);
+    },
+  );
 });
