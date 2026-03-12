@@ -1,5 +1,8 @@
+import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import Dcel from "@/src/Dcel/Dcel";
 import Point from "@/src/geometry/Point";
 import fs from "fs";
@@ -7,8 +10,8 @@ import path from "path";
 import { beforeEach, describe, expect, test } from "vitest";
 import {
   configurationCases,
-  createConfigurationSetup,
   coordKeyOr,
+  createConfigurationSetup,
 } from "./test-setup";
 
 describe("isConflicting() returns", function () {
@@ -205,4 +208,103 @@ describe("getCompensationShift() returns", function () {
 
     expect(c[ContractionType.P]?.getCompensationHeight(4.5)).toBe(1);
   });
+});
+
+describe("First configuration pair in triangle.json after angle constraining", function () {
+  test.fails(
+    "reveals contraction area height issue and inflection type behavior",
+    function () {
+      const json = JSON.parse(
+        fs.readFileSync(path.resolve("test/data/shapes/triangle.json"), "utf8"),
+      );
+
+      let dcel = Dcel.fromGeoJSON(json);
+      const schematization = new CSchematization();
+
+      // Preprocess and constrain angles as per pipeline
+      dcel = schematization.preProcess(dcel);
+      dcel = schematization.constrainAngles(dcel);
+      const collinearProcessor = new CollinearPointProcessor();
+      dcel = collinearProcessor.run(dcel);
+
+      // Generate configurations and face-face-boundaries
+      const configurations = new ConfigurationGenerator().run(dcel);
+      const ffbList = new FaceFaceBoundaryListGenerator().run(dcel);
+
+      // Get the minimal configuration pair (the first one to be processed)
+      const firstPair = ffbList.getMinimalConfigurationPair(configurations);
+
+      if (!firstPair) {
+        throw new Error(
+          "No configuration pair found after constraining angles",
+        );
+      }
+
+      // Log details for debugging
+      const areaPoints = firstPair.contraction.areaPoints;
+      const area = firstPair.contraction.area;
+      const contractionHeight =
+        areaPoints.length > 0
+          ? Math.max(...areaPoints.map((p) => p.y)) -
+            Math.min(...areaPoints.map((p) => p.y))
+          : 0;
+
+      // Check for duplicate or collinear areaPoints (which would cause zero area)
+      if (areaPoints.length >= 3) {
+        const uniquePoints = new Set(areaPoints.map((p) => `${p.x},${p.y}`));
+        expect(uniquePoints.size).toBe(areaPoints.length);
+
+        // Verify area points are not all collinear
+        const uniquePtsArray = Array.from(uniquePoints).map((str) => {
+          const [x, y] = str.split(",").map(Number);
+          return { x, y };
+        });
+
+        if (uniquePtsArray.length >= 3) {
+          const yValues = uniquePtsArray.map((p) => p.y);
+          const yRange = Math.max(...yValues) - Math.min(...yValues);
+
+          const xValues = uniquePtsArray.map((p) => p.x);
+          const xRange = Math.max(...xValues) - Math.min(...xValues);
+
+          expect(yRange).toBeGreaterThan(1e-10);
+          expect(xRange).toBeGreaterThan(1e-10);
+        }
+      }
+
+      // ASSERTIONS: What we expect vs. what might actually happen
+      // 1. Area should be positive and meaningful for a feasible contraction
+      // An area below 1e-10 is effectively zero (machine epsilon scale) and indicates precision loss
+      const MIN_FEASIBLE_AREA = 1e-10;
+
+      expect(area).toBeGreaterThan(MIN_FEASIBLE_AREA);
+
+      // 2. Contraction height should be non-trivial
+      expect(contractionHeight).toBeGreaterThan(0);
+
+      // 3. If this is a shared-edge configuration, verify properties
+      const isSharedEdge = firstPair.isSharingEdge?.();
+      if (isSharedEdge) {
+        const compensationArea = firstPair.compensation.area;
+
+        // In shared edge move, both should have complementary areas
+        expect(Math.abs(area - compensationArea)).toBeLessThan(0.001);
+
+        // Check the shared outer edge for inflection type
+        const outerEdges =
+          firstPair.contraction.configuration.getOuterEdges?.();
+        if (outerEdges) {
+          const compensationOuterEdges =
+            firstPair.compensation.configuration.getOuterEdges?.();
+          if (compensationOuterEdges) {
+            const sharedEdges = outerEdges.filter((e) =>
+              compensationOuterEdges.some((ce) => ce.coordKey === e.coordKey),
+            );
+
+            expect(sharedEdges.length).toBeGreaterThan(0);
+          }
+        }
+      }
+    },
+  );
 });
