@@ -32,7 +32,7 @@ class StaircaseGenerator implements Generator {
    * @param input The {@link Dcel} to add staircases to.
    */
   public run(input: Dcel) {
-    // create staircase for every pair of edges
+    // Create staircase for every pair of edges
     const staircases = input
       .getHalfEdges(true)
       .reduce<Map<number, Staircase>>((acc, edge) => {
@@ -77,14 +77,14 @@ class StaircaseGenerator implements Generator {
         );
       }, new Map());
 
-    // should this rather return a new map?
-    this.calculateStaircases(staircases);
+    // Should this rather return a new map?
+    this.calculateStaircaseParaemters(staircases);
 
     return staircases;
   }
 
   /**
-   * Gets the position ({@link Point}), which is used for calculating the edgeDistance between HalfEdges sharing one Vertex.
+   * Gets the position ({@link Point}), which is used for calculating the edge distance between edges sharing one Vertex.
    * @param offsetEdge The {@link HalfEdge} of which a part should be ignored.
    * @param offset The distance the offset Vertex should be moved in respect to its (original) tail {@link Vertex}.
    * @returns The {@link Point} on the edge of which a part should be ignored and from where the edge is considered for calculating the edgeDistance.
@@ -100,9 +100,8 @@ class StaircaseGenerator implements Generator {
    * Calculates and sets the edge distance and se number of all staircases of a {@link Dcel}.
    * @param input The {@link Dcel} to calculate staircases for.
    */
-  //TODO: rename to calculateStaircaseParameters
-  private calculateStaircases(staircases: Map<number, Staircase>) {
-    // calculate edgedistance and stepnumber for deviating edges first (p. 18)
+  private calculateStaircaseParaemters(staircases: Map<number, Staircase>) {
+    // Calculate edge distance and step number for deviating edges first (p. 18)
     const staircasesOfDeviatingEdges = new Map(
       [...staircases.entries()].filter(([, staircase]) => {
         const coordKey = staircase.edge.coordKey;
@@ -123,7 +122,7 @@ class StaircaseGenerator implements Generator {
       ),
     );
 
-    // calculate edgedistance and stepnumber for remaining edges
+    // Calculate edge distance and step number for remaining edges
     const staircasesOther = new Map(
       [...staircases.entries()].filter(([, staircase]) => {
         const coordKey = staircase.edge.coordKey;
@@ -145,15 +144,15 @@ class StaircaseGenerator implements Generator {
   }
 
   /**
-   * Set the edgedistance for each staircase of a given array of staircases.
+   * Set the edge distance for each staircase of a given array of staircases.
    * @param staircases The array of staircases to set the edgedistance for.
    */
   private setEdgeDistances(staircases: Map<number, Staircase>) {
-    // TODO: make sure the edgedistance cannot be too small?
+    // TODO: make sure the edge distance cannot be too small?
     // To account for topology error ("Must Be Larger Than Cluster tolerance"), when minimum distance between points is too small
     // see: https://pro.arcgis.com/en/pro-app/latest/help/editing/geodatabase-topology-rules-for-polygon-features.htm
 
-    // check if any point of a region is within another staircase region
+    // Check if any point of a region is within another staircase region
     for (const staircase of [...staircases.values()]) {
       staircases.forEach((staircase_) => {
         if (staircase_ === staircase) return;
@@ -179,7 +178,7 @@ class StaircaseGenerator implements Generator {
           e.head !== e_.tail
         ) {
           // "If the compared regions' edges do not have a vertex in common,
-          // de is is simply the minimal distance between the edges."
+          // de is simply the minimal distance between the edges."
           const de = e.distanceToEdge(e_);
           if (typeof de === "number") {
             staircase.de = de;
