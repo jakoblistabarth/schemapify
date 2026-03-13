@@ -1,5 +1,6 @@
 import Dcel from "@/src/Dcel/Dcel";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
@@ -161,4 +162,64 @@ describe("doEdgeMove()", function () {
     expect(originalContractionArea).toEqual(1);
     expect(originalArea).toEqual(newArea);
   });
+});
+
+describe("Triangle.json edge move verification", function () {
+  test.fails(
+    "Edge move should not create degree-4 vertices for simple polygon boundary and should not introduce new orientations.",
+    function () {
+      const json = JSON.parse(
+        fs.readFileSync(path.resolve("test/data/shapes/triangle.json"), "utf8"),
+      );
+
+      let dcel = Dcel.fromGeoJSON(json);
+      const schematization = new CSchematization();
+
+      // Apply pipeline
+      dcel = schematization.preProcess(dcel);
+      dcel = schematization.constrainAngles(dcel);
+      const collinearProcessor = new CollinearPointProcessor();
+      dcel = collinearProcessor.run(dcel);
+
+      let configurations = new ConfigurationGenerator().run(dcel);
+      let ffbList = new FaceFaceBoundaryListGenerator().run(dcel);
+
+      // Get and execute first edge move
+      const pair = ffbList.getMinimalConfigurationPair(configurations);
+      expect(pair).toBeDefined();
+
+      if (pair) {
+        const processor = new EdgeMoveProcessor(ffbList, configurations);
+        const result = processor.run(dcel);
+        dcel = result.dcel;
+        configurations = result.configurations;
+        ffbList = result.faceFaceBoundaryList;
+      }
+
+      // Check for degree-4+ vertices
+      const highDegreeVertices = dcel
+        .getVertices()
+        .filter((v) => v.edges.length > 2);
+
+      // All vertices in simple polygon boundary should have degree 2
+      expect(highDegreeVertices).toHaveLength(0);
+
+      // Check that new orientations aren't introduced
+      const validOrientations = schematization.style.c.angles;
+      const face = dcel.getBoundedFaces()[0];
+      if (face) {
+        const edges = face.getEdges();
+        const invalidOrientations = edges.filter((e) => {
+          const angle = e.getAngle();
+          if (angle === undefined) return false;
+          const normalized = angle < 0 ? angle + Math.PI * 2 : angle;
+          return !validOrientations.some(
+            (v) => Math.abs(v - normalized) < 0.0001,
+          );
+        });
+
+        expect(invalidOrientations).toHaveLength(0);
+      }
+    },
+  );
 });
