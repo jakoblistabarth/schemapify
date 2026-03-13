@@ -15,9 +15,12 @@ import { crawlArray } from "@/src/utilities";
 import fs from "fs";
 import { Position } from "geojson";
 
-export function getTestFiles(dir: string) {
+export function getTestFiles(dir: string, onlyGeoJSON = false) {
   const filesInDir = fs.readdirSync(dir);
-  return filesInDir.filter((f) => f.match(/.json$/));
+  return filesInDir.filter(
+    (f) =>
+      f.match(/.json$/) && (!f.match(/.subdivision.json$/) || !onlyGeoJSON),
+  );
 }
 
 type Directions = {

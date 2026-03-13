@@ -9,7 +9,7 @@ import { getTestFiles } from "./test-setup";
 
 describe("validate geoJSON file (simple shape)", function () {
   const dir = "test/data/shapes";
-  const testFiles = getTestFiles(dir);
+  const testFiles = getTestFiles(dir, true);
 
   testFiles.forEach((file) => {
     test(file + " to return 0 errors, e.i., to be valid", function () {

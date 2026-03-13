@@ -9,12 +9,24 @@ import Subdivision from "../geometry/Subdivision";
 class Input {
   name: string;
   data: Subdivision;
-  format: "shp" | "json" | "kml";
+  format: "shp" | "json" | "kml" | "coordinates";
 
-  constructor(name: string, data: Subdivision, format: "shp" | "json" | "kml") {
+  constructor(
+    name: string,
+    data: Subdivision,
+    format: "shp" | "json" | "kml" | "coordinates",
+  ) {
     this.name = name;
     this.data = data;
     this.format = format;
+  }
+
+  static fromCoordinates(name: string, coordinates: [number, number][][][][]) {
+    return new this(
+      name,
+      Subdivision.fromCoordinates(coordinates),
+      "coordinates",
+    );
   }
 
   static fromGeoJSON(json: FeatureCollection<MultiPolygon | Polygon>): Input {

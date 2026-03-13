@@ -20,7 +20,7 @@ describe(
 
     describe("For synthetic data", function () {
       const dir = "test/data/shapes";
-      const testFiles = getTestFiles(dir);
+      const testFiles = getTestFiles(dir, true);
 
       testFiles
         .filter((file) => file.match(/smallest-contraction/))

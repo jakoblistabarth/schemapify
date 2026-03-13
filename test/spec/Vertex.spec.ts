@@ -117,7 +117,7 @@ describe("sortEdges()", function () {
 
   test("sorts outgoing edges of all vertices in clockwise order", function () {
     const dir = "test/data/shapes";
-    const testFiles = getTestFiles(dir);
+    const testFiles = getTestFiles(dir, true);
 
     testFiles.forEach((file) => {
       const json = JSON.parse(

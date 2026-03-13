@@ -32,7 +32,9 @@ const useAppStore = create<AppState>((set) => ({
   setSource: async (name: string) => {
     const response = await fetch(`/api/data/shapes/${name}`);
     const data = await response.json();
-    const input = Input.fromGeoJSON(data);
+    const input = name.includes(".subdivision")
+      ? Input.fromCoordinates(name, data)
+      : Input.fromGeoJSON(data);
     const schematization = new CSchematization(undefined, {
       visualize: (args) => {
         args.forSnapshots?.snapshotList.add(

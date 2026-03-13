@@ -201,7 +201,7 @@ describe("subdivide() on geodata results in a Dcel", function () {
 
 describe("subdivide() on simple shapes results in a Dcel", function () {
   const dir = "test/data/shapes";
-  const testFiles = getTestFiles(dir);
+  const testFiles = getTestFiles(dir, true);
 
   testFiles.forEach((file) => {
     test(
