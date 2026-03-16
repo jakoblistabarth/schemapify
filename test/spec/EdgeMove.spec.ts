@@ -1,4 +1,5 @@
 import Dcel from "@/src/Dcel/Dcel";
+import Input from "@/src/Input";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
@@ -220,6 +221,46 @@ describe("Triangle.json edge move verification", function () {
 
         expect(invalidOrientations).toHaveLength(0);
       }
+    },
+  );
+});
+
+describe("Thoroughly check edge DCEL after edge move", function () {
+  test.fails(
+    "After edge move, check that all half-edge pointers (twin, next, prev) are consistent and that the DCEL structure is valid.",
+    function () {
+      const input = Input.fromCoordinates(
+        "Simplest edge move",
+        JSON.parse(
+          fs.readFileSync(
+            path.resolve(
+              "test/data/shapes/simplest-edge-move.subdivision.json",
+            ),
+            "utf8",
+          ),
+        ),
+      );
+      const dcel = input.getDcel();
+
+      const clone = dcel.clone();
+      const ffbList = new FaceFaceBoundaryListGenerator().run(clone);
+      const configurations = new ConfigurationGenerator().run(clone);
+      const { dcel: simplified } = new EdgeMoveProcessor(
+        ffbList,
+        configurations,
+      ).run(clone);
+
+      expect(dcel.vertices.size).toBe(6);
+      expect(dcel.halfEdges.size).toBe(12);
+      expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(6);
+      expect(simplified.vertices.size).toBe(5);
+      expect(simplified.getVertices().length).toBe(5);
+      expect(simplified.halfEdges.size).toBeLessThan(dcel.halfEdges.size);
+      expect(simplified.getBoundedFaces()[0].getEdges().length).toBe(5);
+      expect(simplified.getBoundedFaces()[0].edge.getCycle()).not.toThrow();
+      expect(
+        simplified.getBoundedFaces()[0].edge.getCycle(false),
+      ).not.toThrow();
     },
   );
 });
