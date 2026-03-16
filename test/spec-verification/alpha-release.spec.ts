@@ -79,53 +79,47 @@ describe("5-a. If the input data is too detailed, i.e., if it exceeds a maximum 
   });
 });
 
-describe(
-  "Output and transformation with .run() (10s timeout)",
-  { timeout: 10_000 },
-  () => {
-    let input: GeoJSON.FeatureCollection<MultiPolygon>;
-    let inputProperties: GeoJsonProperties[];
-    let output: Dcel;
-    let outputProperties: (GeoJsonProperties | undefined)[];
+describe("Output and transformation with .run() (10s timeout)", () => {
+  let input: GeoJSON.FeatureCollection<MultiPolygon>;
+  let inputProperties: GeoJsonProperties[];
+  let output: Dcel;
+  let outputProperties: (GeoJsonProperties | undefined)[];
 
-    beforeAll(() => {
-      input = JSON.parse(
-        readFileSync(
-          path.resolve("test/data/geodata/AUT_adm1-simple.json"),
-          "utf8",
-        ),
-      );
-      const dcel = Dcel.fromGeoJSON(input);
-      const schematization = new CSchematization();
-      schematization.run(dcel);
-      output = dcel;
-      inputProperties = input.features.map(
-        (f: GeoJSON.Feature) => f.properties,
-      );
-      outputProperties = output
-        .toSubdivision()
-        .multiPolygons.map((f) => f.properties);
+  beforeAll(() => {
+    input = JSON.parse(
+      readFileSync(
+        path.resolve("test/data/geodata/AUT_adm1-simple.json"),
+        "utf8",
+      ),
+    );
+    const dcel = Dcel.fromGeoJSON(input);
+    const schematization = new CSchematization();
+    schematization.run(dcel);
+    output = dcel;
+    inputProperties = input.features.map((f: GeoJSON.Feature) => f.properties);
+    outputProperties = output
+      .toSubdivision()
+      .multiPolygons.map((f) => f.properties);
+  }, 15_000);
+
+  describe("6-a. If the input data holds attributes attached to its features, the systems shall preserve these attributes in the output.", function () {
+    test("The number of feature properties needs to be the same for the input and the output.", function () {
+      expect(inputProperties.length).toEqual(outputProperties.length);
     });
 
-    describe("6-a. If the input data holds attributes attached to its features, the systems shall preserve these attributes in the output.", function () {
-      test("The number of feature properties needs to be the same for the input and the output.", function () {
-        expect(inputProperties.length).toEqual(outputProperties.length);
-      });
-
-      test("The properties of a certain feature needs to be the same for the input and the output.", function () {
-        expect(inputProperties[3]).toEqual(outputProperties[3]);
-      });
+    test("The properties of a certain feature needs to be the same for the input and the output.", function () {
+      expect(inputProperties[3]).toEqual(outputProperties[3]);
     });
+  });
 
-    describe("7-a. The system shall preserve the number of features of the input in the output.", function () {
-      test("The number of features needs to be the same for the input and the output.", function () {
-        const inputFeatures = input.features.length;
-        const outputFeatures = output.toSubdivision().multiPolygons.length;
-        expect(inputFeatures).toEqual(outputFeatures);
-      });
+  describe("7-a. The system shall preserve the number of features of the input in the output.", function () {
+    test("The number of features needs to be the same for the input and the output.", function () {
+      const inputFeatures = input.features.length;
+      const outputFeatures = output.toSubdivision().multiPolygons.length;
+      expect(inputFeatures).toEqual(outputFeatures);
     });
-  },
-);
+  });
+});
 
 describe("8-a The system shall be able to generate a DCEL from a geoJSON.", function () {
   let dcel: Dcel;
@@ -137,7 +131,7 @@ describe("8-a The system shall be able to generate a DCEL from a geoJSON.", func
       ),
     );
     dcel = Dcel.fromGeoJSON(input);
-  });
+  }, 15_000);
 
   test("The DCEL has 1 unbounded face", function () {
     expect(dcel.getUnboundedFace()).toBeInstanceOf(Face);

@@ -273,11 +273,10 @@ class ConfigurationPair {
     if (!prevEdgeLineSegment || !nextEdgeLineSegment) return;
 
     // Determine which endpoint aligns with which adjacent edge
-    const newContractionEdge = newContractionTail.isOnLineSegment(
-      prevEdgeLineSegment,
-    )
-      ? contractionEdge.moveTo(newContractionTail, newContractionHead)
-      : contractionEdge.moveTo(newContractionHead, newContractionTail);
+    const newContractionEdge = contractionEdge.moveTo(
+      newContractionTail,
+      newContractionHead,
+    );
 
     if (newContractionEdge && newContractionEdge.coordKey) {
       const newConfiguration = new Configuration(newContractionEdge);
