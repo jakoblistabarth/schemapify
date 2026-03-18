@@ -1,3 +1,4 @@
+import { EPSILON } from "@/src/geometry/contstants";
 import LineSegment from "@/src/geometry/LineSegment";
 import Point from "@/src/geometry/Point";
 import Polygon from "@/src/geometry/Polygon";
@@ -168,7 +169,7 @@ describe("equals()", function () {
   });
 
   test("returns false if two points reside on different locations.", function () {
-    expect(new Point(0, 0).equals(new Point(0, 0.0000000001))).toBe(false);
+    expect(new Point(0, 0).equals(new Point(0, EPSILON))).toBe(false);
   });
 });
 

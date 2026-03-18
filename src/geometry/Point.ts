@@ -1,7 +1,7 @@
+import { EPSILON } from "./contstants";
 import LineSegment from "./LineSegment";
 import Polygon from "./Polygon";
 import Vector2D from "./Vector2D";
-import { orient2d } from "robust-predicates";
 
 /** Class representing a 2-dimensional point. */
 class Point {
@@ -90,28 +90,14 @@ class Point {
 
   /**
    * Determines whether or not the Point lies on a specified LineSegment.
-   * Uses robust predicates (orient2d) to avoid floating point precision errors.
+   * More specifically, it checks if the sum of distances from the Point to both endpoints is equal to the line segment's length.
    * @param lineSegment A {@link LineSegment} to be checked.
    * @returns A boolean, indicating whether or not the Point lies on the LineSegment.
    */
   isOnLineSegment(lineSegment: LineSegment) {
-    const { x: px, y: py } = this;
-    const { x: ax, y: ay } = lineSegment.endPoint1;
-    const { x: bx, y: by } = lineSegment.endPoint2;
-
-    // Check if point is collinear with segment endpoints
-    const orientation = orient2d(ax, ay, bx, by, px, py);
-    // if it is not collinear, it cannot be on the line segment
-    if (orientation !== 0) return false;
-
-    // being collinear is not sufficient to be on the line segment
-    // we also need to check if the point is within the line's bounding box
-    const minX = Math.min(ax, bx);
-    const maxX = Math.max(ax, bx);
-    const minY = Math.min(ay, by);
-    const maxY = Math.max(ay, by);
-
-    return px >= minX && px <= maxX && py >= minY && py <= maxY;
+    const PA = this.distanceToPoint(lineSegment.endPoint1);
+    const PB = this.distanceToPoint(lineSegment.endPoint2);
+    return Math.abs(PA + PB - lineSegment.length) < EPSILON;
   }
 
   /**
@@ -146,19 +132,17 @@ class Point {
       // calculate A, B and C
       const a = -(p2.y - p1.y);
       const b = p2.x - p1.x;
-      const c = -(a * p1.x + b * p1.y).toFixed(10);
+      const c = -(a * p1.x + b * p1.y);
 
       A.push(a);
       B.push(b);
       C.push(c);
     });
 
-    const D = A.map(
-      (elem, idx) => +(elem * this.x + B[idx] * this.y + C[idx]).toFixed(10),
-    );
+    const D = A.map((elem, idx) => elem * this.x + B[idx] * this.y + C[idx]);
 
-    const t1 = D.every((d) => d >= 0);
-    const t2 = D.every((d) => d <= 0);
+    const t1 = D.every((d) => d >= -EPSILON);
+    const t2 = D.every((d) => d <= EPSILON);
 
     return t1 || t2;
   }
@@ -170,8 +154,8 @@ class Point {
    */
   equals(point: Point) {
     return (
-      Number((this.x - point.x).toFixed(10)) === 0 &&
-      Number((this.y - point.y).toFixed(10)) === 0
+      Math.abs(this.x - point.x) < EPSILON &&
+      Math.abs(this.y - point.y) < EPSILON
     );
   }
 }

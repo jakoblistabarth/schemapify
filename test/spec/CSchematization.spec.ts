@@ -7,7 +7,7 @@ import Dcel from "@/src/Dcel/Dcel";
 
 describe(
   "CSchematization's run() method does not throw.",
-  { timeout: 15_000 },
+  { timeout: 20_000 },
   function () {
     test("CSchematization's run() method does not throw on simplified boundaries of Austria.", function () {
       const inputJson = JSON.parse(

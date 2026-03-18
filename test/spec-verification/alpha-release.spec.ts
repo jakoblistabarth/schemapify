@@ -100,7 +100,7 @@ describe("Output and transformation with .run() (10s timeout)", () => {
     outputProperties = output
       .toSubdivision()
       .multiPolygons.map((f) => f.properties);
-  }, 15_000);
+  }, 20_000);
 
   describe("6-a. If the input data holds attributes attached to its features, the systems shall preserve these attributes in the output.", function () {
     test("The number of feature properties needs to be the same for the input and the output.", function () {

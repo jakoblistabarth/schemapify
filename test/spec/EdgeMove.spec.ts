@@ -41,7 +41,7 @@ describe("createConfigurations()", function () {
 });
 
 describe("doEdgeMove()", function () {
-  // TODO: fix edgeMove first
+  // TODO: fix edge move first
   test.fails(
     "(recursive) on respective minimal configurations returns the expected contraction pair for the second, third, and fourth edge move.",
     function () {

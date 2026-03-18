@@ -1,7 +1,6 @@
 import Point from "./Point";
 import Polygon from "./Polygon";
 import Vector2D from "./Vector2D";
-import { orient2d } from "robust-predicates";
 
 /**
  * Class representing a 2-dimensional finite line.
@@ -43,31 +42,25 @@ class LineSegment {
     const s = q2.minus(q1);
     const rxs = r.cross(s);
     const q1p1 = q1.minus(p1);
-    const q1p1xr = q1p1.cross(r);
 
-    // Use robust orientation tests for collinearity checks
-    const p1_q1_q2_orient = orient2d(p1.dx, p1.dy, q1.dx, q1.dy, q2.dx, q2.dy);
-    const q1_p1_p2_orient = orient2d(q1.dx, q1.dy, p1.dx, p1.dy, p2.dx, p2.dy);
+    // Parallel (including collinear) case
+    if (rxs === 0) {
+      // Use Point.isOnLineSegment to detect collinear overlap.
+      const overlap =
+        this.endPoint1.isOnLineSegment(lineSegment) ||
+        this.endPoint2.isOnLineSegment(lineSegment) ||
+        lineSegment.endPoint1.isOnLineSegment(this) ||
+        lineSegment.endPoint2.isOnLineSegment(this);
 
-    // If all four points form collinear relationships, check for overlap
-    if (p1_q1_q2_orient === 0 && q1_p1_p2_orient === 0) {
-      if (considerCollinearOverlap)
-        if (
-          (0 <= q1p1.dot(r) && q1p1.dot(r) <= r.dot(r)) ||
-          (0 <= p1.minus(q1).dot(s) && p1.minus(q1).dot(s) <= s.dot(s))
-        )
-          return new Point(NaN, NaN);
+      if (overlap && considerCollinearOverlap) return new Point(NaN, NaN);
       return;
     }
-
-    // Parallel and non-intersecting case
-    if (rxs === 0 && q1p1xr !== 0) return;
 
     const t = q1p1.cross(s) / rxs;
     const u = q1p1.cross(r) / rxs;
 
     // Check intersection with strict bounds
-    if (rxs !== 0 && 0 <= t && t <= 1 && 0 <= u && u <= 1) {
+    if (0 <= t && t <= 1 && 0 <= u && u <= 1) {
       const intersectionV = p1.plus(r.times(t));
       return new Point(intersectionV.dx, intersectionV.dy);
     }
