@@ -156,7 +156,7 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       id: "edges-animated",
       data: halfedges,
       getPath: (e: HalfEdge) => [e.tail.xy, e.head!.xy],
-      getOffset: 2,
+      getOffset: 1,
       getTimestamps: () => [0, 1],
       trailLength: 0.25,
       getColor: [200, 200, 255],
@@ -172,7 +172,7 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       pickable: true,
       onHover: (info) => setHoverInfo(info),
       getPath: (e: HalfEdge) => [e.tail.xy, e.head!.xy],
-      getOffset: 2,
+      getOffset: 1,
       getColor: (e: HalfEdge) =>
         hoveredUuid === e.uuid ? [150, 150, 255] : [0, 0, 255],
       widthMinPixels: 2,

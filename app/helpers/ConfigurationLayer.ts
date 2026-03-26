@@ -4,7 +4,7 @@ import Contraction from "@/src/c-oriented-schematization/Contraction";
 import Ring from "@/src/geometry/Ring";
 import { CompositeLayer, LayersList } from "@deck.gl/core";
 import { PathStyleExtension } from "@deck.gl/extensions";
-import { LineLayer, PolygonLayer, TextLayer } from "@deck.gl/layers";
+import { PathLayer, PolygonLayer, TextLayer } from "@deck.gl/layers";
 
 type LayerData = ConfigurationPair;
 
@@ -51,30 +51,30 @@ export default class ConfigurationLayer extends CompositeLayer<ConfigurationLaye
           getDashArray: [5, 5],
         }),
       ),
-      new LineLayer(
+      new PathLayer(
         this.getSubLayerProps({
           id: `x-layer`,
           data: this.contractions
             .map(([, contraction]) => contraction.configuration.x)
             .flat(),
-          getSourcePosition: (e: HalfEdge) => e.tail.vector.toArray(),
-          getTargetPosition: (e: HalfEdge) =>
-            e.head?.vector.toArray() ?? [0, 0],
+          getPath: (e: HalfEdge) => [e.tail.xy, e.head?.xy ?? [0, 0]],
           getColor: [0, 0, 255, 25],
-          getWidth: 10,
+          getWidth: 15,
+          widthUnits: "pixels",
+          capRounded: true,
         }),
       ),
-      new LineLayer(
+      new PathLayer(
         this.getSubLayerProps({
           id: `inner-edges-layer`,
           data: this.contractions
             .map(([, contraction]) => contraction.configuration.innerEdge)
             .flat(),
-          getSourcePosition: (e: HalfEdge) => e.tail.vector.toArray(),
-          getTargetPosition: (e: HalfEdge) =>
-            e.head?.vector.toArray() ?? [0, 0],
-          getColor: [0, 0, 255, 100],
+          getPath: (e: HalfEdge) => [e.tail.xy, e.head?.xy ?? [0, 0]],
+          getColor: [0, 0, 255, 75],
           getWidth: 15,
+          widthUnits: "pixels",
+          capRounded: true,
         }),
       ),
     ];
