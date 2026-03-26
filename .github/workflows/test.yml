@@ -1,7 +1,7 @@
 name: test
 on:
   push:
-    branches-ignore: "wip/*"
+    branches-ignore: ["wip/*"]
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -10,14 +10,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v5
         with:
           version: 9.x.x
       - name: Install modules
         run: pnpm i
       - name: Run EsLint
         run: pnpm lint
+      - name: Create next-env.d.ts for type checking
+        run: pnpm next typegen
       - name: Compile Typescript code and check for errors
         run: pnpm tsc
-      - name: Run jest tests
+      - name: Run tests
         run: pnpm test
