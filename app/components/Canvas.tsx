@@ -6,24 +6,24 @@ import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceF
 import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
-import Vector2D from "@/src/geometry/Vector2D";
 import Snapshot from "@/src/Snapshot/Snapshot";
 import {
   OrthographicView,
   OrthographicViewState,
   PickingInfo,
 } from "@deck.gl/core";
+import { PathStyleExtension } from "@deck.gl/extensions";
 import { TripsLayer } from "@deck.gl/geo-layers";
-import { LineLayer, SolidPolygonLayer } from "@deck.gl/layers";
+import { PathLayer, SolidPolygonLayer } from "@deck.gl/layers";
 import DeckGL from "@deck.gl/react";
 import { ZoomWidget } from "@deck.gl/widgets";
 import "@deck.gl/widgets/stylesheet.css";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import AdaptiveGridLayer from "../helpers/AdaptiveGridLayer";
 import ConfigurationLayer from "../helpers/ConfigurationLayer";
 import { getInitialZoom } from "../helpers/getInitialZoom";
 import useAppStore from "../helpers/store";
 import VertexLayer from "../helpers/VertexLayer";
-import AdaptiveGridLayer from "../helpers/AdaptiveGridLayer";
 
 const step = 0.005;
 const intervalMS = 24;
@@ -99,27 +99,6 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
     return () => clearInterval(currentInterval);
   }, [animate]);
 
-  const shiftPoint = useCallback(
-    (edge: HalfEdge, vertex?: Vertex, scale = 0.02) => {
-      if (!vertex)
-        throw "Error drawing halfEdge: vertex for offset is not defined";
-      const shift =
-        edge.getVector()?.getNormal(true).unitVector.times(scale) ??
-        new Vector2D(0, 0);
-      return vertex?.vector.plus(shift).toArray();
-    },
-    [],
-  );
-
-  const getShiftedPath = useCallback(
-    (edge: HalfEdge) => {
-      return [edge.tail, edge.head].map((p, idx) => {
-        return { coordinates: shiftPoint(edge, p), timestamp: idx };
-      });
-    },
-    [shiftPoint],
-  );
-
   // Expensive computation — only recomputes when DCEL changes
   const { baseLayers, view, initialViewState } = useMemo(() => {
     // Auto-fit DCEL with log2 zoom for DeckGL
@@ -176,26 +155,30 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
     const edgeAnimationLayer = new TripsLayer({
       id: "edges-animated",
       data: halfedges,
-      getPath: (e: HalfEdge) => getShiftedPath(e).map((e) => e.coordinates),
-      getTimestamps: (e: HalfEdge) => getShiftedPath(e).map((e) => e.timestamp),
+      getPath: (e: HalfEdge) => [e.tail.xy, e.head!.xy],
+      getOffset: 2,
+      getTimestamps: () => [0, 1],
       trailLength: 0.25,
       getColor: [200, 200, 255],
       widthMinPixels: 2,
       widthMaxPixels: 2,
       currentTime: time,
+      extensions: [new PathStyleExtension({ offset: true })],
     });
 
-    const edgeLayer = new LineLayer({
+    const edgeLayer = new PathLayer({
       id: "edges",
       data: halfedges,
-      getSourcePosition: (e: HalfEdge) => shiftPoint(e, e.tail),
-      getTargetPosition: (e: HalfEdge) => shiftPoint(e, e.head),
       pickable: true,
       onHover: (info) => setHoverInfo(info),
-      getWidth: (e: HalfEdge) => (hoveredUuid === e.uuid ? 5 : 1),
-      getColor: [0, 0, 255],
+      getPath: (e: HalfEdge) => [e.tail.xy, e.head!.xy],
+      getOffset: 2,
+      getColor: (e: HalfEdge) =>
+        hoveredUuid === e.uuid ? [150, 150, 255] : [0, 0, 255],
       widthMinPixels: 2,
-      transitions: { getWidth: { duration: 100 } },
+      widthUnits: "pixels",
+      extensions: [new PathStyleExtension({ offset: true })],
+      transitions: { getColor: { duration: 300 } },
     });
 
     const vertexLayer = new VertexLayer({
@@ -205,16 +188,8 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       onHover: (info) => setHoverInfo(info),
     });
 
-    return [...baseLayers, edgeAnimationLayer, edgeLayer, vertexLayer];
-  }, [
-    activeSnapshot,
-    baseLayers,
-    hoverInfo,
-    shiftPoint,
-    getShiftedPath,
-    time,
-    dcel,
-  ]);
+    return [...baseLayers, edgeLayer, edgeAnimationLayer, vertexLayer];
+  }, [activeSnapshot, baseLayers, hoverInfo, time, dcel]);
 
   const tooltipContent = useMemo(() => {
     if (!hoverInfo) return null;
