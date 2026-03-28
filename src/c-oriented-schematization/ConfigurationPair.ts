@@ -1,9 +1,10 @@
-import Contraction from "./Contraction";
-import { ContractionType } from "./ContractionType";
-import Configuration from "./Configuration";
+import Dcel from "../Dcel/Dcel";
 import HalfEdge from "../Dcel/HalfEdge";
 import Point from "../geometry/Point";
-import Dcel from "../Dcel/Dcel";
+import Vector2D from "../geometry/Vector2D";
+import Configuration from "./Configuration";
+import Contraction from "./Contraction";
+import { ContractionType } from "./ContractionType";
 import { isCollinearVertex } from "./VertexUtils";
 
 /**
@@ -79,7 +80,7 @@ class ConfigurationPair {
 
     // Perform the appropriate variant of the edge move
     const movedPositions = this.isSharingEdge()
-      ? this.doSharedEdgeMove(configurations)
+      ? this.doSharedEdgeMove(configurations, dcel)
       : this.doRegularEdgeMove(configurations);
 
     if (!movedPositions) return;
@@ -150,12 +151,34 @@ class ConfigurationPair {
   /**
    * Perform the edge move when the contraction and compensation share an outer edge.
    * Both edges move proportionally based on their areas, converging towards a meeting point where area change is balanced.
+   * @param dcel The DCEL to perform the edge move on, used to fetch fresh edge references.
    * @returns An array of {@link Point}s representing the positions of the moved edges, which can be used to update the configurations.
    * Returns void if the edge move could not be performed due to incomplete DCEL links.
    */
-  doSharedEdgeMove(configurations: Map<string, Configuration>) {
-    const contractionEdge = this.contraction.configuration.innerEdge;
-    const compensationEdge = this.compensation.configuration.innerEdge;
+  doSharedEdgeMove(configurations: Map<string, Configuration>, dcel?: Dcel) {
+    const configContractionEdge = this.contraction.configuration.innerEdge;
+    const configCompensationEdge = this.compensation.configuration.innerEdge;
+
+    // Fetch fresh edge references from DCEL if available, otherwise use configuration edges
+    let contractionEdge = configContractionEdge;
+    let compensationEdge = configCompensationEdge;
+
+    if (dcel) {
+      const freshContraction = configContractionEdge.coordKey
+        ? dcel
+            .getHalfEdges()
+            .find((e) => e.coordKey === configContractionEdge.coordKey)
+        : undefined;
+      const freshCompensation = configCompensationEdge.coordKey
+        ? dcel
+            .getHalfEdges()
+            .find((e) => e.coordKey === configCompensationEdge.coordKey)
+        : undefined;
+
+      if (freshContraction) contractionEdge = freshContraction;
+      if (freshCompensation) compensationEdge = freshCompensation;
+    }
+
     const contractionHead = contractionEdge.head;
 
     if (!contractionHead) return;
@@ -186,85 +209,185 @@ class ConfigurationPair {
 
     // Step 3: Calculate areas for proportional movement
     const contractionArea = this.contraction.area;
-
     if (!contractionArea) return;
 
-    // Step 4: Calculate movement distances for both edges
+    // Get edge segments for length calculations
     const contractionSegment = contractionEdge.toLineSegment();
     if (!contractionSegment) return;
 
     const compensationSegment = compensationEdge.toLineSegment();
     if (!compensationSegment) return;
 
-    // In a shared edge move, both areas should be equal in magnitude (opposite signs)
-    // Both edges will meet at a point on the shared edge proportional to their area ratio
-    const compensationArea = contractionArea;
-
-    // Step 5: Calculate the meeting point on the shared edge based on area ratios
-    // Both edges should move to this point so they meet and the shared edge vanishes
+    // Step 4: Find meeting point using constraint that edge angle is constant
+    // Constraints:
+    // 1. Shared endpoint A moves along shared edge: A = shared_start + s * shared_vec
+    // 2. Non-shared endpoint B moves along track: B = track_start + t * track_vec
+    // 3. Edge vector (A - B) must be parallel to original edge (angle is constant)
+    // 4. Area preservation: length × movement_distance × sin(angle) is balanced
     const sharedSegment = sharedEdge.toLineSegment();
     if (!sharedSegment) return;
 
-    const totalArea = Math.abs(contractionArea) + Math.abs(compensationArea);
-    const areaRatio = Math.abs(contractionArea) / totalArea;
-
-    // The meeting point is on the shared edge, proportional to the area ratio
     const sharedVector = sharedSegment.endPoint2.vector.minus(
       sharedSegment.endPoint1.vector,
     );
-    const meetingPoint = sharedSegment.endPoint1.vector
-      .plus(sharedVector.times(areaRatio))
-      .toPoint();
+    const sharedStart = sharedSegment.endPoint1.vector;
 
-    // Step 5b: Both inner edges move to the meeting point on the shared edge
-    // Determine which endpoint of each inner edge connects to the shared edge.
-    // This depends on the orientation of the edges and can vary between iterations.
-
+    // Determine which endpoint is on shared edge vs track
     const sharedEdgeTail = sharedEdge.tail;
     const sharedEdgeHead = sharedEdge.head;
 
-    // Check which endpoint of contraction edge connects to shared edge
+    // Compare by coordinates, not by object reference
     const contractionHeadOnShared =
-      contractionHead === sharedEdgeTail || contractionHead === sharedEdgeHead;
-    const contractionTailOnShared =
-      contractionEdge.tail === sharedEdgeTail ||
-      contractionEdge.tail === sharedEdgeHead;
-
-    // Check which endpoint of compensation edge connects to shared edge
-    const compensationTailOnShared =
-      compensationEdge.tail === sharedEdgeTail ||
-      compensationEdge.tail === sharedEdgeHead;
+      (contractionHead.xy[0] === sharedEdgeTail.xy[0] &&
+        contractionHead.xy[1] === sharedEdgeTail.xy[1]) ||
+      (sharedEdgeHead &&
+        contractionHead.xy[0] === sharedEdgeHead.xy[0] &&
+        contractionHead.xy[1] === sharedEdgeHead.xy[1]);
     const compensationHeadOnShared =
-      compensationEdge.head === sharedEdgeTail ||
-      compensationEdge.head === sharedEdgeHead;
+      (compensationEdge.head?.xy[0] === sharedEdgeTail.xy[0] &&
+        compensationEdge.head?.xy[1] === sharedEdgeTail.xy[1]) ||
+      (sharedEdgeHead &&
+        compensationEdge.head &&
+        compensationEdge.head.xy[0] === sharedEdgeHead.xy[0] &&
+        compensationEdge.head.xy[1] === sharedEdgeHead.xy[1]);
 
-    // Determine the correct endpoints to move to meeting point
-    let newContractionHead = meetingPoint;
-    let newContractionTail = contractionEdge.tail.vector
-      .plus(newContractionHead.vector.minus(contractionHead.vector))
-      .toPoint();
+    const contractionTrack = contractionTracks[contractionHeadOnShared ? 1 : 0];
+    const compensationTrack =
+      compensationTracks[compensationHeadOnShared ? 1 : 0];
 
-    if (!contractionHeadOnShared && contractionTailOnShared) {
-      // Tail is on shared edge, so move tail to meeting point
-      newContractionTail = meetingPoint;
-      newContractionHead = contractionHead.vector
-        .plus(newContractionTail.vector.minus(contractionEdge.tail.vector))
-        .toPoint();
+    if (!contractionTrack || !compensationTrack) return;
+
+    const contractionTrackVec = new Vector2D(
+      Math.cos(contractionTrack.angle),
+      Math.sin(contractionTrack.angle),
+    );
+    const compensationTrackVec = new Vector2D(
+      Math.cos(compensationTrack.angle),
+      Math.sin(compensationTrack.angle),
+    );
+
+    const contractionEdgeAngle = contractionEdge.getAngle();
+    const compensationEdgeAngle = compensationEdge.getAngle();
+    if (
+      typeof contractionEdgeAngle !== "number" ||
+      typeof compensationEdgeAngle !== "number"
+    )
+      return;
+
+    // Original edge direction vectors (unit)
+    const contractionEdgeDir = new Vector2D(
+      Math.cos(contractionEdgeAngle),
+      Math.sin(contractionEdgeAngle),
+    );
+    const compensationEdgeDir = new Vector2D(
+      Math.cos(compensationEdgeAngle),
+      Math.sin(compensationEdgeAngle),
+    );
+
+    // Get starting positions for non-shared endpoints
+    const contractionNonSharedStart = contractionHeadOnShared
+      ? contractionEdge.tail.vector
+      : contractionHead.vector;
+
+    if (!compensationEdge.head) return; // Head should exist for a valid edge
+
+    const compensationNonSharedStart = compensationHeadOnShared
+      ? compensationEdge.tail.vector
+      : compensationEdge.head.vector;
+
+    // Helper: 2D cross product (returns scalar)
+    const cross2D = (a: Vector2D, b: Vector2D): number =>
+      a.dx * b.dy - a.dy * b.dx;
+
+    const contractionOffset = sharedStart.minus(contractionNonSharedStart);
+    const contractionA = cross2D(sharedVector, contractionEdgeDir); // coefficient of s
+    const contractionB = cross2D(contractionTrackVec, contractionEdgeDir); // coefficient of t_c
+    const contractionC = cross2D(contractionOffset, contractionEdgeDir); // constant
+
+    const compensationOffset = sharedStart.minus(compensationNonSharedStart);
+    const compensationA = cross2D(sharedVector, compensationEdgeDir);
+    const compensationB = cross2D(compensationTrackVec, compensationEdgeDir);
+    const compensationC = cross2D(compensationOffset, compensationEdgeDir);
+
+    // Both edges have angle preservation constraints:
+    // contractionA * s - contractionB * t_c = -contractionC
+    // compensationA * s - compensationB * t_comp = -compensationC
+    //
+    // Additionally, area preservation links t_c and t_comp:
+    // For proportional area change: length_c * t_c = -length_comp * t_comp
+    // This gives: t_comp = -(length_c / length_comp) * t_c
+
+    const contractionLength = contractionSegment.length;
+    const compensationLength = compensationSegment.length;
+
+    if (contractionLength === 0 || compensationLength === 0) return;
+
+    // Area preservation coefficient
+    const areaPressrvationCoeff = contractionLength / compensationLength;
+
+    // Now solve the coupled system:
+    // From constraint (1): t_c = (contractionA * s + contractionC) / contractionB
+    // From area preservation: t_comp = -areaPressrvationCoeff * t_c
+    // Substitute into constraint (2):
+    // compensationA * s - compensationB * (-areaPressrvationCoeff * (contractionA * s + contractionC) / contractionB) = -compensationC
+    // Rearrange:
+    // compensationA * s + (compensationB * areaPressrvationCoeff * contractionA / contractionB) * s + (compensationB * areaPressrvationCoeff * contractionC / contractionB) = -compensationC
+    // (compensationA + compensationB * areaPressrvationCoeff * contractionA / contractionB) * s = -compensationC - (compensationB * areaPressrvationCoeff * contractionC / contractionB)
+
+    // Simplified: solve the linear system for s
+    // coeff_s * s = const_term
+    const coeff_s =
+      compensationA +
+      (compensationB * areaPressrvationCoeff * contractionA) / contractionB;
+    const const_term =
+      -compensationC -
+      (compensationB * areaPressrvationCoeff * contractionC) / contractionB;
+
+    let s = 0;
+    if (Math.abs(coeff_s) > 1e-10) {
+      s = const_term / coeff_s;
     }
 
-    if (!compensationEdge.head) return;
+    let t_contraction = 0;
+    let t_compensation = 0;
 
-    let newCompensationTail = meetingPoint;
-    let newCompensationHead = compensationEdge.head.vector
-      .plus(newCompensationTail.vector.minus(compensationEdge.tail.vector))
+    // Solve for t values
+    if (Math.abs(contractionB) > 1e-10) {
+      t_contraction = (contractionA * s + contractionC) / contractionB;
+    }
+    // Apply area preservation
+    t_compensation = -areaPressrvationCoeff * t_contraction;
+
+    const meetingPoint = sharedStart.plus(sharedVector.times(s)).toPoint();
+    // Move along the track by the calculated distances (allow negative movement)
+    const newContractionNonShared = contractionNonSharedStart
+      .plus(contractionTrackVec.times(t_contraction))
+      .toPoint();
+    const newCompensationNonShared = compensationNonSharedStart
+      .plus(compensationTrackVec.times(t_compensation))
       .toPoint();
 
-    if (!compensationTailOnShared && compensationHeadOnShared) {
-      // Head is on shared edge, so move head to meeting point
+    // Assign to head/tail based on which endpoint was on shared edge
+    let newContractionHead: Point;
+    let newContractionTail: Point;
+
+    if (contractionHeadOnShared) {
+      newContractionHead = meetingPoint;
+      newContractionTail = newContractionNonShared;
+    } else {
+      newContractionTail = meetingPoint;
+      newContractionHead = newContractionNonShared;
+    }
+
+    let newCompensationHead: Point;
+    let newCompensationTail: Point;
+
+    if (compensationHeadOnShared) {
       newCompensationHead = meetingPoint;
-      newCompensationTail = compensationEdge.tail.vector
-        .plus(newCompensationHead.vector.minus(compensationEdge.head.vector))
-        .toPoint();
+      newCompensationTail = newCompensationNonShared;
+    } else {
+      newCompensationTail = meetingPoint;
+      newCompensationHead = newCompensationNonShared;
     }
 
     // Step 7: Perform the actual edge moves using moveTo
@@ -272,7 +395,8 @@ class ConfigurationPair {
     const nextEdgeLineSegment = contractionEdge.next?.toLineSegment();
     if (!prevEdgeLineSegment || !nextEdgeLineSegment) return;
 
-    // Determine which endpoint aligns with which adjacent edge
+    const movedPositions: Point[] = [];
+
     const newContractionEdge = contractionEdge.moveTo(
       newContractionTail,
       newContractionHead,
@@ -284,10 +408,9 @@ class ConfigurationPair {
       configurations.set(newContractionEdge.coordKey, newConfiguration);
     }
 
-    const movedPositions: Point[] = [];
-
-    movedPositions.push(contractionEdge.tail.toPoint());
-    movedPositions.push(contractionHead.toPoint());
+    // Add new positions of the moved contraction edge
+    movedPositions.push(newContractionTail);
+    movedPositions.push(newContractionHead);
 
     const newCompensationEdge = compensationEdge.moveTo(
       newCompensationTail,
@@ -303,9 +426,9 @@ class ConfigurationPair {
       configurations.set(newCompensationEdge.coordKey, newConfiguration);
     }
 
-    movedPositions.push(newCompensationEdge.tail.toPoint());
-    const newCompensationHeadPoint = newCompensationEdge.head?.toPoint();
-    if (newCompensationHeadPoint) movedPositions.push(newCompensationHeadPoint);
+    // Add new positions of the moved compensation edge
+    movedPositions.push(newCompensationTail);
+    movedPositions.push(newCompensationHead);
 
     return movedPositions;
   }

@@ -5,9 +5,10 @@ import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPo
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
+import { EPSILON } from "@/src/geometry/contstants";
 import fs from "fs";
 import path from "path";
-import { describe, expect, test } from "vitest";
+import { beforeAll, describe, expect, test } from "vitest";
 
 describe("createConfigurations()", function () {
   test("adds configuration to all edges which are possible candidates for edge moves (which endpoints are of degree 3 or less).", function () {
@@ -71,7 +72,7 @@ describe("doEdgeMove()", function () {
     },
   );
 
-  test.fails("for the test case 'smallest-contraction'", function () {
+  test("for the test case 'smallest-contraction'", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction.json"),
@@ -79,30 +80,48 @@ describe("doEdgeMove()", function () {
       ),
     );
     const dcel = Dcel.fromGeoJSON(json);
-    const ffb = new FaceFaceBoundaryListGenerator().run(dcel);
-    const configurations = new ConfigurationGenerator().run(dcel);
+    const ffb = new FaceFaceBoundaryListGenerator().run(dcel.clone());
+    const configurations = new ConfigurationGenerator().run(dcel.clone());
     const originalArea = dcel.getArea();
-    const pair = ffb
-      .getBoundaries()[0]
-      .getMinimalConfigurationPair(configurations);
     const { dcel: newDcel } = new EdgeMoveProcessor(ffb, configurations).run(
-      dcel,
+      dcel.clone(),
     );
     const newArea = newDcel.getArea();
 
-    expect(dcel.getBoundedFaces()[0].getEdges()[2].tail.xy).toEqual([10.5, 1]);
+    expect(dcel.getBoundedFaces()[0].getEdges()[2].tail.xy).toEqual([11, 1]);
     expect(dcel.getBoundedFaces()[0].getEdges()[2].head?.xy).toEqual([10, 1]);
     expect(dcel.getBoundedFaces()[0].getEdges()[3].tail.xy).toEqual([10, 1]);
     expect(dcel.getBoundedFaces()[0].getEdges()[3].head?.xy).toEqual([10, 7]);
     expect(dcel.getBoundedFaces()[0].getEdges()[4].tail.xy).toEqual([10, 7]);
-    expect(dcel.getBoundedFaces()[0].getEdges()[4].head?.xy).toEqual([10, 8]);
-    expect(dcel.getBoundedFaces()[0].getEdges()[4].tail.xy).toEqual([10, 8]);
-    expect(dcel.getBoundedFaces()[0].getEdges()[4].head?.xy).toEqual([10, 10]);
-    expect(pair?.contraction.area).toEqual(0.5);
+    expect(dcel.getBoundedFaces()[0].getEdges()[4].head?.xy).toEqual([9.5, 7]);
+    expect(dcel.getBoundedFaces()[0].getEdges()[5].tail.xy).toEqual([9.5, 7]);
+    expect(dcel.getBoundedFaces()[0].getEdges()[5].head?.xy).toEqual([9.5, 8]);
+
+    expect(newDcel.getBoundedFaces()[0].getEdges()[2].tail.xy).toEqual([11, 1]);
+    expect(newDcel.getBoundedFaces()[0].getEdges()[2].head?.xy).toEqual([
+      10, 1,
+    ]);
+    expect(newDcel.getBoundedFaces()[0].getEdges()[3].tail.xy).toEqual([10, 1]);
+    expect(newDcel.getBoundedFaces()[0].getEdges()[3].head?.xy).toEqual([
+      10, 7,
+    ]);
+    expect(newDcel.getBoundedFaces()[0].getEdges()[4].tail.xy).toEqual([10, 7]);
+    expect(newDcel.getBoundedFaces()[0].getEdges()[4].head?.xy).toEqual([
+      9 + 5 / 6,
+      7,
+    ]);
+    expect(newDcel.getBoundedFaces()[0].getEdges()[5].tail.xy).toEqual([
+      9 + 5 / 6,
+      7,
+    ]);
+    expect(newDcel.getBoundedFaces()[0].getEdges()[5].head?.xy).toEqual([
+      9 + 5 / 6,
+      10,
+    ]);
     expect(originalArea).toEqual(newArea);
   });
 
-  test.fails("for the test case 'smallest-contraction-2", function () {
+  test("for the test case 'smallest-contraction-2", function () {
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction-2.json"),
@@ -165,64 +184,69 @@ describe("doEdgeMove()", function () {
   });
 });
 
-describe("Triangle.json edge move verification", function () {
-  test.fails(
-    "Edge move should not create degree-4 vertices for simple polygon boundary and should not introduce new orientations.",
-    function () {
-      const json = JSON.parse(
-        fs.readFileSync(path.resolve("test/data/shapes/triangle.json"), "utf8"),
-      );
+describe("Triangle.json edge move verification after one edge move", function () {
+  let dcel: Dcel;
+  let schematization: CSchematization;
 
-      let dcel = Dcel.fromGeoJSON(json);
-      const schematization = new CSchematization();
+  beforeAll(() => {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("test/data/shapes/triangle.json"), "utf8"),
+    );
 
-      // Apply pipeline
-      dcel = schematization.preProcess(dcel);
-      dcel = schematization.constrainAngles(dcel);
-      const collinearProcessor = new CollinearPointProcessor();
-      dcel = collinearProcessor.run(dcel);
+    dcel = Dcel.fromGeoJSON(json);
+    schematization = new CSchematization();
 
-      let configurations = new ConfigurationGenerator().run(dcel);
-      let ffbList = new FaceFaceBoundaryListGenerator().run(dcel);
+    dcel = schematization.preProcess(dcel);
+    dcel = schematization.constrainAngles(dcel);
+    const collinearProcessor = new CollinearPointProcessor();
+    dcel = collinearProcessor.run(dcel);
 
-      // Get and execute first edge move
-      const pair = ffbList.getMinimalConfigurationPair(configurations);
-      expect(pair).toBeDefined();
+    let configurations = new ConfigurationGenerator().run(dcel);
+    let ffbList = new FaceFaceBoundaryListGenerator().run(dcel);
 
-      if (pair) {
-        const processor = new EdgeMoveProcessor(ffbList, configurations);
-        const result = processor.run(dcel);
-        dcel = result.dcel;
-        configurations = result.configurations;
-        ffbList = result.faceFaceBoundaryList;
-      }
+    // Execute first edge move
+    const pair = ffbList.getMinimalConfigurationPair(configurations);
+    expect(pair).toBeDefined();
 
-      // Check for degree-4+ vertices
-      const highDegreeVertices = dcel
-        .getVertices()
-        .filter((v) => v.edges.length > 2);
+    if (pair) {
+      const processor = new EdgeMoveProcessor(ffbList, configurations);
+      const result = processor.run(dcel);
+      dcel = result.dcel;
+      configurations = result.configurations;
+      ffbList = result.faceFaceBoundaryList;
+    }
+  });
 
-      // All vertices in simple polygon boundary should have degree 2
-      expect(highDegreeVertices).toHaveLength(0);
+  test("Edge move should not create degree-4 vertices for simple polygon boundary", function () {
+    // Check for degree-4+ vertices
+    const highDegreeVertices = dcel
+      .getVertices()
+      .filter((v) => v.edges.length > 2);
 
-      // Check that new orientations aren't introduced
-      const validOrientations = schematization.style.c.angles;
-      const face = dcel.getBoundedFaces()[0];
-      if (face) {
-        const edges = face.getEdges();
-        const invalidOrientations = edges.filter((e) => {
-          const angle = e.getAngle();
-          if (angle === undefined) return false;
-          const normalized = angle < 0 ? angle + Math.PI * 2 : angle;
-          return !validOrientations.some(
-            (v) => Math.abs(v - normalized) < 0.0001,
-          );
-        });
+    // All vertices in simple polygon boundary should have degree 2
+    expect(highDegreeVertices).toHaveLength(0);
+  });
 
-        expect(invalidOrientations).toHaveLength(0);
-      }
-    },
-  );
+  test("Edge move should not introduce new orientations (angles)", function () {
+    // Check that new orientations aren't introduced
+    const validAngles = schematization.style.c.angles;
+    const face = dcel.getBoundedFaces()[0];
+    if (face) {
+      const edges = face.getEdges();
+      const unalignedEdges = edges.filter((e) => {
+        const angle = e.getAngle();
+        if (angle === undefined) {
+          return true; // Consider undefined angles as unaligned
+        }
+
+        const isValid = validAngles.some((v) => Math.abs(v - angle) <= EPSILON);
+
+        return !isValid; // Return true if not aligned with any valid angle
+      });
+
+      expect(unalignedEdges).toHaveLength(0);
+    }
+  });
 });
 
 describe("Thoroughly check edge DCEL after edge move", function () {

@@ -16,7 +16,8 @@ class FaceFaceBoundary {
 
   /**
    * Gets the minimal configuration pair of a face-face-boundary. Using the 6 smallest positive and negative contractions, as described in Buchin et al. 2016.
-   * @returns A tuple of two complementary, feasible contractions, posing  minimal configuration pair of a {@link FaceFaceBoundary}.
+   * @param configurations The current configuration map, containing all configurations of the current DCEL state.
+   * @returns A tuple of two complementary, feasible contractions, posing the minimal configuration pair of a {@link FaceFaceBoundary}.
    */
   getMinimalConfigurationPair(configurations: Map<string, Configuration>) {
     const pContractions = this.edges

@@ -4,6 +4,7 @@ import { ContractionType } from "@/src/c-oriented-schematization/ContractionType
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import Dcel from "@/src/Dcel/Dcel";
+import { EPSILON } from "@/src/geometry/contstants";
 import Point from "@/src/geometry/Point";
 import fs from "fs";
 import path from "path";
@@ -288,7 +289,7 @@ describe("First configuration pair in triangle.json after angle constraining", f
         const compensationArea = firstPair.compensation.area;
 
         // In shared edge move, both should have complementary areas
-        expect(Math.abs(area - compensationArea)).toBeLessThan(0.001);
+        expect(Math.abs(area - compensationArea)).toBeLessThan(EPSILON);
 
         // Check the shared outer edge for inflection type
         const outerEdges =

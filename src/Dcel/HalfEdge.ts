@@ -160,13 +160,24 @@ class HalfEdge {
 
   /**
    * Gets the angle of a HalfEdge in respect to the unit circle.
-   * @returns The angle in radians.
+   * @returns The angle in radians, normalized to [0, 2π).
    */
   getAngle() {
     const vector = this.getVector();
     if (!vector) return;
-    const angle = Math.atan2(vector.dy, vector.dx);
-    return angle < 0 ? angle + 2 * Math.PI : angle;
+    let angle = Math.atan2(vector.dy, vector.dx);
+
+    // Normalize to [0, 2π)
+    if (angle < 0) {
+      angle = angle + 2 * Math.PI;
+    }
+
+    // Handle floating-point wraparound where angle >= 2π
+    if (angle >= 2 * Math.PI) {
+      angle = angle - 2 * Math.PI;
+    }
+
+    return angle;
   }
 
   /**
