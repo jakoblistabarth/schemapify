@@ -132,7 +132,11 @@ The algorithm for schematization is as follows:
   5. Once we have a valid configuration pair we can execute the edge move. This process is repeated until we have reduced the number of edges to a certain threshold or we can't find any valid edge moves anymore.
      - The edge move is executed by moving both vertices of the inner edges along the configuration's tracks (each endpoint is positioned on a track at the beginning of the edge move).
      - There are two cases which need differentiation:
-       - If the configuration pair shares exactly one outer edge, this edge needs to degenerate into a point and the adjacent inner edges need to move towards each in a ratio so that the area change is compensated. This is a common case.
+       - If the configuration pair shares exactly one outer edge, both inner edges move along their respective tracks toward a meeting point on the shared edge. The meeting point location is determined by:
+         1. **Edge length**: Each inner edge's length constrains how much area can be displaced when moving perpendicular to it (area_change = edge_length × movement_distance). However, the edge length is subject to change during the movement: if the tracks of an edge are not parallel the length of the edge changes as it moves.
+         2. **Track angle**: The direction of each track (defined by the outer edges) determines the direction of movement for each endpoint.
+         3. **Area balance**: Movement distances are calculated such that the area change caused by the contraction edge is equal to the area change caused by the compensation edge.
+         4. **Convergence**: Both edges move continuously, decreasing the size of the shared edge until their shared endpoint degenerates to a point (length 0 and vanishes). The meeting point emerges from solving the constraint system: `length1 × distance1 × sin(angle1) = length2 × distance2 × sin(angle2)` where angles relate to track orientation relative to the edge.
        - If the configuration pair doesn't share any outer edge, the inner edge of the contraction configuration can be moved along its track until the calculated contraction point is reached. In a second step the inner edge of the compensation configuration can be moved along its tracks until it compensated for the area change caused by the movement of the contraction edge.
 
 ## Contact / Notes
