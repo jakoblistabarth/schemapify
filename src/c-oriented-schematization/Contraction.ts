@@ -51,7 +51,13 @@ class Contraction {
    */
   get isFeasible() {
     if (!this.point) return false;
-    return this.area > 0 && this.blockingNumber === 0 ? true : false;
+    return this.area > 0 &&
+      this.blockingNumber === 0 &&
+      //TODO: remove this condition, as soon as edge moves
+      // for junctions (degree-3) are implemented
+      !this.configuration.hasJunction
+      ? true
+      : false;
   }
 
   /**
