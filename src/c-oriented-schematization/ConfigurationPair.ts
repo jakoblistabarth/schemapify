@@ -80,8 +80,12 @@ class ConfigurationPair {
 
     // Perform the appropriate variant of the edge move
     const movedPositions = this.isSharingEdge()
-      ? this.doSharedEdgeMove(configurations, dcel)
-      : this.doRegularEdgeMove(configurations);
+      ? this.doSharedEdgeMove(contractionEdge, compensationEdge, configurations)
+      : this.doRegularEdgeMove(
+          contractionEdge,
+          compensationEdge,
+          configurations,
+        );
 
     if (!movedPositions) return;
 
@@ -150,35 +154,18 @@ class ConfigurationPair {
 
   /**
    * Perform the edge move when the contraction and compensation share an outer edge.
-   * Both edges move proportionally based on their areas, converging towards a meeting point where area change is balanced.
-   * @param dcel The DCEL to perform the edge move on, used to fetch fresh edge references.
+   * Both edges move proportionally based on the area change they cause, converging towards a meeting point where area change is balanced.
+   * @param contractionEdge An edge reference from the DCEL.
+   * @param compensationEdge An edge reference from the DCEL.
+   * @param configurations Map of configurations to update after the move.
    * @returns An array of {@link Point}s representing the positions of the moved edges, which can be used to update the configurations.
    * Returns void if the edge move could not be performed due to incomplete DCEL links.
    */
-  doSharedEdgeMove(configurations: Map<string, Configuration>, dcel?: Dcel) {
-    const configContractionEdge = this.contraction.configuration.innerEdge;
-    const configCompensationEdge = this.compensation.configuration.innerEdge;
-
-    // Fetch fresh edge references from DCEL if available, otherwise use configuration edges
-    let contractionEdge = configContractionEdge;
-    let compensationEdge = configCompensationEdge;
-
-    if (dcel) {
-      const freshContraction = configContractionEdge.coordKey
-        ? dcel
-            .getHalfEdges()
-            .find((e) => e.coordKey === configContractionEdge.coordKey)
-        : undefined;
-      const freshCompensation = configCompensationEdge.coordKey
-        ? dcel
-            .getHalfEdges()
-            .find((e) => e.coordKey === configCompensationEdge.coordKey)
-        : undefined;
-
-      if (freshContraction) contractionEdge = freshContraction;
-      if (freshCompensation) compensationEdge = freshCompensation;
-    }
-
+  doSharedEdgeMove(
+    contractionEdge: HalfEdge,
+    compensationEdge: HalfEdge,
+    configurations: Map<string, Configuration>,
+  ) {
     const contractionHead = contractionEdge.head;
 
     if (!contractionHead) return;
@@ -436,12 +423,17 @@ class ConfigurationPair {
   /**
    * Perform the edge move when the contraction and compensation do not share an outer edge.
    * This is the regular case, where the contraction and compensation can be performed independently.
+   * @param contractionEdge An edge reference from the DCEL.
+   * @param compensationEdge An edge reference from the DCEL.
+   * @param configurations Map of configurations to update after the move.
    * @returns An array of {@link Point}s representing the positions of the moved edges, which can be used to update the configurations.
    * Returns void if the edge move could not be performed due to incomplete DCEL links.
    */
-  doRegularEdgeMove(configurations: Map<string, Configuration>) {
-    const contractionEdge = this.contraction.configuration.innerEdge;
-    const compensationEdge = this.compensation.configuration.innerEdge;
+  doRegularEdgeMove(
+    contractionEdge: HalfEdge,
+    compensationEdge: HalfEdge,
+    configurations: Map<string, Configuration>,
+  ) {
     const contractionHead = contractionEdge.head;
     if (!contractionHead) return;
 
