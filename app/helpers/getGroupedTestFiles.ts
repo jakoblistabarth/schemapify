@@ -1,7 +1,7 @@
 import getTestFiles, { TestFile } from "./getTestFiles";
 
-const getGroupedTestFiles = async () => {
-  const files = await getTestFiles();
+const getGroupedTestFiles = () => {
+  const files = getTestFiles();
   const filesGrouped = files
     ?.filter((d) => d.type != "invalid")
     .reduce((acc: { [key: string]: TestFile[] }, d) => {

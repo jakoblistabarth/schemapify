@@ -20,9 +20,7 @@ const SnapshotTimeline: FC<Props> = ({ snapshots, colorScale }) => {
   const grow = 5;
   const gap = 2;
 
-  return !snapshots.length ? (
-    <></>
-  ) : (
+  return !snapshots.length ? null : (
     <svg
       width={snapshots.length * width + (snapshots.length - 1) * gap + 2}
       height={height + 2}
