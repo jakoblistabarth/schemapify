@@ -72,8 +72,9 @@ class Configuration {
   }
 
   /**
-   * Gets all edges of the polygon's boundary to which the configuration belongs, unless the 3 edges forming the configuration.
-   * Kind of the inverse to getX().
+   * Gets all edges of the polygon's boundary to which the configuration belongs,
+   * unless the 3 edges forming the configuration.
+   * Kind of the inverse to {@link x()}.
    * @returns An array of {@link HalfEdge}s.
    */
   get x_() {
