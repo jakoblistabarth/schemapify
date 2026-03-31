@@ -20,7 +20,7 @@ const Hotkeys = () => {
     () =>
       dcel &&
       snapshotList &&
-      //TODO: reimplement step by step simplification
+      //TO-DO: reimplement step by step simplification
       // ideally I could write something like this:
       // schematization.doEdgeMove();
       // handleSimplify(dcel, snapshotList, setActiveSnapshot),

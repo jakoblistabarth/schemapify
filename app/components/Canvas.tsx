@@ -78,7 +78,7 @@ const getTooltipContent = (hoverInfo: HoverInfo, activeSnapshot?: Snapshot) => {
 const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | undefined>(undefined);
   const [time, setTime] = useState(0);
-  // TODO: investigate why this happens and if there's a better solution
+  // TO-DO: investigate why this happens and if there's a better solution
   // Workaround to not make layer disappear when switching snapshots
   // Create grid layer once and reuse it across all renders
   const [gridLayer] = useState(

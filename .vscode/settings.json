@@ -7,7 +7,7 @@
   "prettier.printWidth": 100,
   "todohighlight.keywords": [
     {
-      "text": "TODO:",
+      "text": "TO-DO:",
       "backgroundColor": "orange",
       "border": "1px solid red",
       "borderRadius": "3px"

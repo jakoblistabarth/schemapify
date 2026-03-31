@@ -31,7 +31,7 @@ describe("toSubdivision converts to a valid subdivision from a DCEL of test case
   test(`"${input.fileName}".`, function () {
     const subdivision = dcel.toSubdivision();
     const multiPolygons = subdivision.multiPolygons;
-    // the subdivision consists of a single Multipolygon
+    // The subdivision consists of a single multiPolygon
     const polygons = multiPolygons.at(0)?.polygons;
     const rings = polygons?.at(0)?.rings;
 

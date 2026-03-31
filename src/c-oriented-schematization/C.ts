@@ -27,7 +27,7 @@ export default abstract class C {
 
   /**
    * Get an array of valid candidate sets of directions for the given number of edges.
-   * @param numberOfEdges Number of edges to be classified, i.e. incident to this edge. //TODO: check whether this is correct
+   * @param numberOfEdges Number of edges to be classified, i.e. incident to this edge. //TO-DO: check whether this is correct
    * @returns An array of valid sets of directions.
    */
   getValidDirections(numberOfEdges: number) {

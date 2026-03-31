@@ -28,7 +28,7 @@ describe("3-a. If the input data is not a region i.e., it contains features of t
   });
 });
 
-// TODO: get new geojson parsing library. needs to be commented out because not compatible with testing gui
+// TO-DO: get new GeoJSON parsing library. Needs to be commented out because not compatible with testing GUI.
 describe("4-a. If the input data is not a valid geoJSON the program shall exit and the user shall be informed.", function () {
   test.fails(
     "An error is thrown for a file containing polygons which are not closed.",

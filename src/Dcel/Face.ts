@@ -16,13 +16,13 @@ class Face {
   innerEdges: HalfEdge[];
 
   /**
-   * Pointer to the outerRing the face belongs to.
+   * Pointer to the outer ring the face belongs to.
    * Only defined for holes.
    */
   outerRing?: Face;
 
   /**
-   * List of Ids of the associated features.
+   * List of IDs of the associated features.
    * A face can be associated with up to 2 features of the input data:
    * it can serve as an inner ring (hole) for one feature and as an exterior ring for another.
    */
@@ -58,7 +58,7 @@ class Face {
   }
 
   /**
-   * Get the face's uuid.
+   * Get the face's unique identifier.
    * @returns the edge's uuid
    */
   get uuid() {
@@ -91,7 +91,7 @@ class Face {
   }
 
   /**
-   * Replace an face's inner edge.
+   * Replace a face's inner edge.
    * @param old the {@link HalfEdge} to be replaced
    * @param edge the new {@link HalfEdge}
    * @returns the updated face's inner {@link HalfEdge}s

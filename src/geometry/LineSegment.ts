@@ -68,7 +68,7 @@ class LineSegment {
 
   /**
    * Check whether it intersects with a given {@link Polygon}
-   * TODO: Only considers exterior lineSegments of the polygon!
+   * TO-DO: Only considers exterior line segments of the polygon!
    * @param polygon The {@link Polygon} to check for intersections.
    * @returns An array of {@link Point}s where the line intersects the {@link Polygon}.
    */

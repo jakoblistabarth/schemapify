@@ -28,7 +28,7 @@ class Vertex extends Point {
    * Gets the unique ID of a Vertex.
    */
   get uuid() {
-    // use numeric id based uuid when available
+    // Use numeric id based unique identifier when available
     return typeof this.id === "number" && this.id > 0
       ? `v${this.id}`
       : Vertex.getKey(this.x, this.y);

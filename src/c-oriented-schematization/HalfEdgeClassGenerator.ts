@@ -82,10 +82,10 @@ class HalfEdgeClassGenerator implements Generator {
   private classify(halfEdge: HalfEdge, c: C, significantVertices: number[]) {
     this.assignDirections(halfEdge.tail, c);
 
-    // do not overwrite classification
+    // Do not overwrite classification
     if (this.getClass(halfEdge)) return;
 
-    // do not classify a HalfEdge which has a significant head
+    // Do not classify a HalfEdge which has a significant head
     const head = halfEdge.head;
     if (
       head &&
@@ -142,8 +142,8 @@ class HalfEdgeClassGenerator implements Generator {
    * Assigns directions to all incident HalfEdges of the Vertex.
    * @returns An Array, holding the assigned directions starting
    * with the direction of the {@link HalfEge} with the smallest angle on the unit circle.
-   * Direction indices are based on the sectors of C.
-   * For e.g., for C2, the directions are [0, 1, 2, 3], where 0 is 0 degree on the unit circle.
+   * Direction indices are based on the sectors of C().
+   * For e.g., for C(2), the directions are [0, 1, 2, 3], where 0 is 0 degree on the unit circle.
    */
   assignDirections(vertex: Vertex, c: C) {
     const edges = vertex.sortEdges(false);

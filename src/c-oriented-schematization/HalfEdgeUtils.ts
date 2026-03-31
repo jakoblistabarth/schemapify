@@ -80,7 +80,7 @@ export const getAssignedAngle = (
 };
 
 /**
- * Determines whether the HalfEdge is aligned to one of the orientations of C.
+ * Determines whether the HalfEdge is aligned to any of the orientations of C().
  * @returns A boolean, indicating whether or not the {@link HalfEdge} is aligned.
  */
 export const isAligned = (halfEdge: HalfEdge, sectors: Sector[]) => {
@@ -99,17 +99,17 @@ export const isDeviating = (
   let assignedAngle = getAssignedAngle(assignedDirection, sectors);
   if (typeof assignedAngle !== "number") return false;
   if (isAligned(halfEdge, sectors)) {
-    // if edge is aligned, it is deviating
-    // if the assigned angle is not the same as the associated angle
+    // If edge is aligned, it is deviating
+    // If the assigned angle is not the same as the associated angle
     return (
       getAssociatedAngles(halfEdge, sectors)[0] !==
       getAssignedAngle(assignedDirection, sectors)
     );
   } else {
-    // if edge is not aligned, it is deviating
-    // if the assigned angle is not enclosed by the associated sector
+    // If edge is not aligned, it is deviating
+    // If the assigned angle is not enclosed by the associated sector
     const sector = getAssociatedSector(halfEdge, sectors)[0];
-    //TODO: refactor find better solution for last sector (idx = 0)
+    //TO-DO: refactor find better solution for last sector (idx = 0)
     if (sector.idx === sectors.length - 1 && assignedAngle === 0)
       assignedAngle = Math.PI * 2;
     return !sector.encloses(assignedAngle);

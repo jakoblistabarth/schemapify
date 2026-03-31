@@ -2,7 +2,7 @@ import Point from "./Point";
 
 /**
  * Class representing a ring.
- * It is defined by its {@link Point}s
+ * It is defined by its {@link Point}s.
  * Its points are always returned in counterclockwise order.
  */
 class Ring {
@@ -47,7 +47,7 @@ class Ring {
 
   /**
    * Calculates the area of the {@link Ring}.
-   * #TODO: add credits!
+   * #TO-DO: add credits!
    * The array of Points need to be sorted (either clockwise or counter-clockwise).
    * @returns A number indicating the area of the {@link Ring}.
    */

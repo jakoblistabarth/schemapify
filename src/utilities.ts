@@ -75,7 +75,7 @@ export function createGeoJSON<
 }
 
 /**
- * Turns an angle into a unit vector? // TODO: check if that's correct.
+ * Turns an angle into a unit vector? // TO-DO: check if that's correct.
  * @param angle in radians
  * @returns a unit vector
  */
@@ -117,8 +117,8 @@ export const geoJsonToGeometry = (
     const polygons = multipolygons.map((polygon) => {
       const rings = polygon.map((ringPositions) => {
         const ring = Ring.fromCoordinates(ringPositions as [number, number][]);
-        // the rings points are already by definition sorted counterclockwise
-        // remove redundant last point from geojson rings
+        // The rings points are already by definition sorted counterclockwise
+        // remove redundant last point from GeoJSON rings
         return new Ring(ring.points.slice(0, -1));
       });
       return new Polygon(rings);
@@ -129,8 +129,6 @@ export const geoJsonToGeometry = (
 
   return new Subdivision(multiPolygons);
 };
-
-// TODO: implement geometryToGeoJSON
 
 /**
  * Normalizes an angle to be between 0 and 2π.

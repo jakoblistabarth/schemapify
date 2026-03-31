@@ -63,7 +63,7 @@ describe("Find errors for invalid geoJSON file", function () {
     expect(rejected.length).toBeGreaterThan(0);
   });
 
-  // use turf for validation with advanced geometry-checks
+  // Use turf for validation with advanced geometry-checks
   test("with a polygon containing a loop edge", function () {
     const json = JSON.parse(
       fs.readFileSync(

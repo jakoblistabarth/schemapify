@@ -28,14 +28,14 @@ class VertexClassGenerator implements Generator {
   }
 
   /**
-   * Determines the significance of the Vertex..
+   * Determines the significance of the Vertex.
    * @returns A Boolean indicating whether or not the {@link Vertex} is significant.
    */
   private isSignificant(vertex: Vertex, sectors: Sector[]) {
-    // classify as insignificant if all edges are already aligned
+    // Classify as insignificant if all edges are already aligned
     if (this.hasOnlyAlignedEdges(vertex, sectors)) return false;
 
-    // classify as significant if one sector occurs multiple times
+    // Classify as significant if one sector occurs multiple times
     const occupiedSectors = vertex.edges
       .map((edge) => getAssociatedSector(edge, sectors))
       .flat();
@@ -49,7 +49,7 @@ class VertexClassGenerator implements Generator {
     );
     if (occupiedSectors.length !== uniqueSectors.length) return true;
 
-    // classify as significant if neighbor sectors are not empty
+    // Classify as significant if neighbor sectors are not empty
     return uniqueSectors.every((sector: Sector) => {
       const [prevSector, nextSector] = sector.getNeighbors();
       return (

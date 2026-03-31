@@ -42,7 +42,7 @@ describe("createConfigurations()", function () {
 });
 
 describe("doEdgeMove()", function () {
-  // TODO: fix edge move first
+  // TO-DO: fix edge move first
   test.fails(
     "(recursive) on respective minimal configurations returns the expected contraction pair for the second, third, and fourth edge move.",
     function () {
@@ -61,7 +61,7 @@ describe("doEdgeMove()", function () {
         const pair = ffb.getMinimalConfigurationPair(configurations);
         const contractionEdge = pair?.contraction.configuration.innerEdge;
         if (contractionEdge) contractionEdges.push(contractionEdge?.uuid);
-        // TODO: fix this
+        // TO-DO: fix this
         // pair?.doEdgeMove(dcel, configurations, ffb.configurations);
       }
       expect(contractionEdges).toEqual([

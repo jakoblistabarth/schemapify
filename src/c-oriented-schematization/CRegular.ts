@@ -3,18 +3,18 @@ import Sector from "./Sector";
 
 class CRegular extends C {
   /**
-   * the shift of the C of set, by default a horizontal line (0)
+   * The shift of the C of set, by default a horizontal line (0)
    */
   beta: number;
   /**
-   * the number of orientation, at least 2
+   * The number of orientation, at least 2
    */
   orientations: number;
 
   constructor(orientations: number, beta: number = 0) {
     super();
     this.beta = beta;
-    this.orientations = orientations; //TODO: at least 2
+    this.orientations = orientations; //TO-DO: at least 2
     this.angles = this.initializeAngles();
   }
 

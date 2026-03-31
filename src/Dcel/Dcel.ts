@@ -13,7 +13,7 @@ import Ring from "../geometry/Ring";
 
 class Dcel {
   name?: string;
-  // vertices are stored by numeric id; use `vertexBuckets` for spatial lookup
+  // Vertices are stored by numeric id; use `vertexBuckets` for spatial lookup
   vertices: Map<number, Vertex>;
   halfEdges: Map<string, HalfEdge>;
   faces: Face[];
@@ -21,7 +21,7 @@ class Dcel {
   nextVertexId: number;
   nextHalfEdgeId: number;
   nextFaceId: number;
-  // fixed-size-hash-with-buckets spatial index for coordinate lookups
+  // Fixed-size-hash-with-buckets spatial index for coordinate lookups
   vertexBuckets: Map<string, Vertex[]>;
 
   constructor() {
@@ -86,7 +86,7 @@ class Dcel {
   }
 
   /**
-   * Register an existing {@link Vertex} instance with this DCEL.
+   * Register some existing {@link Vertex} instance with this DCEL.
    * Assigns a numeric id if missing and adds it to buckets/map.
    */
   registerVertex(vertex: Vertex) {
@@ -114,12 +114,12 @@ class Dcel {
   }
 
   /**
-   * Register an existing {@link HalfEdge} instance with this DCEL.
+   * Register some existing {@link HalfEdge} instance with this DCEL.
    * Ensures its endpoints are registered, assigns an id if missing and
    * inserts the half-edge into the DCEL halfEdges map and the tail's edges.
    */
   registerHalfEdge(edge: HalfEdge) {
-    // determine head (may come from twin)
+    // Determine head (may come from twin)
     const head = edge.head ?? edge.twin?.tail;
     if (!head)
       throw new Error(
@@ -151,7 +151,7 @@ class Dcel {
     if (edge.tail.edges.indexOf(edge) === -1) edge.tail.edges.push(edge);
     edge.tail.sortEdges();
 
-    // ensure twin is registered too (but avoid infinite recursion)
+    // Ensure twin is registered too (but avoid infinite recursion)
     if (edge.twin) {
       const twinKey = HalfEdge.getKey(
         edge.twin.tail,
@@ -174,7 +174,7 @@ class Dcel {
   }
 
   /**
-   * Register an existing {@link Face} instance with this DCEL.
+   * Register some existing {@link Face} instance with this DCEL.
    */
   registerFace(face: Face) {
     // idempotent: if face already registered, return its id
@@ -185,7 +185,7 @@ class Dcel {
     } else {
       if (!Number.isInteger(face.id) || face.id <= 0)
         throw new Error(`Invalid face id ${face.id}`);
-      // ensure no other face uses this id
+      // Ensure no other face uses this id
       if (this.faces.some((f) => f !== face && f.id === face.id))
         throw new Error(`Face id ${face.id} is already registered`);
     }
@@ -260,9 +260,9 @@ class Dcel {
    */
   getArea() {
     return this.getFaces().reduce((acc, face) => {
-      // do only consider faces associated with one feature
-      // the unbounded faces (no associated features) need to be ignored
-      // and faces which are holes and boundary (two associated features) can be ignored
+      // Do only consider faces associated with one feature.
+      // The unbounded faces (no associated features) need to be ignored.
+      // Faces which are holes and boundary (two associated features) can be ignored
       // as the area of the hole and the boundary cancel each other out
       if (face.associatedFeatures.length !== 1) return acc;
       const faceArea = face.getArea();
@@ -401,7 +401,7 @@ class Dcel {
     return this.halfEdges;
   }
 
-  // simple DJB2 hash of coordinate string, returned as hex (bounded length)
+  // Simple DJB2 hash of coordinate string, returned as hex (bounded length)
   private coordHash(x: number, y: number) {
     const s = `${x},${y}`;
     let h = 5381;
@@ -436,7 +436,7 @@ class Dcel {
 
     dcel.featureProperties = subdivision.multiPolygons.map((d) => d.properties);
 
-    // convert Multipolygons to nested array of vertices (polygons)
+    // Convert multiPolygons to nested array of vertices (polygons)
     const polygons = subdivision.multiPolygons.reduce(
       (acc: Vertex[][][], multiPolygon) => {
         acc.push(
@@ -469,12 +469,12 @@ class Dcel {
       }),
     );
 
-    // TODO: sort edges everytime a new edge is pushed to vertex.edges
+    // TO-DO: sort edges every time a new edge is pushed to vertex.edges
     dcel.vertices.forEach((vertex) => {
-      // sort the half-edges whose tail vertex is that endpoint in clockwise order.
+      // Sort the half-edges whose tail vertex is that endpoint in clockwise order.
       vertex.sortEdges();
 
-      // For every pair of half-edges e1, e2 in clockwise order, assign e1->twin->next = e2 and e2->prev = e1->twin.
+      // For every pair of half-edges e1, e2 in clockwise order, assign e1->twin->next = e2 and e2->previous = e1->twin.
       vertex.edges.forEach((e1, idx) => {
         const e2 = vertex.edges[(idx + 1) % vertex.edges.length];
         if (!e1.twin) return;
@@ -492,7 +492,7 @@ class Dcel {
         polygon.rings.forEach((ring, idx) => {
           const [firstPoint, secondPoint] = ring.points;
 
-          // find first edge of the ring
+          // Find first edge of the ring
           const edge = dcel.getHalfEdges().find((e) => {
             return (
               e.tail.x === firstPoint.x &&
@@ -503,7 +503,7 @@ class Dcel {
           });
           if (!edge) return;
 
-          // check whether there's already a face related to this edge
+          // Check whether there's already a face related to this edge
           const existingFace = dcel.faces.find((f) => f.edge === edge);
           if (existingFace?.associatedFeatures) {
             existingFace.associatedFeatures.push(featureId);
@@ -533,7 +533,7 @@ class Dcel {
       );
     });
 
-    // create unbounded Face (infinite outerFace) and assign it to edges which do not have a face yet
+    // Create unbounded Face (infinite outer face) and assign it to edges which do not have a face yet
     const unboundedFace = dcel.addFace();
     while (dcel.getHalfEdges().find((edge) => !edge.face)) {
       const outerEdge = dcel.getHalfEdges().find((edge) => !edge.face);
@@ -561,7 +561,7 @@ class Dcel {
 
   /**
    * Gets the DCEL's center.
-   * Defined as the center of it's Boundingbox
+   * Defined as the center of it's BoundingBox
    * @returns The center of the {@link Dcel}.
    */
   get center() {
@@ -587,7 +587,7 @@ class Dcel {
           ?.filter(
             (face) =>
               !face.isHole ||
-              // TODO: think of a clever condition which excludes rings which are inner holes for the respective ring
+              // TO-DO: think of a clever condition which excludes rings which are inner holes for the respective ring
               (face.isHole &&
                 face.outerRing &&
                 !faces.map(({ id }) => id).includes(face.outerRing?.id)),
@@ -681,7 +681,7 @@ class Dcel {
     // Create a fresh DCEL from the subdivision representation
     const clone = this.toSubdivision().toDcel();
 
-    // Helper to build a coord-key for vertices
+    // Helper to build a coordinate-key for vertices
     const coordKey = (x: number, y: number) => `${x}|${y}`;
 
     // Map original vertices by coordinate -> id

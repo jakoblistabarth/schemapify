@@ -35,7 +35,7 @@ class Staircase {
   _de?: number;
   /** The number of steps the staircase the must use.  */
   se?: number;
-  /** A list of {@link HalfEdge}s whose staircase regions interfer with this staircase region.  */
+  /** A list of {@link HalfEdge}s whose staircase regions interfere with this staircase region.  */
   interferesWith: HalfEdge[];
   #cStyle: CStyle;
 
@@ -57,7 +57,7 @@ class Staircase {
     this.interferesWith = [];
   }
 
-  // TODO: fix typing, infer type if possible
+  // TO-DO: fix typing, infer type if possible
   get de(): number | undefined {
     return this._de;
   }
@@ -80,12 +80,12 @@ class Staircase {
     const length = edge.getLength();
     const angle = edge.getAngle();
     switch (this.orientation) {
-      // "Aligned deviating edges do not use steps but a value δe instead. (p.17)"
-      // TODO: make this function pure by not setting deltaE from within
+      // "Aligned deviating edges do not use steps but a value δe instead. (page 17)"
+      // TO-DO: make this function pure by not setting deltaE from within
       case Orientation.AD: {
         if (typeof this.de !== "number" || typeof this.deltaE !== "number")
           return;
-        // "… we use δe = min{de/2,Δe}, where Δe = 0.1||e|| as defined for the staircase regions."
+        // "… we use δe = minimum{de/2,Δe}, where Δe = 0.1||e|| as defined for the staircase regions."
         if (this.de / 2 < this.deltaE) this.deltaE = this.de / 2;
         break;
       }
@@ -100,7 +100,7 @@ class Staircase {
         });
         const d1 = Math.min(...distances);
         let se = Math.ceil((2 * d1 * length) / this.de + 1);
-        se = se % 2 === 0 ? se + 2 : se + 1; // TODO: check if this is correct? (p. 18)
+        se = se % 2 === 0 ? se + 2 : se + 1; // TO-DO: check if this is correct? (page 18)
         this.se = Math.max(4, se);
         break;
       }
@@ -120,7 +120,7 @@ class Staircase {
             this.de) /
           2;
         const se = Math.ceil(length / maximum_step_length);
-        this.se = se % 2 === 0 ? se + 2 : se + 1; // TODO: check if this is correct? (p. 18)
+        this.se = se % 2 === 0 ? se + 2 : se + 1; // TO-DO: check if this is correct? (page 18)
       }
     }
   }
@@ -134,7 +134,7 @@ class Staircase {
 
   /**
    * Gets the staircase region of an edge, depending on its class.
-   * If the edge has an significant Vertex, it has to be the tail of the edge.
+   * If the edge has a significant Vertex, it has to be the tail of the edge.
    * If that's not the case its twin is used for calculating the staircase region.
    * @returns A {@link Polygon} representing the region of an edge.
    */
@@ -164,7 +164,7 @@ class Staircase {
       case Orientation.E:
         return this.getSimpleRegion();
       case Orientation.UD:
-        // like UB and E but accommodate for the appended area
+        // Like UB and E but accommodate for the appended area
         // "that is used to make the staircase adhere to the assigned direction (see Figure 12(b–c))."
         this.points = this.getStaircasePoints();
 
@@ -397,7 +397,7 @@ class Staircase {
     const assignedAngle = getAssignedAngle(this.assignedDirection, sectors);
     if (typeof stepArea !== "number" || typeof assignedAngle !== "number")
       return [];
-    const height = (stepArea * 2) / l2; // get the height of a parallelogram, using A/b = h
+    const height = (stepArea * 2) / l2; // Get the height of a parallelogram, using A/b = h
     const a = stepArea / height;
 
     const p1 = originalStaircasePoints[0].getNewPoint(a, assignedAngle);
@@ -477,7 +477,7 @@ export const getStepLengths = (
   if (!v) return [];
   const vse = v.times(1 / se);
 
-  // solve linear equation for l1 and l2 with cramer's rule for 2x2 systems
+  // Solve linear equation for l1 and l2 with Cramer's rule for 2 x 2 systems
   const det = d1u.dx * d2u.dy - d1u.dy * d2u.dx;
   const detX = vse.dx * d2u.dy - vse.dy * d2u.dx;
   const l1 = detX / det;
@@ -505,11 +505,11 @@ export const getClosestAssociatedAngle = (
 ) => {
   const sectors = c.sectors;
   const associatedSector = getAssociatedSector(halfEdge, sectors);
-  if (orientation !== Orientation.UD || !associatedSector) return; // TODO: error handling, this function is only meant to be used for unaligned deviating edges
+  if (orientation !== Orientation.UD || !associatedSector) return; // TO-DO: error handling, this function is only meant to be used for unaligned deviating edges
   const sector = associatedSector[0];
 
-  // TODO: refactor: find better solution for last sector and it's upper bound
-  // set upperbound of last to Math.PI * 2 ?
+  // TO-DO: refactor: find better solution for last sector and it's upper bound
+  // Set upper bound of last to Math.PI * 2 ?
   const upper = sector.idx === sectors.length - 1 ? 0 : sector.upper;
   const lower = sector.lower;
   const angle =

@@ -49,7 +49,7 @@ class HalfEdge {
    * Get a stable coordinate-based key for the HalfEdge.
    * Unlike {@link uuid}, this does not use numeric IDs and therefore remains
    * consistent across serialization/deserialization cycles (e.g. Subdivision → Dcel).
-   * Returns `undefined` when the head vertex is unavailable (no twin set).
+   * Returns `undefined` when the head vertex is unavailable (no twin is set).
    * @returns A string key based solely on coordinates, or `undefined`.
    */
   get coordKey(): string | undefined {
@@ -264,7 +264,7 @@ class HalfEdge {
     et.next.prev = et_;
 
     if (f2.edge && !f1.outerRing) {
-      // if f2 is not the unbounded face and f1 is not a hole
+      // If f2 is not the unbounded face and f1 is not a hole
       f2.edge = et_;
     }
 
@@ -299,7 +299,7 @@ class HalfEdge {
     et__.twin = e__;
     e__.twin = et__;
 
-    if (f1.edge && !f2.outerRing) f1.edge = e_; // if e is an clockwise-running edge incident to the unbounded face
+    if (f1.edge && !f2.outerRing) f1.edge = e_; // If e is a clockwise-running edge incident to the unbounded face
 
     f1.innerEdges.forEach((e) => {
       if (!e.face) return;
@@ -325,10 +325,10 @@ class HalfEdge {
    */
   moveTo(newTail: Point, newHead: Point) {
     // 1. Move both endpoints (no merging here), capturing the returned vertex because moveTo
-    // may return a different (pre-existing) vertex object when it merges.
+    // may return a different (preexisting) vertex object when it merges.
     this.tail = this.tail.moveTo(newTail.x, newTail.y);
 
-    const head = this.head; // equals to this.twin?.tail (before any head move)
+    const head = this.head; // Equals to this.twin?.tail (before any head move)
     if (head && this.twin) {
       this.twin.tail = head.moveTo(newHead.x, newHead.y);
     }
@@ -371,7 +371,7 @@ class HalfEdge {
   intersectsLine(line: Line) {
     const head = this.head;
     const P = this.toLine()?.intersectsLine(line);
-    //TODO: check if the fact that intersectsLine returns undefined for parallel line
+    //TO-DO: check if the fact that intersectsLine returns undefined for parallel line
     // poses a problem for the case that the halfedge is part of the line
     if (!P || !head) return;
     if (P.isOnLineSegment(new LineSegment(this.tail, head))) return P;

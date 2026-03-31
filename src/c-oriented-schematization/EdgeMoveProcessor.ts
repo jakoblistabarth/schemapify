@@ -3,8 +3,8 @@ import Dcel from "../Dcel/Dcel";
 import Configuration from "./Configuration";
 import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
 
-//TODO: make this class more in line with the other processors?
-// class EdgeMoveProcessor implements Processor {
+//TO-DO: make this class more in line with the other processors?
+// Class EdgeMoveProcessor implements Processor {
 class EdgeMoveProcessor {
   faceFaceBoundaryList: FaceFaceBoundaryList;
   configurations: Map<string, Configuration>;
@@ -17,13 +17,13 @@ class EdgeMoveProcessor {
     this.configurations = configurations;
   }
 
-  // TODO: the return type here is wrong,
+  // TO-DO: the return type here is wrong,
   // the edge move is perhaps the combination of a processor and a generator?
   public run(input: Dcel) {
     const pair = this.faceFaceBoundaryList.getMinimalConfigurationPair(
       this.configurations,
     );
-    // contractions and configurations are updated as side effects in doEdgeMove()
+    // Contractions and configurations are updated as side effects in doEdgeMove()
     const edgeMove = pair?.doEdgeMove(
       input,
       this.contractions,
@@ -33,7 +33,7 @@ class EdgeMoveProcessor {
       dcel: edgeMove ? edgeMove.dcel : input,
       configurations: edgeMove ? edgeMove.configurations : this.configurations,
       faceFaceBoundaryList: edgeMove
-        ? //TODO: update the ffbl as its creation(?) is expensive O(n^2)?
+        ? //TO-DO: update the face-face-boundary-list as its creation(?) is expensive O(n^2)?
           new FaceFaceBoundaryList(edgeMove.dcel)
         : this.faceFaceBoundaryList,
     };

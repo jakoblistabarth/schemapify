@@ -9,13 +9,13 @@ class PreProcessor implements Processor {
   }
 
   public run(input: Dcel) {
-    // TODO: should I clone within the processor or rather clone
+    // TO-DO: should I clone within the processor or rather clone
     // the argument passed to the constructor?
     return this.subdivideEdges(input.clone(), this.epsilon);
   }
 
   /**
-   * Subdivide all edges of an DCEL so that no edges are longer than the defined threshold.
+   * Subdivide all edges of a DCEL so that no edges are longer than the defined threshold.
    * @param Dcel The DCEL to subdivide.
    * @param threshold The maximum length of an edge.
    * @returns A subdivided {@link Dcel}.

@@ -20,7 +20,7 @@ export type Callbacks = { [key in LogLevel]?: Callback };
  * A schematization process is a process that takes a {@link Dcel} as input and returns a schematized {@link Dcel} as output.
  */
 abstract class Schematization {
-  // TODO: Make these properties private, again?
+  // TO-DO: Make these properties private, again?
   // Does not seem to be possible with abstract classes
   callbacks: Callbacks;
   style: object;
@@ -38,7 +38,7 @@ abstract class Schematization {
     this.style = style;
   }
 
-  //TODO: Improve JsDocstring
+  //TO-DO: Improve JsDoc string
   /**
    * Perform an action based on the defined callbacks.
    * @param args An object containing the arguments for the action.

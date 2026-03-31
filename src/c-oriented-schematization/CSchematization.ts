@@ -23,7 +23,7 @@ import Configuration from "./Configuration";
 import EdgeMoveProcessor from "./EdgeMoveProcessor";
 
 export enum LABEL {
-  // TODO: is a default label needed?
+  // TO-DO: is a default label needed?
   DEFAULT = "default",
   LOAD = "loadData",
   SUBDIVIDE = "subdivide",
@@ -48,7 +48,7 @@ class CSchematization extends Schematization {
     level,
     ...rest
   }: {
-    //TODO: Why is the typing not inferred as for preProcess?
+    //TO-DO: Why is the typing not inferred as for preprocess?
     level: "debug" | "visualize";
   } & Parameters<Callback>[0]): void {
     this.callbacks[level]?.(rest);
@@ -132,7 +132,7 @@ class CSchematization extends Schematization {
       halfEdgeClasses,
       this.style,
     ).run(withSubdividedEdges);
-    //TODO: add additional data to Snapshot: staircaseRegions as geometry
+    //TO-DO: add additional data to Snapshot: staircase regions as geometry
     this.doAction({
       level: "visualize",
       dcel: withSubdividedEdges,
@@ -148,7 +148,7 @@ class CSchematization extends Schematization {
       withSubdividedEdges,
     );
 
-    //TODO: add additional data to Snapshot: staircaseRegions as geometry
+    //TO-DO: add additional data to Snapshot: staircase regions as geometry
     this.doAction({
       level: "visualize",
       dcel: withStaircases,
@@ -174,7 +174,7 @@ class CSchematization extends Schematization {
       forSnapshots: { snapshotList: this.snapshots, triggeredAt: start },
     });
 
-    // TODO: check whether loop is correct
+    // TO-DO: check whether loop is correct
     let dcel: Dcel = withoutCollinearPoints;
     do {
       const edgeCountBeforeMove = dcel.halfEdges.size;
@@ -201,7 +201,7 @@ class CSchematization extends Schematization {
         break;
       }
     } while (debug ? !!debug : dcel.halfEdges.size >= this.style.k);
-    // TODO: is it possible to return here a simplification function
+    // TO-DO: is it possible to return here a simplification function
     // which I can then use for handling simplifying e.g. with hotkeys?
     return dcel;
   }
@@ -218,7 +218,7 @@ class CSchematization extends Schematization {
   }
 
   /**
-   * Sets ε, a constant threshold for the maximum edge length within a DCEL, in the DCEL's config object.
+   * Sets ε, a constant threshold for the maximum edge length within a DCEL, in the config object of the DCEL.
    * @param lambda A constant factor.
    * @returns Epsilon. The maximum length of a {@link HalfEdge}.
    */
@@ -258,7 +258,7 @@ class CSchematization extends Schematization {
     });
   }
 
-  //TODO: remove this function, seems to be only used in the canvas at the moment?
+  //TO-DO: remove this function, seems to be only used in the canvas at the moment?
   /**
    * Gets all contractions within a DCEL.
    * @param dcel The DCEL to get the contractions from.

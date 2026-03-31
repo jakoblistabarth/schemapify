@@ -101,7 +101,7 @@ class StaircaseGenerator implements Generator {
    * @param input The {@link Dcel} to calculate staircases for.
    */
   private calculateStaircaseParaemters(staircases: Map<number, Staircase>) {
-    // Calculate edge distance and step number for deviating edges first (p. 18)
+    // Calculate edge distance and step number for deviating edges first (page 18)
     const staircasesOfDeviatingEdges = new Map(
       [...staircases.entries()].filter(([, staircase]) => {
         const coordKey = staircase.edge.coordKey;
@@ -148,7 +148,7 @@ class StaircaseGenerator implements Generator {
    * @param staircases The array of staircases to set the edgedistance for.
    */
   private setEdgeDistances(staircases: Map<number, Staircase>) {
-    // TODO: make sure the edge distance cannot be too small?
+    // TO-DO: make sure the edge distance cannot be too small?
     // To account for topology error ("Must Be Larger Than Cluster tolerance"), when minimum distance between points is too small
     // see: https://pro.arcgis.com/en/pro-app/latest/help/editing/geodatabase-topology-rules-for-polygon-features.htm
 

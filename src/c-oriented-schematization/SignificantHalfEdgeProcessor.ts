@@ -4,7 +4,7 @@ import Processor from "../Schematization/Processor";
 
 class SignificantHalfEdgeProcessor implements Processor {
   significantVertices: number[];
-  // TODO: should be a Set for better performance, but using Map because of Snapshot types
+  // TO-DO: should be a Set for better performance, but using Map because of Snapshot types
   private significantVertexKeys: Map<string, boolean> = new Map();
 
   constructor(significantVertices: number[]) {

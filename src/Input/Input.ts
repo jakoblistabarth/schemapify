@@ -32,7 +32,7 @@ class Input {
   static fromGeoJSON(json: FeatureCollection<MultiPolygon | Polygon>): Input {
     return new this("geojson", geoJsonToGeometry(json), "json");
   }
-  // TODO: Implement method to create Input from file path
+  // TO-DO: Implement method to create Input from file path
   //   static from(filePath: string): Input {
   //     // do something
   //     return new this(filePath, new Subdivision(), "json");

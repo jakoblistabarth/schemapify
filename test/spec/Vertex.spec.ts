@@ -10,7 +10,7 @@ import { getTestFiles } from "./test-setup";
 const isCircularlySortedByAngle = (
   edges: HalfEdge[],
   clockwise = true,
-  //TODO: use a more robust method instead of an epsilon threshold for angle comparisons
+  //TO-DO: use a robuster method instead of an epsilon threshold for angle comparisons
   //see robust geometric predicates
   eps = 1e-9,
 ) => {
@@ -110,7 +110,7 @@ describe("sortEdges()", function () {
 
       center.sortEdges();
 
-      // verify circular order by angle (clockwise)
+      // Verify circular order by angle (clockwise)
       expect(isCircularlySortedByAngle(center.edges, true)).toBe(true);
     });
   });

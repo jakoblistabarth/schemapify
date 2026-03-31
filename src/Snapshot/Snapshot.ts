@@ -3,7 +3,7 @@ import Dcel from "../Dcel/Dcel";
 import Subdivision from "../geometry/Subdivision";
 import { LABEL } from "../c-oriented-schematization/CSchematization";
 
-//TODO: do not use any
+//TO-DO: do not use any
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AdditionalData = Record<string, Map<number | string, any>>;
 

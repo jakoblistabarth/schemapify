@@ -84,7 +84,7 @@ const createDcel = (origin: Vertex, edges: HalfEdge[]) => {
     const halfEdge = direction;
     halfEdge.tail = tail;
     if (halfEdge.twin) {
-      // register twin using DCEL factories to ensure ids and head/tail linkage
+      // Register twin using DCEL factories to ensure ids and head/tail linkage
       const twin = dcel.addHalfEdge(head, tail);
       halfEdge.twin = twin;
       twin.twin = halfEdge;
@@ -92,7 +92,7 @@ const createDcel = (origin: Vertex, edges: HalfEdge[]) => {
     dcel.registerHalfEdge(halfEdge);
   });
 
-  // ensure origin.edges contains only the provided subset in the given order
+  // Ensure origin.edges contains only the provided subset in the given order
   origin.edges = edges.map((direction) => {
     const head = direction.head ?? direction.twin?.tail;
     if (!head) return direction;
@@ -157,7 +157,7 @@ export const getClassification = (
 ) => {
   const { dcel, origin } = testSetup;
   const { c = cStyle.c, significantVertices = [] } = options;
-  // register only the provided subset of fixture directions for this test
+  // Register only the provided subset of fixture directions for this test
   createDcel(origin, edges);
   const assignedDirections = new HalfEdgeClassGenerator(
     c,
@@ -209,17 +209,17 @@ export function createConfigurationSetup(
     edge.twin.next = crawlArray(edges, idx, +1).twin;
   });
 
-  // register faces with the DCEL so ids are consistent
+  // Register faces with the DCEL so ids are consistent
   dcel.registerFace(innerFace);
   dcel.registerFace(outerFace);
 
-  // ensure face.edge pointers so faces are considered bounded
+  // Ensure face.edge pointers so faces are considered bounded
   if (edges[0]) {
     outerFace.edge = edges[0];
     if (edges[0].twin) innerFace.edge = edges[0].twin;
   }
 
-  // ensure halfedges are registered in the DCEL maps (safe-guard)
+  // Ensure halfedges are registered in the DCEL maps (safe-guard)
   edges.forEach((edge) => {
     if (edge.twin) dcel.registerHalfEdge(edge.twin);
     dcel.registerHalfEdge(edge);
@@ -227,7 +227,7 @@ export function createConfigurationSetup(
 
   // Rebuild incident edge lists per vertex from the DCEL to ensure correctness
   vertices.forEach((v) => {
-    // collect only half-edges for which this vertex is the tail (outgoing edges)
+    // Collect only half-edges for which this vertex is the tail (outgoing edges)
     const incident = dcel.getHalfEdges().filter((e) => e.tail === v);
     // unique
     v.edges = incident.filter((e, i) => incident.indexOf(e) === i);

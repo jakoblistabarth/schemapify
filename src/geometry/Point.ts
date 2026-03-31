@@ -50,9 +50,9 @@ class Point {
   }
 
   /**
-   * Determines the distance between the Point and a LineSegment.
+   * Determines the distance between the point and a line segment.
    * @param l A {@link LineSegment} to calculate the distance to.
-   * @returns The distance between the Point and the LineSegment.
+   * @returns The distance between the point and the line segment.
    */
   distanceToLineSegment(l: LineSegment) {
     const [vx, vy] = this.xy;

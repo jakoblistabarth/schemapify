@@ -146,7 +146,7 @@ export default class AdaptiveGridLayer extends Layer<AdaptiveGridLayerProps> {
 
     // Visible world bounds.
     // viewport.unproject uses screen pixels where (0,0) is top-left.
-    // Bottom-left corner → world min; top-right corner → world max.
+    // Bottom-left corner → world minimum; top-right corner → world maximum.
     const [minX, minY] = viewport.unproject([0, viewport.height]);
     const [maxX, maxY] = viewport.unproject([viewport.width, 0]);
 

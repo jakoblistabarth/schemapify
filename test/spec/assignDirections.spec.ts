@@ -15,8 +15,8 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
   });
 
   test("a", () => {
-    // this example needs a significant vertex even though it is not like this in the paper
-    // however, whithout the significant vertex, the direction is not unambigous
+    // This example needs a significant vertex even though it is not like this in the paper
+    // however, without the significant vertex, the direction is not unambiguous
     const assignedDirections = getClassification(
       s,
       [s.directions.od53, s.directions.od217],
@@ -29,8 +29,8 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
   });
 
   test("b", () => {
-    // this example needs a significant vertex even though it is not like this in the paper
-    // how
+    // This example needs a significant vertex even though it is not like this in the paper
+    // however, without the significant vertex, the direction is not unambiguous
     const assignedDirections = getClassification(
       s,
       [s.directions.od53, s.directions.od180, s.directions.od270],
@@ -40,7 +40,7 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
     expect(assignedDirections).toEqual([1, 2, 3]);
   });
 
-  // TODO: fix test / assignment of directions
+  // TO-DO: fix test / assignment of directions
   test("c", function () {
     const assignedDirections = getClassification(
       s,
@@ -104,8 +104,8 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
   });
 
   test("h", function () {
-    // this example needs a significant vertex even though it is not like this in the paper
-    // however, whithout the significant vertex, the direction is not unambigous
+    // This example needs a significant vertex even though it is not like this in the paper
+    // however, without the significant vertex, the direction is not unambiguous
     const assignedDirections = getClassification(
       s,
       [s.directions.od53, s.directions.od217],
@@ -120,8 +120,8 @@ describe("Given the examples in the paper of Buchin et al., directions are assig
   });
 
   test("i", function () {
-    // this example needs a significant vertex even though it is not like this in the paper
-    // however, whithout the significant vertex, the direction is not unambigous
+    // This example needs a significant vertex even though it is not like this in the paper
+    // however, without the significant vertex, the direction is not unambiguous
     const assignedDirections = getClassification(
       s,
       [s.directions.od53, s.directions.od180, s.directions.od270],

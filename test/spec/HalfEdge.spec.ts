@@ -368,7 +368,7 @@ describe("subdivideToThreshold()", function () {
     const dcel = Dcel.fromGeoJSON(json);
     const result = new PreProcessor(2.51).run(dcel);
 
-    // every side of the square is subdivided 3 times
+    // Every side of the square is subdivided 3 times
     // resulting in 2^3 = 8 edges (16 halfEdges) per side
     expect(result.halfEdges.size).toBe(64);
   });
@@ -570,7 +570,7 @@ describe("moveTo().", function () {
   });
 
   test("moveTo() deletes (merges) a vertex if one target point is already existing.", function () {
-    //TODO: does not yet handle removing collinear points (in this case the vertex at (10, 1) would be collinear and should be removed)
+    //TO-DO: does not yet handle removing collinear points (in this case the vertex at (10, 1) would be collinear and should be removed)
     const json = JSON.parse(
       fs.readFileSync(
         path.resolve("test/data/shapes/smallest-contraction.json"),

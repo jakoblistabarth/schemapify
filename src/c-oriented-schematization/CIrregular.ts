@@ -4,7 +4,7 @@ import Sector from "./Sector";
 class CIrregular extends C {
   constructor(angles: number[]) {
     super();
-    this.angles = angles; // TODO: at least 4
+    this.angles = angles; // TO-DO: at least 4
   }
 
   /**
@@ -25,10 +25,10 @@ class CIrregular extends C {
   /**
    * Get the central angle of a Sector.
    * @returns The central angle of a {@link Sector}.
-   * TODO: @param idx for irregular Cs only meaningful with index as argument?
+   * TO-DO: @param idx for irregular Cs only meaningful with index as argument?
    */
   get sectorAngle() {
-    // TODO: for irregular Cs only meaningful with index as argument?
+    // TO-DO: for irregular Cs only meaningful with index as argument?
     return 0;
   }
 }

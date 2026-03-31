@@ -27,7 +27,7 @@ class ConfigurationGenerator implements Generator {
       }, new Map());
 
     configurations.forEach((configuration) => {
-      //TODO: Check whether this works in such a recursive way
+      //TO-DO: Check whether this works in such a recursive way
       configuration.initialize(configurations);
     });
     return configurations;

@@ -1,0 +1,12 @@
+Buchin
+collinear
+DCEL
+deck
+eslint
+gl
+halfedge
+halfedges
+schemapify
+schematization
+X1
+X2

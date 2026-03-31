@@ -39,7 +39,7 @@ class ConfigurationPair {
    */
   doEdgeMove(
     dcel: Dcel,
-    // this contains all contractions no only the ones of the pair, hence, not all of them are complementary or feasible (undefined contractions)
+    // This contains all contractions no only the ones of the pair, hence, not all of them are complementary or feasible (undefined contractions)
     contractions: Map<
       string,
       {
@@ -105,7 +105,7 @@ class ConfigurationPair {
     // 2.4 Update the affected configurations
     this.updateConfigurations(remainingEdges, configurations);
 
-    // TODO: 3. Update (increment) blocking numbers again
+    // TO-DO: 3. Update (increment) blocking numbers again
     contractions.forEach((contraction) => {
       Object.values(contraction).forEach((d) =>
         d?.incrementBlockingNumber(this.x1x2, configurations),
@@ -148,7 +148,7 @@ class ConfigurationPair {
       });
     }
 
-    //TODO: update uuids of maps?
+    //TO-DO: update IDs of maps?
     return { dcel, contractions, configurations };
   }
 
@@ -207,8 +207,8 @@ class ConfigurationPair {
 
     // Step 4: Find meeting point using constraint that edge angle is constant
     // Constraints:
-    // 1. Shared endpoint A moves along shared edge: A = shared_start + s * shared_vec
-    // 2. Non-shared endpoint B moves along track: B = track_start + t * track_vec
+    // 1. Shared endpoint A moves along shared edge: A = shared_start + s * shared_vector
+    // 2. Non-shared endpoint B moves along track: B = track_start + t * track_vector
     // 3. Edge vector (A - B) must be parallel to original edge (angle is constant)
     // 4. Area preservation: length × movement_distance × sin(angle) is balanced
     const sharedSegment = sharedEdge.toLineSegment();
@@ -315,6 +315,7 @@ class ConfigurationPair {
     // Now solve the coupled system:
     // From constraint (1): t_c = (contractionA * s + contractionC) / contractionB
     // From area preservation: t_comp = -areaPressrvationCoeff * t_c
+    //
     // Substitute into constraint (2):
     // compensationA * s - compensationB * (-areaPressrvationCoeff * (contractionA * s + contractionC) / contractionB) = -compensationC
     // Rearrange:
@@ -472,7 +473,7 @@ class ConfigurationPair {
       const newConfiguration = new Configuration(newEdge);
       newConfiguration.initialize(configurations);
       configurations.set(newEdge.coordKey, newConfiguration);
-      // TODO: add newEdge to facefaceBoundaryList
+      // TO-DO: add newEdge to face-face-boundary-list
       // newEdge?.dcel.faceFaceBoundaryList?.addEdge(newEdge);
     }
 

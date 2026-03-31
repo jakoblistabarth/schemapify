@@ -53,7 +53,7 @@ class Contraction {
     if (!this.point) return false;
     return this.area > 0 &&
       this.blockingNumber === 0 &&
-      //TODO: remove this condition, as soon as edge moves
+      //TO-DO: remove this condition, as soon as edge moves
       // for junctions (degree-3) are implemented
       !this.configuration.hasJunction
       ? true
@@ -178,7 +178,7 @@ class Contraction {
         dist: distD,
       });
 
-    // find closest contraction point in respect to the configurations inner edge
+    // Find closest contraction point in respect to the configurations inner edge
     pointCandidates.sort((a, b) => a.dist - b.dist);
     return type === ContractionType.P
       ? pointCandidates.filter((candidate) => candidate.dist >= 0).shift()
@@ -269,7 +269,7 @@ class Contraction {
       return acc;
     }, []);
 
-    // return true, if both endpoints of the edge reside within the contraction area
+    // Return true, if both endpoints of the edge reside within the contraction area
     // (i.e., the edge resides entirely within contraction area)
     // or if one intersection of the edge and the contraction area boundaries is not part of X
     if (
@@ -280,7 +280,7 @@ class Contraction {
         ))
     )
       return true;
-    // TODO: make specs
+    // TO-DO: make specs
     return false;
   }
 
@@ -309,7 +309,7 @@ class Contraction {
     x1x2: HalfEdge[],
     configurations: Map<string, Configuration>,
   ) {
-    if (this.blockingNumber === 0) return; // skip check for interference when no blocking point exists
+    if (this.blockingNumber === 0) return; // Skip check for interference when no blocking point exists
     const decrement = x1x2.reduce((acc: number, edge) => {
       if (this.isBlockedBy(edge, configurations)) ++acc;
       return acc;

@@ -27,7 +27,7 @@ class StaircaseProcessor implements Processor {
           ? this.staircases.get(edge.id)
           : undefined;
       if (!staircase) return;
-      const stepPoints = staircase.getStaircasePoints().slice(1, -1); // TODO: use .points instead
+      const stepPoints = staircase.getStaircasePoints().slice(1, -1); // TO-DO: use points getter instead
       let edgeToSubdivide = edge;
       for (const p of stepPoints) {
         const dividedEdge = edgeToSubdivide.subdivide(new Point(p.x, p.y));

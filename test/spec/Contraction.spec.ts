@@ -280,7 +280,7 @@ describe("First configuration pair in triangle.json after angle constraining", f
 
       expect(area).toBeGreaterThan(MIN_FEASIBLE_AREA);
 
-      // 2. Contraction height should be non-trivial
+      // 2. Contraction height should be nontrivial
       expect(contractionHeight).toBeGreaterThan(0);
 
       // 3. If this is a shared-edge configuration, verify properties

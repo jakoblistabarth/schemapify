@@ -70,7 +70,7 @@ describe("Build staircase for a HalfEdge of class AD", function () {
   });
 });
 
-// TODO: test staircase with head like for staircase of UD edges
+// TO-DO: test staircase with head like for staircase of UD edges
 describe("Build staircase for a HalfEdge of class UB", function () {
   test("returns a staircase containing a minimum of 5 Points", function () {
     const staircase = createStaircaseSetup([7, 5], 0, Orientation.UB);

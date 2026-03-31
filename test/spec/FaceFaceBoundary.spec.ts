@@ -126,5 +126,5 @@ describe("getMinimalConfigurationPair()", function () {
     expect(compensationInner2?.head?.y).toBe(10);
   });
 
-  //TODO: add test where no complementary exists for smallest contraction
+  //TO-DO: add a test where no complementary exists for smallest contraction
 });

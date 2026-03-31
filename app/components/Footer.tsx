@@ -6,7 +6,7 @@ const Footer = () => {
     <>
       <footer
         className="bg-white p-3"
-        // gridarea footer
+        // grid-area footer
       >
         <div className="flex gap-5">
           <Link href={"/about"}>About</Link>
