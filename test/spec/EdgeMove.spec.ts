@@ -249,6 +249,145 @@ describe("Triangle.json edge move verification after one edge move", function ()
   });
 });
 
+describe("Blocked contractions are correctly identified and prevented from edge moves", function () {
+  test("unaligned-deviating-2: cross-face vertex blocking prevents invalid edge moves", function () {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/shapes/unaligned-deviating-2.json"),
+        "utf8",
+      ),
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    const schematization = new CSchematization();
+
+    const originalArea = dcel.getArea();
+
+    // Manually replicate simplify() but stop after 3 iterations
+    const preprocessed = schematization.preProcess(dcel);
+    const constrained = schematization.constrainAngles(preprocessed);
+    let result = new CollinearPointProcessor().run(constrained);
+
+    // Run exactly 3 iterations of edge moves
+    let iteration = 0;
+    do {
+      iteration++;
+      const faceFaceBoundaryList = new FaceFaceBoundaryListGenerator().run(
+        result,
+      );
+      const configurations = new ConfigurationGenerator().run(result);
+      const { dcel: newDcel } = new EdgeMoveProcessor(
+        faceFaceBoundaryList,
+        configurations,
+      ).run(result);
+      result = newDcel;
+    } while (iteration < 3);
+
+    // Check: Area preservation
+    const finalArea = result.getArea();
+    const areaDifference = Math.abs(originalArea - finalArea);
+    expect(areaDifference).toBeLessThan(EPSILON);
+
+    // Check: No degenerate edges
+    const degenerateEdges = result.getHalfEdges().filter((e) => {
+      const head = e.head;
+      return head && e.tail.x === head.x && e.tail.y === head.y;
+    });
+    expect(degenerateEdges).toHaveLength(0);
+
+    // Check: Problematic edges at y ≈ 0.6̄ (2/3) should not overlap with other edges from same polygon
+    // The problematic edges are: (-2, 0.6̄) → (-3.5, 0.6̄) and (-2.16̄, 0.6̄) → (-1.3̄, 0.6̄)
+    const TWO_THIRDS = 2 / 3;
+    const allEdges = result.getHalfEdges();
+    const configurations = new ConfigurationGenerator().run(result);
+
+    const problematicEdges = allEdges.filter((edge) => {
+      if (!edge.head) return false;
+      // Look for horizontal edges near y = 2/3
+      const isHorizontal = Math.abs(edge.tail.y - edge.head.y) < EPSILON;
+      const isAtTargetY = Math.abs(edge.tail.y - TWO_THIRDS) < EPSILON;
+      return isHorizontal && isAtTargetY;
+    });
+
+    // Debug: log which face each problematic edge belongs to and whether it appears in any x_ boundary
+    problematicEdges.forEach((edge) => {
+      const face = edge.face;
+      let appearsInX_ = false;
+      let appearsInX = false;
+
+      configurations.forEach((config) => {
+        if (config.x_.includes(edge)) appearsInX_ = true;
+        if (config.x.includes(edge)) appearsInX = true;
+      });
+
+      if (edge.head)
+        console.log(
+          `Edge (${edge.tail.x.toFixed(4)}, ${edge.tail.y.toFixed(4)}) -> (${edge.head.x.toFixed(4)}, ${edge.head.y.toFixed(4)}): ` +
+            `face=${face ? "exists" : "null"}, in_x_=${appearsInX_}, in_x=${appearsInX}`,
+        );
+    });
+
+    // For each problematic edge, check it doesn't overlap with other edges from same face
+    for (const problematicEdge of problematicEdges) {
+      const face = problematicEdge.face;
+      if (!face) continue;
+
+      const faceEdges = face.getEdges();
+      for (const otherEdge of faceEdges) {
+        if (!otherEdge.head) continue;
+        if (otherEdge === problematicEdge) continue;
+
+        // Skip if they share a vertex
+        const sharesVertex = [problematicEdge.tail, problematicEdge.head].some(
+          (v) => v === otherEdge.tail || v === otherEdge.head,
+        );
+        if (sharesVertex) continue;
+        if (!problematicEdge.head) continue;
+
+        // Check if edges are collinear (on same infinite line)
+        const dx1 = problematicEdge.head.x - problematicEdge.tail.x;
+        const dy1 = problematicEdge.head.y - problematicEdge.tail.y;
+        const dx2 = otherEdge.head.x - otherEdge.tail.x;
+        const dy2 = otherEdge.head.y - otherEdge.tail.y;
+
+        const crossProduct = dx1 * dy2 - dy1 * dx2;
+        const isParallel = Math.abs(crossProduct) < EPSILON;
+
+        if (isParallel) {
+          const dx = otherEdge.tail.x - problematicEdge.tail.x;
+          const dy = otherEdge.tail.y - problematicEdge.tail.y;
+          const crossToOther = dx1 * dy - dy1 * dx;
+
+          if (Math.abs(crossToOther) < EPSILON) {
+            expect.fail(
+              `Problematic edge overlap at y ≈ 0.6̄: (${problematicEdge.tail.x.toFixed(4)}, ${problematicEdge.tail.y.toFixed(4)}) -> ` +
+                `(${problematicEdge.head.x.toFixed(4)}, ${problematicEdge.head.y.toFixed(4)}) overlaps with ` +
+                `(${otherEdge.tail.x.toFixed(4)}, ${otherEdge.tail.y.toFixed(4)}) -> ` +
+                `(${otherEdge.head.x.toFixed(4)}, ${otherEdge.head.y.toFixed(4)})`,
+            );
+          }
+        }
+      }
+    }
+
+    // Verify no new orientations were introduced
+    const validAngles = schematization.style.c.angles;
+    const faces = result.getBoundedFaces();
+
+    for (const face of faces) {
+      const edges = face.getEdges();
+      for (const edge of edges) {
+        const angle = edge.getAngle();
+        if (angle !== undefined) {
+          const isValid = validAngles.some(
+            (v) => Math.abs(v - angle) <= EPSILON,
+          );
+          expect(isValid).toBe(true);
+        }
+      }
+    }
+  });
+});
+
 describe("Thoroughly check edge DCEL after edge move", function () {
   test.fails(
     "After edge move, check that all half-edge pointers (twin, next, prev) are consistent and that the DCEL structure is valid.",

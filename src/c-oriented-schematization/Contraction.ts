@@ -247,6 +247,26 @@ class Contraction {
 
   /**
    * Determines whether or not the specified HalfEdge blocks the contraction.
+   *
+   * This method performs edge-based geometric blocking checks with three cases:
+   * - Case 1: Both endpoints of the edge lie inside the contraction area.
+   * - Case 2: The edge crosses the boundary at non-X locations (improper crossing).
+   * - Case 3: One endpoint inside with improper boundary crossing.
+   *
+   * ARCHITECTURAL NOTE: Adjacent vertex checking is NOT performed here.
+   * "Adjacent vertex checking" means: checking if vertices from adjacent faces (faces sharing
+   * boundary edges with the current configuration's face) get trapped inside the contraction area.
+   * Although such vertices might also block the contraction (implemented in initializeBlockingNumber),
+   * we cannot include that check here because:
+   * 1. This method is called during DCEL modifications (in decrementBlockingNumber/incrementBlockingNumber)
+   * 2. Adjacent vertex checks require calling x_ getter, which calls getCycle()
+   * 3. getCycle() performs cycle detection that fails when DCEL is in flux during edge moves
+   * 4. This would crash decrementBlockingNumber/incrementBlockingNumber operations
+   *
+   * Therefore, edge-based geometric checks are the ONLY safe blocking mechanism for use during
+   * DCEL modifications, while the more comprehensive adjacent vertex checking is restricted
+   * to initializeBlockingNumber when the DCEL structure is stable.
+   *
    * @param edge The {@link HalfEdge}
    * @returns A boolean, indicating whether or not the {@link Contraction} is blocked by the specified {@link HalfEdge}.
    */
@@ -270,17 +290,26 @@ class Contraction {
       return acc;
     }, []);
 
-    // Return true, if both endpoints of the edge reside within the contraction area
-    // (i.e., the edge resides entirely within contraction area)
-    // or if one intersection of the edge and the contraction area boundaries is not part of X
+    // Case 1: Both endpoints inside the contraction area (edge entirely inside)
+    if (pointsInPolygon.length == 2) return true;
+
+    // Case 2: Improper boundary crossing - intersection not on X edges
     if (
-      pointsInPolygon.length == 2 ||
-      (intersections &&
-        intersections.some(
-          (intersection) => !intersection.isOnLineSegments(xLineSegments),
-        ))
+      intersections &&
+      intersections.some(
+        (intersection) => !intersection.isOnLineSegments(xLineSegments),
+      )
     )
       return true;
+
+    // Case 3: One endpoint inside. Check if all boundary crossings are on X edges.
+    // If an edge has one endpoint inside and crosses at any non-X point, it blocks.
+    if (pointsInPolygon.length === 1 && intersections) {
+      return intersections.some(
+        (intersection) => !intersection.isOnLineSegments(xLineSegments),
+      );
+    }
+
     return false;
   }
 
@@ -292,47 +321,61 @@ class Contraction {
     let blockingNumber = 0;
     if (!this.point) return blockingNumber;
 
-    // Check 1: Count boundary edges that block the contraction
-    // I.e., edges that intersect with the contraction area and which endpoints both lie outside of the contraction area
+    // Count boundary edges that block the contraction.
+    // isBlockedBy handles all blocking scenarios:
+    // - Case 1: Edges entirely inside the area
+    // - Case 2: Improper boundary crossing (intersections at non-X edge points)
+    // - Case 3: One endpoint inside with improper crossing
     this.configuration.x_.forEach((boundaryEdge) => {
       if (this.isBlockedBy(boundaryEdge, configurations)) {
         blockingNumber++;
       }
     });
 
-    // Check 2: Check if any internal vertices lie inside the contraction area
-    // Only check vertices from the two adjacent faces (not entire DCEL) for performance
-    const areaPolygon = new Polygon([new Ring(this.areaPoints)]);
+    // ARCHITECTURAL NOTE: Adjacent vertex checking is performed here (not in isBlockedBy)
+    // because it requires calling x_ and getCycle(), which traverse the DCEL cycle.
+    // These methods fail during DCEL modifications (in decrementBlockingNumber/incrementBlockingNumber).
+    // Therefore, adjacent vertex checking must only run during initialization when the DCEL is stable.
+    // Only edge-based blocking (Cases 1-3) can be used in decrementBlockingNumber/incrementBlockingNumber
+    // since it operates on lightweight edge geometry that remains valid during DCEL modifications.
 
-    // Build set of boundary vertices from the configuration
-    const boundaryVertices = new Set([
-      this.configuration.innerEdge.tail,
-      this.configuration.innerEdge.head,
-      ...this.configuration.x.flatMap((e) => [e.tail, e.head]),
-      ...this.configuration.x_.flatMap((e) => [e.tail, e.head]),
-    ]);
+    // Check if any vertices from adjacent faces fall inside the contraction area.
+    // The contraction area polygon might extend into adjacent faces, trapping vertices.
+    // Get all vertices connected to the configuration's x_ boundary edges
+    const boundaryVertices = new Set<Vertex>();
+    this.configuration.x_.forEach((edge) => {
+      boundaryVertices.add(edge.tail);
+      if (edge.head) boundaryVertices.add(edge.head);
+    });
 
-    // Get vertices only from the two adjacent faces
-    const innerEdgeFace = this.configuration.innerEdge.face;
-    const twinFace = this.configuration.innerEdge.twin?.face;
-    const adjacentFaceVertices = new Set(
-      [innerEdgeFace, twinFace].flatMap((face) => {
-        const vertices: Vertex[] = [];
-        if (face?.edge) {
-          let halfEdge: HalfEdge | undefined = face.edge;
-          do {
-            vertices.push(halfEdge.tail);
-            halfEdge = halfEdge.next;
-          } while (halfEdge && halfEdge !== face.edge);
-        }
-        return vertices;
-      }),
-    );
+    // Get all vertices from the configuration's own face
+    const ownFaceVertices = new Set<Vertex>();
+    const faceCycle = this.configuration.innerEdge.getCycle();
+    Array.from(faceCycle).forEach((edge) => {
+      ownFaceVertices.add(edge.tail);
+      if (edge.head) ownFaceVertices.add(edge.head);
+    });
 
-    // Check internal vertices from the two adjacent faces
+    // Get all vertices from adjacent faces (via x_ edges)
+    const adjacentFaceVertices = new Set<Vertex>();
+    this.configuration.x_.forEach((edge) => {
+      const adjacentFace = edge.twin?.face;
+      if (adjacentFace) {
+        adjacentFace.getEdges().forEach((e) => {
+          adjacentFaceVertices.add(e.tail);
+          if (e.head) adjacentFaceVertices.add(e.head);
+        });
+      }
+    });
+
+    // Check if any interior vertices (not on x_ boundary, not in own face) from adjacent faces fall inside the area
+    const area = new Polygon([new Ring(this.areaPoints)]);
     adjacentFaceVertices.forEach((vertex) => {
-      if (!boundaryVertices.has(vertex) && vertex.isInPolygon(areaPolygon)) {
-        blockingNumber++;
+      // Skip if it's part of the configuration's boundary or its own face
+      if (!boundaryVertices.has(vertex) && !ownFaceVertices.has(vertex)) {
+        if (vertex.isInPolygon(area)) {
+          blockingNumber++;
+        }
       }
     });
 
@@ -341,6 +384,17 @@ class Contraction {
 
   /**
    * Discards the contribution that the edges of X1 and X2 made to the blocking numbers, as a preliminary step for an edge-move.
+   *
+   * ARCHITECTURAL NOTE: This method uses ONLY isBlockedBy() for edge-based blocking checks.
+   * Adjacent vertex checking (performed in initializeBlockingNumber) is not repeated here because:
+   * - This method is called during DCEL modifications when edges are being moved
+   * - The x_ getter requires getCycle() which traverses the DCEL face cycle
+   * - During modifications, the DCEL is in an unstable state and cycle detection fails
+   * - Therefore, only lightweight edge geometry checks are safe to use here
+   *
+   * This is a design trade-off: we accept lightweight checks during active modifications,
+   * while relying on comprehensive initialization checks when the DCEL is stable.
+   *
    * @param x1x2 An array of {@link Halfedge}s involved in the edge-move.
    */
   decrementBlockingNumber(
@@ -357,6 +411,10 @@ class Contraction {
 
   /**
    * Adds the contribution to the blocking numbers for the edges that changed during the contraction (i.e., the remaining edges of X1 and X2) edge-move.
+   *
+   * ARCHITECTURAL NOTE: This method uses ONLY isBlockedBy() for edge-based blocking checks,
+   * for the same reasons as decrementBlockingNumber. See that method's documentation.
+   *
    * @param x1x2 An array of {@link HalfEdges} that changed during the contraction.
    */
   incrementBlockingNumber(
