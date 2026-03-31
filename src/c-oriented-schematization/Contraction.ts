@@ -1,11 +1,12 @@
 import HalfEdge, { InflectionType } from "../Dcel/HalfEdge";
-import Point from "../geometry/Point";
+import Vertex from "../Dcel/Vertex";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
+import Point from "../geometry/Point";
 import Polygon from "../geometry/Polygon";
+import Ring from "../geometry/Ring";
 import Vector2D from "../geometry/Vector2D";
 import Configuration, { OuterEdge } from "./Configuration";
-import Ring from "../geometry/Ring";
 import { ContractionType } from "./ContractionType";
 
 class Contraction {
@@ -280,7 +281,6 @@ class Contraction {
         ))
     )
       return true;
-    // TO-DO: make specs
     return false;
   }
 
@@ -292,8 +292,46 @@ class Contraction {
     let blockingNumber = 0;
     if (!this.point) return blockingNumber;
 
+    // Check 1: Count boundary edges that block the contraction
+    // I.e., edges that intersect with the contraction area and which endpoints both lie outside of the contraction area
     this.configuration.x_.forEach((boundaryEdge) => {
       if (this.isBlockedBy(boundaryEdge, configurations)) {
+        blockingNumber++;
+      }
+    });
+
+    // Check 2: Check if any internal vertices lie inside the contraction area
+    // Only check vertices from the two adjacent faces (not entire DCEL) for performance
+    const areaPolygon = new Polygon([new Ring(this.areaPoints)]);
+
+    // Build set of boundary vertices from the configuration
+    const boundaryVertices = new Set([
+      this.configuration.innerEdge.tail,
+      this.configuration.innerEdge.head,
+      ...this.configuration.x.flatMap((e) => [e.tail, e.head]),
+      ...this.configuration.x_.flatMap((e) => [e.tail, e.head]),
+    ]);
+
+    // Get vertices only from the two adjacent faces
+    const innerEdgeFace = this.configuration.innerEdge.face;
+    const twinFace = this.configuration.innerEdge.twin?.face;
+    const adjacentFaceVertices = new Set(
+      [innerEdgeFace, twinFace].flatMap((face) => {
+        const vertices: Vertex[] = [];
+        if (face?.edge) {
+          let halfEdge: HalfEdge | undefined = face.edge;
+          do {
+            vertices.push(halfEdge.tail);
+            halfEdge = halfEdge.next;
+          } while (halfEdge && halfEdge !== face.edge);
+        }
+        return vertices;
+      }),
+    );
+
+    // Check internal vertices from the two adjacent faces
+    adjacentFaceVertices.forEach((vertex) => {
+      if (!boundaryVertices.has(vertex) && vertex.isInPolygon(areaPolygon)) {
         blockingNumber++;
       }
     });
