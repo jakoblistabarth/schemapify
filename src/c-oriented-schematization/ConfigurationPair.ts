@@ -49,8 +49,8 @@ class ConfigurationPair {
     >,
     configurations: Map<string, Configuration>,
   ) {
-    // Fetch fresh edge references from DCEL using coordKey, not stale object references
-    // This ensures we're working with edges that are actually in the current DCEL
+    // Check if edge references are still valid in the current DCEL.
+
     const configContractionEdge = this.contraction.configuration.innerEdge;
     const configCompensationEdge = this.compensation.configuration.innerEdge;
 
@@ -67,14 +67,22 @@ class ConfigurationPair {
 
     if (!contractionEdge || !compensationEdge) return;
 
+    // Store edges involved in the edge move before any coordinate changes.
+    // This is the complete list of edges from both configurations that are involved in the move.
+    // We capture it now while coordKey lookups are still reliable.
+    const x1x2Edges = [...this.x1x2];
+
+    // Capture edge set before the move to track which edges will be deleted
+    const edgesBeforeMove = new Set(dcel.getHalfEdges());
+
     const contractionHead = contractionEdge.head;
 
     if (!contractionHead) return;
 
-    // 1. Update (decrement) blocking edges
+    // 1. Update (decrement) blocking edges using the stored x1x2 references
     contractions.forEach((contractions) => {
       Object.values(contractions).forEach((d) =>
-        d?.decrementBlockingNumber(this.x1x2, configurations),
+        d?.decrementBlockingNumber(x1x2Edges, configurations),
       );
     });
 
@@ -105,10 +113,10 @@ class ConfigurationPair {
     // 2.4 Update the affected configurations
     this.updateConfigurations(remainingEdges, configurations);
 
-    // TO-DO: 3. Update (increment) blocking numbers again
+    // 3. Update (increment) blocking numbers again using the stored x1x2 references
     contractions.forEach((contraction) => {
       Object.values(contraction).forEach((d) =>
-        d?.incrementBlockingNumber(this.x1x2, configurations),
+        d?.incrementBlockingNumber(x1x2Edges, configurations),
       );
     });
 
@@ -148,7 +156,85 @@ class ConfigurationPair {
       });
     }
 
-    //TO-DO: update IDs of maps?
+    //TO-DO: also update face-face-boundary-list
+    // Comprehensive configuration update after edge moves and collinear removal.
+    // We must:
+    // 1. Remove configurations for edges that were deleted during the move or collinear removal
+    // 2. Add configurations for new edges that were created
+    // 3. Reinitialize adjacent configurations whose outer edges changed
+    const edgesAfterMove = new Set(dcel.getHalfEdges());
+
+    // Find edges that were deleted
+    const deletedEdges = new Set<HalfEdge>();
+    edgesBeforeMove.forEach((edge) => {
+      if (!edgesAfterMove.has(edge)) {
+        deletedEdges.add(edge);
+      }
+    });
+
+    // Find edges that were created
+    const newEdges: HalfEdge[] = [];
+    edgesAfterMove.forEach((edge) => {
+      if (!edgesBeforeMove.has(edge)) {
+        newEdges.push(edge);
+      }
+    });
+
+    // Remove configurations for deleted edges
+    const staleCofigurationKeys: string[] = [];
+    configurations.forEach((config, key) => {
+      if (deletedEdges.has(config.innerEdge)) {
+        staleCofigurationKeys.push(key);
+      }
+    });
+    staleCofigurationKeys.forEach((key) => configurations.delete(key));
+
+    // Add configurations for new edges
+    newEdges.forEach((edge) => {
+      if (
+        edge.endpoints.every((vertex) => vertex.edges.length <= 3) &&
+        edge.coordKey
+      ) {
+        const newConfiguration = new Configuration(edge);
+        newConfiguration.initialize(configurations);
+        configurations.set(edge.coordKey, newConfiguration);
+      }
+    });
+
+    // Reinitialize configurations whose outer edges were affected by the move.
+    // When outer edges change, contraction areas may change, so we need to recalculate them.
+    // Check all remaining edges' adjacent configurations (prev/next edges affect their outer edges)
+    const adjacentConfigsToReinit = new Set<Configuration>();
+    remainingEdges.forEach((edge) => {
+      // Check edges in the cycle around this edge
+      const walkEdge = (
+        e: HalfEdge | undefined,
+        visited: Set<HalfEdge> = new Set(),
+      ) => {
+        if (!e || visited.has(e)) return;
+        visited.add(e);
+
+        const config = configurations.get(e.coordKey ?? "");
+        if (config) {
+          adjacentConfigsToReinit.add(config);
+        }
+
+        // Walk in a limited chain (3-4 edges) to find nearby configurations
+        if (visited.size < 4) {
+          walkEdge(e.prev, visited);
+          walkEdge(e.next, visited);
+        }
+      };
+
+      walkEdge(edge);
+      if (edge.twin) walkEdge(edge.twin);
+    });
+
+    // Reinitialize the contractions for affected configurations
+    adjacentConfigsToReinit.forEach((config) => {
+      config.initialize(configurations);
+    });
+
     return { dcel, contractions, configurations };
   }
 
@@ -538,8 +624,11 @@ class ConfigurationPair {
       if (
         edge.endpoints.every((vertex) => vertex.edges.length <= 3) &&
         edge.coordKey
-      )
-        configurations.set(edge.coordKey, new Configuration(edge));
+      ) {
+        const newConfiguration = new Configuration(edge);
+        newConfiguration.initialize(configurations);
+        configurations.set(edge.coordKey, newConfiguration);
+      }
     });
   }
 }

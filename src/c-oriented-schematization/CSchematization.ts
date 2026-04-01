@@ -162,9 +162,10 @@ class CSchematization extends Schematization {
   /**
    * Simplify a {@link Dcel} by removing collinear vertices and applying edge moves.
    * @param input The {@link Dcel} to simplify.
+   * @param maxIterations Optional maximum number of iterations for the simplify step to prevent infinite loops. If not provided, the simplify step will run until no more edge moves can be applied or the number of half-edges is less than k.
    * @returns The simplified {@link Dcel}.
    */
-  simplify(input: Dcel, debug = false) {
+  simplify(input: Dcel, maxIterations?: number) {
     let start = performance.now();
     const withoutCollinearPoints = new CollinearPointProcessor().run(input);
     this.doAction({
@@ -174,19 +175,19 @@ class CSchematization extends Schematization {
       forSnapshots: { snapshotList: this.snapshots, triggeredAt: start },
     });
 
-    // TO-DO: check whether loop is correct
     let dcel: Dcel = withoutCollinearPoints;
+    let configurations = new ConfigurationGenerator().run(dcel);
+    let iteration = 0;
     do {
+      iteration++;
       const edgeCountBeforeMove = dcel.halfEdges.size;
       const faceFaceBoundaryList = new FaceFaceBoundaryListGenerator().run(
         dcel,
       );
-      const configurations = new ConfigurationGenerator().run(dcel);
-      const { dcel: newDcel } = new EdgeMoveProcessor(
-        faceFaceBoundaryList,
-        configurations,
-      ).run(dcel);
+      const { dcel: newDcel, configurations: updatedConfigurations } =
+        new EdgeMoveProcessor(faceFaceBoundaryList, configurations).run(dcel);
       dcel = newDcel;
+      configurations = updatedConfigurations;
 
       start = performance.now();
       this.doAction({
@@ -198,9 +199,18 @@ class CSchematization extends Schematization {
 
       // Break if no progress was made (prevents infinite loop)
       if (dcel.halfEdges.size === edgeCountBeforeMove) {
+        if (maxIterations && iteration >= maxIterations) {
+          throw new Error(
+            "No progress made in edge move iteration " + iteration,
+          );
+        }
         break;
       }
-    } while (debug ? !!debug : dcel.halfEdges.size >= this.style.k);
+    } while (
+      maxIterations
+        ? iteration < maxIterations
+        : dcel.halfEdges.size >= this.style.k
+    );
     // TO-DO: is it possible to return here a simplification function
     // which I can then use for handling simplifying e.g. with hotkeys?
     return dcel;
@@ -209,12 +219,13 @@ class CSchematization extends Schematization {
   /**
    * Run the schematization process on a {@link Dcel}.
    * @param input The {@link Dcel} to run the schematization process on.
+   * @param maxSimplifyIterations Optional maximum number of iterations for the simplify step to prevent infinite loops. If not provided, the simplify step will run until no more edge moves can be applied or the number of half-edges is less than k.
    * @returns The schematized {@link Dcel}.
    */
-  run(input: Dcel) {
+  run(input: Dcel, maxSimplifyIterations?: number) {
     const preprocessed = this.preProcess(input);
     const constrained = this.constrainAngles(preprocessed);
-    return this.simplify(constrained);
+    return this.simplify(constrained, maxSimplifyIterations);
   }
 
   /**

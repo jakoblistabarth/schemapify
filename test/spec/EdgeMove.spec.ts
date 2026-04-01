@@ -427,3 +427,15 @@ describe("Thoroughly check edge DCEL after edge move", function () {
     },
   );
 });
+
+describe("At least 6 iterations shall be possible for diamond shape", function () {
+  test("Diamond shape should allow at least 6 edge moves before stopping.", function () {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("test/data/shapes/diamond.json"), "utf8"),
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    const schematization = new CSchematization();
+
+    expect(() => schematization.run(dcel, 6)).not.toThrow();
+  });
+});
