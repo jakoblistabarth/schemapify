@@ -1,10 +1,16 @@
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
 import Contraction from "@/src/c-oriented-schematization/Contraction";
+import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
 import Ring from "@/src/geometry/Ring";
 import { CompositeLayer, LayersList } from "@deck.gl/core";
 import { PathStyleExtension } from "@deck.gl/extensions";
-import { PathLayer, PolygonLayer, TextLayer } from "@deck.gl/layers";
+import {
+  PathLayer,
+  PolygonLayer,
+  ScatterplotLayer,
+  TextLayer,
+} from "@deck.gl/layers";
 
 type LayerData = ConfigurationPair;
 
@@ -33,8 +39,24 @@ export default class ConfigurationLayer extends CompositeLayer<ConfigurationLaye
             text: type,
           })),
           getColor: [0, 0, 255],
-          getSize: 12,
+          getSize: 10,
           fontFamily: "Inter Variable",
+        }),
+      ),
+      new ScatterplotLayer(
+        this.getSubLayerProps({
+          id: "contraction-point-layer",
+          data: this.contractions.map(([, contraction]) => ({
+            position: contraction.point.xy,
+            type: contraction.type,
+          })),
+          radiusMaxPixels: 8,
+          getFillColor: (d: {
+            position: [number, number];
+            type: ContractionType;
+          }) => {
+            return d.type === ContractionType.P ? [0, 255, 0] : [255, 0, 0];
+          },
         }),
       ),
       new PolygonLayer(
