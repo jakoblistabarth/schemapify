@@ -72,9 +72,7 @@ describe("Debug vertex removal in smallest-contraction-1a.json", () => {
     });
 
     let state = dcel;
-    state = schematizer.preProcess(state);
-    state = schematizer.constrainAngles(state);
-    state = new CollinearPointProcessor().run(state);
+    state = schematizer.run(state, 0); // Run up to angle constraining, skip simplification
 
     let iterationCount = 0;
     do {

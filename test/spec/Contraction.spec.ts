@@ -1,4 +1,3 @@
-import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
@@ -222,11 +221,8 @@ describe("First configuration pair in triangle.json after angle constraining", f
       let dcel = Dcel.fromGeoJSON(json);
       const schematization = new CSchematization();
 
-      // Preprocess and constrain angles as per pipeline
-      dcel = schematization.preProcess(dcel);
-      dcel = schematization.constrainAngles(dcel);
-      const collinearProcessor = new CollinearPointProcessor();
-      dcel = collinearProcessor.run(dcel);
+      // Run schematization up to angle constraining, skip simplification
+      dcel = schematization.run(dcel, 0);
 
       // Generate configurations and face-face-boundaries
       const configurations = new ConfigurationGenerator().run(dcel);
