@@ -78,7 +78,7 @@ class StaircaseGenerator implements Generator {
       }, new Map());
 
     // Should this rather return a new map?
-    this.calculateStaircaseParaemters(staircases);
+    this.calculateStaircaseParameters(staircases);
 
     return staircases;
   }
@@ -100,7 +100,7 @@ class StaircaseGenerator implements Generator {
    * Calculates and sets the edge distance and se number of all staircases of a {@link Dcel}.
    * @param input The {@link Dcel} to calculate staircases for.
    */
-  private calculateStaircaseParaemters(staircases: Map<number, Staircase>) {
+  private calculateStaircaseParameters(staircases: Map<number, Staircase>) {
     // Calculate edge distance and step number for deviating edges first (page 18)
     const staircasesOfDeviatingEdges = new Map(
       [...staircases.entries()].filter(([, staircase]) => {
