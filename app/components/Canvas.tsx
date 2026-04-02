@@ -3,6 +3,7 @@ import Contraction from "@/src/c-oriented-schematization/Contraction";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
 import { LABEL } from "@/src/c-oriented-schematization/CSchematization";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
+import Staircase from "@/src/c-oriented-schematization/Staircase";
 import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
@@ -14,7 +15,7 @@ import {
 } from "@deck.gl/core";
 import { PathStyleExtension } from "@deck.gl/extensions";
 import { TripsLayer } from "@deck.gl/geo-layers";
-import { PathLayer, SolidPolygonLayer } from "@deck.gl/layers";
+import { PathLayer, PolygonLayer, SolidPolygonLayer } from "@deck.gl/layers";
 import DeckGL from "@deck.gl/react";
 import { ZoomWidget } from "@deck.gl/widgets";
 import "@deck.gl/widgets/stylesheet.css";
@@ -100,6 +101,9 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
   }, [animate]);
 
   // Expensive computation — only recomputes when DCEL changes
+  const staircaseRegions = activeSnapshot?.additionalData?.regions;
+  const snapshotLabel = activeSnapshot?.label;
+
   const { baseLayers, view, initialViewState } = useMemo(() => {
     // Auto-fit DCEL with log2 zoom for DeckGL
     const bbox = dcel.getBbox();
@@ -112,8 +116,29 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
 
     const view = new OrthographicView({ flipY: false, id: "ortho" });
 
-    if (activeSnapshot?.label !== LABEL.SIMPLIFY)
+    if (
+      snapshotLabel !== LABEL.SIMPLIFY &&
+      snapshotLabel !== LABEL.STAIRCASEREGIONS
+    )
       return { baseLayers: [gridLayer], view, initialViewState };
+
+    if (snapshotLabel === LABEL.STAIRCASEREGIONS && staircaseRegions) {
+      const staircaseRegionLayer = new PolygonLayer({
+        id: "staircase-regions",
+        data: Array.from(staircaseRegions.values()),
+        getPolygon: (d: Staircase) =>
+          d.region.exteriorRing.points.map((p) => p.xy),
+        getFillColor: [0, 0, 255, 20],
+        getLineColor: [0, 0, 255, 80],
+        getLineWidth: 1,
+        lineWidthUnits: "pixels",
+      });
+      return {
+        baseLayers: [gridLayer, staircaseRegionLayer],
+        view,
+        initialViewState,
+      };
+    }
 
     const configurations = new ConfigurationGenerator().run(dcel);
 
@@ -142,7 +167,7 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       view,
       initialViewState,
     };
-  }, [gridLayer, dcel, activeSnapshot?.label]);
+  }, [gridLayer, dcel, snapshotLabel, staircaseRegions]);
 
   // Cheap — only hover/animation-sensitive layers recompute on mouse move or tick
   const layers = useMemo(() => {

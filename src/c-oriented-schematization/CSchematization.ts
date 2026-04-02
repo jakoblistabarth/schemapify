@@ -132,7 +132,6 @@ class CSchematization extends Schematization {
       halfEdgeClasses,
       this.style,
     ).run(withSubdividedEdges);
-    //TO-DO: add additional data to Snapshot: staircase regions as geometry
     this.doAction({
       level: "visualize",
       dcel: withSubdividedEdges,
@@ -140,6 +139,9 @@ class CSchematization extends Schematization {
       forSnapshots: {
         snapshotList: this.snapshots,
         triggeredAt: start,
+        additionalData: {
+          regions: staircases,
+        },
       },
     });
 
@@ -148,7 +150,6 @@ class CSchematization extends Schematization {
       withSubdividedEdges,
     );
 
-    //TO-DO: add additional data to Snapshot: staircase regions as geometry
     this.doAction({
       level: "visualize",
       dcel: withStaircases,
