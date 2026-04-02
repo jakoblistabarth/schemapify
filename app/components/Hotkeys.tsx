@@ -28,6 +28,7 @@ const Hotkeys = () => {
   );
   useHotkeys(["ctrl+c"], () => removeSource());
   useHotkeys(["ctrl+1"], () => setSource("diamond.json"));
+  useHotkeys(["ctrl+2"], () => setSource("unaligned-deviating-2.json"));
   useHotkeys(["ctrl+3"], () => setSource("triangle.json"));
   useHotkeys(["left"], () =>
     prevSnapshot ? setActiveSnapshot(prevSnapshot.id) : undefined,
