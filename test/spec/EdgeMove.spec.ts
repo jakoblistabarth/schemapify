@@ -298,7 +298,6 @@ describe("Blocked contractions are correctly identified and prevented from edge 
     // The problematic edges are: (-2, 0.6̄) → (-3.5, 0.6̄) and (-2.16̄, 0.6̄) → (-1.3̄, 0.6̄)
     const TWO_THIRDS = 2 / 3;
     const allEdges = result.getHalfEdges();
-    const configurations = new ConfigurationGenerator().run(result);
 
     const problematicEdges = allEdges.filter((edge) => {
       if (!edge.head) return false;
@@ -306,24 +305,6 @@ describe("Blocked contractions are correctly identified and prevented from edge 
       const isHorizontal = Math.abs(edge.tail.y - edge.head.y) < EPSILON;
       const isAtTargetY = Math.abs(edge.tail.y - TWO_THIRDS) < EPSILON;
       return isHorizontal && isAtTargetY;
-    });
-
-    // Debug: log which face each problematic edge belongs to and whether it appears in any x_ boundary
-    problematicEdges.forEach((edge) => {
-      const face = edge.face;
-      let appearsInX_ = false;
-      let appearsInX = false;
-
-      configurations.forEach((config) => {
-        if (config.x_.includes(edge)) appearsInX_ = true;
-        if (config.x.includes(edge)) appearsInX = true;
-      });
-
-      if (edge.head)
-        console.log(
-          `Edge (${edge.tail.x.toFixed(4)}, ${edge.tail.y.toFixed(4)}) -> (${edge.head.x.toFixed(4)}, ${edge.head.y.toFixed(4)}): ` +
-            `face=${face ? "exists" : "null"}, in_x_=${appearsInX_}, in_x=${appearsInX}`,
-        );
     });
 
     // For each problematic edge, check it doesn't overlap with other edges from same face
