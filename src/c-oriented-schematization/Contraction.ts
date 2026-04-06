@@ -1,5 +1,6 @@
 import HalfEdge, { InflectionType } from "../Dcel/HalfEdge";
 import Vertex from "../Dcel/Vertex";
+import { EPSILON } from "../geometry/contstants";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
 import Point from "../geometry/Point";
@@ -444,14 +445,22 @@ class Contraction {
     if (alpha1 === undefined || alpha2 === undefined) return;
     const alpha1_ = -Math.abs(alpha1) + Math.PI * 0.5;
     const alpha2_ = -Math.abs(alpha2) + Math.PI * 0.5;
-    if (alpha1_ === 0 && alpha2_ === 0) {
+
+    // Check whether both angles are near ±π/2
+    if (Math.abs(alpha1_) < EPSILON && Math.abs(alpha2_) < EPSILON) {
       return contractionArea / aLength;
-    } else {
-      const p = (aLength * 2) / (Math.tan(alpha1_) + Math.tan(alpha2_));
-      const q =
-        (-contractionArea * 2) / (Math.tan(alpha1_) + Math.tan(alpha2_));
-      return -p * 0.5 + Math.sqrt(Math.pow(p * 0.5, 2) - q);
     }
+
+    const tanSum = Math.tan(alpha1_) + Math.tan(alpha2_);
+
+    // Check whether tan sum is too close to zero (angles are nearly opposite right angles)
+    if (Math.abs(tanSum) < EPSILON) {
+      return contractionArea / aLength;
+    }
+
+    const p = (aLength * 2) / tanSum;
+    const q = (-contractionArea * 2) / tanSum;
+    return -p * 0.5 + Math.sqrt(Math.pow(p * 0.5, 2) - q);
   }
 }
 

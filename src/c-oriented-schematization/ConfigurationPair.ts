@@ -87,7 +87,7 @@ class ConfigurationPair {
     });
 
     // Perform the appropriate variant of the edge move
-    const movedPositions = this.isSharingEdge()
+    const movedPositions = this.shouldUseSharedEdgeMove()
       ? this.doSharedEdgeMove(contractionEdge, compensationEdge, configurations)
       : this.doRegularEdgeMove(
           contractionEdge,
@@ -591,6 +591,30 @@ class ConfigurationPair {
    */
   isSharingEdge(): boolean {
     return this.findSharedOuterEdge() !== undefined;
+  }
+
+  /**
+   * Determines whether to use shared edge move logic.
+   * Shared edge move should only be used if:
+   * 1. The configurations share an outer edge
+   * 2. The contraction or the compensation point lies on that shared edge (including endpoints)
+   * @returns A boolean indicating whether shared edge move logic should be used.
+   */
+  shouldUseSharedEdgeMove(): boolean {
+    if (!this.isSharingEdge()) return false;
+
+    const sharedEdge = this.findSharedOuterEdge();
+    const sharedSegment = sharedEdge?.toLineSegment();
+    const contractionPoint = this.contraction.point;
+    const compensationPoint = this.compensation.point;
+
+    return !!(
+      sharedSegment &&
+      contractionPoint &&
+      compensationPoint &&
+      (contractionPoint.isOnLineSegment(sharedSegment) ||
+        compensationPoint.isOnLineSegment(sharedSegment))
+    );
   }
 
   /**
