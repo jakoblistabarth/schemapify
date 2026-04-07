@@ -285,6 +285,10 @@ class Contraction {
     const pointsInPolygon = edge.endpoints.filter((vertex) =>
       vertex.isInPolygon(area),
     );
+
+    // Case 1: Both endpoints inside the contraction area
+    if (pointsInPolygon.length === 2) return true;
+
     const intersections = area.getIntersections(edge);
     const xLineSegments = x.reduce((acc: LineSegment[], edge) => {
       const lineSegment = edge.toLineSegment();
@@ -292,17 +296,28 @@ class Contraction {
       return acc;
     }, []);
 
-    // Case 1: Both endpoints inside the contraction area
-    if (pointsInPolygon.length === 2) return true;
-
-    // Cases 2: Improper boundary crossing (intersection not on X edges) blocks
-    if (
-      intersections &&
-      intersections.some(
+    //TODO: make robuster, seems to make algorithm stop too early at times.
+    // Case 2: Improper boundary crossing (intersection not on X edges) blocks
+    // Exception: if this is a 4-point area with P3 very close to an edge that
+    // is part of the configuration (edge in X), it should not block.
+    if (intersections) {
+      const hasImproperCrossing = intersections.some(
         (intersection) => !intersection.isOnLineSegments(xLineSegments),
+      );
+      const hasTrackPointCloseToEdge =
+        this.areaPoints.length === 4 &&
+        this.areaPoints[3].distanceToLineSegment(edgeLine) < EPSILON;
+      const hasTrackPointOutsideOfX =
+        this.areaPoints.length === 4 &&
+        !this.configuration.x
+          .flatMap((e) => e.endpoints)
+          .some((v) => v.equals(this.areaPoints[3]));
+
+      if (
+        hasImproperCrossing ||
+        (hasTrackPointCloseToEdge && hasTrackPointOutsideOfX)
       )
-    ) {
-      return true;
+        return true;
     }
 
     return false;
