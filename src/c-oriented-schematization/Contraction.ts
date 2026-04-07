@@ -249,10 +249,9 @@ class Contraction {
   /**
    * Determines whether or not the specified HalfEdge blocks the contraction.
    *
-   * This method performs edge-based geometric blocking checks with three cases:
+   * This method performs edge-based geometric blocking checks:
    * - Case 1: Both endpoints of the edge lie inside the contraction area.
-   * - Case 2: The edge crosses the boundary at non-X locations (improper crossing).
-   * - Case 3: One endpoint inside with improper boundary crossing.
+   * - Case 2: The edge crosses the boundary at non-X locations (improper crossing) regardless of endpoints.
    *
    * ARCHITECTURAL NOTE: Adjacent vertex checking is NOT performed here.
    * "Adjacent vertex checking" means: checking if vertices from adjacent faces (faces sharing
@@ -275,8 +274,10 @@ class Contraction {
     const x = this.configuration.x;
     const twin = this.configuration.innerEdge.twin;
     if (!twin) return;
-    const x_ = twin.coordKey ? configurations.get(twin.coordKey)?.x : undefined;
-    if (x_) x.push(...x_);
+    const xOfTwin = twin.coordKey
+      ? configurations.get(twin.coordKey)?.x
+      : undefined;
+    if (xOfTwin) x.push(...xOfTwin);
     if (x.includes(edge)) return false;
     const edgeLine = edge.toLineSegment();
     if (!edgeLine) return;
@@ -291,24 +292,17 @@ class Contraction {
       return acc;
     }, []);
 
-    // Case 1: Both endpoints inside the contraction area (edge entirely inside)
-    if (pointsInPolygon.length == 2) return true;
+    // Case 1: Both endpoints inside the contraction area
+    if (pointsInPolygon.length === 2) return true;
 
-    // Case 2: Improper boundary crossing - intersection not on X edges
+    // Cases 2: Improper boundary crossing (intersection not on X edges) blocks
     if (
       intersections &&
       intersections.some(
         (intersection) => !intersection.isOnLineSegments(xLineSegments),
       )
-    )
+    ) {
       return true;
-
-    // Case 3: One endpoint inside. Check if all boundary crossings are on X edges.
-    // If an edge has one endpoint inside and crosses at any non-X point, it blocks.
-    if (pointsInPolygon.length === 1 && intersections) {
-      return intersections.some(
-        (intersection) => !intersection.isOnLineSegments(xLineSegments),
-      );
     }
 
     return false;
