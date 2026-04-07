@@ -1,5 +1,5 @@
-import { Layer } from "@deck.gl/core";
 import type { DefaultProps } from "@deck.gl/core";
+import { Layer } from "@deck.gl/core";
 import { ClipSpace } from "@luma.gl/engine";
 
 interface AdaptiveGridLayerProps {

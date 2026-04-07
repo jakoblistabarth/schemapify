@@ -1,5 +1,5 @@
-import Dcel from "@/src/Dcel/Dcel";
 import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
+import Dcel from "@/src/Dcel/Dcel";
 import Subdivision from "@/src/geometry/Subdivision";
 import { readFileSync } from "fs";
 import path from "path";

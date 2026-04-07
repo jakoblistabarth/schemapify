@@ -1,9 +1,9 @@
-import HalfEdge from "../Dcel/HalfEdge";
 import Face from "../Dcel/Face";
-import Contraction from "./Contraction";
-import ConfigurationPair from "./ConfigurationPair";
-import { ContractionType } from "./ContractionType";
+import HalfEdge from "../Dcel/HalfEdge";
 import Configuration from "./Configuration";
+import ConfigurationPair from "./ConfigurationPair";
+import Contraction from "./Contraction";
+import { ContractionType } from "./ContractionType";
 
 class FaceFaceBoundary {
   faces: [Face, Face];

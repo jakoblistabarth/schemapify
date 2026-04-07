@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import fs from "fs";
-import path from "path";
-import Dcel from "@/src/Dcel/Dcel";
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
+import Dcel from "@/src/Dcel/Dcel";
+import fs from "fs";
+import path from "path";
+import { describe, expect, it } from "vitest";
 
 describe("A ConfigurationPair with overlapping configurations", function () {
   it("ConfigurationPairs with an shared outer Edge are identified.", function () {

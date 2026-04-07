@@ -1,9 +1,9 @@
-import HalfEdge from "../Dcel/HalfEdge";
-import Face from "../Dcel/Face";
 import Dcel from "../Dcel/Dcel";
-import FaceFaceBoundary from "./FaceFaceBoundary";
-import ConfigurationPair from "./ConfigurationPair";
+import Face from "../Dcel/Face";
+import HalfEdge from "../Dcel/HalfEdge";
 import Configuration from "./Configuration";
+import ConfigurationPair from "./ConfigurationPair";
+import FaceFaceBoundary from "./FaceFaceBoundary";
 
 export type FaceFaceBoundaryMap = Map<string, FaceFaceBoundary>;
 

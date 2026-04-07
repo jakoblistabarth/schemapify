@@ -1,9 +1,9 @@
-import { describe, expect, test } from "vitest";
-import Dcel from "@/src/Dcel/Dcel";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import Dcel from "@/src/Dcel/Dcel";
 import { EPSILON } from "@/src/geometry/contstants";
 import fs from "fs";
 import path from "path";
+import { describe, expect, test } from "vitest";
 
 describe("unaligned-deviating-2.json - Geometry Progression", function () {
   const json = JSON.parse(

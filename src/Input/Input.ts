@@ -1,7 +1,7 @@
 import Dcel from "@/src/Dcel/Dcel";
-import { Polygon, MultiPolygon, FeatureCollection } from "geojson";
-import { geoJsonToGeometry } from "../utilities";
+import { FeatureCollection, MultiPolygon, Polygon } from "geojson";
 import Subdivision from "../geometry/Subdivision";
+import { geoJsonToGeometry } from "../utilities";
 
 /**
  * Represents the input data for the schematization process.

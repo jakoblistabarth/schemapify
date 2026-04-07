@@ -13,8 +13,8 @@ import { beforeEach, describe, expect, test } from "vitest";
 import {
   configurationCases,
   ConfigurationSetup,
-  createConfigurationSetup,
   coordKeyOr,
+  createConfigurationSetup,
 } from "./test-setup";
 
 describe("getTrack()", function () {

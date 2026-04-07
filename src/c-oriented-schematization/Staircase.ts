@@ -5,16 +5,16 @@ import Line from "../geometry/Line";
 import Point from "../geometry/Point";
 import Polygon from "../geometry/Polygon";
 import Ring from "../geometry/Ring";
-import Sector from "./Sector";
-import { CStyle } from "./schematization.style";
+import { getUnitVector } from "../utilities";
+import C from "./C";
 import { Orientation } from "./HalfEdgeClassGenerator";
 import {
   getAssignedAngle,
   getAssociatedAngles,
   getAssociatedSector,
 } from "./HalfEdgeUtils";
-import { getUnitVector } from "../utilities";
-import C from "./C";
+import { CStyle } from "./schematization.style";
+import Sector from "./Sector";
 
 class Staircase {
   /** The {@link HalfEdge} the staircase belongs to. */

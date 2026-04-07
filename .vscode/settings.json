@@ -2,6 +2,9 @@
   "cSpell.allowCompoundWords": true,
   "cSpell.words": ["Buchin", "dcel", "Meulemans", "Renssen", "Schemapify"],
   "cSpell.ignoreWords": ["bbox", "plgn"],
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "prettier.printWidth": 100,

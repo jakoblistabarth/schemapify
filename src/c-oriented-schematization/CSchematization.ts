@@ -9,12 +9,12 @@ import EdgeMoveProcessor from "./EdgeMoveProcessor";
 import FaceFaceBoundaryListGenerator from "./FaceFaceBoundaryListGenerator";
 import HalfEdgeClassGenerator from "./HalfEdgeClassGenerator";
 import PreProcessor from "./PreProcessor";
+import type { CStyle } from "./schematization.style";
+import { style as defaultStyle } from "./schematization.style";
 import SignificantHalfEdgeProcessor from "./SignificantHalfEdgeProcessor";
 import StaircaseGenerator from "./StaircaseGenerator";
 import StaircaseProcessor from "./StaircaseProcessor";
 import VertexClassGenerator from "./VertexClassGenerator";
-import type { CStyle } from "./schematization.style";
-import { style as defaultStyle } from "./schematization.style";
 
 export enum LABEL {
   // TO-DO: is a default label needed?

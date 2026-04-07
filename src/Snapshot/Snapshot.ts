@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
+import { LABEL } from "../c-oriented-schematization/CSchematization";
 import Dcel from "../Dcel/Dcel";
 import Subdivision from "../geometry/Subdivision";
-import { LABEL } from "../c-oriented-schematization/CSchematization";
 
 //TO-DO: do not use any
 //eslint-disable-next-line @typescript-eslint/no-explicit-any

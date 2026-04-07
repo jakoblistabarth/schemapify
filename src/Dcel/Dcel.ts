@@ -1,15 +1,14 @@
 import * as geojson from "geojson";
-// import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
+import MultiPolygon from "../geometry/MultiPolygon";
 import Point from "../geometry/Point";
+import Polygon from "../geometry/Polygon";
+import Ring from "../geometry/Ring";
 import Subdivision from "../geometry/Subdivision";
 import BoundingBox from "../helpers/BoundingBox";
 import { geoJsonToGeometry, validateGeoJSON } from "../utilities";
 import Face from "./Face";
 import HalfEdge from "./HalfEdge";
 import Vertex from "./Vertex";
-import Polygon from "../geometry/Polygon";
-import MultiPolygon from "../geometry/MultiPolygon";
-import Ring from "../geometry/Ring";
 
 class Dcel {
   name?: string;

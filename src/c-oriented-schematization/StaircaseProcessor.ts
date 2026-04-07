@@ -1,6 +1,6 @@
 import Dcel from "../Dcel/Dcel";
-import Processor from "../Schematization/Processor";
 import Point from "../geometry/Point";
+import Processor from "../Schematization/Processor";
 import Staircase from "./Staircase";
 
 class StaircaseProcessor implements Processor {

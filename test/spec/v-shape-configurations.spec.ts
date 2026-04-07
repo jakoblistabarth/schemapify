@@ -1,10 +1,10 @@
-import { describe, expect, test } from "vitest";
-import Dcel from "@/src/Dcel/Dcel";
+import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
+import Dcel from "@/src/Dcel/Dcel";
 import fs from "fs";
 import path from "path";
-import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
-import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
+import { describe, expect, test } from "vitest";
 
 describe("v-shape.json - invalid configurations chosen", function () {
   const json = JSON.parse(

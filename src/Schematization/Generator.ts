@@ -1,5 +1,5 @@
-import Dcel from "../Dcel/Dcel";
 import FaceFaceBoundaryList from "../c-oriented-schematization/FaceFaceBoundaryList";
+import Dcel from "../Dcel/Dcel";
 
 abstract class Generator {
   constructor() {}

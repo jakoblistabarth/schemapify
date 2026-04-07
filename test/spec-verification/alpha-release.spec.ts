@@ -1,9 +1,9 @@
-import { readFileSync } from "fs";
-import path from "path";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
+import { readFileSync } from "fs";
 import type { GeoJsonProperties, MultiPolygon } from "geojson";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import path from "path";
 import { beforeAll, describe, expect, test } from "vitest";
 
 describe("2-a. The system shall be able to parse geoJSON as input data.", function () {

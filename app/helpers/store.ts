@@ -1,9 +1,9 @@
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import Dcel from "@/src/Dcel/Dcel";
 import Input from "@/src/Input/";
 import Job from "@/src/Job/";
 import Snapshot from "@/src/Snapshot/Snapshot";
 import SnapshotList from "@/src/Snapshot/SnapshotList";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import { FeatureCollection, MultiPolygon, Polygon } from "geojson";
 import { create } from "zustand";
 

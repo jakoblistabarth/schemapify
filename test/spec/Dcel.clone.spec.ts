@@ -1,7 +1,7 @@
 import Dcel from "@/src/Dcel/Dcel";
 import { readFileSync } from "fs";
 import { resolve } from "path";
-import { describe, beforeEach, test, expect } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 
 describe("A Dcel clone", function () {
   let dcel: Dcel;

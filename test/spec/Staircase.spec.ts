@@ -1,10 +1,10 @@
-import Dcel from "@/src/Dcel/Dcel";
+import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
-import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
 import { Orientation } from "@/src/c-oriented-schematization/HalfEdgeClassGenerator";
-import { getClosestAssociatedAngle } from "@/src/c-oriented-schematization/Staircase";
 import { style } from "@/src/c-oriented-schematization/schematization.style";
+import { getClosestAssociatedAngle } from "@/src/c-oriented-schematization/Staircase";
+import Dcel from "@/src/Dcel/Dcel";
 import Polygon from "@/src/geometry/Polygon";
 import Ring from "@/src/geometry/Ring";
 import Subdivision from "@/src/geometry/Subdivision";

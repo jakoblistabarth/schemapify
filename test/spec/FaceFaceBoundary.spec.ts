@@ -1,8 +1,8 @@
-import Dcel from "@/src/Dcel/Dcel";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
+import Dcel from "@/src/Dcel/Dcel";
 import Subdivision from "@/src/geometry/Subdivision";
 import { readFileSync } from "fs";
 import path from "path";

@@ -1,11 +1,11 @@
-import Dcel from "@/src/Dcel/Dcel";
-import Snapshot from "@/src/Snapshot/Snapshot";
-import SnapshotList from "@/src/Snapshot/SnapshotList";
-import { LABEL } from "@/src/c-oriented-schematization/CSchematization";
 import Configuration from "@/src/c-oriented-schematization/Configuration";
 import Contraction from "@/src/c-oriented-schematization/Contraction";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
+import { LABEL } from "@/src/c-oriented-schematization/CSchematization";
 import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
+import Dcel from "@/src/Dcel/Dcel";
+import Snapshot from "@/src/Snapshot/Snapshot";
+import SnapshotList from "@/src/Snapshot/SnapshotList";
 
 export const handleSimplify = (
   dcel: Dcel,

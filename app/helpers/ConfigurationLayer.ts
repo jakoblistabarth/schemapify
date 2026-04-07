@@ -1,7 +1,7 @@
-import HalfEdge from "@/src/Dcel/HalfEdge";
 import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
 import Contraction from "@/src/c-oriented-schematization/Contraction";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
+import HalfEdge from "@/src/Dcel/HalfEdge";
 import Ring from "@/src/geometry/Ring";
 import { CompositeLayer, LayersList } from "@deck.gl/core";
 import { PathStyleExtension } from "@deck.gl/extensions";

@@ -1,7 +1,7 @@
 import Dcel from "@/src/Dcel/Dcel";
-import SnapshotList from "../Snapshot/SnapshotList";
 import { LABEL } from "../c-oriented-schematization/CSchematization";
 import { AdditionalData } from "../Snapshot/Snapshot";
+import SnapshotList from "../Snapshot/SnapshotList";
 
 export type Callback = (args: {
   dcel: Dcel;

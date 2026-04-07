@@ -1,5 +1,5 @@
-import MultiPolygon from "./MultiPolygon";
 import Dcel from "@/src/Dcel/Dcel";
+import MultiPolygon from "./MultiPolygon";
 
 /**
  * Represents a subdivision.

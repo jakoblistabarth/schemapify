@@ -3,8 +3,8 @@ import HalfEdge from "../Dcel/HalfEdge";
 import Generator from "../Schematization/Generator";
 import { Orientation } from "./HalfEdgeClassGenerator";
 import { getAssociatedSector, getSignificantVertex } from "./HalfEdgeUtils";
-import Staircase from "./Staircase";
 import { CStyle } from "./schematization.style";
+import Staircase from "./Staircase";
 
 class StaircaseGenerator implements Generator {
   sigificantVertices: number[];

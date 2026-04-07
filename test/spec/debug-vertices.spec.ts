@@ -1,13 +1,13 @@
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
-import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
-import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor";
+import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import Dcel from "@/src/Dcel/Dcel";
 import fs from "fs";
 import path from "path";
-import { describe, test, expect } from "vitest";
+import { describe, expect, test } from "vitest";
 
 describe("Debug vertex removal in smallest-contraction-1a.json", () => {
   test("trace vertices through simplification iterations", () => {

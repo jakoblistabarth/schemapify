@@ -1,9 +1,9 @@
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
-import { describe, test } from "vitest";
-import { getTestFiles } from "./test-setup";
+import Dcel from "@/src/Dcel/Dcel";
 import { readFileSync } from "fs";
 import { resolve } from "path";
-import Dcel from "@/src/Dcel/Dcel";
+import { describe, test } from "vitest";
+import { getTestFiles } from "./test-setup";
 
 describe(
   "CSchematization's run() method does not throw.",

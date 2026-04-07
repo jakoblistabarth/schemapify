@@ -1,10 +1,10 @@
-import Dcel from "@/src/Dcel/Dcel";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
+import Dcel from "@/src/Dcel/Dcel";
 import { EPSILON } from "@/src/geometry/contstants";
 import { readFileSync } from "fs";
 import { resolve } from "path";
