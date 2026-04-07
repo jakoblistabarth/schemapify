@@ -3,9 +3,11 @@ import Schematization, {
   Callback,
   Callbacks,
 } from "@/src/Schematization/Schematization";
-import MultiPolygon from "@/src/geometry/MultiPolygon";
-import Polygon from "@/src/geometry/Polygon";
-import HalfEdgeClassGenerator, { Orientation } from "./HalfEdgeClassGenerator";
+import CollinearPointProcessor from "./CollinearPointProcessor";
+import ConfigurationGenerator from "./ConfigurationGenerator";
+import EdgeMoveProcessor from "./EdgeMoveProcessor";
+import FaceFaceBoundaryListGenerator from "./FaceFaceBoundaryListGenerator";
+import HalfEdgeClassGenerator from "./HalfEdgeClassGenerator";
 import PreProcessor from "./PreProcessor";
 import SignificantHalfEdgeProcessor from "./SignificantHalfEdgeProcessor";
 import StaircaseGenerator from "./StaircaseGenerator";
@@ -13,14 +15,6 @@ import StaircaseProcessor from "./StaircaseProcessor";
 import VertexClassGenerator from "./VertexClassGenerator";
 import type { CStyle } from "./schematization.style";
 import { style as defaultStyle } from "./schematization.style";
-import Contraction from "./Contraction";
-import { ContractionType } from "./ContractionType";
-import Staircase from "./Staircase";
-import CollinearPointProcessor from "./CollinearPointProcessor";
-import FaceFaceBoundaryListGenerator from "./FaceFaceBoundaryListGenerator";
-import ConfigurationGenerator from "./ConfigurationGenerator";
-import Configuration from "./Configuration";
-import EdgeMoveProcessor from "./EdgeMoveProcessor";
 
 export enum LABEL {
   // TO-DO: is a default label needed?
@@ -236,58 +230,6 @@ class CSchematization extends Schematization {
    */
   setEpsilon(input: Dcel, lambda: number) {
     return (this.style.epsilon = input.getDiameter() * lambda);
-  }
-
-  /**
-   * Converts all staircase regions of a {@link Dcel} to {@link MultiPolygon}s.
-   * @param input The {@link Dcel} to convert the staircase regions of.
-   * @returns An array of {@link MultiPolygon}s representing the staircase regions.
-   */
-  staircaseRegionsToGeometry(
-    staircases: Map<number, Staircase>,
-    orientations: Map<number, Orientation>,
-  ) {
-    return [...staircases.entries()].map(([, staircase]): MultiPolygon => {
-      const region = staircase.region.exteriorRing;
-
-      const edgeId =
-        typeof staircase.edge.id === "number" && staircase.edge.id > 0
-          ? staircase.edge.id
-          : undefined;
-      const properties = {
-        uuid: edgeId !== undefined ? edgeId.toString() : undefined,
-        class: edgeId !== undefined ? orientations.get(edgeId) : undefined,
-        interferesWith: staircase.interferesWith
-          .map((e) => (typeof e.id === "number" && e.id > 0 ? e.id : undefined))
-          .join(" ,"),
-      };
-
-      return new MultiPolygon(
-        [new Polygon([region])],
-        properties.uuid,
-        properties,
-      );
-    });
-  }
-
-  //TO-DO: remove this function, seems to be only used in the canvas at the moment?
-  /**
-   * Gets all contractions within a DCEL.
-   * @param dcel The DCEL to get the contractions from.
-   * @returns An array of {@link Contraction}s.
-   */
-  getContractions(dcel: Dcel, configurations: Map<string, Configuration>) {
-    return dcel.getHalfEdges().reduce((acc: Contraction[], edge) => {
-      const configuration = edge.coordKey
-        ? configurations.get(edge.coordKey)
-        : undefined;
-      if (!configuration) return acc;
-      const n = configuration[ContractionType.N];
-      const p = configuration[ContractionType.P];
-      if (n) acc.push(n);
-      if (p) acc.push(p);
-      return acc;
-    }, []);
   }
 }
 
