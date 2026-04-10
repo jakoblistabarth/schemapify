@@ -1,7 +1,7 @@
 import Vertex from "@/src/Dcel/Vertex";
 import { CompositeLayer, LayersList } from "@deck.gl/core";
 import { ScatterplotLayer } from "@deck.gl/layers";
-import { HoverInfo } from "../components/Canvas";
+import { HoverInfo } from "../components/Tooltip";
 
 type LayerData = {
   vertices: Vertex[];

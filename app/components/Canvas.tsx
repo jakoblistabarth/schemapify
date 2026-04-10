@@ -6,18 +6,11 @@ import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceF
 import Staircase from "@/src/c-oriented-schematization/Staircase";
 import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
-import Vertex from "@/src/Dcel/Vertex";
-import Snapshot from "@/src/Snapshot/Snapshot";
-import {
-  OrthographicView,
-  OrthographicViewState,
-  PickingInfo,
-} from "@deck.gl/core";
+import { Layer, OrthographicView, OrthographicViewState } from "@deck.gl/core";
 import { PathStyleExtension } from "@deck.gl/extensions";
 import { TripsLayer } from "@deck.gl/geo-layers";
 import { PathLayer, PolygonLayer, SolidPolygonLayer } from "@deck.gl/layers";
 import DeckGL from "@deck.gl/react";
-import { ZoomWidget } from "@deck.gl/widgets";
 import "@deck.gl/widgets/stylesheet.css";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import AdaptiveGridLayer from "../helpers/AdaptiveGridLayer";
@@ -25,6 +18,8 @@ import ConfigurationLayer from "../helpers/ConfigurationLayer";
 import { getInitialZoom } from "../helpers/getInitialZoom";
 import useAppStore from "../helpers/store";
 import VertexLayer from "../helpers/VertexLayer";
+import MapViewWidget, { type ViewMode } from "./MapViewWidget";
+import Tooltip, { type HoverInfo } from "./Tooltip";
 
 const step = 0.005;
 const intervalMS = 24;
@@ -33,60 +28,70 @@ const loopLength = 1;
 type Props = {
   dcel: Dcel;
   isAnimating?: boolean;
+  onAnimatingChange?: (isAnimating: boolean) => void;
 };
 
-export type HoverInfo = PickingInfo<Vertex | HalfEdge>;
-
-const getTooltipContent = (hoverInfo: HoverInfo, activeSnapshot?: Snapshot) => {
-  const { object } = hoverInfo;
-  if (object instanceof Vertex) {
-    const additionalData = activeSnapshot?.additionalData;
-    const significantVertices =
-      additionalData?.significantVertices &&
-      activeSnapshot?.label === LABEL.CLASSIFY
-        ? additionalData.significantVertices
-        : undefined;
-    const isSignificant =
-      significantVertices?.get(Vertex.getKey(object.x, object.y)) ?? false;
-    return {
-      type: "Vertex",
-      metadata: {
-        Coordinates: object.xy.join("·"),
-        Degree: object.edges.length,
-        Significant: isSignificant,
-      },
-    };
-  } else if (object instanceof HalfEdge) {
-    const additionalData = activeSnapshot?.additionalData;
-    const coordKey = object.coordKey;
-    const dataForObject =
-      additionalData?.halfEdgeClasses &&
-      activeSnapshot?.label === LABEL.CLASSIFY &&
-      coordKey !== undefined
-        ? additionalData.halfEdgeClasses.get(coordKey)
-        : {};
-    return {
-      type: "HalfEdge",
-      metadata: {
-        Tail: object.tail.xy.join("·"),
-        Head: object.head?.xy.join("·"),
-        ...dataForObject,
-      },
-    };
-  }
-};
-
-const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
+const Canvas: FC<Props> = ({
+  dcel,
+  isAnimating = false,
+  onAnimatingChange,
+}) => {
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | undefined>(undefined);
   const [time, setTime] = useState(0);
-  // TO-DO: investigate why this happens and if there's a better solution
+  const [viewMode, setViewMode] = useState<ViewMode>("debug");
+  const [viewState, setViewState] = useState<OrthographicViewState | undefined>(
+    undefined,
+  );
   // Workaround to not make layer disappear when switching snapshots
   // Create grid layer once and reuse it across all renders
+  // TO-DO: investigate why this happens and if there's a better solution
   const [gridLayer] = useState(
     () => new AdaptiveGridLayer({ id: "adaptive-grid" }),
   );
 
   const { activeSnapshot } = useAppStore();
+
+  // Compute initial view state early so it's available for handleZoom
+  // Memoize to prevent dependency changes on every render
+  const initialViewState = useMemo(() => {
+    const bbox = dcel.getBbox();
+    const initialZoom = getInitialZoom(bbox);
+    return {
+      target: bbox.center,
+      zoom: initialZoom,
+    };
+  }, [dcel]);
+
+  const handleZoom = useCallback(
+    (direction: "in" | "out" | "reset") => {
+      const transitionDuration = 500;
+      setViewState((prev) => {
+        // Initialize from initialViewState if viewState is undefined
+        const current = prev || initialViewState;
+        if (!current || current.zoom === undefined) return current;
+
+        if (direction === "reset") {
+          // Reset to initial zoom
+          const bbox = dcel.getBbox();
+          const zoom = getInitialZoom(bbox);
+          return {
+            ...current,
+            target: bbox.center,
+            zoom,
+            transitionDuration,
+          };
+        }
+        const currentZoom =
+          typeof current.zoom === "number" ? current.zoom : current.zoom[0];
+        return {
+          ...current,
+          zoom: currentZoom + (direction === "in" ? 1 : -1),
+          transitionDuration,
+        };
+      });
+    },
+    [dcel, initialViewState],
+  );
 
   const animate = useCallback(() => {
     // increment time by "step" on each loop
@@ -104,23 +109,42 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
   const staircaseRegions = activeSnapshot?.additionalData?.regions;
   const snapshotLabel = activeSnapshot?.label;
 
-  const { baseLayers, view, initialViewState } = useMemo(() => {
-    // Auto-fit DCEL with log2 zoom for DeckGL
-    const bbox = dcel.getBbox();
-    const zoom = getInitialZoom(bbox);
+  const simplePolygonLayer = useMemo(() => {
+    const multiPolygons = dcel.toSubdivision().toMultiPolygons();
 
-    const initialViewState: OrthographicViewState = {
-      target: bbox.center,
-      zoom,
-    };
+    // Flatten multiPolygons to individual polygons for PolygonLayer
+    // TODO: use the DCEL's feature properties to restore input data
+    // dcel.featureProperties
+    const polygonData = multiPolygons.flatMap((multiPolygon) =>
+      multiPolygon.coordinates.map((polygon, properties) => ({
+        polygon,
+        properties, // Assuming the first ring is the exterior ring
+      })),
+    );
 
+    return new PolygonLayer({
+      id: "simple-polygons",
+      data: polygonData,
+      getPolygon: (d: { polygon: Array<Array<[number, number]>> }) => d.polygon,
+      getFillColor: [0, 0, 255, 20],
+      getLineColor: [0, 0, 255, 255],
+      getLineWidth: 1,
+      lineWidthUnits: "pixels",
+      pickable: true,
+      visible: viewMode === "simple",
+    });
+  }, [dcel, viewMode]);
+
+  const { baseLayers, view } = useMemo(() => {
     const view = new OrthographicView({ flipY: false, id: "ortho" });
 
-    if (
-      snapshotLabel !== LABEL.SIMPLIFY &&
-      snapshotLabel !== LABEL.STAIRCASEREGIONS
-    )
-      return { baseLayers: [gridLayer], view, initialViewState };
+    // Always create debug layers but control visibility
+    const showDebugLayers =
+      viewMode === "debug" &&
+      (snapshotLabel === LABEL.SIMPLIFY ||
+        snapshotLabel === LABEL.STAIRCASEREGIONS);
+
+    const baseLayers: Layer[] = [gridLayer, simplePolygonLayer];
 
     if (snapshotLabel === LABEL.STAIRCASEREGIONS && staircaseRegions) {
       const staircaseRegionLayer = new PolygonLayer({
@@ -132,63 +156,80 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
         getLineColor: [0, 0, 255, 80],
         getLineWidth: 1,
         lineWidthUnits: "pixels",
+        visible: showDebugLayers,
       });
-      return {
-        baseLayers: [gridLayer, staircaseRegionLayer],
-        view,
-        initialViewState,
-      };
+      baseLayers.push(staircaseRegionLayer);
     }
 
-    const configurations = new ConfigurationGenerator().run(dcel);
+    if (snapshotLabel === LABEL.SIMPLIFY) {
+      const configurations = new ConfigurationGenerator().run(dcel);
 
-    const contractionLayer = new SolidPolygonLayer({
-      id: "contractions",
-      data: [...configurations.values()]
-        .flatMap((c) => Object.values(c.contractions))
-        .filter((c) => c?.configuration.innerEdge.face?.edge)
-        .filter((c) => c?.isFeasible)
-        .map((c) => ({
-          polygon: c?.areaPoints.map((p) => p.vector.toArray()),
-          type: c?.type,
-        })),
-      getFillColor: (c: Contraction) =>
-        c.type === ContractionType.N ? [255, 0, 0, 10] : [0, 255, 0, 10],
-    });
+      const contractionLayer = new SolidPolygonLayer({
+        id: "contractions",
+        data: [...configurations.values()]
+          .flatMap((c) => Object.values(c.contractions))
+          .filter((c) => c?.configuration.innerEdge.face?.edge)
+          .filter((c) => c?.isFeasible)
+          .map((c) => ({
+            polygon: c?.areaPoints.map((p) => p.vector.toArray()),
+            type: c?.type,
+          })),
+        getFillColor: (c: Contraction) =>
+          c.type === ContractionType.N ? [255, 0, 0, 10] : [0, 255, 0, 10],
+        visible: showDebugLayers,
+      });
 
-    const ffbList = new FaceFaceBoundaryListGenerator().run(dcel);
+      const ffbList = new FaceFaceBoundaryListGenerator().run(dcel);
 
-    const configurationLayer = new ConfigurationLayer({
-      data: ffbList.getMinimalConfigurationPair(configurations),
-    });
+      const configurationLayer = new ConfigurationLayer({
+        data: ffbList.getMinimalConfigurationPair(configurations),
+        visible: showDebugLayers,
+      });
+
+      baseLayers.push(configurationLayer);
+      baseLayers.push(contractionLayer);
+    }
 
     return {
-      baseLayers: [gridLayer, configurationLayer, contractionLayer],
+      baseLayers,
       view,
       initialViewState,
     };
-  }, [gridLayer, dcel, snapshotLabel, staircaseRegions]);
+  }, [
+    gridLayer,
+    dcel,
+    snapshotLabel,
+    staircaseRegions,
+    viewMode,
+    initialViewState,
+    simplePolygonLayer,
+  ]);
+
+  // Extract hoveredUuid once (dependency on hoverInfo directly would cause layer recomputation)
+  const hoveredUuid = hoverInfo?.object?.uuid;
 
   // Cheap — only hover/animation-sensitive layers recompute on mouse move or tick
-  const layers = useMemo(() => {
+  const layers = useMemo((): Layer[] => {
     const halfedges = Array.from(dcel.getHalfEdges());
     const vertices = Array.from(dcel.getVertices());
     const significantVertices =
       activeSnapshot?.additionalData?.significantVertices;
-    const hoveredUuid = hoverInfo?.object?.uuid;
+
+    const isDebugMode = viewMode === "debug";
 
     const edgeAnimationLayer = new TripsLayer({
       id: "edges-animated",
       data: halfedges,
       getPath: (e: HalfEdge) => [e.tail.xy, e.head!.xy],
-      getOffset: 1,
+      getOffset: 2,
       getTimestamps: () => [0, 1],
       trailLength: 0.25,
       getColor: [200, 200, 255],
-      widthMinPixels: 2,
-      widthMaxPixels: 2,
+      getWidth: 1,
+      widthUnits: "pixels",
       currentTime: time,
       extensions: [new PathStyleExtension({ offset: true })],
+      visible: isDebugMode,
     });
 
     const edgeLayer = new PathLayer({
@@ -197,13 +238,14 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       pickable: true,
       onHover: (info) => setHoverInfo(info),
       getPath: (e: HalfEdge) => [e.tail.xy, e.head!.xy],
-      getOffset: 1,
+      getOffset: 2,
       getColor: (e: HalfEdge) =>
         hoveredUuid === e.uuid ? [150, 150, 255] : [0, 0, 255],
-      widthMinPixels: 2,
+      getWidth: 1,
       widthUnits: "pixels",
       extensions: [new PathStyleExtension({ offset: true })],
       transitions: { getColor: { duration: 300 } },
+      visible: isDebugMode,
     });
 
     const vertexLayer = new VertexLayer({
@@ -211,20 +253,11 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
       data: { vertices, significantVertices },
       hoveredUuid,
       onHover: (info) => setHoverInfo(info),
+      visible: isDebugMode,
     });
 
     return [...baseLayers, edgeLayer, edgeAnimationLayer, vertexLayer];
-  }, [activeSnapshot, baseLayers, hoverInfo, time, dcel]);
-
-  const tooltipContent = useMemo(() => {
-    if (!hoverInfo) return null;
-    return getTooltipContent(hoverInfo, activeSnapshot);
-  }, [hoverInfo, activeSnapshot]);
-
-  const widgets = useMemo(
-    () => [new ZoomWidget({ placement: "top-right" })],
-    [],
-  );
+  }, [activeSnapshot, baseLayers, time, hoveredUuid, dcel, viewMode]);
 
   return (
     <>
@@ -232,33 +265,21 @@ const Canvas: FC<Props> = ({ dcel, isAnimating = false }) => {
         views={view}
         layers={layers}
         initialViewState={initialViewState}
+        viewState={viewState}
+        onViewStateChange={({ viewState: newViewState }) =>
+          setViewState(newViewState as OrthographicViewState)
+        }
         controller={true}
-        widgets={widgets}
-      />
-      {hoverInfo?.object && (
-        <div
-          className="pointer-events-none absolute rounded bg-white p-3 text-xs shadow-lg"
-          style={{ left: hoverInfo.x + 10, top: hoverInfo.y + 10 }}
-        >
-          <div className="flex gap-2 font-mono">
-            <span className="text-gray-400">
-              {tooltipContent?.type ?? "Unknown object"}
-            </span>
-            <span className="font-bold">{hoverInfo?.object?.uuid}</span>
-          </div>
-          <table>
-            <tbody>
-              {tooltipContent &&
-                Object.entries(tooltipContent.metadata).map(([key, value]) => (
-                  <tr key={key}>
-                    <td className="pr-2">{key}</td>
-                    <td className="font-mono">{String(value)}</td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      >
+        <MapViewWidget
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          onZoom={handleZoom}
+          isAnimating={isAnimating}
+          onAnimatingChange={onAnimatingChange}
+        />
+      </DeckGL>
+      <Tooltip hoverInfo={hoverInfo} activeSnapshot={activeSnapshot} />
     </>
   );
 };

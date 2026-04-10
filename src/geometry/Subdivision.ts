@@ -40,6 +40,23 @@ class Subdivision {
   toDcel() {
     return Dcel.fromSubdivision(this);
   }
+
+  /**
+   * Transform the subdivision into an array of multi polygons (represented by arrays).
+   * @returns An array of multi polygons (serialized into arrays).
+   */
+  toMultiPolygons() {
+    return this.multiPolygons.map((multiPolygon) => {
+      const { properties, polygons } = multiPolygon;
+      const coordinates = polygons.map((polygon) =>
+        polygon.rings.map((ring) => ring.points.map((point) => point.xy)),
+      );
+      return {
+        properties,
+        coordinates,
+      };
+    });
+  }
 }
 
 export default Subdivision;

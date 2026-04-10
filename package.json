@@ -28,6 +28,7 @@
     "@luma.gl/engine": "^9.2.6",
     "@placemarkio/check-geojson": "^0.1.14",
     "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-toolbar": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/postcss": "^4.2.2",
     "@turf/boolean-valid": "^7.3.4",
