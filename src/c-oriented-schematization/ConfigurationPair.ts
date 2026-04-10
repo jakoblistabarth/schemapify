@@ -1,5 +1,6 @@
 import Dcel from "../Dcel/Dcel";
 import HalfEdge from "../Dcel/HalfEdge";
+import { EPSILON } from "../geometry/contstants";
 import Point from "../geometry/Point";
 import Vector2D from "../geometry/Vector2D";
 import Configuration from "./Configuration";
@@ -418,7 +419,7 @@ class ConfigurationPair {
       (compensationB * areaPressrvationCoeff * contractionC) / contractionB;
 
     let s = 0;
-    if (Math.abs(coeff_s) > 1e-10) {
+    if (Math.abs(coeff_s) > EPSILON) {
       s = const_term / coeff_s;
     }
 
@@ -426,7 +427,7 @@ class ConfigurationPair {
     let t_compensation = 0;
 
     // Solve for t values
-    if (Math.abs(contractionB) > 1e-10) {
+    if (Math.abs(contractionB) > EPSILON) {
       t_contraction = (contractionA * s + contractionC) / contractionB;
     }
     // Apply area preservation

@@ -264,15 +264,15 @@ describe("First configuration pair in triangle.json after angle constraining", f
           const xValues = uniquePtsArray.map((p) => p.x);
           const xRange = Math.max(...xValues) - Math.min(...xValues);
 
-          expect(yRange).toBeGreaterThan(1e-10);
-          expect(xRange).toBeGreaterThan(1e-10);
+          expect(yRange).toBeGreaterThan(EPSILON);
+          expect(xRange).toBeGreaterThan(EPSILON);
         }
       }
 
       // ASSERTIONS: What we expect vs. what might actually happen
       // 1. Area should be positive and meaningful for a feasible contraction
-      // An area below 1e-10 is effectively zero (machine epsilon scale) and indicates precision loss
-      const MIN_FEASIBLE_AREA = 1e-10;
+      // An area below EPSILON is effectively zero (machine epsilon scale) and indicates precision loss
+      const MIN_FEASIBLE_AREA = EPSILON;
 
       expect(area).toBeGreaterThan(MIN_FEASIBLE_AREA);
 

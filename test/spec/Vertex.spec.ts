@@ -1,19 +1,14 @@
 import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
+import { EPSILON } from "@/src/geometry/contstants";
 import { normalizeAngle, permute } from "@/src/utilities";
 import fs from "fs";
 import path from "path";
 import { beforeEach, describe, expect, test } from "vitest";
 import { getTestFiles } from "./test-setup";
 
-const isCircularlySortedByAngle = (
-  edges: HalfEdge[],
-  clockwise = true,
-  //TO-DO: use a robuster method instead of an epsilon threshold for angle comparisons
-  //see robust geometric predicates
-  eps = 1e-9,
-) => {
+const isCircularlySortedByAngle = (edges: HalfEdge[], clockwise = true) => {
   const angles = edges.map((e) => {
     const a = e.getAngle();
     return typeof a === "number" ? normalizeAngle(a) : NaN;
@@ -23,7 +18,7 @@ const isCircularlySortedByAngle = (
     Array.from({ length: Math.max(0, angles.length - 1) }).every((__, i) => {
       const a = angles[(rotation + i) % angles.length];
       const b = angles[(rotation + i + 1) % angles.length];
-      return clockwise ? a + eps >= b : a <= b + eps;
+      return clockwise ? a + EPSILON >= b : a <= b + EPSILON;
     }),
   );
 };
