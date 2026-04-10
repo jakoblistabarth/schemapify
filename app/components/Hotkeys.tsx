@@ -13,6 +13,7 @@ const Hotkeys = () => {
     prevSnapshot,
     nextSnapshot,
     snapshotList,
+    toggleViewMode,
   } = useAppStore();
 
   useHotkeys(
@@ -36,6 +37,7 @@ const Hotkeys = () => {
   useHotkeys(["right"], () =>
     nextSnapshot ? setActiveSnapshot(nextSnapshot.id) : undefined,
   );
+  useHotkeys(["w"], () => toggleViewMode());
   return <></>;
 };
 

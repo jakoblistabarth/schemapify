@@ -8,6 +8,7 @@ import { FeatureCollection, MultiPolygon, Polygon } from "geojson";
 import { create } from "zustand";
 
 export type MapMode = "dcel" | "polygon";
+export type ViewMode = "debug" | "simple";
 
 type AppState = {
   source?: {
@@ -19,6 +20,9 @@ type AppState = {
   dcel?: Dcel;
   mapMode: MapMode;
   toggleMapMode: () => void;
+  viewMode: ViewMode;
+  setViewMode: (mode: ViewMode) => void;
+  toggleViewMode: () => void;
   activeSnapshot?: Snapshot;
   nextSnapshot?: Snapshot;
   prevSnapshot?: Snapshot;
@@ -73,6 +77,12 @@ const useAppStore = create<AppState>((set) => ({
   mapMode: "dcel",
   toggleMapMode: () =>
     set((state) => ({ mapMode: state.mapMode == "dcel" ? "polygon" : "dcel" })),
+  viewMode: "debug",
+  setViewMode: (mode: ViewMode) => set(() => ({ viewMode: mode })),
+  toggleViewMode: () =>
+    set((state) => ({
+      viewMode: state.viewMode === "debug" ? "simple" : "debug",
+    })),
   activeSnapshot: undefined,
   setActiveSnapshot: (id) => {
     set((state) => {

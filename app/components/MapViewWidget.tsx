@@ -12,8 +12,7 @@ import {
   RiResetRightLine,
   RiSubtractLine,
 } from "react-icons/ri";
-
-export type ViewMode = "debug" | "simple";
+import { ViewMode } from "../helpers/store";
 
 /**
  * Props for the MapViewWidget
@@ -67,6 +66,7 @@ const MapViewWidget: FC<
   const [showAnimation, setShowAnimation] = useState(
     props.isAnimating ?? false,
   );
+
   const element = useMemo(() => document.createElement("div"), []);
   useWidget(MapView, {
     ...props,
@@ -79,7 +79,6 @@ const MapViewWidget: FC<
     isAnimating: props.isAnimating ?? false,
     onAnimatingChange: props.onAnimatingChange ?? (() => {}),
   });
-  const [value, setValue] = useState(props.viewMode);
 
   const handleZoomClick = (direction: "in" | "out" | "reset") => {
     props.onZoom(direction);
@@ -92,11 +91,10 @@ const MapViewWidget: FC<
     >
       <Toolbar.ToggleGroup
         type="single"
-        value={value}
+        value={props.viewMode}
         orientation="vertical"
         onValueChange={(value) => {
           if (value) {
-            setValue(value as ViewMode);
             props.onViewModeChange(value as ViewMode);
           }
         }}

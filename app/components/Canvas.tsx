@@ -20,7 +20,7 @@ import ConfigurationLayer from "../helpers/ConfigurationLayer";
 import { getInitialZoom } from "../helpers/getInitialZoom";
 import useAppStore from "../helpers/store";
 import VertexLayer from "../helpers/VertexLayer";
-import MapViewWidget, { type ViewMode } from "./MapViewWidget";
+import MapViewWidget from "./MapViewWidget";
 import Tooltip, { type HoverInfo } from "./Tooltip";
 
 const step = 0.005;
@@ -40,7 +40,8 @@ const Canvas: FC<Props> = ({
 }) => {
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | undefined>(undefined);
   const [time, setTime] = useState(0);
-  const [viewMode, setViewMode] = useState<ViewMode>("debug");
+  const viewMode = useAppStore((state) => state.viewMode);
+  const setViewMode = useAppStore((state) => state.setViewMode);
   const [viewState, setViewState] = useState<OrthographicViewState | undefined>(
     undefined,
   );
