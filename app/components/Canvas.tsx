@@ -6,6 +6,8 @@ import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceF
 import Staircase from "@/src/c-oriented-schematization/Staircase";
 import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
+import MultiPolygon from "@/src/geometry/MultiPolygon";
+import Polygon from "@/src/geometry/Polygon";
 import { Layer, OrthographicView, OrthographicViewState } from "@deck.gl/core";
 import { PathStyleExtension } from "@deck.gl/extensions";
 import { TripsLayer } from "@deck.gl/geo-layers";
@@ -50,6 +52,9 @@ const Canvas: FC<Props> = ({
   );
 
   const { activeSnapshot } = useAppStore();
+
+  // Extract hoveredUuid once (dependency on hoverInfo directly would cause layer recomputation)
+  const hoveredUuid = hoverInfo?.object?.uuid;
 
   // Compute initial view state early so it's available for handleZoom
   // Memoize to prevent dependency changes on every render
@@ -110,30 +115,37 @@ const Canvas: FC<Props> = ({
   const snapshotLabel = activeSnapshot?.label;
 
   const simplePolygonLayer = useMemo(() => {
-    const multiPolygons = dcel.toSubdivision().toMultiPolygons();
-
-    // Flatten multiPolygons to individual polygons for PolygonLayer
-    // TODO: use the DCEL's feature properties to restore input data
-    // dcel.featureProperties
-    const polygonData = multiPolygons.flatMap((multiPolygon) =>
-      multiPolygon.coordinates.map((polygon, properties) => ({
+    const subdivision = dcel.toSubdivision();
+    const polygonData = subdivision.multiPolygons.flatMap((multiPolygon, idx) =>
+      multiPolygon.polygons.map((polygon) => ({
+        multiPolygon,
         polygon,
-        properties, // Assuming the first ring is the exterior ring
+        uuid: idx.toString(),
       })),
     );
 
     return new PolygonLayer({
       id: "simple-polygons",
       data: polygonData,
-      getPolygon: (d: { polygon: Array<Array<[number, number]>> }) => d.polygon,
-      getFillColor: [0, 0, 255, 20],
+      getPolygon: (feature: { polygon: Polygon }) =>
+        feature.polygon.rings.map((ring) =>
+          ring.points.map((point) => point.xy),
+        ),
+      getFillColor: (feature: { multiPolygon: MultiPolygon }) =>
+        feature.multiPolygon.id == hoveredUuid
+          ? [0, 0, 255, 40]
+          : [0, 0, 255, 20],
       getLineColor: [0, 0, 255, 255],
       getLineWidth: 1,
       lineWidthUnits: "pixels",
       pickable: true,
+      onHover: (info) => setHoverInfo(info),
       visible: viewMode === "simple",
+      transitions: {
+        getFillColor: { duration: 200 },
+      },
     });
-  }, [dcel, viewMode]);
+  }, [dcel, hoveredUuid, viewMode]);
 
   const { baseLayers, view } = useMemo(() => {
     const view = new OrthographicView({ flipY: false, id: "ortho" });
@@ -204,9 +216,6 @@ const Canvas: FC<Props> = ({
     initialViewState,
     simplePolygonLayer,
   ]);
-
-  // Extract hoveredUuid once (dependency on hoverInfo directly would cause layer recomputation)
-  const hoveredUuid = hoverInfo?.object?.uuid;
 
   // Cheap — only hover/animation-sensitive layers recompute on mouse move or tick
   const layers = useMemo((): Layer[] => {

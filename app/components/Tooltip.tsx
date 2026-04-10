@@ -1,11 +1,14 @@
 import { LABEL } from "@/src/c-oriented-schematization/CSchematization";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
+import MultiPolygon from "@/src/geometry/MultiPolygon";
 import Snapshot from "@/src/Snapshot/Snapshot";
 import { PickingInfo } from "@deck.gl/core";
 import { FC, memo, useMemo } from "react";
 
-export type HoverInfo = PickingInfo<Vertex | HalfEdge>;
+export type HoverInfo = PickingInfo<
+  Vertex | HalfEdge | { multiPolygon: MultiPolygon; uuid: string }
+>;
 
 interface TooltipProps {
   hoverInfo: HoverInfo | undefined;
@@ -31,7 +34,8 @@ const getTooltipContent = (hoverInfo: HoverInfo, activeSnapshot?: Snapshot) => {
         Significant: isSignificant,
       },
     };
-  } else if (object instanceof HalfEdge) {
+  }
+  if (object instanceof HalfEdge) {
     const additionalData = activeSnapshot?.additionalData;
     const coordKey = object.coordKey;
     const dataForObject =
@@ -46,6 +50,14 @@ const getTooltipContent = (hoverInfo: HoverInfo, activeSnapshot?: Snapshot) => {
         Tail: object.tail.xy.join("·"),
         Head: object.head?.xy.join("·"),
         ...dataForObject,
+      },
+    };
+  }
+  if (object?.multiPolygon instanceof MultiPolygon) {
+    return {
+      type: "Polygon",
+      metadata: {
+        ...object.multiPolygon.properties,
       },
     };
   }
