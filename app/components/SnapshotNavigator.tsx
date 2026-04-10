@@ -1,15 +1,15 @@
 "use client";
 
+import { extent, scaleLinear } from "d3";
 import { FC } from "react";
-import useAppStore from "../helpers/store";
-import SnapshotTimeline from "./SnapshotTimeline";
 import {
   RiCamera3Line,
   RiSkipBackLine,
   RiSkipForwardLine,
 } from "react-icons/ri";
+import useAppStore from "../helpers/store";
 import Button from "./Button";
-import { extent, scaleLinear } from "d3";
+import SnapshotTimeline from "./SnapshotTimeline";
 
 const SnapshotList: FC = () => {
   const { snapshotList, nextSnapshot, prevSnapshot, setActiveSnapshot } =
@@ -27,7 +27,7 @@ const SnapshotList: FC = () => {
   const snapshotsByStep = snapshotList?.getSnapshotByStep();
 
   return (
-    <div className="self-align-middle relative mx-auto mb-5 flex items-center justify-between gap-2 rounded-md bg-white p-1 px-2">
+    <div className="self-align-middle relative mx-auto mb-5 flex items-center justify-between gap-2 rounded-md bg-white p-1 px-2 shadow">
       <h2 className="flex justify-between gap-1 text-xs font-bold">
         <RiCamera3Line size={15} />
         Snapshots
@@ -39,7 +39,7 @@ const SnapshotList: FC = () => {
       ))}
       <div className="flex">
         <Button
-          className="p-2 transition-opacity duration-500 disabled:pointer-events-none disabled:opacity-20"
+          className="size-8 transition-opacity duration-500 disabled:pointer-events-none disabled:opacity-20"
           onClick={() =>
             prevSnapshot ? setActiveSnapshot(prevSnapshot.id) : undefined
           }
@@ -48,7 +48,7 @@ const SnapshotList: FC = () => {
           <RiSkipBackLine size={15} />
         </Button>
         <Button
-          className="p-2 transition-opacity duration-500 disabled:pointer-events-none disabled:opacity-20"
+          className="size-8 transition-opacity duration-500 disabled:pointer-events-none disabled:opacity-20"
           onClick={() =>
             nextSnapshot ? setActiveSnapshot(nextSnapshot.id) : undefined
           }

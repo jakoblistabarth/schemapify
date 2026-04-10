@@ -1,10 +1,10 @@
 "use client";
 
 import { FC, useMemo } from "react";
-import useAppStore from "../helpers/store";
 import { MdClose } from "react-icons/md";
-import FileSelect from "./FileSelect";
 import { GroupedTestFiles } from "../helpers/getGroupedTestFiles";
+import useAppStore from "../helpers/store";
+import FileSelect from "./FileSelect";
 
 type Props = {
   files: GroupedTestFiles;
@@ -20,7 +20,7 @@ const Configurator: FC<Props> = ({ files }) => {
   const info = useMemo(() => {
     if (!dcel) return undefined;
     return {
-      duration: activeSnapshot?.duration,
+      duration: `${activeSnapshot?.duration}ms`,
       vertices: dcel.vertices.size,
       halfEdges: dcel.halfEdges.size,
       faces: dcel.getBoundedFaces().length,
