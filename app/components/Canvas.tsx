@@ -8,13 +8,18 @@ import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import MultiPolygon from "@/src/geometry/MultiPolygon";
 import Polygon from "@/src/geometry/Polygon";
-import { Layer, OrthographicView, OrthographicViewState } from "@deck.gl/core";
+import {
+  Layer,
+  OrthographicView,
+  OrthographicViewState,
+  PickingInfo,
+} from "@deck.gl/core";
 import { PathStyleExtension } from "@deck.gl/extensions";
 import { TripsLayer } from "@deck.gl/geo-layers";
 import { PathLayer, PolygonLayer, SolidPolygonLayer } from "@deck.gl/layers";
 import DeckGL from "@deck.gl/react";
 import "@deck.gl/widgets/stylesheet.css";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AdaptiveGridLayer from "../helpers/AdaptiveGridLayer";
 import ConfigurationLayer from "../helpers/ConfigurationLayer";
 import { getInitialZoom } from "../helpers/getInitialZoom";
@@ -39,7 +44,11 @@ const Canvas: FC<Props> = ({
   onAnimatingChange,
 }) => {
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | undefined>(undefined);
+  const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const [time, setTime] = useState(0);
+  const deckglRef = useRef<HTMLDivElement>(null);
   const viewMode = useAppStore((state) => state.viewMode);
   const setViewMode = useAppStore((state) => state.setViewMode);
   const [viewState, setViewState] = useState<OrthographicViewState | undefined>(
@@ -111,6 +120,35 @@ const Canvas: FC<Props> = ({
     return () => clearInterval(currentInterval);
   }, [animate]);
 
+  const handleHover = useCallback((info: PickingInfo | undefined) => {
+    if (info) setHoverInfo(info);
+    // Initialize cursor position with hover event position to avoid stale tooltip position
+    if (info?.object) {
+      setCursorPos({ x: info.x, y: info.y });
+    } else {
+      setCursorPos(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hoverInfo?.object) return;
+
+    const canvas = deckglRef.current;
+    if (!canvas) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      // Get canvas position relative to viewport
+      const rect = canvas.getBoundingClientRect();
+      setCursorPos({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+    };
+
+    canvas.addEventListener("mousemove", handleMouseMove);
+    return () => canvas.removeEventListener("mousemove", handleMouseMove);
+  }, [hoverInfo?.object]);
+
   // Expensive computation — only recomputes when DCEL changes
   const staircaseRegions = activeSnapshot?.additionalData?.regions;
   const snapshotLabel = activeSnapshot?.label;
@@ -140,13 +178,13 @@ const Canvas: FC<Props> = ({
       getLineWidth: 1,
       lineWidthUnits: "pixels",
       pickable: true,
-      onHover: (info) => setHoverInfo(info),
+      onHover: handleHover,
       visible: viewMode === "simple",
       transitions: {
         getFillColor: { duration: 200 },
       },
     });
-  }, [dcel, hoveredUuid, viewMode]);
+  }, [dcel, hoveredUuid, handleHover, viewMode]);
 
   const { baseLayers, view } = useMemo(() => {
     const view = new OrthographicView({ flipY: false, id: "ortho" });
@@ -218,8 +256,8 @@ const Canvas: FC<Props> = ({
     simplePolygonLayer,
   ]);
 
-  // Cheap — only hover/animation-sensitive layers recompute on mouse move or tick
-  const layers = useMemo((): Layer[] => {
+  // Static layers (don't depend on animation time)
+  const { staticLayers, vertexLayer } = useMemo(() => {
     const halfedges = Array.from(dcel.getHalfEdges());
     const vertices = Array.from(dcel.getVertices());
     const significantVertices =
@@ -227,26 +265,11 @@ const Canvas: FC<Props> = ({
 
     const isDebugMode = viewMode === "debug";
 
-    const edgeAnimationLayer = new TripsLayer({
-      id: "edges-animated",
-      data: halfedges,
-      getPath: (e: HalfEdge) => [e.tail.xy, e.head!.xy],
-      getOffset: 2,
-      getTimestamps: () => [0, 1],
-      trailLength: 0.25,
-      getColor: [200, 200, 255],
-      getWidth: 1,
-      widthUnits: "pixels",
-      currentTime: time,
-      extensions: [new PathStyleExtension({ offset: true })],
-      visible: isDebugMode,
-    });
-
     const edgeLayer = new PathLayer({
       id: "edges",
       data: halfedges,
       pickable: true,
-      onHover: (info) => setHoverInfo(info),
+      onHover: handleHover,
       getPath: (e: HalfEdge) => [e.tail.xy, e.head!.xy],
       getOffset: 2,
       getColor: (e: HalfEdge) =>
@@ -262,25 +285,57 @@ const Canvas: FC<Props> = ({
       id: "vertex-layer",
       data: { vertices, significantVertices },
       hoveredUuid,
-      onHover: (info) => setHoverInfo(info),
+      onHover: handleHover,
       visible: isDebugMode,
     });
 
-    return [...baseLayers, edgeLayer, edgeAnimationLayer, vertexLayer];
-  }, [activeSnapshot, baseLayers, time, hoveredUuid, dcel, viewMode]);
+    return {
+      staticLayers: [...baseLayers, edgeLayer],
+      vertexLayer,
+    };
+  }, [baseLayers, handleHover, hoveredUuid, dcel, viewMode, activeSnapshot]);
+
+  // Animation layer (recomputes only when time changes)
+  const edgeAnimationLayer = useMemo(() => {
+    const halfedges = Array.from(dcel.getHalfEdges());
+    const isDebugMode = viewMode === "debug";
+
+    return new TripsLayer({
+      id: "edges-animated",
+      data: halfedges,
+      getPath: (e: HalfEdge) => [e.tail.xy, e.head!.xy],
+      getOffset: 2,
+      getTimestamps: () => [0, 1],
+      trailLength: 0.25,
+      getColor: [200, 200, 255],
+      getWidth: 1,
+      widthUnits: "pixels",
+      currentTime: time,
+      extensions: [new PathStyleExtension({ offset: true })],
+      visible: isDebugMode,
+    });
+  }, [time, dcel, viewMode]);
+
+  // Combine all layers: trips layer before vertex layer
+  const layers = useMemo((): Layer[] => {
+    return [...staticLayers, edgeAnimationLayer, vertexLayer];
+  }, [staticLayers, edgeAnimationLayer, vertexLayer]);
 
   return (
     <>
-      <DeckGL
-        views={view}
-        layers={layers}
-        initialViewState={initialViewState}
-        viewState={viewState}
-        onViewStateChange={({ viewState: newViewState }) =>
-          setViewState(newViewState as OrthographicViewState)
-        }
-        controller={true}
-      />
+      <div ref={deckglRef} className="contents">
+        <DeckGL
+          views={view}
+          layers={layers}
+          initialViewState={initialViewState}
+          viewState={viewState}
+          onViewStateChange={({ viewState: newViewState }) =>
+            setViewState(newViewState as OrthographicViewState)
+          }
+          controller={true}
+          getCursor={({ isHovering }) => (isHovering ? "pointer" : "grab")}
+        />
+      </div>
       <MapViewWidget
         viewMode={viewMode}
         onViewModeChange={setViewMode}
@@ -288,7 +343,11 @@ const Canvas: FC<Props> = ({
         isAnimating={isAnimating}
         onAnimatingChange={onAnimatingChange}
       />
-      <Tooltip hoverInfo={hoverInfo} activeSnapshot={activeSnapshot} />
+      <Tooltip
+        hoverInfo={hoverInfo}
+        activeSnapshot={activeSnapshot}
+        cursorPos={cursorPos}
+      />
     </>
   );
 };

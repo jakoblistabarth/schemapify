@@ -13,6 +13,7 @@ export type HoverInfo = PickingInfo<
 interface TooltipProps {
   hoverInfo: HoverInfo | undefined;
   activeSnapshot?: Snapshot;
+  cursorPos?: { x: number; y: number } | null;
 }
 
 const getTooltipContent = (hoverInfo: HoverInfo, activeSnapshot?: Snapshot) => {
@@ -64,7 +65,7 @@ const getTooltipContent = (hoverInfo: HoverInfo, activeSnapshot?: Snapshot) => {
 };
 
 const Tooltip: FC<TooltipProps> = memo(
-  ({ hoverInfo, activeSnapshot }) => {
+  ({ hoverInfo, activeSnapshot, cursorPos }) => {
     // Memoize tooltip content calculation to avoid recomputation on every render
     const tooltipContent = useMemo(() => {
       if (!hoverInfo?.object) return null;
@@ -75,34 +76,39 @@ const Tooltip: FC<TooltipProps> = memo(
 
     return (
       <div
-        className="pointer-events-none absolute rounded bg-white p-3 text-xs shadow-lg"
-        style={{ left: hoverInfo.x + 10, top: hoverInfo.y + 10 }}
+        className="pointer-events-none fixed rounded bg-white text-xs shadow-lg"
+        style={{
+          left: (cursorPos?.x ?? hoverInfo.x) + 10,
+          top: (cursorPos?.y ?? hoverInfo.y) + 10,
+        }}
       >
-        <div className="flex gap-2 font-mono">
-          <span className="text-gray-400">
-            {tooltipContent?.type ?? "Unknown object"}
-          </span>
+        <div className="flex gap-2 border-b border-l-2 border-b-blue-50 border-l-blue-500 p-2 font-mono">
+          <span>{tooltipContent?.type ?? "Unknown object"}</span>
           <span className="font-bold">{hoverInfo?.object?.uuid}</span>
         </div>
-        <table>
-          <tbody>
-            {tooltipContent &&
-              Object.entries(tooltipContent.metadata).map(([key, value]) => (
-                <tr key={key}>
-                  <td className="pr-2">{key}</td>
-                  <td className="font-mono">{String(value)}</td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+        <div className="p-2">
+          <table>
+            <tbody>
+              {tooltipContent &&
+                Object.entries(tooltipContent.metadata).map(([key, value]) => (
+                  <tr key={key}>
+                    <td className="pr-2">{key}</td>
+                    <td className="font-mono">{String(value)}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   },
   (prevProps, nextProps) => {
-    // Only re-render if UUID or activeSnapshot changed
+    // Only skip re-render if UUID, activeSnapshot, and cursorPos are all the same
     return (
       prevProps.hoverInfo?.object?.uuid === nextProps.hoverInfo?.object?.uuid &&
-      prevProps.activeSnapshot === nextProps.activeSnapshot
+      prevProps.activeSnapshot === nextProps.activeSnapshot &&
+      prevProps.cursorPos?.x === nextProps.cursorPos?.x &&
+      prevProps.cursorPos?.y === nextProps.cursorPos?.y
     );
   },
 );
