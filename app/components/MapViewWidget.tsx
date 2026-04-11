@@ -1,22 +1,16 @@
-import { Widget, WidgetPlacement, WidgetProps } from "@deck.gl/core";
-import { useWidget } from "@deck.gl/react";
 import * as Toolbar from "@radix-ui/react-toolbar";
-import { FC, PropsWithChildren, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
+import { FC, PropsWithChildren } from "react";
 import {
   RiAddLargeFill,
   RiCollageFill,
   RiCollageLine,
+  RiFlag2Line,
   RiPauseLine,
   RiPlayLine,
-  RiResetRightLine,
   RiSubtractLine,
 } from "react-icons/ri";
 import { ViewMode } from "../helpers/store";
 
-/**
- * Props for the MapViewWidget
- */
 export interface MapViewProps {
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
@@ -25,77 +19,29 @@ export interface MapViewProps {
   onAnimatingChange?: (isAnimating: boolean) => void;
 }
 
-/**
- * Widget-specific props extending deck.gl WidgetProps
- */
-interface MapViewWidgetProps extends Required<WidgetProps> {
-  viewMode: ViewMode;
-  onViewModeChange: (mode: ViewMode) => void;
-  onZoom: (direction: "in" | "out" | "reset") => void;
-  isAnimating: boolean;
-  onAnimatingChange: (isAnimating: boolean) => void;
-  placement: WidgetPlacement;
-  element: HTMLDivElement;
-}
-
-class MapView extends Widget<MapViewWidgetProps> {
-  props: MapViewWidgetProps;
-  id: string;
-  placement: WidgetPlacement;
-  className: string;
-
-  constructor(props: MapViewWidgetProps) {
-    super(props);
-    this.props = props;
-    this.id = props.id;
-    this.placement = props.placement;
-    this.className = "widget-map-view-switch";
-  }
-
-  onAdd(): HTMLDivElement {
-    return this.props.element;
-  }
-
-  // No dynamic rendering needed since React handles the UI via portals
-  onRenderHTML(): void {}
-}
-
-const MapViewWidget: FC<
-  Omit<MapViewProps, "element" | "id" | "style" | "className" | "_container">
-> = (props) => {
-  const [showAnimation, setShowAnimation] = useState(
-    props.isAnimating ?? false,
-  );
-
-  const element = useMemo(() => document.createElement("div"), []);
-  useWidget(MapView, {
-    ...props,
-    element,
-    id: "map-view-switch",
-    style: {},
-    placement: "top-right",
-    className: "widget-map-view-switch",
-    _container: "",
-    isAnimating: props.isAnimating ?? false,
-    onAnimatingChange: props.onAnimatingChange ?? (() => {}),
-  });
-
-  const handleZoomClick = (direction: "in" | "out" | "reset") => {
-    props.onZoom(direction);
+const MapViewWidget: FC<MapViewProps> = ({
+  viewMode,
+  onViewModeChange,
+  onZoom,
+  isAnimating,
+  onAnimatingChange,
+}) => {
+  const isViewMode = (value: string): value is ViewMode => {
+    return value === "debug" || value === "simple";
   };
 
-  return createPortal(
+  return (
     <Toolbar.Root
       orientation="vertical"
-      className="pointer-events-auto absolute top-3 right-3 rounded-md bg-white p-1 shadow"
+      className="pointer-events-auto absolute top-3 right-3 z-10 rounded-md bg-white p-1 shadow"
     >
       <Toolbar.ToggleGroup
         type="single"
-        value={props.viewMode}
+        value={viewMode}
         orientation="vertical"
         onValueChange={(value) => {
-          if (value) {
-            props.onViewModeChange(value as ViewMode);
+          if (isViewMode(value)) {
+            onViewModeChange(value);
           }
         }}
       >
@@ -110,45 +56,34 @@ const MapViewWidget: FC<
         </ToggleItem>
       </Toolbar.ToggleGroup>
       <Separator />
-      <div className="space-y-1">
-        <ToolbarButton
-          ariaLabel="Zoom-in"
-          onClick={() => handleZoomClick("in")}
-        >
+      <div className="flex flex-col space-y-1">
+        <ToolbarButton ariaLabel="Zoom-in" onClick={() => onZoom("in")}>
           <RiAddLargeFill />
         </ToolbarButton>
-        <ToolbarButton
-          ariaLabel="Zoom-out"
-          onClick={() => handleZoomClick("out")}
-        >
+        <ToolbarButton ariaLabel="Zoom-out" onClick={() => onZoom("out")}>
           <RiSubtractLine />
         </ToolbarButton>
-        <ToolbarButton
-          ariaLabel="Reset zoom"
-          onClick={() => handleZoomClick("reset")}
-        >
-          <RiResetRightLine />
+        <ToolbarButton ariaLabel="Reset zoom" onClick={() => onZoom("reset")}>
+          <RiFlag2Line />
         </ToolbarButton>
       </div>
       <Separator />
       <Toolbar.ToggleGroup
         aria-label="Toggle animation"
         type="single"
+        value={isAnimating ? "play" : ""}
         onValueChange={() => {
-          const newState = !showAnimation;
-          setShowAnimation(newState);
-          props.onAnimatingChange?.(newState);
+          onAnimatingChange?.(!(isAnimating ?? false));
         }}
       >
         <ToggleItem
-          value={showAnimation ? "Pause animation" : "Play animation"}
-          title={showAnimation ? "Pause animation" : "Play animation"}
+          value="play"
+          title={isAnimating ? "Pause animation" : "Play animation"}
         >
-          {showAnimation ? <RiPauseLine /> : <RiPlayLine />}
+          {isAnimating ? <RiPauseLine /> : <RiPlayLine />}
         </ToggleItem>
       </Toolbar.ToggleGroup>
-    </Toolbar.Root>,
-    element,
+    </Toolbar.Root>
   );
 };
 

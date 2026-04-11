@@ -280,15 +280,14 @@ const Canvas: FC<Props> = ({
           setViewState(newViewState as OrthographicViewState)
         }
         controller={true}
-      >
-        <MapViewWidget
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          onZoom={handleZoom}
-          isAnimating={isAnimating}
-          onAnimatingChange={onAnimatingChange}
-        />
-      </DeckGL>
+      />
+      <MapViewWidget
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onZoom={handleZoom}
+        isAnimating={isAnimating}
+        onAnimatingChange={onAnimatingChange}
+      />
       <Tooltip hoverInfo={hoverInfo} activeSnapshot={activeSnapshot} />
     </>
   );
