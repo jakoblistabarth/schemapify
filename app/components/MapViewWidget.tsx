@@ -97,7 +97,7 @@ const ToggleItem: FC<
     <Toolbar.ToggleItem
       value={value}
       title={title}
-      className="flex size-8 items-center justify-center bg-white leading-4 first:rounded-t last:rounded-b hover:bg-blue-50 focus:z-10 focus:shadow-[0_0_0_2px] focus:shadow-black focus:outline-none data-[state=on]:bg-blue-100 data-[state=on]:text-blue-600"
+      className="flex size-8 items-center justify-center bg-white leading-4 first:rounded-t last:rounded-b hover:cursor-pointer hover:bg-blue-50 focus:z-10 focus:shadow-[0_0_0_2px] focus:shadow-black focus:outline-none data-[state=on]:bg-blue-100 data-[state=on]:text-blue-600"
     >
       {children}
     </Toolbar.ToggleItem>
@@ -112,7 +112,7 @@ const ToolbarButton: FC<
 > = ({ ariaLabel, onClick, children }) => {
   return (
     <Toolbar.ToolbarButton
-      className="inline-flex size-8 items-center justify-center rounded bg-white hover:bg-blue-50 focus:z-10 focus:shadow-[0_0_0_2px] focus:shadow-black focus:outline-none"
+      className="inline-flex size-8 items-center justify-center rounded bg-white hover:cursor-pointer hover:bg-blue-50 focus:z-10 focus:shadow-[0_0_0_2px] focus:shadow-black focus:outline-none"
       aria-label={ariaLabel}
       onClick={onClick}
     >
