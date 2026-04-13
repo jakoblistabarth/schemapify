@@ -4,6 +4,7 @@ import { FC, useMemo } from "react";
 import { MdClose } from "react-icons/md";
 import { GroupedTestFiles } from "../helpers/getGroupedTestFiles";
 import useAppStore from "../helpers/store";
+import CConfigurator from "./CConfigurator";
 import FileSelect from "./FileSelect";
 
 type Props = {
@@ -47,6 +48,7 @@ const Configurator: FC<Props> = ({ files }) => {
             )}
           </div>
         )}
+        {source && !activeSnapshot && <CConfigurator />}
         {activeSnapshot && (
           <div className="mt-2 rounded-md bg-white p-2 text-sm">
             <div className="mb-2 text-gray-500">

@@ -3,7 +3,7 @@ import Sector from "./Sector";
 
 class CRegular extends C {
   /**
-   * The shift of the C of set, by default a horizontal line (0)
+   * The shift of the set C, in radians. By default a horizontal line, (0 radians).
    */
   beta: number;
   /**

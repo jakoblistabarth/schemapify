@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ReactNode } from "react";
 import { RiArrowLeftLine, RiGithubLine } from "react-icons/ri";
-import Button from "../components/Button";
 import Brand from "../components/Brand";
+import Button from "../components/Button";
 
 export default function MetaLayout({ children }: { children: ReactNode }) {
   return (
@@ -15,7 +15,7 @@ export default function MetaLayout({ children }: { children: ReactNode }) {
       <main>{children}</main>
       <footer className="mt-5 flex flex-col gap-3">
         <Link href={"/"}>
-          <Button primary>
+          <Button variant="primary">
             <RiArrowLeftLine /> Back
           </Button>
         </Link>

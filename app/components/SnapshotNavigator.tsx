@@ -37,7 +37,7 @@ const SnapshotList: FC = () => {
           <SnapshotTimeline colorScale={colorScale} snapshots={snapshots} />
         </div>
       ))}
-      <div className="flex">
+      <div className="flex gap-1">
         <Button
           className="size-8 transition-opacity duration-500 disabled:pointer-events-none disabled:opacity-20"
           onClick={() =>

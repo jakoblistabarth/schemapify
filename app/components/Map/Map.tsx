@@ -6,8 +6,8 @@ import Canvas from "../Canvas";
 
 const Map: FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
-  const { activeSnapshot } = useAppStore();
-  const dcel = activeSnapshot?.subdivision.toDcel();
+  const { activeSnapshot, loadedInput } = useAppStore();
+  const dcel = activeSnapshot?.subdivision.toDcel() ?? loadedInput?.getDcel();
   return dcel ? (
     <Canvas
       isAnimating={isAnimating}
