@@ -18,7 +18,6 @@ import { PathStyleExtension } from "@deck.gl/extensions";
 import { TripsLayer } from "@deck.gl/geo-layers";
 import { PathLayer, PolygonLayer, SolidPolygonLayer } from "@deck.gl/layers";
 import DeckGL from "@deck.gl/react";
-import "@deck.gl/widgets/stylesheet.css";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AdaptiveGridLayer from "../helpers/AdaptiveGridLayer";
 import ConfigurationLayer from "../helpers/ConfigurationLayer";
