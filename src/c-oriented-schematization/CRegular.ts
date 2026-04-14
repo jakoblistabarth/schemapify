@@ -1,3 +1,4 @@
+import { EPSILON } from "../geometry/contstants";
 import C from "./C";
 import Sector from "./Sector";
 
@@ -23,11 +24,16 @@ class CRegular extends C {
    * @returns an array of angles
    */
   private initializeAngles() {
+    const twoPi = Math.PI * 2;
     return Array(this.orientations * 2)
       .fill(0)
       .map((_, idx) => {
-        return this.beta + (idx * Math.PI) / this.orientations;
-      });
+        let angle = this.beta + (idx * Math.PI) / this.orientations;
+        // Normalize angle if it's very close to 2π
+        if (Math.abs(angle - twoPi) <= EPSILON) angle = 0;
+        return angle;
+      })
+      .toSorted();
   }
 
   /**

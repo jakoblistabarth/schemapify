@@ -76,7 +76,7 @@ export const getAssignedAngle = (
   assignedDirection: number,
   sectors: Sector[],
 ) => {
-  return Math.PI * 2 * (assignedDirection / sectors.length);
+  return sectors[assignedDirection]?.lower;
 };
 
 /**
