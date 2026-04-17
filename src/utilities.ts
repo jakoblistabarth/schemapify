@@ -139,3 +139,21 @@ export const geoJsonToGeometry = (
 export const normalizeAngle = (a: number) => {
   return ((a % TWO_PI) + TWO_PI) % TWO_PI;
 };
+
+/**
+ * Converts an angle from radians to degrees.
+ * @param radians the angle in radians
+ * @returns the angle in degrees
+ */
+export const radiansToDegrees = (radians: number) => {
+  return (radians * 180) / Math.PI;
+};
+
+/**
+ * Converts an angle from degrees to radians.
+ * @param degrees the angle in degrees
+ * @returns the angle in radians
+ */
+export const degreesToRadians = (degrees: number) => {
+  return (degrees * Math.PI) / 180;
+};

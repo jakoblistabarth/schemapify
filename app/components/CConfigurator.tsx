@@ -3,6 +3,7 @@
 import C from "@/src/c-oriented-schematization/C";
 import CIrregular from "@/src/c-oriented-schematization/CIrregular";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
+import { degreesToRadians, radiansToDegrees } from "@/src/utilities";
 import * as Slider from "@radix-ui/react-slider";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import { range } from "d3";
@@ -25,7 +26,7 @@ const CConfigurator: FC<Props> = () => {
   );
   const [angles, setAngles] = useState<string>(
     cConfig?.type === "irregular"
-      ? cConfig.angles.map((a) => (a * 180) / Math.PI).join(", ")
+      ? cConfig.angles.map((a) => radiansToDegrees(a)).join(", ")
       : "0, 30, 90, 150",
   );
   const betaMax = type === "regular" ? 180 / Math.max(orientations, 2) : 180;
@@ -33,11 +34,11 @@ const CConfigurator: FC<Props> = () => {
 
   const c = useMemo<C>(() => {
     if (type === "regular") {
-      return new CRegular(orientations, (normalizedBeta * Math.PI) / 180);
+      return new CRegular(orientations, degreesToRadians(normalizedBeta));
     } else {
       const angleValues = angles
         .split(",")
-        .map((a) => (parseFloat(a.trim()) * Math.PI) / 180);
+        .map((a) => degreesToRadians(parseFloat(a.trim())));
       return new CIrregular(angleValues);
     }
   }, [type, orientations, normalizedBeta, angles]);

@@ -1,5 +1,6 @@
 import C from "@/src/c-oriented-schematization/C";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
+import { radiansToDegrees } from "@/src/utilities";
 import clsx from "clsx";
 import { FC, Fragment } from "react";
 
@@ -22,7 +23,7 @@ const CPreview: FC<Props> = ({ c }) => {
         >
           {angles?.map((angle, i) => {
             const isPrimary = i < angles.length / 2;
-            const angleInDegrees = (angle * 180) / Math.PI;
+            const angleInDegrees = radiansToDegrees(angle);
             const labelRadius = size * 0.4;
             const labelX = Math.cos(angle) * labelRadius;
             const labelY = -Math.sin(angle) * labelRadius;
