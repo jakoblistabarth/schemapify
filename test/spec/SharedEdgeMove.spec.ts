@@ -4,8 +4,8 @@ import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
+import { isAlignedToC } from "@/src/c-oriented-schematization/HalfEdgeUtils";
 import Dcel from "@/src/Dcel/Dcel";
-import { EPSILON } from "@/src/geometry/contstants";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { describe, expect, test, vi } from "vitest";
@@ -97,15 +97,9 @@ describe("SharedEdgeMove on smallest-contraction-1a.json", function () {
       const face = dcel.getBoundedFaces()[0];
       const edges = face.getEdges();
 
-      const unalignedEdges = edges.filter((e) => {
-        const angle = e.getAngle();
-        if (angle === undefined) {
-          return true; // Consider undefined angles as unaligned
-        }
-
-        const isValid = validAngles.some((v) => Math.abs(v - angle) <= EPSILON);
-        return !isValid; // Return true if invalid
-      });
+      const unalignedEdges = edges.filter(
+        (e) => !isAlignedToC(e, schematization.style.c),
+      );
 
       if (unalignedEdges.length > 0) {
         const invalidDetails = unalignedEdges

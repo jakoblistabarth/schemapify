@@ -1,6 +1,6 @@
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import { isAlignedToC } from "@/src/c-oriented-schematization/HalfEdgeUtils";
 import Dcel from "@/src/Dcel/Dcel";
-import { EPSILON } from "@/src/geometry/contstants";
 import fs from "fs";
 import path from "path";
 import { describe, expect, test } from "vitest";
@@ -18,7 +18,6 @@ describe("unaligned-deviating-2.json - Geometry Progression", function () {
     const schematization = new CSchematization();
 
     const initialArea = initialDcel.getArea();
-    const validAngles = schematization.style.c.angles;
 
     for (let maxMoves = 1; maxMoves <= 10; maxMoves++) {
       const dcel = Dcel.fromGeoJSON(json);
@@ -37,9 +36,7 @@ describe("unaligned-deviating-2.json - Geometry Progression", function () {
           if (angle === undefined) {
             unalignedCount++;
           } else {
-            const isValid = validAngles.some(
-              (v) => Math.abs(v - angle) <= EPSILON,
-            );
+            const isValid = isAlignedToC(edge, schematization.style.c);
             if (!isValid) {
               unalignedCount++;
             }

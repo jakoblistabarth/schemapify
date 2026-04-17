@@ -1,5 +1,5 @@
+import { isAlignedToC } from "@/src/c-oriented-schematization/HalfEdgeUtils";
 import { CStyle } from "@/src/c-oriented-schematization/schematization.style";
-import { EPSILON, TWO_PI } from "@/src/geometry/contstants";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { describe, expect, test } from "vitest";
@@ -8,10 +8,6 @@ import CRegular from "../../src/c-oriented-schematization/CRegular";
 import CSchematization from "../../src/c-oriented-schematization/CSchematization";
 
 describe("Beta shift for schematization using a regular C", function () {
-  const normalizeAngle = (angle: number) => {
-    return ((angle % TWO_PI) + TWO_PI) % TWO_PI;
-  };
-
   const c = new CRegular(2, Math.PI / 2);
   const cStyle = {
     lambda: 1,
@@ -19,17 +15,6 @@ describe("Beta shift for schematization using a regular C", function () {
     c,
     staircaseEpsilon: 0.1,
   } satisfies CStyle;
-
-  const isAlignedToC = (
-    angle: number,
-    cAngles: number[],
-    epsilon = EPSILON,
-  ) => {
-    const normalized = normalizeAngle(angle);
-    return cAngles.some(
-      (cAngle) => Math.abs(normalized - normalizeAngle(cAngle)) < epsilon,
-    );
-  };
 
   test("should simplify without throwing an error", function () {
     const inputJson = JSON.parse(
@@ -53,8 +38,7 @@ describe("Beta shift for schematization using a regular C", function () {
     );
     const halfEdges = constrained.getHalfEdges(true);
     const misaligned = halfEdges.filter((edge) => {
-      const angle = edge.getAngle();
-      return typeof angle === "number" && !isAlignedToC(angle, c.angles);
+      return typeof edge.getAngle() === "number" && !isAlignedToC(edge, c);
     });
 
     expect(

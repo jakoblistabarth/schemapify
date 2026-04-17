@@ -3,6 +3,7 @@ import ConfigurationGenerator from "@/src/c-oriented-schematization/Configuratio
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
+import { isAlignedToC } from "@/src/c-oriented-schematization/HalfEdgeUtils";
 import Dcel from "@/src/Dcel/Dcel";
 import { EPSILON } from "@/src/geometry/contstants";
 import Input from "@/src/Input";
@@ -229,20 +230,12 @@ describe("Triangle.json edge move verification after one edge move", function ()
 
   test("Edge move should not introduce new orientations (angles)", function () {
     // Check that new orientations aren't introduced
-    const validAngles = schematization.style.c.angles;
     const face = dcel.getBoundedFaces()[0];
     if (face) {
       const edges = face.getEdges();
-      const unalignedEdges = edges.filter((e) => {
-        const angle = e.getAngle();
-        if (angle === undefined) {
-          return true; // Consider undefined angles as unaligned
-        }
-
-        const isValid = validAngles.some((v) => Math.abs(v - angle) <= EPSILON);
-
-        return !isValid; // Return true if not aligned with any valid angle
-      });
+      const unalignedEdges = edges.filter(
+        (e) => !isAlignedToC(e, schematization.style.c),
+      );
 
       expect(unalignedEdges).toHaveLength(0);
     }

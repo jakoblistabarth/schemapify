@@ -1,5 +1,6 @@
 import HalfEdge from "../Dcel/HalfEdge";
-import { TWO_PI } from "../geometry/contstants";
+import { EPSILON, TWO_PI } from "../geometry/contstants";
+import C from "./C";
 import Sector from "./Sector";
 
 /**
@@ -115,4 +116,14 @@ export const isDeviating = (
       assignedAngle = TWO_PI;
     return !sector.encloses(assignedAngle);
   }
+};
+
+export const isAlignedToC = (halfEdge: HalfEdge, c: C) => {
+  const angle = halfEdge.getAngle();
+  if (angle === undefined)
+    throw "Angle is undefined. Cannot determine if edge is aligned to C.";
+  const validAngles = c.angles;
+  return validAngles.some(
+    (validAngle) => Math.abs(angle - validAngle) < EPSILON,
+  );
 };
