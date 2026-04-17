@@ -1,4 +1,4 @@
-import { EPSILON } from "./contstants";
+import { EPSILON, TWO_PI } from "./contstants";
 import LineSegment from "./LineSegment";
 import Polygon from "./Polygon";
 import Vector2D from "./Vector2D";
@@ -83,8 +83,7 @@ class Point {
     // QUESTION: do i really need this conditions for dx, and dy because js' sin/cos implementation is inaccurate??
     const dx =
       angle === Math.PI * 0.5 || angle === Math.PI * 1.5 ? 0 : Math.cos(angle);
-    const dy =
-      angle === Math.PI * 1 || angle === Math.PI * 2 ? 0 : Math.sin(angle);
+    const dy = angle === Math.PI * 1 || angle === TWO_PI ? 0 : Math.sin(angle);
     return new Point(this.x + distance * dx, this.y + distance * dy);
   }
 

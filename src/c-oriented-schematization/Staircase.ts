@@ -1,6 +1,7 @@
 import ConvexHullGrahamScan from "graham_scan";
 import HalfEdge from "../Dcel/HalfEdge";
 import Vertex from "../Dcel/Vertex";
+import { TWO_PI } from "../geometry/contstants";
 import Line from "../geometry/Line";
 import Point from "../geometry/Point";
 import Polygon from "../geometry/Polygon";
@@ -232,7 +233,7 @@ class Staircase {
    * @returns The area of a step.
    */
   getStepArea(assignedEdge: number, associatedEdge: number) {
-    const enclosingAngle = (Math.PI * 2) / this.#cStyle.c.directions.length;
+    const enclosingAngle = TWO_PI / this.#cStyle.c.directions.length;
     return (assignedEdge * associatedEdge * Math.sin(enclosingAngle)) / 2;
   }
 
@@ -267,7 +268,7 @@ class Staircase {
     if (typeof d1 !== "number") return [];
     const d2 = edge.getAngle();
     if (typeof d2 !== "number") return [];
-    const d1Opposite = (d1 + Math.PI) % (Math.PI * 2);
+    const d1Opposite = (d1 + Math.PI) % TWO_PI;
 
     const points: Point[] = [];
     const tail = edge.tail;
@@ -509,12 +510,12 @@ export const getClosestAssociatedAngle = (
   const sector = associatedSector[0];
 
   // TO-DO: refactor: find better solution for last sector and it's upper bound
-  // Set upper bound of last to Math.PI * 2 ?
+  // Set upper bound of last to TWO_PI ?
   const upper = sector.idx === sectors.length - 1 ? 0 : sector.upper;
   const lower = sector.lower;
   const angle =
     getAssignedAngle(assignedDirection, sectors) === 0
-      ? Math.PI * 2
+      ? TWO_PI
       : getAssignedAngle(assignedDirection, sectors);
 
   return upper + c.sectorAngle === angle ? upper : lower;

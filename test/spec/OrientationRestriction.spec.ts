@@ -9,6 +9,7 @@ import { style } from "@/src/c-oriented-schematization/schematization.style";
 import Sector from "@/src/c-oriented-schematization/Sector";
 import VertexClassGenerator from "@/src/c-oriented-schematization/VertexClassGenerator";
 import { getEdgesInSector } from "@/src/c-oriented-schematization/VertexUtils";
+import { TWO_PI } from "@/src/geometry/contstants";
 import { crawlArray } from "@/src/utilities";
 import { beforeEach, describe, expect, test } from "vitest";
 import { createEdgeVertexSetup, idOr, TestSetup } from "./test-setup";
@@ -210,7 +211,7 @@ describe("the sector of edges incident to a vertex are correctly identified", fu
     ]);
     expect(getAssociatedAngles(s.directions.od284, c.sectors)).toEqual([
       Math.PI * 1.5,
-      Math.PI * 2,
+      TWO_PI,
     ]);
   });
 

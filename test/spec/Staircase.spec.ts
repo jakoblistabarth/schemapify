@@ -5,6 +5,7 @@ import { Orientation } from "@/src/c-oriented-schematization/HalfEdgeClassGenera
 import { style } from "@/src/c-oriented-schematization/schematization.style";
 import { getClosestAssociatedAngle } from "@/src/c-oriented-schematization/Staircase";
 import Dcel from "@/src/Dcel/Dcel";
+import { TWO_PI } from "@/src/geometry/contstants";
 import Polygon from "@/src/geometry/Polygon";
 import Ring from "@/src/geometry/Ring";
 import Subdivision from "@/src/geometry/Subdivision";
@@ -276,7 +277,7 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
 
     expect(
       getClosestAssociatedAngle(edge, new CRegular(2), Orientation.UD, 2),
-    ).toBe(((Math.PI * 2) / new CRegular(2).directions.length) * 3);
+    ).toBe((TWO_PI / new CRegular(2).directions.length) * 3);
   });
 });
 

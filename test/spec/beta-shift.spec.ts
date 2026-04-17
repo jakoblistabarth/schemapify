@@ -1,5 +1,5 @@
 import { CStyle } from "@/src/c-oriented-schematization/schematization.style";
-import { EPSILON } from "@/src/geometry/contstants";
+import { EPSILON, TWO_PI } from "@/src/geometry/contstants";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { describe, expect, test } from "vitest";
@@ -9,8 +9,7 @@ import CSchematization from "../../src/c-oriented-schematization/CSchematization
 
 describe("Beta shift for schematization using a regular C", function () {
   const normalizeAngle = (angle: number) => {
-    const twoPi = Math.PI * 2;
-    return ((angle % twoPi) + twoPi) % twoPi;
+    return ((angle % TWO_PI) + TWO_PI) % TWO_PI;
   };
 
   const c = new CRegular(2, Math.PI / 2);

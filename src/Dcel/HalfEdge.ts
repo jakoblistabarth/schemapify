@@ -1,4 +1,5 @@
 import Sector from "../c-oriented-schematization/Sector";
+import { TWO_PI } from "../geometry/contstants";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
 import Point from "../geometry/Point";
@@ -386,7 +387,7 @@ class HalfEdge {
     const angle = this.getAngle();
     if (typeof angle !== "number") return;
     const diff = Math.abs(angle - sector.lower);
-    return diff > Math.PI ? Math.abs(diff - Math.PI * 2) : diff;
+    return diff > Math.PI ? Math.abs(diff - TWO_PI) : diff;
   }
 
   /**

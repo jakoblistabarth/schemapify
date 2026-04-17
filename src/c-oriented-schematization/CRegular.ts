@@ -1,4 +1,4 @@
-import { EPSILON } from "../geometry/contstants";
+import { EPSILON, TWO_PI } from "../geometry/contstants";
 import C from "./C";
 import Sector from "./Sector";
 
@@ -24,7 +24,7 @@ class CRegular extends C {
    * @returns an array of angles
    */
   private initializeAngles() {
-    const twoPi = Math.PI * 2;
+    const twoPi = TWO_PI;
     return Array(this.orientations * 2)
       .fill(0)
       .map((_, idx) => {
@@ -51,7 +51,7 @@ class CRegular extends C {
   get sectors(): Sector[] {
     return this.angles.map((angle, idx) => {
       const upperBound =
-        idx + 1 == this.angles.length ? Math.PI * 2 : this.angles[idx + 1];
+        idx + 1 == this.angles.length ? TWO_PI : this.angles[idx + 1];
       return new Sector(this, idx, angle, upperBound);
     });
   }

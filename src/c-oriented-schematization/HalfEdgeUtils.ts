@@ -1,4 +1,5 @@
 import HalfEdge from "../Dcel/HalfEdge";
+import { TWO_PI } from "../geometry/contstants";
 import Sector from "./Sector";
 
 /**
@@ -60,7 +61,7 @@ export const getAssociatedSector = (halfEdge: HalfEdge, sectors: Sector[]) => {
       (direction[0] === sector.lower && direction[1] === sector.upper) ||
       +direction === sector.lower ||
       +direction === sector.upper ||
-      +direction === sector.upper - Math.PI * 2
+      +direction === sector.upper - TWO_PI
     ) {
       acc.push(sector);
     }
@@ -111,7 +112,7 @@ export const isDeviating = (
     const sector = getAssociatedSector(halfEdge, sectors)[0];
     //TO-DO: refactor find better solution for last sector (idx = 0)
     if (sector.idx === sectors.length - 1 && assignedAngle === 0)
-      assignedAngle = Math.PI * 2;
+      assignedAngle = TWO_PI;
     return !sector.encloses(assignedAngle);
   }
 };

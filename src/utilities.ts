@@ -4,6 +4,7 @@ import Polygon from "./geometry/Polygon";
 import Ring from "./geometry/Ring";
 import Subdivision from "./geometry/Subdivision";
 import Vector2D from "./geometry/Vector2D";
+import { TWO_PI } from "./geometry/contstants";
 
 export async function getJSON(path: string) {
   const response = await fetch(path);
@@ -80,7 +81,7 @@ export function createGeoJSON<
  * @returns a unit vector
  */
 export function getUnitVector(angle: number): Vector2D {
-  angle = angle > Math.PI ? angle - Math.PI * 2 : angle;
+  angle = angle > Math.PI ? angle - TWO_PI : angle;
   return new Vector2D(Math.cos(angle), Math.sin(angle));
 }
 
@@ -136,6 +137,5 @@ export const geoJsonToGeometry = (
  * @returns the normalized angle in radians
  */
 export const normalizeAngle = (a: number) => {
-  const twoPi = Math.PI * 2;
-  return ((a % twoPi) + twoPi) % twoPi;
+  return ((a % TWO_PI) + TWO_PI) % TWO_PI;
 };
