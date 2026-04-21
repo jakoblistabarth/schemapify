@@ -43,7 +43,7 @@ const SnapshotList: FC = () => {
           onClick={() =>
             prevSnapshot ? setActiveSnapshot(prevSnapshot.id) : undefined
           }
-          disabled={!!!prevSnapshot}
+          disabled={!prevSnapshot}
         >
           <RiSkipBackLine size={15} />
         </Button>
@@ -52,7 +52,7 @@ const SnapshotList: FC = () => {
           onClick={() =>
             nextSnapshot ? setActiveSnapshot(nextSnapshot.id) : undefined
           }
-          disabled={!!!nextSnapshot}
+          disabled={!nextSnapshot}
         >
           <RiSkipForwardLine size={15} />
         </Button>

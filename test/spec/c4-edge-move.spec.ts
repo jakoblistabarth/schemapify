@@ -18,65 +18,56 @@ describe("c4-edge-move.subdivision.json - New Direction Debug", function () {
     ),
   );
 
-  test.fails(
-    "should not introduce new orientations after first edge move",
-    function () {
-      const dcel = Dcel.fromSubdivision(Subdivision.fromCoordinates(json));
-      const schematization = new CSchematization({
-        c: new CRegular(4),
-        lambda: 1,
-        k: 3,
-        staircaseEpsilon: 0.1,
-      });
+  test.fails("should not introduce new orientations after first edge move", function () {
+    const dcel = Dcel.fromSubdivision(Subdivision.fromCoordinates(json));
+    const schematization = new CSchematization({
+      c: new CRegular(4),
+      lambda: 1,
+      k: 3,
+      staircaseEpsilon: 0.1,
+    });
 
-      // No constraint needed, data is already an angle-constrained subdivision.
-      // Run one iteration of edge move
-      const configurations = new ConfigurationGenerator().run(dcel);
-      const ffb = new FaceFaceBoundaryListGenerator().run(dcel);
+    // No constraint needed, data is already an angle-constrained subdivision.
+    // Run one iteration of edge move
+    const configurations = new ConfigurationGenerator().run(dcel);
+    const ffb = new FaceFaceBoundaryListGenerator().run(dcel);
 
-      const { dcel: dcelAfterMove } = new EdgeMoveProcessor(
-        ffb,
-        configurations,
-      ).run(dcel.clone());
+    const { dcel: dcelAfterMove } = new EdgeMoveProcessor(
+      ffb,
+      configurations,
+    ).run(dcel.clone());
 
-      // Check for unaligned edges after move
-      const unalignedAfterMove = dcelAfterMove
-        .getHalfEdges()
-        .filter((e) => !isAlignedToC(e, schematization.style.c));
+    // Check for unaligned edges after move
+    const unalignedAfterMove = dcelAfterMove
+      .getHalfEdges()
+      .filter((e) => !isAlignedToC(e, schematization.style.c));
 
-      expect(unalignedAfterMove).toHaveLength(0);
-    },
-  );
+    expect(unalignedAfterMove).toHaveLength(0);
+  });
 
-  test.fails(
-    "should preserve area and edge alignment through full schematization",
-    function () {
-      const dcel = Dcel.fromSubdivision(Subdivision.fromCoordinates(json));
-      const schematization = new CSchematization({
-        lambda: 1,
-        k: 8,
-        c: new CRegular(4),
-        staircaseEpsilon: 0.1,
-      });
-      const originalArea = dcel.getArea();
+  test.fails("should preserve area and edge alignment through full schematization", function () {
+    const dcel = Dcel.fromSubdivision(Subdivision.fromCoordinates(json));
+    const schematization = new CSchematization({
+      lambda: 1,
+      k: 8,
+      c: new CRegular(4),
+      staircaseEpsilon: 0.1,
+    });
+    const originalArea = dcel.getArea();
 
-      const result = schematization.run(dcel);
-      const finalArea = result.getArea();
+    const result = schematization.run(dcel);
+    const finalArea = result.getArea();
 
-      // Verify all edges are aligned to C
-      const unalignedCount = result.getHalfEdges().reduce((count, edge) => {
-        const angle = edge.getAngle();
-        if (
-          angle === undefined ||
-          !isAlignedToC(edge, schematization.style.c)
-        ) {
-          return count + 1;
-        }
-        return count;
-      }, 0);
+    // Verify all edges are aligned to C
+    const unalignedCount = result.getHalfEdges().reduce((count, edge) => {
+      const angle = edge.getAngle();
+      if (angle === undefined || !isAlignedToC(edge, schematization.style.c)) {
+        return count + 1;
+      }
+      return count;
+    }, 0);
 
-      expect(unalignedCount).toBe(0);
-      expect(finalArea).toBeCloseTo(originalArea, 1);
-    },
-  );
+    expect(unalignedCount).toBe(0);
+    expect(finalArea).toBeCloseTo(originalArea, 1);
+  });
 });

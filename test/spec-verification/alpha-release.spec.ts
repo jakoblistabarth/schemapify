@@ -30,43 +30,32 @@ describe("3-a. If the input data is not a region i.e., it contains features of t
 
 // TO-DO: get new GeoJSON parsing library. Needs to be commented out because not compatible with testing GUI.
 describe("4-a. If the input data is not a valid geoJSON the program shall exit and the user shall be informed.", function () {
-  test.fails(
-    "An error is thrown for a file containing polygons which are not closed.",
-    function () {
-      const json = JSON.parse(
-        readFileSync(path.resolve("test/data/invalid/not-closed.json"), "utf8"),
-      );
-      expect(() => Dcel.fromGeoJSON(json)).toThrow("invalid input");
-    },
-  );
+  test.fails("An error is thrown for a file containing polygons which are not closed.", function () {
+    const json = JSON.parse(
+      readFileSync(path.resolve("test/data/invalid/not-closed.json"), "utf8"),
+    );
+    expect(() => Dcel.fromGeoJSON(json)).toThrow("invalid input");
+  });
 
-  test.fails(
-    "An error is thrown for a file containing geometry with a loop edge (same start end endpoint).",
-    function () {
-      const json = JSON.parse(
-        readFileSync(
-          path.resolve("test/data/invalid/square-loop-edge.json"),
-          "utf8",
-        ),
-      );
-      expect(() => Dcel.fromGeoJSON(json)).toThrow("invalid input");
-    },
-  );
+  test.fails("An error is thrown for a file containing geometry with a loop edge (same start end endpoint).", function () {
+    const json = JSON.parse(
+      readFileSync(
+        path.resolve("test/data/invalid/square-loop-edge.json"),
+        "utf8",
+      ),
+    );
+    expect(() => Dcel.fromGeoJSON(json)).toThrow("invalid input");
+  });
 
-  test.fails(
-    "An error is thrown for a file containing geometry which violates the geoJSON specification's 'right-hand rule'.",
-    function () {
-      const json = JSON.parse(
-        readFileSync(
-          path.resolve(
-            "test/data/invalid/square-right-hand-rule-violation.json",
-          ),
-          "utf8",
-        ),
-      );
-      expect(() => Dcel.fromGeoJSON(json)).toThrow("invalid input");
-    },
-  );
+  test.fails("An error is thrown for a file containing geometry which violates the geoJSON specification's 'right-hand rule'.", function () {
+    const json = JSON.parse(
+      readFileSync(
+        path.resolve("test/data/invalid/square-right-hand-rule-violation.json"),
+        "utf8",
+      ),
+    );
+    expect(() => Dcel.fromGeoJSON(json)).toThrow("invalid input");
+  });
 });
 
 describe("5-a. If the input data is too detailed, i.e., if it exceeds a maximum number of edges or vertices, the program shall exit and the user shall be informed.", function () {

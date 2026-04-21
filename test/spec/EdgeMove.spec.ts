@@ -44,34 +44,31 @@ describe("createConfigurations()", function () {
 
 describe("doEdgeMove()", function () {
   // TO-DO: fix edge move first
-  test.fails(
-    "(recursive) on respective minimal configurations returns the expected contraction pair for the second, third, and fourth edge move.",
-    function () {
-      const json = JSON.parse(
-        fs.readFileSync(
-          path.resolve("test/data/shapes/smallest-contraction.json"),
-          "utf8",
-        ),
-      );
-      const dcel = Dcel.fromGeoJSON(json);
-      const configurations = new ConfigurationGenerator().run(dcel);
-      const ffb = new FaceFaceBoundaryListGenerator().run(dcel);
-      const contractionEdges: string[] = [];
+  test.fails("(recursive) on respective minimal configurations returns the expected contraction pair for the second, third, and fourth edge move.", function () {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/shapes/smallest-contraction.json"),
+        "utf8",
+      ),
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    const configurations = new ConfigurationGenerator().run(dcel);
+    const ffb = new FaceFaceBoundaryListGenerator().run(dcel);
+    const contractionEdges: string[] = [];
 
-      for (let index = 0; index < 10; index++) {
-        const pair = ffb.getMinimalConfigurationPair(configurations);
-        const contractionEdge = pair?.contraction.configuration.innerEdge;
-        if (contractionEdge) contractionEdges.push(contractionEdge?.uuid);
-        // TO-DO: fix this
-        // pair?.doEdgeMove(dcel, configurations, ffb.configurations);
-      }
-      expect(contractionEdges).toEqual([
-        "9.5|7->9.5|8",
-        "10|1->10|7",
-        "10|8->10|10",
-      ]);
-    },
-  );
+    for (let index = 0; index < 10; index++) {
+      const pair = ffb.getMinimalConfigurationPair(configurations);
+      const contractionEdge = pair?.contraction.configuration.innerEdge;
+      if (contractionEdge) contractionEdges.push(contractionEdge?.uuid);
+      // TO-DO: fix this
+      // pair?.doEdgeMove(dcel, configurations, ffb.configurations);
+    }
+    expect(contractionEdges).toEqual([
+      "9.5|7->9.5|8",
+      "10|1->10|7",
+      "10|8->10|10",
+    ]);
+  });
 
   test("for the test case 'smallest-contraction'", function () {
     const json = JSON.parse(
@@ -361,43 +358,36 @@ describe("Blocked contractions are correctly identified and prevented from edge 
 });
 
 describe("Thoroughly check edge DCEL after edge move", function () {
-  test.fails(
-    "After edge move, check that all half-edge pointers (twin, next, prev) are consistent and that the DCEL structure is valid.",
-    function () {
-      const input = Input.fromCoordinates(
-        "Simplest edge move",
-        JSON.parse(
-          fs.readFileSync(
-            path.resolve(
-              "test/data/shapes/simplest-edge-move.subdivision.json",
-            ),
-            "utf8",
-          ),
+  test.fails("After edge move, check that all half-edge pointers (twin, next, prev) are consistent and that the DCEL structure is valid.", function () {
+    const input = Input.fromCoordinates(
+      "Simplest edge move",
+      JSON.parse(
+        fs.readFileSync(
+          path.resolve("test/data/shapes/simplest-edge-move.subdivision.json"),
+          "utf8",
         ),
-      );
-      const dcel = input.getDcel();
+      ),
+    );
+    const dcel = input.getDcel();
 
-      const clone = dcel.clone();
-      const ffbList = new FaceFaceBoundaryListGenerator().run(clone);
-      const configurations = new ConfigurationGenerator().run(clone);
-      const { dcel: simplified } = new EdgeMoveProcessor(
-        ffbList,
-        configurations,
-      ).run(clone);
+    const clone = dcel.clone();
+    const ffbList = new FaceFaceBoundaryListGenerator().run(clone);
+    const configurations = new ConfigurationGenerator().run(clone);
+    const { dcel: simplified } = new EdgeMoveProcessor(
+      ffbList,
+      configurations,
+    ).run(clone);
 
-      expect(dcel.vertices.size).toBe(6);
-      expect(dcel.halfEdges.size).toBe(12);
-      expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(6);
-      expect(simplified.vertices.size).toBe(5);
-      expect(simplified.getVertices().length).toBe(5);
-      expect(simplified.halfEdges.size).toBeLessThan(dcel.halfEdges.size);
-      expect(simplified.getBoundedFaces()[0].getEdges().length).toBe(5);
-      expect(simplified.getBoundedFaces()[0].edge.getCycle()).not.toThrow();
-      expect(
-        simplified.getBoundedFaces()[0].edge.getCycle(false),
-      ).not.toThrow();
-    },
-  );
+    expect(dcel.vertices.size).toBe(6);
+    expect(dcel.halfEdges.size).toBe(12);
+    expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(6);
+    expect(simplified.vertices.size).toBe(5);
+    expect(simplified.getVertices().length).toBe(5);
+    expect(simplified.halfEdges.size).toBeLessThan(dcel.halfEdges.size);
+    expect(simplified.getBoundedFaces()[0].getEdges().length).toBe(5);
+    expect(simplified.getBoundedFaces()[0].edge.getCycle()).not.toThrow();
+    expect(simplified.getBoundedFaces()[0].edge.getCycle(false)).not.toThrow();
+  });
 });
 
 describe("At least 6 iterations shall be possible for diamond shape", function () {

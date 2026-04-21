@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "tabWidth": 2,
+  "useTabs": false,
+  "sortTailwindcss": {
+    "functions": ["clsx"]
+  },
+  "printWidth": 80,
+  "sortPackageJson": false,
+  "ignorePatterns": ["test/data/**/*.json"]
+}

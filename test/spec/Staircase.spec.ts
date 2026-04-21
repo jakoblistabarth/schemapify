@@ -330,27 +330,24 @@ describe("Staircases for a diamond rotated square of side length 1)", function (
 });
 
 describe("Floating point precision in staircase generation", function () {
-  test.fails(
-    "Checks potentially affected staircase vertex in triangle.json",
-    function () {
-      const json = JSON.parse(
-        readFileSync(path.resolve("test/data/shapes/triangle.json"), "utf8"),
-      );
+  test.fails("Checks potentially affected staircase vertex in triangle.json", function () {
+    const json = JSON.parse(
+      readFileSync(path.resolve("test/data/shapes/triangle.json"), "utf8"),
+    );
 
-      let dcel = Dcel.fromGeoJSON(json);
-      const schematization = new CSchematization();
+    let dcel = Dcel.fromGeoJSON(json);
+    const schematization = new CSchematization();
 
-      dcel = schematization.preProcess(dcel);
-      dcel = schematization.constrainAngles(dcel);
-      const collinearPointRemover = new CollinearPointProcessor();
-      dcel = collinearPointRemover.run(dcel);
+    dcel = schematization.preProcess(dcel);
+    dcel = schematization.constrainAngles(dcel);
+    const collinearPointRemover = new CollinearPointProcessor();
+    dcel = collinearPointRemover.run(dcel);
 
-      // Get all vertices
-      const vertices = Array.from(dcel.getVertices());
-      const affectedVertex = vertices.find(
-        (v) => v.x === 7.5 && v.y > 4.5 && v.y < 5.5,
-      );
-      expect(affectedVertex?.y).toBe(5);
-    },
-  );
+    // Get all vertices
+    const vertices = Array.from(dcel.getVertices());
+    const affectedVertex = vertices.find(
+      (v) => v.x === 7.5 && v.y > 4.5 && v.y < 5.5,
+    );
+    expect(affectedVertex?.y).toBe(5);
+  });
 });

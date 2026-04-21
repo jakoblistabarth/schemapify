@@ -6,8 +6,7 @@
     "source.organizeImports": "explicit"
   },
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "prettier.printWidth": 100,
+  "editor.defaultFormatter": "oxc.oxc-vscode",
   "todohighlight.keywords": [
     {
       "text": "TO-DO:",
@@ -22,9 +21,6 @@
       "borderRadius": "3px"
     }
   ],
-  "[xml]": {
-    "editor.defaultFormatter": "DotJoshJohnson.xml"
-  },
   "js/ts.tsdk.path": "node_modules/typescript/lib",
   "js/ts.tsdk.promptToUseWorkspaceVersion": true,
   "tailwindCSS.experimental.configFile": "app/globals.css",
