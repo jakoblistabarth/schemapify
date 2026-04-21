@@ -65,8 +65,6 @@ describe("SharedEdgeMove on smallest-contraction-1a.json", function () {
     dcel = schematization.preProcess(dcel);
     dcel = schematization.constrainAngles(dcel);
 
-    const validAngles = schematization.style.c.angles;
-
     let moveCount = 0;
     let lastUnalignedEdges:
       | ReturnType<typeof Array.prototype.filter>
