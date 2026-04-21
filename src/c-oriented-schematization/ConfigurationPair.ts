@@ -89,12 +89,8 @@ class ConfigurationPair {
 
     // Perform the appropriate variant of the edge move
     const movedPositions = this.shouldUseSharedEdgeMove()
-      ? this.doSharedEdgeMove(contractionEdge, compensationEdge, configurations)
-      : this.doRegularEdgeMove(
-          contractionEdge,
-          compensationEdge,
-          configurations,
-        );
+      ? this.doSharedEdgeMove(contractionEdge, compensationEdge)
+      : this.doRegularEdgeMove(contractionEdge, compensationEdge);
 
     if (!movedPositions) return;
 
@@ -182,12 +178,11 @@ class ConfigurationPair {
     });
 
     // Remove configurations for deleted edges
-    const staleCofigurationKeys: string[] = [];
-    configurations.forEach((config, key) => {
-      if (deletedEdges.has(config.innerEdge)) {
-        staleCofigurationKeys.push(key);
-      }
-    });
+    const staleCofigurationKeys = configurations
+      .entries()
+      .flatMap(([key, config]) =>
+        deletedEdges.has(config.innerEdge) ? [key] : [],
+      );
     staleCofigurationKeys.forEach((key) => configurations.delete(key));
 
     // Add configurations for new edges
@@ -205,36 +200,39 @@ class ConfigurationPair {
     // Reinitialize configurations whose outer edges were affected by the move.
     // When outer edges change, contraction areas may change, so we need to recalculate them.
     // Check all remaining edges' adjacent configurations (prev/next edges affect their outer edges)
-    const adjacentConfigsToReinit = new Set<Configuration>();
-    remainingEdges.forEach((edge) => {
-      // Check edges in the cycle around this edge
-      const walkEdge = (
-        e: HalfEdge | undefined,
-        visited: Set<HalfEdge> = new Set(),
-      ) => {
-        if (!e || visited.has(e)) return;
-        visited.add(e);
+    const adjacentConfigsToReinit = remainingEdges.reduce<Set<Configuration>>(
+      (configs, edge) => {
+        // Check edges in the cycle around this edge
+        const walkEdge = (
+          e: HalfEdge | undefined,
+          visited: Set<HalfEdge> = new Set(),
+        ) => {
+          if (!e || visited.has(e)) return;
+          visited.add(e);
 
-        const config = configurations.get(e.coordKey ?? "");
-        if (config) {
-          adjacentConfigsToReinit.add(config);
-        }
+          const config = configurations.get(e.coordKey ?? "");
+          if (config) {
+            configs.add(config);
+          }
 
-        // Walk in a limited chain (3-4 edges) to find nearby configurations
-        if (visited.size < 4) {
-          walkEdge(e.prev, visited);
-          walkEdge(e.next, visited);
-        }
-      };
+          // Walk in a limited chain (3-4 edges) to find nearby configurations
+          if (visited.size < 4) {
+            walkEdge(e.prev, visited);
+            walkEdge(e.next, visited);
+          }
+        };
 
-      walkEdge(edge);
-      if (edge.twin) walkEdge(edge.twin);
-    });
+        walkEdge(edge);
+        if (edge.twin) walkEdge(edge.twin);
+        return configs;
+      },
+      new Set<Configuration>(),
+    );
 
     // Reinitialize the contractions for affected configurations
-    adjacentConfigsToReinit.forEach((config) => {
-      config.initialize(configurations);
-    });
+    adjacentConfigsToReinit.forEach((config) =>
+      config.initialize(configurations),
+    );
 
     return { dcel, contractions, configurations };
   }
@@ -244,46 +242,21 @@ class ConfigurationPair {
    * Both edges move proportionally based on the area change they cause, converging towards a meeting point where area change is balanced.
    * @param contractionEdge An edge reference from the DCEL.
    * @param compensationEdge An edge reference from the DCEL.
-   * @param configurations Map of configurations to update after the move.
    * @returns An array of {@link Point}s representing the positions of the moved edges, which can be used to update the configurations.
    * Returns void if the edge move could not be performed due to incomplete DCEL links.
    */
-  doSharedEdgeMove(
-    contractionEdge: HalfEdge,
-    compensationEdge: HalfEdge,
-    configurations: Map<string, Configuration>,
-  ) {
+  doSharedEdgeMove(contractionEdge: HalfEdge, compensationEdge: HalfEdge) {
     const contractionHead = contractionEdge.head;
 
     if (!contractionHead) return;
 
-    // Step 1: Get the shared outer edge
+    // Get the shared outer edge
     const sharedEdge = this.findSharedOuterEdge();
     if (!sharedEdge) return;
 
-    const contractionOuterEdges = this.contraction.configuration
-      .getOuterEdges()
-      .filter((e) => e.coordKey !== sharedEdge.coordKey);
-    const compensationOuterEdges = this.compensation.configuration
-      .getOuterEdges()
-      .filter((e) => e.coordKey !== sharedEdge.coordKey);
-
-    if (
-      contractionOuterEdges.length === 0 ||
-      compensationOuterEdges.length === 0
-    )
-      return;
-
-    // Step 2: Get track lines from outer edges - these constrain movement endpoints
+    //Get track lines from outer edges - these constrain movement endpoints
     const contractionTracks = this.contraction.configuration.tracks;
     const compensationTracks = this.compensation.configuration.tracks;
-
-    if (contractionTracks.length === 0 || compensationTracks.length === 0)
-      return;
-
-    // Step 3: Calculate areas for proportional movement
-    const contractionArea = this.contraction.area;
-    if (!contractionArea) return;
 
     // Get edge segments for length calculations
     const contractionSegment = contractionEdge.toLineSegment();
@@ -292,7 +265,7 @@ class ConfigurationPair {
     const compensationSegment = compensationEdge.toLineSegment();
     if (!compensationSegment) return;
 
-    // Step 4: Find meeting point using constraint that edge angle is constant
+    // Find meeting point using constraint that edge angle is constant
     // Constraints:
     // 1. Shared endpoint A moves along shared edge: A = shared_start + s * shared_vector
     // 2. Non-shared endpoint B moves along track: B = track_start + t * track_vector
@@ -369,19 +342,15 @@ class ConfigurationPair {
       ? compensationEdge.tail.vector
       : compensationEdge.head.vector;
 
-    // Helper: 2D cross product (returns scalar)
-    const cross2D = (a: Vector2D, b: Vector2D): number =>
-      a.dx * b.dy - a.dy * b.dx;
-
     const contractionOffset = sharedStart.minus(contractionNonSharedStart);
-    const contractionA = cross2D(sharedVector, contractionEdgeDir); // coefficient of s
-    const contractionB = cross2D(contractionTrackVec, contractionEdgeDir); // coefficient of t_c
-    const contractionC = cross2D(contractionOffset, contractionEdgeDir); // constant
+    const contractionA = sharedVector.cross(contractionEdgeDir); // coefficient of s
+    const contractionB = contractionTrackVec.cross(contractionEdgeDir); // coefficient of t_c
+    const contractionC = contractionOffset.cross(contractionEdgeDir); // constant
 
     const compensationOffset = sharedStart.minus(compensationNonSharedStart);
-    const compensationA = cross2D(sharedVector, compensationEdgeDir);
-    const compensationB = cross2D(compensationTrackVec, compensationEdgeDir);
-    const compensationC = cross2D(compensationOffset, compensationEdgeDir);
+    const compensationA = sharedVector.cross(compensationEdgeDir);
+    const compensationB = compensationTrackVec.cross(compensationEdgeDir);
+    const compensationC = compensationOffset.cross(compensationEdgeDir);
 
     // Both edges have angle preservation constraints:
     // contractionA * s - contractionB * t_c = -contractionC
@@ -397,26 +366,26 @@ class ConfigurationPair {
     if (contractionLength === 0 || compensationLength === 0) return;
 
     // Area preservation coefficient
-    const areaPressrvationCoeff = contractionLength / compensationLength;
+    const areaPreservationCoeff = contractionLength / compensationLength;
 
     // Now solve the coupled system:
     // From constraint (1): t_c = (contractionA * s + contractionC) / contractionB
-    // From area preservation: t_comp = -areaPressrvationCoeff * t_c
+    // From area preservation: t_comp = -areaPreservationCoeff * t_c
     //
     // Substitute into constraint (2):
-    // compensationA * s - compensationB * (-areaPressrvationCoeff * (contractionA * s + contractionC) / contractionB) = -compensationC
+    // compensationA * s - compensationB * (-areaPreservationCoeff * (contractionA * s + contractionC) / contractionB) = -compensationC
     // Rearrange:
-    // compensationA * s + (compensationB * areaPressrvationCoeff * contractionA / contractionB) * s + (compensationB * areaPressrvationCoeff * contractionC / contractionB) = -compensationC
-    // (compensationA + compensationB * areaPressrvationCoeff * contractionA / contractionB) * s = -compensationC - (compensationB * areaPressrvationCoeff * contractionC / contractionB)
+    // compensationA * s + (compensationB * areaPreservationCoeff * contractionA / contractionB) * s + (compensationB * areaPreservationCoeff * contractionC / contractionB) = -compensationC
+    // (compensationA + compensationB * areaPreservationCoeff * contractionA / contractionB) * s = -compensationC - (compensationB * areaPreservationCoeff * contractionC / contractionB)
 
     // Simplified: solve the linear system for s
     // coeff_s * s = const_term
     const coeff_s =
       compensationA +
-      (compensationB * areaPressrvationCoeff * contractionA) / contractionB;
+      (compensationB * areaPreservationCoeff * contractionA) / contractionB;
     const const_term =
       -compensationC -
-      (compensationB * areaPressrvationCoeff * contractionC) / contractionB;
+      (compensationB * areaPreservationCoeff * contractionC) / contractionB;
 
     let s = 0;
     if (Math.abs(coeff_s) > EPSILON) {
@@ -431,7 +400,7 @@ class ConfigurationPair {
       t_contraction = (contractionA * s + contractionC) / contractionB;
     }
     // Apply area preservation
-    t_compensation = -areaPressrvationCoeff * t_contraction;
+    t_compensation = -areaPreservationCoeff * t_contraction;
 
     const meetingPoint = sharedStart.plus(sharedVector.times(s)).toPoint();
     // Move along the track by the calculated distances (allow negative movement)
@@ -465,47 +434,17 @@ class ConfigurationPair {
       newCompensationHead = newCompensationNonShared;
     }
 
-    // Step 7: Perform the actual edge moves using moveTo
-    const prevEdgeLineSegment = contractionEdge.prev?.toLineSegment();
-    const nextEdgeLineSegment = contractionEdge.next?.toLineSegment();
-    if (!prevEdgeLineSegment || !nextEdgeLineSegment) return;
+    // Perform the actual edge moves using moveTo
+    contractionEdge.moveTo(newContractionTail, newContractionHead);
+    compensationEdge.moveTo(newCompensationTail, newCompensationHead);
 
-    const movedPositions: Point[] = [];
-
-    const newContractionEdge = contractionEdge.moveTo(
+    // Return moved positions for configuration updates
+    return [
       newContractionTail,
       newContractionHead,
-    );
-
-    if (newContractionEdge && newContractionEdge.coordKey) {
-      const newConfiguration = new Configuration(newContractionEdge);
-      newConfiguration.initialize(configurations);
-      configurations.set(newContractionEdge.coordKey, newConfiguration);
-    }
-
-    // Add new positions of the moved contraction edge
-    movedPositions.push(newContractionTail);
-    movedPositions.push(newContractionHead);
-
-    const newCompensationEdge = compensationEdge.moveTo(
       newCompensationTail,
       newCompensationHead,
-    );
-
-    // If compensation edge became degenerate, we can't continue
-    if (!newCompensationEdge) return;
-
-    if (newCompensationEdge.coordKey) {
-      const newConfiguration = new Configuration(newCompensationEdge);
-      newConfiguration.initialize(configurations);
-      configurations.set(newCompensationEdge.coordKey, newConfiguration);
-    }
-
-    // Add new positions of the moved compensation edge
-    movedPositions.push(newCompensationTail);
-    movedPositions.push(newCompensationHead);
-
-    return movedPositions;
+    ];
   }
 
   /**
@@ -513,15 +452,10 @@ class ConfigurationPair {
    * This is the regular case, where the contraction and compensation can be performed independently.
    * @param contractionEdge An edge reference from the DCEL.
    * @param compensationEdge An edge reference from the DCEL.
-   * @param configurations Map of configurations to update after the move.
    * @returns An array of {@link Point}s representing the positions of the moved edges, which can be used to update the configurations.
    * Returns void if the edge move could not be performed due to incomplete DCEL links.
    */
-  doRegularEdgeMove(
-    contractionEdge: HalfEdge,
-    compensationEdge: HalfEdge,
-    configurations: Map<string, Configuration>,
-  ) {
+  doRegularEdgeMove(contractionEdge: HalfEdge, compensationEdge: HalfEdge) {
     const contractionHead = contractionEdge.head;
     if (!contractionHead) return;
 
@@ -547,27 +481,21 @@ class ConfigurationPair {
     const newHead = compensationEdge.head?.vector.plus(normal).toPoint();
     if (!newHead) return;
 
-    // 2.3 Do the contraction and the compensation
+    // 2.4 Do the contraction and the compensation
     const prevEdgeLineSegment = contractionEdge.prev?.toLineSegment();
     const nextEdgeLineSegment = contractionEdge.next?.toLineSegment();
     if (!prevEdgeLineSegment || !nextEdgeLineSegment) return;
 
-    const newEdge = pointA.isOnLineSegment(prevEdgeLineSegment)
-      ? contractionEdge.moveTo(pointA, pointB)
-      : contractionEdge.moveTo(pointB, pointA);
-
-    if (newEdge && newEdge.coordKey) {
-      const newConfiguration = new Configuration(newEdge);
-      newConfiguration.initialize(configurations);
-      configurations.set(newEdge.coordKey, newConfiguration);
-      // TO-DO: add newEdge to face-face-boundary-list
-      // newEdge?.dcel.faceFaceBoundaryList?.addEdge(newEdge);
+    if (pointA.isOnLineSegment(prevEdgeLineSegment)) {
+      contractionEdge.moveTo(pointA, pointB);
+    } else {
+      contractionEdge.moveTo(pointB, pointA);
     }
 
-    const movedPositions: Point[] = [];
-
-    movedPositions.push(contractionEdge.tail.toPoint());
-    movedPositions.push(contractionHead.toPoint());
+    const movedPositions = [
+      contractionEdge.tail.toPoint(),
+      contractionHead.toPoint(),
+    ];
 
     const compensationAfterMove = compensationEdge.moveTo(newTail, newHead);
 
