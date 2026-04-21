@@ -680,20 +680,17 @@ class Dcel {
     // Create a fresh DCEL from the subdivision representation
     const clone = this.toSubdivision().toDcel();
 
-    // Helper to build a coordinate-key for vertices
-    const coordKey = (x: number, y: number) => `${x}|${y}`;
-
     // Map original vertices by coordinate -> id
     const origVertexIdByCoord = new Map<string, number>();
     this.getVertices().forEach((v) => {
       if (typeof v.id === "number" && v.id > 0)
-        origVertexIdByCoord.set(coordKey(v.x, v.y), v.id);
+        origVertexIdByCoord.set(Vertex.getKey(v.x, v.y), v.id);
     });
 
     // Reassign ids on cloned vertices to match original where possible
     const newVertices = new Map<number, Vertex>();
     clone.getVertices().forEach((v) => {
-      const key = coordKey(v.x, v.y);
+      const key = Vertex.getKey(v.x, v.y);
       const origId = origVertexIdByCoord.get(key);
       if (typeof origId === "number" && origId > 0) v.id = origId;
       else v.id = clone.nextVertexId++;
@@ -707,10 +704,7 @@ class Dcel {
       const t = e.tail;
       const h = e.head;
       if (t && h && typeof e.id === "number" && e.id > 0) {
-        origEdgeIdByCoords.set(
-          `${coordKey(t.x, t.y)}->${coordKey(h.x, h.y)}`,
-          e.id,
-        );
+        origEdgeIdByCoords.set(`${HalfEdge.getKey(t, h)}`, e.id);
       }
     });
 
@@ -720,7 +714,7 @@ class Dcel {
       const t = e.tail;
       const h = e.head;
       if (!t || !h) return;
-      const coordsKey = `${coordKey(t.x, t.y)}->${coordKey(h.x, h.y)}`;
+      const coordsKey = `${HalfEdge.getKey(t, h)}`;
       const origId = origEdgeIdByCoords.get(coordsKey);
       if (typeof origId === "number" && origId > 0) e.id = origId;
       else e.id = clone.nextHalfEdgeId++;
@@ -737,10 +731,7 @@ class Dcel {
       const t = e.tail;
       const h = e.head;
       if (!t || !h) return;
-      origFaceIdByEdgeCoords.set(
-        `${coordKey(t.x, t.y)}->${coordKey(h.x, h.y)}`,
-        f.id,
-      );
+      origFaceIdByEdgeCoords.set(`${HalfEdge.getKey(t, h)}`, f.id);
     });
 
     // Reassign ids on cloned faces where possible
@@ -750,7 +741,7 @@ class Dcel {
       const t = e.tail;
       const h = e.head;
       if (!t || !h) return;
-      const coordsKey = `${coordKey(t.x, t.y)}->${coordKey(h.x, h.y)}`;
+      const coordsKey = `${HalfEdge.getKey(t, h)}`;
       const origId = origFaceIdByEdgeCoords.get(coordsKey);
       if (typeof origId === "number" && origId > 0) f.id = origId;
       else f.id = clone.nextFaceId++;
