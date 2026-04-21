@@ -193,7 +193,7 @@ class ConfigurationPair {
     // Add configurations for new edges
     newEdges.forEach((edge) => {
       if (
-        edge.endpoints.every((vertex) => vertex.edges.length <= 3) &&
+        edge.endpoints.every((vertex) => vertex.degree <= 3) &&
         edge.coordKey
       ) {
         const newConfiguration = new Configuration(edge);
@@ -647,7 +647,7 @@ class ConfigurationPair {
     involvedEdges.forEach((edge) => {
       if (!edge) return;
       if (
-        edge.endpoints.every((vertex) => vertex.edges.length <= 3) &&
+        edge.endpoints.every((vertex) => vertex.degree <= 3) &&
         edge.coordKey
       ) {
         const newConfiguration = new Configuration(edge);

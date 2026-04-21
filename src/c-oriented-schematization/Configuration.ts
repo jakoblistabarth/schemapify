@@ -140,7 +140,7 @@ class Configuration {
    * @returns A boolean indicating if the configuration has a junction.
    */
   get hasJunction() {
-    return this.innerEdge.endpoints.some((p) => p.edges.length > 2);
+    return this.innerEdge.endpoints.some((p) => p.degree > 2);
   }
 
   /**

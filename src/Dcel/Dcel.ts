@@ -475,7 +475,7 @@ class Dcel {
 
       // For every pair of half-edges e1, e2 in clockwise order, assign e1->twin->next = e2 and e2->previous = e1->twin.
       vertex.edges.forEach((e1, idx) => {
-        const e2 = vertex.edges[(idx + 1) % vertex.edges.length];
+        const e2 = vertex.edges[(idx + 1) % vertex.degree];
         if (!e1.twin) return;
         e1.twin.next = e2;
         e2.prev = e1.twin;

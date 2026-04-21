@@ -25,11 +25,11 @@ describe("createConfigurations()", function () {
 
     const verticesDegree4 = dcelConstrained
       .getVertices()
-      .filter((v) => v.edges.length === 4);
+      .filter((v) => v.degree === 4);
 
     const edgesDegree4 = dcelConstrained
       .getHalfEdges()
-      .filter((e) => e.endpoints?.some((v) => v.edges.length > 3));
+      .filter((e) => e.endpoints?.some((v) => v.degree > 3));
 
     const configurations = new ConfigurationGenerator().run(dcelConstrained);
     const configurationCount = configurations.size;
@@ -220,9 +220,7 @@ describe("Triangle.json edge move verification after one edge move", function ()
 
   test("Edge move should not create degree-4 vertices for simple polygon boundary", function () {
     // Check for degree-4+ vertices
-    const highDegreeVertices = dcel
-      .getVertices()
-      .filter((v) => v.edges.length > 2);
+    const highDegreeVertices = dcel.getVertices().filter((v) => v.degree > 2);
 
     // All vertices in simple polygon boundary should have degree 2
     expect(highDegreeVertices).toHaveLength(0);

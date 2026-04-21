@@ -35,6 +35,14 @@ class Vertex extends Point {
   }
 
   /**
+   * Gets the number of incident HalfEdges of the Vertex.
+   * @returns The degree of the {@link Vertex}.
+   */
+  get degree() {
+    return this.edges.length;
+  }
+
+  /**
    * Gets the distance between the Vertex to another.
    * @param p The other {@link Vertex}.
    * @returns The distance.
@@ -78,7 +86,7 @@ class Vertex extends Point {
    */
   remove(face?: Face) {
     if (!this.dcel) return;
-    else if (this.edges.length > 2)
+    else if (this.degree > 2)
       throw new Error(
         "only vertices of degree 2 or less can be removed, otherwise the topology would be corrupted",
       );

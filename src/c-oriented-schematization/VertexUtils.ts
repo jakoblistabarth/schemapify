@@ -16,7 +16,7 @@ export const getEdgesInSector = (vertex: Vertex, sector: Sector) => {
 };
 
 export const isCollinearVertex = (vertex: Vertex) => {
-  if (vertex.edges.length !== 2) return false;
+  if (vertex.degree !== 2) return false;
   const [p, q] = vertex.edges.map((e) => e.head);
   if (!p || !q) return undefined;
   const line = new LineSegment(p, q);

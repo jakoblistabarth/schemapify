@@ -17,7 +17,7 @@ class ConfigurationGenerator implements Generator {
       .getHalfEdges()
       .reduce<Map<string, Configuration>>((acc, edge) => {
         if (
-          edge.endpoints.some((vertex) => vertex.edges.length > 3) ||
+          edge.endpoints.some((vertex) => vertex.degree > 3) ||
           !edge.coordKey
         ) {
           return acc;

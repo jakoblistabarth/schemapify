@@ -31,7 +31,7 @@ const getTooltipContent = (hoverInfo: HoverInfo, activeSnapshot?: Snapshot) => {
       type: "Vertex",
       metadata: {
         Coordinates: object.xy.join("·"),
-        Degree: object.edges.length,
+        Degree: object.degree,
         Significant: isSignificant,
       },
     };
