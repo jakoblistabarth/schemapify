@@ -18,7 +18,7 @@ describe("c4-edge-move.subdivision.json - New Direction Debug", function () {
     ),
   );
 
-  test.fails("should not introduce new orientations after first edge move", function () {
+  test("should not introduce new orientations after first edge move", function () {
     const dcel = Dcel.fromSubdivision(Subdivision.fromCoordinates(json));
     const schematization = new CSchematization({
       c: new CRegular(4),

@@ -284,18 +284,21 @@ class ConfigurationPair {
     const sharedEdgeHead = sharedEdge.head;
 
     const contractionHeadOnShared =
-    contractionHead.equals(sharedEdgeTail) ||
-      (sharedEdgeHead &&
-        contractionHead.equals(sharedEdgeHead));
+      contractionHead.equals(sharedEdgeTail) ||
+      (sharedEdgeHead && contractionHead.equals(sharedEdgeHead));
     const compensationHeadOnShared =
-      (compensationEdge.head?.equals(sharedEdgeTail)) ||
+      compensationEdge.head?.equals(sharedEdgeTail) ||
       (sharedEdgeHead &&
         compensationEdge.head &&
         compensationEdge.head.equals(sharedEdgeHead));
 
-    const contractionTrack = contractionTracks[contractionHeadOnShared ? 1 : 0];
-    const compensationTrack =
-      compensationTracks[compensationHeadOnShared ? 1 : 0];
+    // for each involved edge get the track for which the shared edge is not part of
+    const contractionTrack = contractionTracks.find(
+      (track) => track && !sharedSegment.isOnLine(track),
+    );
+    const compensationTrack = compensationTracks.find(
+      (track) => track && !sharedSegment.isOnLine(track),
+    );
 
     if (!contractionTrack || !compensationTrack) return;
 
