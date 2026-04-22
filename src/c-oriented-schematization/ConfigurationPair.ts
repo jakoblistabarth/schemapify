@@ -283,20 +283,15 @@ class ConfigurationPair {
     const sharedEdgeTail = sharedEdge.tail;
     const sharedEdgeHead = sharedEdge.head;
 
-    // Compare by coordinates, not by object reference
     const contractionHeadOnShared =
-      (contractionHead.xy[0] === sharedEdgeTail.xy[0] &&
-        contractionHead.xy[1] === sharedEdgeTail.xy[1]) ||
+    contractionHead.equals(sharedEdgeTail) ||
       (sharedEdgeHead &&
-        contractionHead.xy[0] === sharedEdgeHead.xy[0] &&
-        contractionHead.xy[1] === sharedEdgeHead.xy[1]);
+        contractionHead.equals(sharedEdgeHead));
     const compensationHeadOnShared =
-      (compensationEdge.head?.xy[0] === sharedEdgeTail.xy[0] &&
-        compensationEdge.head?.xy[1] === sharedEdgeTail.xy[1]) ||
+      (compensationEdge.head?.equals(sharedEdgeTail)) ||
       (sharedEdgeHead &&
         compensationEdge.head &&
-        compensationEdge.head.xy[0] === sharedEdgeHead.xy[0] &&
-        compensationEdge.head.xy[1] === sharedEdgeHead.xy[1]);
+        compensationEdge.head.equals(sharedEdgeHead));
 
     const contractionTrack = contractionTracks[contractionHeadOnShared ? 1 : 0];
     const compensationTrack =
