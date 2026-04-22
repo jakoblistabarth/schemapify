@@ -1,4 +1,5 @@
 import { EPSILON, TWO_PI } from "./contstants";
+import Line from "./Line";
 import LineSegment from "./LineSegment";
 import Polygon from "./Polygon";
 import Vector2D from "./Vector2D";
@@ -156,6 +157,17 @@ class Point {
       Math.abs(this.x - point.x) < EPSILON &&
       Math.abs(this.y - point.y) < EPSILON
     );
+  }
+
+  /**
+   * Tests whether the point lies on a given (infinite) line.
+   * More specifically, it checks whether the point satisfies the line's equation.
+   * @param line The {@link Line} to check for collinearity with the point.
+   * @returns A boolean, indicating whether or not the point lies on the line.
+   */
+  isOnLine(line: Line) {
+    const [A, B, C] = line.abc;
+    return Math.abs(A * this.x + B * this.y - C) < EPSILON;
   }
 }
 

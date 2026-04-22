@@ -1,3 +1,4 @@
+import Line from "./Line";
 import Point from "./Point";
 import Polygon from "./Polygon";
 import Vector2D from "./Vector2D";
@@ -79,6 +80,16 @@ class LineSegment {
       if (intersection) acc.push(intersection);
       return acc;
     }, []);
+  }
+
+  /**
+   * Checks whether the line segment lies on the given (infinite) line.
+   * More specifically, it checks whether both endpoints of the line segment lie on the line.
+   * @param line The {@link Line} to check for collinearity with the line segment.
+   * @returns A boolean, indicating whether or not the line segment lies on the line.
+   */
+  isOnLine(line: Line) {
+    return this.endPoint1.isOnLine(line) && this.endPoint2.isOnLine(line);
   }
 }
 

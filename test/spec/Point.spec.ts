@@ -1,4 +1,5 @@
 import { EPSILON } from "@/src/geometry/contstants";
+import Line from "@/src/geometry/Line";
 import LineSegment from "@/src/geometry/LineSegment";
 import Point from "@/src/geometry/Point";
 import Polygon from "@/src/geometry/Polygon";
@@ -190,5 +191,21 @@ describe("isOnLineSegments()", function () {
     expect(pointC.isOnLineSegments(lineSegments)).toBe(true);
     expect(pointD.isOnLineSegments(lineSegments)).toBe(true);
     expect(pointE.isOnLineSegments(lineSegments)).toBe(false);
+  });
+});
+
+describe("isOnLine()", function () {
+  test("returns true if the point is on the (infinite) line", function () {
+    const line = new Line(new Point(0, 0), Math.PI / 4);
+    const point = new Point(1, 1);
+    const point2 = new Point(-2, -2);
+    const point3 = new Point(0, 0);
+    const point4 = new Point(1, 0);
+    const point5 = new Point(0, 0.00001);
+    expect(point.isOnLine(line)).toBe(true);
+    expect(point2.isOnLine(line)).toBe(true);
+    expect(point3.isOnLine(line)).toBe(true);
+    expect(point4.isOnLine(line)).toBe(false);
+    expect(point5.isOnLine(line)).toBe(false);
   });
 });

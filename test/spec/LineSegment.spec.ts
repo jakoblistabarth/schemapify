@@ -1,3 +1,4 @@
+import Line from "@/src/geometry/Line";
 import LineSegment from "@/src/geometry/LineSegment";
 import Point from "@/src/geometry/Point";
 import Polygon from "@/src/geometry/Polygon";
@@ -89,5 +90,20 @@ describe("intersectsPolygon()", function () {
       new Point(0, 0),
       new Point(0, 0),
     ]);
+  });
+});
+
+describe("isOnLine()", function () {
+  test("returns true if the line segment is on the line", function () {
+    const line = new Line(new Point(0, 0), Math.PI / 4);
+    const segment = new LineSegment(new Point(0, 0), new Point(1, 1));
+    const segment2 = new LineSegment(new Point(-1, -1), new Point(-2, -2));
+    const segment3 = new LineSegment(
+      new Point(-100, -100),
+      new Point(100, 100),
+    );
+    expect(segment.isOnLine(line)).toBe(true);
+    expect(segment2.isOnLine(line)).toBe(true);
+    expect(segment3.isOnLine(line)).toBe(true);
   });
 });
