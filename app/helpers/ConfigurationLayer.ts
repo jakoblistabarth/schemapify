@@ -2,10 +2,12 @@ import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair
 import Contraction from "@/src/c-oriented-schematization/Contraction";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
 import HalfEdge from "@/src/Dcel/HalfEdge";
+import Line from "@/src/geometry/Line";
 import Ring from "@/src/geometry/Ring";
 import { CompositeLayer, LayersList } from "@deck.gl/core";
 import { PathStyleExtension } from "@deck.gl/extensions";
 import {
+  LineLayer,
   PathLayer,
   PolygonLayer,
   ScatterplotLayer,
@@ -97,6 +99,19 @@ export default class ConfigurationLayer extends CompositeLayer<ConfigurationLaye
           getWidth: 15,
           widthUnits: "pixels",
           capRounded: true,
+        }),
+      ),
+      new LineLayer(
+        this.getSubLayerProps({
+          id: `track-layer`,
+          data: this.contractions
+            .map(([, contraction]) => contraction.configuration.tracks)
+            .flat(),
+          getSourcePosition: (l: Line) => l.getPointOnLine(-1e4).xy,
+          getTargetPosition: (l: Line) => l.getPointOnLine(1e4).xy,
+          getColor: [0, 0, 255, 10],
+          getWidth: 2,
+          widthUnits: "pixels",
         }),
       ),
     ];
