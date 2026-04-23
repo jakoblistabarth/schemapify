@@ -1,6 +1,9 @@
 import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
 import Contraction from "@/src/c-oriented-schematization/Contraction";
-import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
+import {
+  ConfigurationPurpose,
+  ContractionType,
+} from "@/src/c-oriented-schematization/ContractionType";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Line from "@/src/geometry/Line";
 import Ring from "@/src/geometry/Ring";
@@ -25,10 +28,14 @@ type ConfigurationLayerProps = {
 export default class ConfigurationLayer extends CompositeLayer<ConfigurationLayerProps> {
   static layerName = "ConfigurationLayer";
 
+  get pair() {
+    return this.props.data;
+  }
+
   get contractions() {
     return Object.entries(this.props.data).filter(
       ([, d]) => d != undefined,
-    ) as [string, Contraction][];
+    ) as [ConfigurationPurpose, Contraction][];
   }
 
   renderLayers(): LayersList | null {
@@ -114,6 +121,24 @@ export default class ConfigurationLayer extends CompositeLayer<ConfigurationLaye
           widthUnits: "pixels",
         }),
       ),
+      this.pair instanceof ConfigurationPair &&
+      this.pair.shouldUseSharedEdgeMove()
+        ? new ScatterplotLayer(
+            this.getSubLayerProps({
+              id: "meeting-point-layer",
+              data: [
+                { position: this.pair.getMeetingPoint()?.meetingPoint.xy },
+              ],
+              getRadius: 12,
+              radiusUnits: "pixels",
+              getLineColor: [0, 0, 255],
+              filled: false,
+              stroked: true,
+              getLineWidth: 1,
+              lineWidthUnits: "pixels",
+            }),
+          )
+        : null,
     ];
   }
 }
