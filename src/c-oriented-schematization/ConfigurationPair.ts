@@ -1,8 +1,8 @@
 import Dcel from "../Dcel/Dcel";
 import HalfEdge from "../Dcel/HalfEdge";
 import { EPSILON } from "../geometry/contstants";
+import Line from "../geometry/Line";
 import Point from "../geometry/Point";
-import Vector2D from "../geometry/Vector2D";
 import Configuration from "./Configuration";
 import Contraction from "./Contraction";
 import { ConfigurationPurpose, ContractionType } from "./ContractionType";
@@ -119,32 +119,15 @@ class ConfigurationPair {
     } = tracks;
     if (!contractionTrack || !compensationTrack) return;
 
-    const contractionTrackVec = new Vector2D(
-      Math.cos(contractionTrack.angle),
-      Math.sin(contractionTrack.angle),
-    );
-    const compensationTrackVec = new Vector2D(
-      Math.cos(compensationTrack.angle),
-      Math.sin(compensationTrack.angle),
-    );
-
-    const contractionOffset = sharedStart.minus(contractionNonSharedStart);
-    const contractionA = sharedVector.cross(contractionEdgeDir); // coefficient of s
-    const contractionB = contractionTrackVec.cross(contractionEdgeDir); // coefficient of t_c
-    const contractionC = contractionOffset.cross(contractionEdgeDir); // constant
-
-    const compensationOffset = sharedStart.minus(compensationNonSharedStart);
-    const compensationA = sharedVector.cross(compensationEdgeDir);
-    const compensationB = compensationTrackVec.cross(compensationEdgeDir);
-    const compensationC = compensationOffset.cross(compensationEdgeDir);
-
-    // Both edges have angle preservation constraints:
-    // contractionA * s - contractionB * t_c = -contractionC
-    // compensationA * s - compensationB * t_comp = -compensationC
-    //
-    // Additionally, area preservation links t_c and t_comp:
-    // For proportional area change: length_c * t_c = -length_comp * t_comp
-    // This gives: t_comp = -(length_c / length_comp) * t_c
+    // Each moving edge is a line with constant angle (original edge angle).
+    // We solve for the intersection of the moving edge with the two track lines.
+    const contractionEdgeAngle = contractionEdge.getAngle();
+    const compensationEdgeAngle = compensationEdge.getAngle();
+    if (
+      contractionEdgeAngle === undefined ||
+      compensationEdgeAngle === undefined
+    )
+      return;
 
     const contractionSegmentLength = contractionEdge.toLineSegment()?.length;
     const compensationSegmentLength = compensationEdge.toLineSegment()?.length;
@@ -157,35 +140,86 @@ class ConfigurationPair {
     )
       return;
 
-    const areaPreservationCoeff =
-      contractionSegmentLength / compensationSegmentLength;
+    // Area change for an edge move with constant angle (parallelogram/trapezoid area):
+    // Area = edgeLength * distance_perpendicular
+    // distance_perpendicular = actual_distance_along_shared_edge * sin(angle_between_shared_and_edge)
+    // However, it's simpler to relate the displacement 's' along the shared edge to area.
 
-    const coeff_s =
-      compensationA +
-      (compensationB * areaPreservationCoeff * contractionA) / contractionB;
-    const const_term =
-      -compensationC -
-      (compensationB * areaPreservationCoeff * contractionC) / contractionB;
+    const sharedAngle = Math.atan2(sharedVector.dy, sharedVector.dx);
+    const sinPhiContraction = Math.abs(
+      Math.sin(contractionEdgeAngle - sharedAngle),
+    );
+    const sinPhiCompensation = Math.abs(
+      Math.sin(compensationEdgeAngle - sharedAngle),
+    );
 
-    let s = 0;
-    if (Math.abs(coeff_s) > EPSILON) {
-      s = const_term / coeff_s;
-    }
+    // For proportional area change along the shared edge:
+    // displacement_contraction * length_contraction * sin(phi_contraction) = -displacement_compensation * length_compensation * sin(phi_compensation)
+    // Note: This assumes points meet from opposite directions on the shared segment.
 
-    let t_contraction = 0;
-    if (Math.abs(contractionB) > EPSILON) {
-      t_contraction = (contractionA * s + contractionC) / contractionB;
-    }
-    const t_compensation = -areaPreservationCoeff * t_contraction;
+    const areaWeightContraction = contractionSegmentLength * sinPhiContraction;
+    const areaWeightCompensation =
+      compensationSegmentLength * sinPhiCompensation;
+
+    if (areaWeightContraction < EPSILON || areaWeightCompensation < EPSILON)
+      return;
+
+    // We want the meeting point M such that area changes balance.
+    // M = sharedStart + s * sharedVector
+    // M must be reachable by both moving edges starting from their current shared endpoint.
+    // The current shared endpoint for contraction is A_start.
+    // The current shared endpoint for compensation is B_start (which is same as A_start).
+    const sharedEndpoint = this.hasHeadOnSharedEdge(
+      ConfigurationPurpose.CONTRACTION,
+    )
+      ? contractionEdge.head?.vector
+      : contractionEdge.tail.vector;
+
+    if (!sharedEndpoint) return;
+
+    // Calculate current 's' for the shared endpoint
+    const currentS =
+      sharedEndpoint.minus(sharedStart).dot(sharedVector) /
+      Math.pow(sharedVector.magnitude, 2);
+
+    // To balance area changes, we solve for the meeting 's'.
+    // If the whole shared edge collapses to a point M, the contraction edge moves from shared endpoint to M
+    // and compensation edge moves from shared endpoint to M.
+    // However, they already share that point. The "move" in a shared edge move is actually
+    // collapsing the shared segment itself.
+
+    // The shared segment endpoints in 's' space are 0 and 1.
+    // The inner edges share ONE of these endpoints. They move towards the OTHER.
+    const startS = Math.abs(currentS - 0) < EPSILON ? 0 : 1;
+    const targetS = 1 - startS;
+
+    // To preserve area, we don't necessarily go all the way to targetS.
+    // We find s such that (s - startS) * weight_c = -(s - startS) * weight_comp ?
+    // No, that's for regular moves. In shared moves, they move together.
+    // The "meeting point" is where the segment shrinks to.
+    // If weight_c == weight_comp, s is the midpoint (0.5).
+    const s =
+      (areaWeightContraction * startS + areaWeightCompensation * targetS) /
+      (areaWeightContraction + areaWeightCompensation);
+
+    if (s < -EPSILON || s > 1 + EPSILON) return;
 
     const meetingPoint = sharedStart.plus(sharedVector.times(s)).toPoint();
 
-    const newContractionPoint = contractionNonSharedStart
-      .plus(contractionTrackVec.times(t_contraction))
-      .toPoint();
-    const newCompensationPoint = compensationNonSharedStart
-      .plus(compensationTrackVec.times(t_compensation))
-      .toPoint();
+    // Now find the new positions for the non-shared endpoints.
+    // These must result in edges that are parallel to the original ones.
+    const movingEdgeContraction = new Line(meetingPoint, contractionEdgeAngle);
+    const movingEdgeCompensation = new Line(
+      meetingPoint,
+      compensationEdgeAngle,
+    );
+
+    const newContractionPoint =
+      movingEdgeContraction.intersectsLine(contractionTrack);
+    const newCompensationPoint =
+      movingEdgeCompensation.intersectsLine(compensationTrack);
+
+    if (!newContractionPoint || !newCompensationPoint) return;
 
     return {
       s,

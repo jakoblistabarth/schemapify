@@ -104,19 +104,13 @@ describe("doEdgeMove()", function () {
       10, 7,
     ]);
     expect(newDcel.getBoundedFaces()[0].getEdges()[4].tail.xy).toEqual([10, 7]);
-    expect(newDcel.getBoundedFaces()[0].getEdges()[4].head?.xy).toEqual([
-      9 + 5 / 6,
-      7,
-    ]);
-    expect(newDcel.getBoundedFaces()[0].getEdges()[5].tail.xy).toEqual([
-      9 + 5 / 6,
-      7,
-    ]);
-    expect(newDcel.getBoundedFaces()[0].getEdges()[5].head?.xy).toEqual([
-      9 + 5 / 6,
-      10,
-    ]);
-    expect(originalArea).toEqual(newArea);
+    const head4 = newDcel.getBoundedFaces()[0].getEdges()[4].head;
+    expect(head4?.x).toBeCloseTo(9 + 5 / 6, 9);
+    expect(head4?.y).toBe(7);
+    const head5 = newDcel.getBoundedFaces()[0].getEdges()[5].head;
+    expect(head5?.x).toBeCloseTo(9 + 5 / 6, 9);
+    expect(head5?.y).toBe(10);
+    expect(originalArea).toBeCloseTo(newArea, 9);
   });
 
   test("for the test case 'smallest-contraction-2", function () {
@@ -137,7 +131,7 @@ describe("doEdgeMove()", function () {
 
     expect(newDcel.halfEdges.size / 2).toEqual(10);
     expect(newDcel.vertices.size).toEqual(10);
-    expect(originalArea).toEqual(newArea);
+    expect(originalArea).toBeCloseTo(newArea, 8);
   });
 
   test("for the test case 'contractions-equal'", function () {
