@@ -7,6 +7,9 @@
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
   "todohighlight.keywords": [
     {
       "text": "TO-DO:",
