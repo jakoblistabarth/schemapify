@@ -1,6 +1,7 @@
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import { isAlignedToC } from "@/src/c-oriented-schematization/HalfEdgeUtils";
 import Dcel from "@/src/Dcel/Dcel";
+import { DECIMAL_SCALE } from "@/src/geometry/constants";
 import fs from "fs";
 import path from "path";
 import { describe, expect, test } from "vitest";
@@ -49,7 +50,7 @@ describe("unaligned-deviating-2.json - Geometry Progression", function () {
         initialArea > 0 ? (areaLost / initialArea) * 100 : 0;
 
       expect(unalignedCount).toBe(0);
-      expect(finalArea).toBeCloseTo(8);
+      expect(finalArea).toBeCloseTo(8, DECIMAL_SCALE);
       expect(areaLostPercent).toBeLessThan(0.1); // Arbitrary threshold to catch major collapses
     }
   });

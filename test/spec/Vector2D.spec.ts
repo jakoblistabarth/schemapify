@@ -1,3 +1,4 @@
+import { DECIMAL_SCALE } from "@/src/geometry/constants";
 import Vector2D from "@/src/geometry/Vector2D";
 import { describe, expect, test } from "vitest";
 
@@ -48,7 +49,13 @@ describe("The getter unitVector() returns the correct vector", function () {
   test("for a simple vector", function () {
     expect(new Vector2D(2, 0).unitVector).toEqual(new Vector2D(1, 0));
     expect(new Vector2D(-2, 0).unitVector).toEqual(new Vector2D(-1, 0));
-    expect(new Vector2D(2, 4).unitVector.dx).toBeCloseTo(0.44721);
-    expect(new Vector2D(2, 4).unitVector.dy).toBeCloseTo(0.89443);
+    expect(new Vector2D(2, 4).unitVector.dx).toBeCloseTo(
+      0.4472135,
+      DECIMAL_SCALE,
+    );
+    expect(new Vector2D(2, 4).unitVector.dy).toBeCloseTo(
+      0.8944271,
+      DECIMAL_SCALE,
+    );
   });
 });

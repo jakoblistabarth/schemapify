@@ -1,5 +1,6 @@
 import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
+import { DECIMAL_SCALE } from "@/src/geometry/constants";
 import Subdivision from "@/src/geometry/Subdivision";
 import fs from "fs";
 import * as geojson from "geojson";
@@ -432,6 +433,6 @@ describe("getArea()", function () {
 
   test("returns the correct area of Austria.", function () {
     const dcel = Dcel.fromSubdivision(new Subdivision([shape]));
-    expect(dcel.getArea()).toBeCloseTo(83688201106.428);
+    expect(dcel.getArea()).toBeCloseTo(83688201106.4284, DECIMAL_SCALE);
   });
 });

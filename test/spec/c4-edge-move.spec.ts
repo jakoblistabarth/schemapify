@@ -5,6 +5,7 @@ import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import { isAlignedToC } from "@/src/c-oriented-schematization/HalfEdgeUtils";
 import Dcel from "@/src/Dcel/Dcel";
+import { DECIMAL_SCALE } from "@/src/geometry/constants";
 import Subdivision from "@/src/geometry/Subdivision";
 import fs from "fs";
 import path from "path";
@@ -68,6 +69,6 @@ describe("c4-edge-move.subdivision.json - New Direction Debug", function () {
     }, 0);
 
     expect(unalignedCount).toBe(0);
-    expect(finalArea).toBeCloseTo(originalArea, 1);
+    expect(finalArea).toBeCloseTo(originalArea, DECIMAL_SCALE);
   });
 });

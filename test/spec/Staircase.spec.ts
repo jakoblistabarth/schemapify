@@ -5,7 +5,7 @@ import { Orientation } from "@/src/c-oriented-schematization/HalfEdgeClassGenera
 import { style } from "@/src/c-oriented-schematization/schematization.style";
 import { getClosestAssociatedAngle } from "@/src/c-oriented-schematization/Staircase";
 import Dcel from "@/src/Dcel/Dcel";
-import { TWO_PI } from "@/src/geometry/constants";
+import { DECIMAL_SCALE, TWO_PI } from "@/src/geometry/constants";
 import Polygon from "@/src/geometry/Polygon";
 import Ring from "@/src/geometry/Ring";
 import Subdivision from "@/src/geometry/Subdivision";
@@ -85,8 +85,8 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const staircase = createStaircaseSetup([7, 5], 3, Orientation.UD);
     const d2 = staircase?.points[staircase.points.length - 1];
     expect(staircase?.points?.length).toBeGreaterThanOrEqual(9);
-    expect(7).toBeCloseTo(d2?.x ?? NaN, 10);
-    expect(5).toBeCloseTo(d2?.y ?? NaN, 10);
+    expect(d2?.x).toBeCloseTo(7, DECIMAL_SCALE);
+    expect(d2?.y).toBeCloseTo(5, DECIMAL_SCALE);
   });
 
   test("returns a staircase where the area spanned between the first 4 points equals the area of the second last and the last 3 points", function () {
@@ -100,9 +100,9 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const lastStep = new Polygon([new Ring(staircase?.points.slice(-3) ?? [])])
       .area;
 
-    expect(appendedArea).toBeCloseTo(secondLastStep, 10);
-    expect(appendedArea).toBeCloseTo(lastStep, 10);
-    expect(secondLastStep).toBeCloseTo(lastStep, 10);
+    expect(appendedArea).toBeCloseTo(secondLastStep, DECIMAL_SCALE);
+    expect(appendedArea).toBeCloseTo(lastStep, DECIMAL_SCALE);
+    expect(secondLastStep).toBeCloseTo(lastStep, DECIMAL_SCALE);
   });
 
   test("returns a staircase where the area spanned between the first 4 points equals the area of the second last and the last 3 points", function () {
@@ -116,9 +116,9 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const lastStep = new Polygon([new Ring(staircase?.points.slice(-3) ?? [])])
       .area;
 
-    expect(appendedArea).toBeCloseTo(secondLastStep, 10);
-    expect(appendedArea).toBeCloseTo(lastStep, 10);
-    expect(secondLastStep).toBeCloseTo(lastStep, 10);
+    expect(appendedArea).toBeCloseTo(secondLastStep, DECIMAL_SCALE);
+    expect(appendedArea).toBeCloseTo(lastStep, DECIMAL_SCALE);
+    expect(secondLastStep).toBeCloseTo(lastStep, DECIMAL_SCALE);
   });
 
   test("returns a staircase where the area spanned between the first 4 points equals the area of the second last and the last 3 points", function () {
@@ -132,9 +132,9 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const lastStep = new Polygon([new Ring(staircase?.points.slice(-3) ?? [])])
       .area;
 
-    expect(appendedArea).toBeCloseTo(secondLastStep, 10);
-    expect(appendedArea).toBeCloseTo(lastStep, 10);
-    expect(secondLastStep).toBeCloseTo(lastStep, 10);
+    expect(appendedArea).toBeCloseTo(secondLastStep, DECIMAL_SCALE);
+    expect(appendedArea).toBeCloseTo(lastStep, DECIMAL_SCALE);
+    expect(secondLastStep).toBeCloseTo(lastStep, DECIMAL_SCALE);
   });
 
   test("returns a staircase where the area spanned between the first 4 points equals the area of the second last and the last 3 points", function () {
@@ -148,9 +148,9 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const lastStep = new Polygon([new Ring(staircase?.points.slice(-3) ?? [])])
       .area;
 
-    expect(appendedArea).toBeCloseTo(secondLastStep, 10);
-    expect(appendedArea).toBeCloseTo(lastStep, 10);
-    expect(secondLastStep).toBeCloseTo(lastStep, 10);
+    expect(appendedArea).toBeCloseTo(secondLastStep, DECIMAL_SCALE);
+    expect(appendedArea).toBeCloseTo(lastStep, DECIMAL_SCALE);
+    expect(secondLastStep).toBeCloseTo(lastStep, DECIMAL_SCALE);
   });
 
   test("returns a staircase with a minimum of 9 points", function () {
@@ -158,8 +158,8 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const d2 = staircase?.points[staircase.points.length - 1];
 
     expect(staircase?.points?.length).toBeGreaterThanOrEqual(9);
-    expect(-7).toBeCloseTo(d2?.x ?? NaN, 10);
-    expect(-5).toBeCloseTo(d2?.y ?? NaN, 10);
+    expect(d2?.x).toBeCloseTo(-7, DECIMAL_SCALE);
+    expect(d2?.y).toBeCloseTo(-5, DECIMAL_SCALE);
   });
 
   test("returns a staircase with a minimum of 9 points", function () {
@@ -167,8 +167,8 @@ describe("Build staircase for a HalfEdge of class UD", function () {
     const d2 = staircase?.points[staircase.points.length - 1];
 
     expect(staircase?.points?.length).toBeGreaterThanOrEqual(9);
-    expect(2.5).toBeCloseTo(d2?.x ?? NaN, 10);
-    expect(1).toBeCloseTo(d2?.y ?? NaN, 10);
+    expect(d2?.x).toBeCloseTo(2.5, DECIMAL_SCALE);
+    expect(d2?.y).toBeCloseTo(1, DECIMAL_SCALE);
   });
 });
 
@@ -184,7 +184,7 @@ describe("getStepArea(),", function () {
       style: { ...style, c: new CRegular(4) },
     });
     const stepArea = staircase?.getStepArea(3, 1);
-    expect(stepArea).toBeCloseTo(1.0607, 3);
+    expect(stepArea).toBeCloseTo(1.06066, DECIMAL_SCALE);
   });
 });
 

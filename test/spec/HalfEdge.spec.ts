@@ -4,6 +4,7 @@ import PreProcessor from "@/src/c-oriented-schematization/PreProcessor";
 import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
+import { DECIMAL_SCALE } from "@/src/geometry/constants";
 import Line from "@/src/geometry/Line";
 import Point from "@/src/geometry/Point";
 import Subdivision from "@/src/geometry/Subdivision";
@@ -385,8 +386,8 @@ describe("intersectsLine()", function () {
     halfEdgeTwin.twin = halfEdge;
     const line = new Line(new Point(1, 1), 0);
 
-    expect(halfEdge.intersectsLine(line)?.x).toBeCloseTo(1);
-    expect(halfEdge.intersectsLine(line)?.y).toBeCloseTo(1);
+    expect(halfEdge.intersectsLine(line)?.x).toBeCloseTo(1, DECIMAL_SCALE);
+    expect(halfEdge.intersectsLine(line)?.y).toBeCloseTo(1, DECIMAL_SCALE);
   });
 
   test("returns the intersection point if the halfedge intersects with a line", function () {
@@ -399,8 +400,8 @@ describe("intersectsLine()", function () {
     halfEdgeTwin.twin = halfEdge;
     const line = new Line(new Point(2, 1), 0);
 
-    expect(halfEdge.intersectsLine(line)?.x).toBeCloseTo(1);
-    expect(halfEdge.intersectsLine(line)?.y).toBeCloseTo(1);
+    expect(halfEdge.intersectsLine(line)?.x).toBeCloseTo(1, DECIMAL_SCALE);
+    expect(halfEdge.intersectsLine(line)?.y).toBeCloseTo(1, DECIMAL_SCALE);
   });
 
   test("returns undefined if the halfedge and the line are parallel and do not share a vertex", function () {
