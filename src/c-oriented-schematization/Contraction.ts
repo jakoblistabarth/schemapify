@@ -1,6 +1,6 @@
 import HalfEdge, { InflectionType } from "../Dcel/HalfEdge";
 import Vertex from "../Dcel/Vertex";
-import { EPSILON } from "../geometry/contstants";
+import { EPSILON } from "../geometry/constants";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
 import Point from "../geometry/Point";

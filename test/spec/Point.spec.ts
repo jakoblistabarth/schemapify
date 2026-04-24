@@ -1,4 +1,4 @@
-import { EPSILON } from "@/src/geometry/contstants";
+import { EPSILON } from "@/src/geometry/constants";
 import Line from "@/src/geometry/Line";
 import LineSegment from "@/src/geometry/LineSegment";
 import Point from "@/src/geometry/Point";

@@ -1,7 +1,7 @@
 import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
-import { EPSILON } from "@/src/geometry/contstants";
+import { EPSILON } from "@/src/geometry/constants";
 import { normalizeAngle, permute } from "@/src/utilities";
 import fs from "fs";
 import path from "path";

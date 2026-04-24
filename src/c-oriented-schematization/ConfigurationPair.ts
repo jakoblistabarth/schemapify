@@ -1,6 +1,6 @@
 import Dcel from "../Dcel/Dcel";
 import HalfEdge from "../Dcel/HalfEdge";
-import { EPSILON } from "../geometry/contstants";
+import { EPSILON } from "../geometry/constants";
 import Line from "../geometry/Line";
 import Point from "../geometry/Point";
 import Configuration from "./Configuration";

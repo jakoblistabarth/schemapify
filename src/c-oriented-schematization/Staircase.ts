@@ -1,7 +1,7 @@
 import ConvexHullGrahamScan from "graham_scan";
 import HalfEdge from "../Dcel/HalfEdge";
 import Vertex from "../Dcel/Vertex";
-import { TWO_PI } from "../geometry/contstants";
+import { TWO_PI } from "../geometry/constants";
 import Line from "../geometry/Line";
 import Point from "../geometry/Point";
 import Polygon from "../geometry/Polygon";

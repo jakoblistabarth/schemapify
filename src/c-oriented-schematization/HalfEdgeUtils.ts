@@ -1,5 +1,5 @@
 import HalfEdge from "../Dcel/HalfEdge";
-import { EPSILON, TWO_PI } from "../geometry/contstants";
+import { EPSILON, TWO_PI } from "../geometry/constants";
 import C from "./C";
 import Sector from "./Sector";
 

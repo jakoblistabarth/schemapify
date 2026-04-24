@@ -4,7 +4,7 @@ import Polygon from "./geometry/Polygon";
 import Ring from "./geometry/Ring";
 import Subdivision from "./geometry/Subdivision";
 import Vector2D from "./geometry/Vector2D";
-import { TWO_PI } from "./geometry/contstants";
+import { TWO_PI } from "./geometry/constants";
 
 export async function getJSON(path: string) {
   const response = await fetch(path);

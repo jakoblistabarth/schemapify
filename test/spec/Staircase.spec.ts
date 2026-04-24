@@ -5,7 +5,7 @@ import { Orientation } from "@/src/c-oriented-schematization/HalfEdgeClassGenera
 import { style } from "@/src/c-oriented-schematization/schematization.style";
 import { getClosestAssociatedAngle } from "@/src/c-oriented-schematization/Staircase";
 import Dcel from "@/src/Dcel/Dcel";
-import { TWO_PI } from "@/src/geometry/contstants";
+import { TWO_PI } from "@/src/geometry/constants";
 import Polygon from "@/src/geometry/Polygon";
 import Ring from "@/src/geometry/Ring";
 import Subdivision from "@/src/geometry/Subdivision";

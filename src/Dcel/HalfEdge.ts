@@ -1,5 +1,5 @@
 import Sector from "../c-oriented-schematization/Sector";
-import { TWO_PI } from "../geometry/contstants";
+import { TWO_PI } from "../geometry/constants";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
 import Point from "../geometry/Point";

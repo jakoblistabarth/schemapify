@@ -1,4 +1,4 @@
-import { EPSILON, TWO_PI } from "./contstants";
+import { EPSILON, TWO_PI } from "./constants";
 import Line from "./Line";
 import LineSegment from "./LineSegment";
 import Polygon from "./Polygon";

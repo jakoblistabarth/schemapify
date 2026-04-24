@@ -5,7 +5,7 @@ import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import { isAlignedToC } from "@/src/c-oriented-schematization/HalfEdgeUtils";
 import Dcel from "@/src/Dcel/Dcel";
-import { EPSILON } from "@/src/geometry/contstants";
+import { EPSILON } from "@/src/geometry/constants";
 import Input from "@/src/Input";
 import fs from "fs";
 import path from "path";

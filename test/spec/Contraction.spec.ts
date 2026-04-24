@@ -3,7 +3,7 @@ import { ContractionType } from "@/src/c-oriented-schematization/ContractionType
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import Dcel from "@/src/Dcel/Dcel";
-import { EPSILON } from "@/src/geometry/contstants";
+import { EPSILON } from "@/src/geometry/constants";
 import Point from "@/src/geometry/Point";
 import fs from "fs";
 import path from "path";

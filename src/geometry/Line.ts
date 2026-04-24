@@ -1,4 +1,4 @@
-import { EPSILON } from "./contstants";
+import { EPSILON } from "./constants";
 import Point from "./Point";
 
 /**

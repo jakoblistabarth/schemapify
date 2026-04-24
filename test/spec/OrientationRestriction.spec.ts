@@ -9,7 +9,7 @@ import { style } from "@/src/c-oriented-schematization/schematization.style";
 import Sector from "@/src/c-oriented-schematization/Sector";
 import VertexClassGenerator from "@/src/c-oriented-schematization/VertexClassGenerator";
 import { getEdgesInSector } from "@/src/c-oriented-schematization/VertexUtils";
-import { TWO_PI } from "@/src/geometry/contstants";
+import { TWO_PI } from "@/src/geometry/constants";
 import { crawlArray } from "@/src/utilities";
 import { beforeEach, describe, expect, test } from "vitest";
 import { createEdgeVertexSetup, idOr, TestSetup } from "./test-setup";
