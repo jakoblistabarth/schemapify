@@ -145,7 +145,7 @@ class ConfigurationPair {
     // distance_perpendicular = actual_distance_along_shared_edge * sin(angle_between_shared_and_edge)
     // However, it's simpler to relate the displacement 's' along the shared edge to area.
 
-    const sharedAngle = Math.atan2(sharedVector.dy, sharedVector.dx);
+    const sharedAngle = sharedVector.angle;
     const sinPhiContraction = Math.abs(
       Math.sin(contractionEdgeAngle - sharedAngle),
     );
@@ -520,15 +520,30 @@ class ConfigurationPair {
     if (!compensationShift) return;
 
     // 2.3 Calculate new positions for compensation edge
+    const [prevTrack, nextTrack] = this.compensation.configuration.tracks;
+    if (!prevTrack || !nextTrack) return;
+
+    // Calculate the shifted inner edge line (paraellel to the original inner edge)
     const normal = compensationEdge
       .getVector()
       ?.unitVector.getNormal(this.compensation?.type === ContractionType.N)
       .times(compensationShift);
     if (!normal) return;
 
-    const newTail = compensationEdge.tail.vector.plus(normal).toPoint();
-    const newHead = compensationEdge.head?.vector.plus(normal).toPoint();
-    if (!newHead) return;
+    // Shift one point on the inner edge to define the new parallel line
+    const shiftedPoint = compensationEdge.tail.vector.plus(normal).toPoint();
+    const innerEdgeDirection = compensationEdge.getVector()?.unitVector;
+    if (!innerEdgeDirection) return;
+
+    // Create the shifted inner edge as an (infinite) line
+    const shiftedInnerEdgeLine = new Line(
+      shiftedPoint,
+      innerEdgeDirection.angle,
+    );
+
+    const newTail = shiftedInnerEdgeLine.intersectsLine(prevTrack);
+    const newHead = shiftedInnerEdgeLine.intersectsLine(nextTrack);
+    if (!newTail || !newHead) return;
 
     // 2.4 Do the contraction and the compensation
     const prevEdgeLineSegment = contractionEdge.prev?.toLineSegment();

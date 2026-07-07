@@ -17,6 +17,13 @@ class Vector2D {
   }
 
   /**
+   * Get the vector's angle in radians.
+   */
+  get angle() {
+    return Math.atan2(this.dy, this.dx);
+  }
+
+  /**
    * Get the vectors normal vector.
    * @param counterclockwise boolean, indicating in which of the two halfspaces the normal vector should be situated.
    * @returns

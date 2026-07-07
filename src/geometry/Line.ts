@@ -3,7 +3,7 @@ import Point from "./Point";
 
 /**
  * Class representing a 2-dimensional infinite line.
- * It is defined by a point and an angle.
+ * It is defined by a {@link Point} and an angle in radians.
  */
 class Line {
   point: Point;

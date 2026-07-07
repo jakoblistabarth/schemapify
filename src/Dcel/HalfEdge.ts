@@ -166,7 +166,7 @@ class HalfEdge {
   getAngle() {
     const vector = this.getVector();
     if (!vector) return;
-    let angle = Math.atan2(vector.dy, vector.dx);
+    let angle = vector.angle;
 
     // Normalize to [0, 2π)
     if (angle < 0) {
