@@ -173,7 +173,11 @@ class CSchematization extends Schematization {
     let dcel: Dcel = withoutCollinearPoints;
     let configurations = new ConfigurationGenerator().run(dcel);
     let iteration = 0;
-    do {
+    while (
+      maxIterations !== undefined
+        ? iteration < maxIterations
+        : dcel.halfEdges.size >= this.style.k
+    ) {
       iteration++;
       const edgeCountBeforeMove = dcel.halfEdges.size;
       const faceFaceBoundaryList = new FaceFaceBoundaryListGenerator().run(
@@ -194,18 +198,18 @@ class CSchematization extends Schematization {
 
       // Break if no progress was made (prevents infinite loop)
       if (dcel.halfEdges.size === edgeCountBeforeMove) {
-        if (maxIterations && iteration >= maxIterations) {
+        if (
+          maxIterations !== undefined &&
+          maxIterations !== 0 &&
+          iteration >= maxIterations
+        ) {
           throw new Error(
             "No progress made in edge move iteration " + iteration,
           );
         }
         break;
       }
-    } while (
-      maxIterations
-        ? iteration < maxIterations
-        : dcel.halfEdges.size >= this.style.k
-    );
+    }
     // TO-DO: is it possible to return here a simplification function
     // which I can then use for handling simplifying e.g. with hotkeys?
     return dcel;
