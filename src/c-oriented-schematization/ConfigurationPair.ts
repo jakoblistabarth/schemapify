@@ -60,14 +60,21 @@ class ConfigurationPair {
    * This is used to determine whether to use the shared edge move logic, which requires that at least one of the points lies on the shared edge.
    * @returns A boolean indicating whether the contraction head lies on the shared edge, or false if no shared edge exists.
    */
-  hasHeadOnSharedEdge(configurationType: ConfigurationPurpose): boolean {
+  hasHeadOnSharedEdge(configurationType: ConfigurationPurpose) {
     const sharedEdge = this.findSharedOuterEdge();
-    const head = this[configurationType].configuration.innerEdge.head;
+    const head =
+      this.getConfiguration(configurationType).configuration.innerEdge.head;
     if (!sharedEdge?.head || !head) return false;
     return (
       head.equals(sharedEdge?.tail) ||
       (sharedEdge?.head && head?.equals(sharedEdge?.head))
     );
+  }
+
+  getConfiguration(configurationType: ConfigurationPurpose) {
+    return configurationType === ConfigurationPurpose.CONTRACTION
+      ? this.contraction
+      : this.compensation;
   }
 
   /**
@@ -108,16 +115,10 @@ class ConfigurationPair {
 
     if (!contractionNonSharedStart || !compensationNonSharedStart) return;
 
-    const contractionEdgeDir = contractionEdge.getVector()?.unitVector;
-    const compensationEdgeDir = compensationEdge.getVector()?.unitVector;
-    if (!contractionEdgeDir || !compensationEdgeDir) return;
-
     const tracks = this.getNonSharedTracks();
     if (!tracks) return;
-    const {
-      [ConfigurationPurpose.CONTRACTION]: contractionTrack,
-      [ConfigurationPurpose.COMPENSATION]: compensationTrack,
-    } = tracks;
+    const contractionTrack = tracks[ConfigurationPurpose.CONTRACTION];
+    const compensationTrack = tracks[ConfigurationPurpose.COMPENSATION];
     if (!contractionTrack || !compensationTrack) return;
 
     // Each moving edge is a line with constant angle (original edge angle).
