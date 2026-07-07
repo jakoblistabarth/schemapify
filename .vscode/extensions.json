@@ -1,3 +1,7 @@
 {
-  "recommendations": ["elijah-potter.harper", "vitest.explorer"]
+  "recommendations": [
+    "elijah-potter.harper",
+    "vitest.explorer",
+    "oxc.oxc-vscode"
+  ]
 }
