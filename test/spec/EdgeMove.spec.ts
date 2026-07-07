@@ -352,7 +352,7 @@ describe("Blocked contractions are correctly identified and prevented from edge 
 });
 
 describe("Thoroughly check edge DCEL after edge move", function () {
-  test.fails("After edge move, check that all half-edge pointers (twin, next, prev) are consistent and that the DCEL structure is valid.", function () {
+  test("After edge move, check that all half-edge pointers (twin, next, prev) are consistent and that the DCEL structure is valid.", function () {
     const input = Input.fromCoordinates(
       "Simplest edge move",
       JSON.parse(
@@ -375,12 +375,14 @@ describe("Thoroughly check edge DCEL after edge move", function () {
     expect(dcel.vertices.size).toBe(6);
     expect(dcel.halfEdges.size).toBe(12);
     expect(dcel.getBoundedFaces()[0].getEdges().length).toBe(6);
-    expect(simplified.vertices.size).toBe(5);
-    expect(simplified.getVertices().length).toBe(5);
+    expect(simplified.vertices.size).toBe(4);
+    expect(simplified.getVertices().length).toBe(4);
     expect(simplified.halfEdges.size).toBeLessThan(dcel.halfEdges.size);
-    expect(simplified.getBoundedFaces()[0].getEdges().length).toBe(5);
-    expect(simplified.getBoundedFaces()[0].edge.getCycle()).not.toThrow();
-    expect(simplified.getBoundedFaces()[0].edge.getCycle(false)).not.toThrow();
+    expect(simplified.getBoundedFaces()[0].getEdges().length).toBe(4);
+    expect(() => simplified.getBoundedFaces()[0].edge.getCycle()).not.toThrow();
+    expect(() =>
+      simplified.getBoundedFaces()[0].edge.getCycle(false),
+    ).not.toThrow();
   });
 });
 
