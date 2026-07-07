@@ -8,7 +8,6 @@ import Dcel from "@/src/Dcel/Dcel";
 import { DECIMAL_SCALE, TWO_PI } from "@/src/geometry/constants";
 import Polygon from "@/src/geometry/Polygon";
 import Ring from "@/src/geometry/Ring";
-import Subdivision from "@/src/geometry/Subdivision";
 import { readFileSync } from "fs";
 import path from "path";
 import { describe, expect, test } from "vitest";
@@ -283,7 +282,7 @@ describe("getClosestAssociatedAngle() returns closest associated angle for an ed
 
 describe("Staircases for a diamond rotated square of side length 1)", function () {
   test("are bound within a reasonable area", function () {
-    const subdivision = Subdivision.fromCoordinates([
+    const dcel = Dcel.fromCoordinates([
       [
         [
           [
@@ -295,7 +294,6 @@ describe("Staircases for a diamond rotated square of side length 1)", function (
         ],
       ],
     ]);
-    const dcel = Dcel.fromSubdivision(subdivision);
     const schematization = new CSchematization();
     const constrainedDcel = schematization.constrainAngles(dcel);
     const { xMin, xMax, yMin, yMax } = constrainedDcel.getBbox();
@@ -310,7 +308,7 @@ describe("Staircases for a diamond rotated square of side length 1)", function (
   });
 
   test("can be simplified without throwing an error", function () {
-    const subdivision = Subdivision.fromCoordinates([
+    const dcel = Dcel.fromCoordinates([
       [
         [
           [
@@ -322,7 +320,6 @@ describe("Staircases for a diamond rotated square of side length 1)", function (
         ],
       ],
     ]);
-    const dcel = Dcel.fromSubdivision(subdivision);
     const schematization = new CSchematization();
     const constrained = schematization.constrainAngles(dcel);
     expect(() => schematization.simplify(constrained)).not.toThrow();

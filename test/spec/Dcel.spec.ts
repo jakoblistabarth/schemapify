@@ -10,7 +10,7 @@ import shape from "../data/geodata/AUT_adm0-s1_epsg31287";
 
 describe("A Dcel from multipolygons", function () {
   test("forming a square is parsed correctly.", function () {
-    const s = Subdivision.fromCoordinates([
+    const dcel = Dcel.fromCoordinates([
       [
         [
           [
@@ -22,7 +22,6 @@ describe("A Dcel from multipolygons", function () {
         ],
       ],
     ]);
-    const dcel = Dcel.fromSubdivision(s);
 
     expect(dcel.faces.length).toBe(2);
     expect(dcel.vertices.size).toBe(4);
@@ -30,7 +29,7 @@ describe("A Dcel from multipolygons", function () {
   });
 
   test("forming 2 adjacent squares is parsed correctly.", function () {
-    const s = Subdivision.fromCoordinates([
+    const dcel = Dcel.fromCoordinates([
       [
         [
           [
@@ -50,7 +49,6 @@ describe("A Dcel from multipolygons", function () {
         ],
       ],
     ]);
-    const dcel = Dcel.fromSubdivision(s);
 
     expect(dcel.faces.length).toBe(3);
     expect(dcel.vertices.size).toBe(6);
@@ -58,7 +56,7 @@ describe("A Dcel from multipolygons", function () {
   });
 
   test("forming 2 separate squares is parsed correctly.", function () {
-    const s = Subdivision.fromCoordinates([
+    const dcel = Dcel.fromCoordinates([
       [
         [
           [
@@ -78,7 +76,6 @@ describe("A Dcel from multipolygons", function () {
         ],
       ],
     ]);
-    const dcel = Dcel.fromSubdivision(s);
 
     expect(dcel.faces.length).toBe(3);
     expect(dcel.vertices.size).toBe(8);
@@ -86,7 +83,7 @@ describe("A Dcel from multipolygons", function () {
   });
 
   test("forming 2 separate squares with one hole is parsed correctly.", function () {
-    const m = Subdivision.fromCoordinates([
+    const dcel = Dcel.fromCoordinates([
       [
         [
           [
@@ -112,7 +109,6 @@ describe("A Dcel from multipolygons", function () {
         ],
       ],
     ]);
-    const dcel = Dcel.fromSubdivision(m);
 
     expect(dcel.faces.length).toBe(4);
     expect(dcel.vertices.size).toBe(12);
@@ -348,86 +344,82 @@ describe("getArea()", function () {
   });
 
   test("returns the correct area for a polygon with 1 hole and 1 island", function () {
-    const dcel = Dcel.fromSubdivision(
-      Subdivision.fromCoordinates([
+    const dcel = Dcel.fromCoordinates([
+      [
         [
           [
-            [
-              [0, 0],
-              [4, 0],
-              [4, 4],
-              [0, 4],
-            ],
-            [
-              [1, 1],
-              [3, 1],
-              [3, 3],
-              [1, 3],
-            ],
+            [0, 0],
+            [4, 0],
+            [4, 4],
+            [0, 4],
           ],
           [
-            [
-              [1.5, 1.5],
-              [2.5, 1.5],
-              [2.5, 2.5],
-              [1.5, 2.5],
-            ],
+            [1, 1],
+            [3, 1],
+            [3, 3],
+            [1, 3],
           ],
         ],
-      ]),
-    );
+        [
+          [
+            [1.5, 1.5],
+            [2.5, 1.5],
+            [2.5, 2.5],
+            [1.5, 2.5],
+          ],
+        ],
+      ],
+    ]);
     expect(dcel.getArea()).toBe(12 + 1);
   });
 
   test("returns the correct area for two polygons, one with multiple holes", function () {
-    const dcel = Dcel.fromSubdivision(
-      Subdivision.fromCoordinates([
+    const dcel = Dcel.fromCoordinates([
+      [
         [
           [
-            [
-              [0, 0],
-              [5, 0],
-              [5, 5],
-              [0, 5],
-            ],
-            [
-              [1, 1],
-              [2, 1],
-              [2, 2],
-              [1, 2],
-            ],
-            [
-              [3, 1],
-              [4, 1],
-              [4, 2],
-              [3, 2],
-            ],
-            [
-              [3, 3],
-              [4, 3],
-              [4, 4],
-              [3, 4],
-            ],
-            [
-              [1, 3],
-              [2, 3],
-              [2, 4],
-              [1, 4],
-            ],
+            [0, 0],
+            [5, 0],
+            [5, 5],
+            [0, 5],
+          ],
+          [
+            [1, 1],
+            [2, 1],
+            [2, 2],
+            [1, 2],
+          ],
+          [
+            [3, 1],
+            [4, 1],
+            [4, 2],
+            [3, 2],
+          ],
+          [
+            [3, 3],
+            [4, 3],
+            [4, 4],
+            [3, 4],
+          ],
+          [
+            [1, 3],
+            [2, 3],
+            [2, 4],
+            [1, 4],
           ],
         ],
+      ],
+      [
         [
           [
-            [
-              [-2, 1],
-              [-1, 1],
-              [-1, 5],
-              [-2, 5],
-            ],
+            [-2, 1],
+            [-1, 1],
+            [-1, 5],
+            [-2, 5],
           ],
         ],
-      ]),
-    );
+      ],
+    ]);
     expect(dcel.getArea()).toBe(21 + 4);
   });
 

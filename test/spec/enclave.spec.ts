@@ -1,6 +1,5 @@
 import Dcel from "@/src/Dcel/Dcel";
 import Face from "@/src/Dcel/Face";
-import Subdivision from "@/src/geometry/Subdivision";
 import fs from "fs";
 import path from "path";
 import { beforeEach, describe, expect, test } from "vitest";
@@ -33,7 +32,7 @@ describe("A Dcel from multipolygons of a simplified enclave model", function () 
   let dcel: Dcel;
 
   beforeEach(function () {
-    const s = Subdivision.fromCoordinates([
+    dcel = Dcel.fromCoordinates([
       [
         [
           [
@@ -61,7 +60,6 @@ describe("A Dcel from multipolygons of a simplified enclave model", function () 
         ],
       ],
     ]);
-    dcel = Dcel.fromSubdivision(s);
   });
 
   test("has 1 unbounded face", function () {

@@ -3,7 +3,6 @@ import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import FaceFaceBoundaryList from "@/src/c-oriented-schematization/FaceFaceBoundaryList";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import Dcel from "@/src/Dcel/Dcel";
-import Subdivision from "@/src/geometry/Subdivision";
 import { readFileSync } from "fs";
 import path from "path";
 import { describe, expect, test } from "vitest";
@@ -46,19 +45,17 @@ describe("create()", function () {
 
 describe("The Face-Face-Boundary", function () {
   test("consists of edges which all belong to the same face", function () {
-    const dcel = Dcel.fromSubdivision(
-      Subdivision.fromCoordinates([
+    const dcel = Dcel.fromCoordinates([
+      [
         [
           [
-            [
-              [-3, 3],
-              [0, -2],
-              [3, 2],
-            ],
+            [-3, 3],
+            [0, -2],
+            [3, 2],
           ],
         ],
-      ]),
-    );
+      ],
+    ]);
     const schematization = new CSchematization();
     const constrained = schematization.constrainAngles(dcel);
     const ffbl = new FaceFaceBoundaryList(constrained);

@@ -7,7 +7,6 @@ import Vertex from "@/src/Dcel/Vertex";
 import { DECIMAL_SCALE } from "@/src/geometry/constants";
 import Line from "@/src/geometry/Line";
 import Point from "@/src/geometry/Point";
-import Subdivision from "@/src/geometry/Subdivision";
 import fs from "fs";
 import path from "path";
 import { describe, expect, test } from "vitest";
@@ -461,21 +460,19 @@ describe("getMinimalCycleDistance()", function () {
 
 describe("moveTo().", function () {
   test("moves an edge where both new position are free.", function () {
-    const dcel = Dcel.fromSubdivision(
-      Subdivision.fromCoordinates([
+    const dcel = Dcel.fromCoordinates([
+      [
         [
           [
-            [
-              [0, 0],
-              [0, 1],
-              [1, 1],
-              [1, 0],
-              [0, 0],
-            ],
+            [0, 0],
+            [0, 1],
+            [1, 1],
+            [1, 0],
+            [0, 0],
           ],
         ],
-      ]),
-    );
+      ],
+    ]);
     dcel
       .findHalfEdge(new Point(0, 0), new Point(0, 1))
       ?.moveTo(new Point(-2, 0), new Point(-2, 1));
@@ -488,21 +485,19 @@ describe("moveTo().", function () {
   });
 
   test("moves an edge where both new position are free.", function () {
-    const dcel = Dcel.fromSubdivision(
-      Subdivision.fromCoordinates([
+    const dcel = Dcel.fromCoordinates([
+      [
         [
           [
-            [
-              [0, 0],
-              [0, 1],
-              [1, 1],
-              [1, 0],
-              [0, 0],
-            ],
+            [0, 0],
+            [0, 1],
+            [1, 1],
+            [1, 0],
+            [0, 0],
           ],
         ],
-      ]),
-    );
+      ],
+    ]);
     dcel
       .findHalfEdge(new Point(0, 0), new Point(0, 1))
       ?.moveTo(new Point(0, -1), new Point(0, 0));
@@ -515,23 +510,21 @@ describe("moveTo().", function () {
   });
 
   test("moves an edge where one position is free.", function () {
-    const dcel = Dcel.fromSubdivision(
-      Subdivision.fromCoordinates([
+    const dcel = Dcel.fromCoordinates([
+      [
         [
           [
-            [
-              [0, 0],
-              [1.5, 0],
-              [1.5, 0.25],
-              [1, 0.25],
-              [1, 1],
-              [0, 1],
-              [0, 0],
-            ],
+            [0, 0],
+            [1.5, 0],
+            [1.5, 0.25],
+            [1, 0.25],
+            [1, 1],
+            [0, 1],
+            [0, 0],
           ],
         ],
-      ]),
-    );
+      ],
+    ]);
     dcel
       .findHalfEdge(new Point(1.5, 0), new Point(1.5, 0.25))
       ?.moveTo(new Point(1, 0), new Point(1, 0.25));

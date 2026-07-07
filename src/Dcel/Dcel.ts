@@ -3,7 +3,7 @@ import MultiPolygon from "../geometry/MultiPolygon";
 import Point from "../geometry/Point";
 import Polygon from "../geometry/Polygon";
 import Ring from "../geometry/Ring";
-import Subdivision from "../geometry/Subdivision";
+import Subdivision, { Coordinates } from "../geometry/Subdivision";
 import BoundingBox from "../helpers/BoundingBox";
 import { geoJsonToGeometry, validateGeoJSON } from "../utilities";
 import Face from "./Face";
@@ -544,6 +544,16 @@ class Dcel {
     }
 
     return dcel;
+  }
+
+  /**
+   * Creates a Doubly Connected Edge List (DCEL) data structure from a list of coordinates.
+   * @param coordinates A list of coordinates representing the subdivision.
+   * @returns A {@link Dcel}.
+   */
+  static fromCoordinates(coordinates: Coordinates) {
+    const subdivision = Subdivision.fromCoordinates(coordinates);
+    return this.fromSubdivision(subdivision);
   }
 
   /**

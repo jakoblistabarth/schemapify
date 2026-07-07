@@ -1,6 +1,8 @@
 import Dcel from "@/src/Dcel/Dcel";
 import MultiPolygon from "./MultiPolygon";
 
+export type Coordinates = [number, number][][][][];
+
 /**
  * Represents a subdivision.
  * A subdivision is a collection of {@link MultiPolygon}s.
@@ -26,7 +28,7 @@ class Subdivision {
    * @param coordinates A list of coordinates representing the subdivision.
    * @returns A {@link Subdivision}.
    */
-  static fromCoordinates(coordinates: [number, number][][][][]) {
+  static fromCoordinates(coordinates: Coordinates) {
     const multiPolygons = coordinates.map((multiPolygon) =>
       MultiPolygon.fromCoordinates(multiPolygon),
     );

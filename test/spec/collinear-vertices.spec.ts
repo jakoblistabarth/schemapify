@@ -1,6 +1,5 @@
 import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
 import Dcel from "@/src/Dcel/Dcel";
-import Subdivision from "@/src/geometry/Subdivision";
 import { readFileSync } from "fs";
 import path from "path";
 import { describe, expect, test } from "vitest";
@@ -59,30 +58,28 @@ describe("Removing collinear vertices", function () {
   });
 
   test("removes any collinear points on a simples square", function () {
-    const dcel = Dcel.fromSubdivision(
-      Subdivision.fromCoordinates([
+    const dcel = Dcel.fromCoordinates([
+      [
         [
           [
-            [
-              [-2, -2],
-              [-1, -2],
-              [0, -2],
-              [1, -2],
-              [2, -2],
-              [2, -1.9],
-              [2, -1.8],
-              [2, -1.7],
-              [2, 1.9],
-              [2, 2],
-              [1.9, 2],
-              [0, 2],
-              [-1.9, 2],
-              [-2, 2],
-            ],
+            [-2, -2],
+            [-1, -2],
+            [0, -2],
+            [1, -2],
+            [2, -2],
+            [2, -1.9],
+            [2, -1.8],
+            [2, -1.7],
+            [2, 1.9],
+            [2, 2],
+            [1.9, 2],
+            [0, 2],
+            [-1.9, 2],
+            [-2, 2],
           ],
         ],
-      ]),
-    );
+      ],
+    ]);
 
     const result = new CollinearPointProcessor().run(dcel);
     expect(result.vertices.size).toBe(4);
