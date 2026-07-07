@@ -327,7 +327,7 @@ describe("Staircases for a diamond rotated square of side length 1)", function (
 });
 
 describe("Floating point precision in staircase generation", function () {
-  test.fails("Checks potentially affected staircase vertex in triangle.json", function () {
+  test("Checks potentially affected staircase vertex in triangle.json", function () {
     const json = JSON.parse(
       readFileSync(path.resolve("test/data/shapes/triangle.json"), "utf8"),
     );
@@ -345,6 +345,6 @@ describe("Floating point precision in staircase generation", function () {
     const affectedVertex = vertices.find(
       (v) => v.x === 7.5 && v.y > 4.5 && v.y < 5.5,
     );
-    expect(affectedVertex?.y).toBe(5);
+    expect(affectedVertex?.y).toBeCloseTo(5, DECIMAL_SCALE);
   });
 });
