@@ -1,5 +1,6 @@
 import { EPSILON } from "./constants";
 import Point from "./Point";
+import Vector2D from "./Vector2D";
 
 /**
  * Class representing a 2-dimensional infinite line.
@@ -57,6 +58,12 @@ class Line {
     x = Math.abs(x) < EPSILON ? 0 : x;
     y = Math.abs(y) < EPSILON ? 0 : y;
     return new Point(Number(x.toFixed(10)), Number(y.toFixed(10)));
+  }
+
+  perpendicularDistanceToPoint(point: Point) {
+    const dir = Vector2D.fromAngle(this.angle);
+    const toPoint = point.vector.minus(this.point.vector);
+    return Math.abs(dir.cross(toPoint));
   }
 }
 

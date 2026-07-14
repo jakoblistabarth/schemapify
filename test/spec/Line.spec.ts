@@ -63,3 +63,29 @@ describe("intersectsLine()", function () {
     expect(a.intersectsLine(b)).toBe(undefined);
   });
 });
+
+describe("perpendicularDistanceToPoint()", function () {
+  test("returns the correct perpendicular distance", function () {
+    const a = new Line(new Point(0, 0), Math.PI * 0.5);
+    const pointA = new Point(2, 2);
+    const pointB = new Point(-2, 2);
+    const pointC = new Point(-4.5, -2);
+    const pointD = new Point(0, 1);
+    expect(a.perpendicularDistanceToPoint(pointA)).toBeCloseTo(2);
+    expect(a.perpendicularDistanceToPoint(pointB)).toBeCloseTo(2);
+    expect(a.perpendicularDistanceToPoint(pointC)).toBeCloseTo(4.5);
+    expect(a.perpendicularDistanceToPoint(pointD)).toBeCloseTo(0);
+  });
+
+  test("returns the correct perpendicular distance", function () {
+    const a = new Line(new Point(0, 0), Math.PI);
+    const pointA = new Point(0, 2);
+    const pointB = new Point(-2, 2);
+    const pointC = new Point(-4.5, -2);
+    const pointD = new Point(0, 1);
+    expect(a.perpendicularDistanceToPoint(pointA)).toBeCloseTo(2);
+    expect(a.perpendicularDistanceToPoint(pointB)).toBeCloseTo(2);
+    expect(a.perpendicularDistanceToPoint(pointC)).toBeCloseTo(2);
+    expect(a.perpendicularDistanceToPoint(pointD)).toBeCloseTo(1);
+  });
+});

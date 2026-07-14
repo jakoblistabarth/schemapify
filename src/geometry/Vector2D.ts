@@ -98,6 +98,15 @@ class Vector2D {
   toArray(): [number, number] {
     return [this.dx, this.dy];
   }
+
+  /**
+   * Create a Vector from an angle in radians.
+   * @param angle The angle in radians.
+   * @returns The Vector representation of the angle.
+   */
+  static fromAngle(angle: number) {
+    return new Vector2D(Math.cos(angle), Math.sin(angle));
+  }
 }
 
 export default Vector2D;
