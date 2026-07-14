@@ -52,6 +52,7 @@ describe("c4-edge-move.subdivision.json", function () {
     expect(unalignedAfterMove).toHaveLength(0);
   });
 
+  // fails due to error in shareḍ edge move
   test.fails("should preserve area and edge alignment through first edge move", function () {
     const dcel = Dcel.fromCoordinates(c4edgemove);
     const originalArea = dcel.getArea();
@@ -69,6 +70,7 @@ describe("c4-edge-move.subdivision.json", function () {
   });
 
   //TODO: comment in
+  // fails due to error in shared edge move
   test.fails("should preserve area and edge alignment through full schematization", function () {
     const dcel = Dcel.fromCoordinates(c4edgemove);
     const schematization = new CSchematization({
@@ -123,5 +125,31 @@ describe("c4-edge-move-2.subdivision.json", function () {
       .filter((e) => !isAlignedToC(e, schematization.style.c));
 
     expect(unalignedAfterMove).toHaveLength(0);
+  });
+
+  test("should preserve area and edge alignment through full schematization", function () {
+    const dcel = Dcel.fromCoordinates(c4edgemove2);
+    const schematization = new CSchematization({
+      lambda: 1,
+      k: 8,
+      c: new CRegular(4),
+      staircaseEpsilon: 0.1,
+    });
+    const originalArea = dcel.getArea();
+
+    const result = schematization.run(dcel, 2);
+    const finalArea = result.getArea();
+
+    // Verify all edges are aligned to C
+    const unalignedCount = result.getHalfEdges().reduce((count, edge) => {
+      const angle = edge.getAngle();
+      if (angle === undefined || !isAlignedToC(edge, schematization.style.c)) {
+        return count + 1;
+      }
+      return count;
+    }, 0);
+
+    expect(unalignedCount).toBe(0);
+    expect(finalArea).toBeCloseTo(originalArea, DECIMAL_SCALE);
   });
 });

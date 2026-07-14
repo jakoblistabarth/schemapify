@@ -505,33 +505,33 @@ class ConfigurationPair {
    * Returns void if the edge move could not be performed due to incomplete DCEL links.
    */
   doRegularEdgeMove(contractionEdge: HalfEdge, compensationEdge: HalfEdge) {
-    const contractionHead = contractionEdge.head;
-    if (!contractionHead) return;
+    // 1 Get references
+    const contractionArea = this.contraction.area;
 
-    // 2.1 Calculate new positions for contraction edge
-    const pointA = this.contraction.point;
-    const pointB = this.contraction.areaPoints.at(-1);
-    if (!pointA || !pointB) return;
-    const contractionSegment = contractionEdge.toLineSegment();
-    if (!contractionSegment) return;
+    const compensationLength = compensationEdge.toLineSegment()?.length;
+    const compensationEdgeLine = compensationEdge.toLine();
+    if (!compensationLength || !compensationEdgeLine) return;
 
-    // 2.2 Calculate compensation trapeze height
-    const compensationShift = this.compensationShift;
-    if (!compensationShift) return;
+    // 2 Calculate compensation trapeze height
+    const compensationShift =
+      this.compensation.getCompensationHeight(contractionArea);
+    if (compensationShift === undefined) return;
 
-    // 2.3 Calculate new positions for compensation edge
+    // 3 Calculate new positions for compensation edge
     const [prevTrack, nextTrack] = this.compensation.configuration.tracks;
     if (!prevTrack || !nextTrack) return;
 
-    // Calculate the shifted inner edge line (paraellel to the original inner edge)
-    const normal = compensationEdge
-      .getVector()
-      ?.unitVector.getNormal(this.compensation?.type === ContractionType.N)
+    // Calculate the shifted inner edge line (parallel to the original inner edge)
+    const edgeVector = compensationEdge.getVector();
+    const unitEdgeVector = edgeVector?.unitVector;
+    const normal = unitEdgeVector
+      ?.getNormal(this.compensation?.type === ContractionType.N)
       .times(compensationShift);
     if (!normal) return;
 
     // Shift one point on the inner edge to define the new parallel line
-    const shiftedPoint = compensationEdge.tail.vector.plus(normal).toPoint();
+    const originalTail = compensationEdge.tail.vector;
+    const shiftedPoint = originalTail.plus(normal).toPoint();
     const innerEdgeDirection = compensationEdge.getVector()?.unitVector;
     if (!innerEdgeDirection) return;
 
@@ -545,16 +545,23 @@ class ConfigurationPair {
     const newHead = shiftedInnerEdgeLine.intersectsLine(nextTrack);
     if (!newTail || !newHead) return;
 
-    // 2.4 Do the contraction and the compensation
+    // 4 Do the contraction and the compensation
     const prevEdgeLineSegment = contractionEdge.prev?.toLineSegment();
     const nextEdgeLineSegment = contractionEdge.next?.toLineSegment();
     if (!prevEdgeLineSegment || !nextEdgeLineSegment) return;
+
+    const pointA = this.contraction.point;
+    const pointB = this.contraction.areaPoints.at(-1);
+    if (!pointA || !pointB) return;
 
     if (pointA.isOnLineSegment(prevEdgeLineSegment)) {
       contractionEdge.moveTo(pointA, pointB);
     } else {
       contractionEdge.moveTo(pointB, pointA);
     }
+
+    const contractionHead = contractionEdge.head;
+    if (!contractionHead) return;
 
     const movedPositions = [
       contractionEdge.tail.toPoint(),
@@ -571,10 +578,6 @@ class ConfigurationPair {
     if (compensationHead) movedPositions.push(compensationHead);
 
     return movedPositions;
-  }
-
-  get compensationShift() {
-    return this.compensation.getCompensationHeight(this.contraction.area);
   }
 
   /**

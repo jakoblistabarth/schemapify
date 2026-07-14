@@ -449,27 +449,32 @@ class Contraction {
     const a = this.configuration.innerEdge;
     const aLength = a.getLength();
     if (!a.face || !aLength) return;
-    const alpha1 = a.tail.getExteriorAngle(a.face);
-    const alpha2 = a.head?.getExteriorAngle(a.face);
-    if (alpha1 === undefined || alpha2 === undefined) return;
-    const alpha1_ = -Math.abs(alpha1) + Math.PI * 0.5;
-    const alpha2_ = -Math.abs(alpha2) + Math.PI * 0.5;
 
-    // Check whether both angles are near ±π/2
-    if (Math.abs(alpha1_) < EPSILON && Math.abs(alpha2_) < EPSILON) {
-      return contractionArea / aLength;
-    }
+    const edgeVector = a.getVector()?.unitVector; // tail -> head
+    const normal = edgeVector?.getNormal(this.type === ContractionType.N); // SAME normal used in the move
+    if (!edgeVector || !normal) return;
 
-    const tanSum = Math.tan(alpha1_) + Math.tan(alpha2_);
+    const prevTrack = this.configuration.getTrack(OuterEdge.PREV);
+    const nextTrack = this.configuration.getTrack(OuterEdge.NEXT);
+    if (!prevTrack || !nextTrack) return;
+    const tTail = Vector2D.fromAngle(prevTrack.angle)?.unitVector;
+    const tHead = Vector2D.fromAngle(nextTrack.angle)?.unitVector;
+    if (!tTail || !tHead) return;
 
-    // Check whether tan sum is too close to zero (angles are nearly opposite right angles)
-    if (Math.abs(tanSum) < EPSILON) {
-      return contractionArea / aLength;
-    }
+    const kTail = tTail.dot(edgeVector) / tTail.dot(normal);
+    const kHead = tHead.dot(edgeVector) / tHead.dot(normal);
+    const c = (kHead - kTail) / 2; // correct-sign coefficient
 
-    const p = (aLength * 2) / tanSum;
-    const q = (-contractionArea * 2) / tanSum;
-    return -p * 0.5 + Math.sqrt(Math.pow(p * 0.5, 2) - q);
+    if (Math.abs(c) < EPSILON) return contractionArea / aLength; // parallelogram case
+
+    // c*h² + L*h − area = 0
+    const disc = aLength * aLength + 4 * c * contractionArea;
+    if (disc < 0) return;
+    const sqrtD = Math.sqrt(disc);
+
+    return [(-aLength + sqrtD) / (2 * c), (-aLength - sqrtD) / (2 * c)]
+      .filter((h) => h > EPSILON && aLength + (kHead - kTail) * h >= -EPSILON) // valid, before track apex
+      .sort((x, y) => x - y)[0];
   }
 }
 
