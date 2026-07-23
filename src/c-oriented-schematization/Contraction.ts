@@ -41,7 +41,12 @@ class Contraction {
   ): Contraction | undefined {
     const point = this.getPoint(configuration, contractionType);
     return point
-      ? new Contraction(configuration, contractionType, point, configurations)
+      ? new Contraction(
+          configuration,
+          contractionType,
+          point.point,
+          configurations,
+        )
       : undefined;
   }
 
@@ -137,6 +142,7 @@ class Contraction {
     type PointCandidate = {
       point: Point;
       dist: number;
+      vanishing: OuterEdge.NEXT | OuterEdge.PREV | "inner";
     };
 
     const pointCandidates: PointCandidate[] = [];
@@ -159,7 +165,7 @@ class Contraction {
           configuration.innerEdge.tail.x - T.x,
           configuration.innerEdge.tail.y - T.y,
         ).dot(innerEdgeNormal);
-        pointCandidates.push({ point: T, dist: distT });
+        pointCandidates.push({ point: T, dist: distT, vanishing: "inner" });
       }
     }
 
@@ -170,6 +176,7 @@ class Contraction {
       pointCandidates.push({
         point: A,
         dist: distA,
+        vanishing: OuterEdge.PREV,
       });
     const distD = configuration.innerEdge.next?.twin
       ?.getVector()
@@ -178,14 +185,14 @@ class Contraction {
       pointCandidates.push({
         point: D,
         dist: distD,
+        vanishing: OuterEdge.NEXT,
       });
 
     // Find closest contraction point in respect to the configurations inner edge
     pointCandidates.sort((a, b) => a.dist - b.dist);
     return type === ContractionType.P
       ? pointCandidates.filter((candidate) => candidate.dist >= 0).shift()
-          ?.point
-      : pointCandidates.filter((candidate) => candidate.dist <= 0).pop()?.point;
+      : pointCandidates.filter((candidate) => candidate.dist <= 0).pop();
   }
 
   /**

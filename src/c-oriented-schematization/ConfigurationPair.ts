@@ -3,7 +3,8 @@ import HalfEdge from "../Dcel/HalfEdge";
 import { EPSILON } from "../geometry/constants";
 import Line from "../geometry/Line";
 import Point from "../geometry/Point";
-import Configuration from "./Configuration";
+import Vector2D from "../geometry/Vector2D";
+import Configuration, { OuterEdge } from "./Configuration";
 import Contraction from "./Contraction";
 import { ConfigurationPurpose, ContractionType } from "./ContractionType";
 import { isCollinearVertex } from "./VertexUtils";
@@ -497,36 +498,26 @@ class ConfigurationPair {
   }
 
   /**
-   * Perform the edge move when the contraction and compensation do not share an outer edge.
-   * This is the regular case, where the contraction and compensation can be performed independently.
-   * @param contractionEdge An edge reference from the DCEL.
-   * @param compensationEdge An edge reference from the DCEL.
-   * @returns An array of {@link Point}s representing the positions of the moved edges, which can be used to update the configurations.
-   * Returns void if the edge move could not be performed due to incomplete DCEL links.
+   * Calculate the new positions for the compensation edge after the contraction edge has moved.
+   * The compensation edge is shifted parallel to its original position.
+   * @returns An array containing the new tail and head points for the compensation edge, or undefined if the calculation fails.
    */
-  doRegularEdgeMove(contractionEdge: HalfEdge, compensationEdge: HalfEdge) {
-    // 1 Get references
-    const contractionArea = this.contraction.area;
-
-    const compensationLength = compensationEdge.toLineSegment()?.length;
-    const compensationEdgeLine = compensationEdge.toLine();
-    if (!compensationLength || !compensationEdgeLine) return;
-
-    // 2 Calculate compensation trapeze height
-    const compensationShift =
-      this.compensation.getCompensationHeight(contractionArea);
-    if (compensationShift === undefined) return;
-
-    // 3 Calculate new positions for compensation edge
+  getNewCompensationPositions() {
+    const compensationEdge = this.compensation.configuration.innerEdge;
     const [prevTrack, nextTrack] = this.compensation.configuration.tracks;
     if (!prevTrack || !nextTrack) return;
+
+    const compensationHeight = this.compensation.getCompensationHeight(
+      this.contraction.area,
+    );
+    if (compensationHeight === undefined) return;
 
     // Calculate the shifted inner edge line (parallel to the original inner edge)
     const edgeVector = compensationEdge.getVector();
     const unitEdgeVector = edgeVector?.unitVector;
     const normal = unitEdgeVector
       ?.getNormal(this.compensation?.type === ContractionType.N)
-      .times(compensationShift);
+      .times(compensationHeight);
     if (!normal) return;
 
     // Shift one point on the inner edge to define the new parallel line
@@ -543,6 +534,35 @@ class ConfigurationPair {
 
     const newTail = shiftedInnerEdgeLine.intersectsLine(prevTrack);
     const newHead = shiftedInnerEdgeLine.intersectsLine(nextTrack);
+
+    return [newTail, newHead];
+  }
+
+  /**
+   * Perform the edge move when the contraction and compensation do not share an outer edge.
+   * This is the regular case, where the contraction and compensation can be performed independently.
+   * @param contractionEdge An edge reference from the DCEL.
+   * @param compensationEdge An edge reference from the DCEL.
+   * @returns An array of {@link Point}s representing the positions of the moved edges, which can be used to update the configurations.
+   * Returns void if the edge move could not be performed due to incomplete DCEL links.
+   */
+  doRegularEdgeMove(contractionEdge: HalfEdge, compensationEdge: HalfEdge) {
+    // 1 Get references
+    const contractionArea = this.contraction.area;
+
+    const compensationLength = compensationEdge.toLineSegment()?.length;
+    const compensationEdgeLine = compensationEdge.toLine();
+    if (!compensationLength || !compensationEdgeLine) return;
+
+    // 2 Calculate compensation trapeze height
+    const compensationHeight =
+      this.compensation.getCompensationHeight(contractionArea);
+    if (compensationHeight === undefined) return;
+
+    // 3 Calculate new positions for compensation edge
+    const endpoints = this.getNewCompensationPositions();
+    if (!endpoints) return;
+    const [newTail, newHead] = endpoints;
     if (!newTail || !newHead) return;
 
     // 4 Do the contraction and the compensation
@@ -590,6 +610,78 @@ class ConfigurationPair {
   }
 
   /**
+   * Determines whether the shared edge will be consumed by the contraction and compensation moves.
+   * This is used to determine whether to use the shared edge move logic, which requires that at least one of the points lies on the shared edge.
+   * @returns A boolean indicating whether the shared edge will be consumed by the moves.
+   */
+  private consumesSharedEdge(shared: HalfEdge): boolean {
+    const sLen = shared.toLineSegment()?.length;
+    const sDir = shared.getVector()?.unitVector;
+    if (!sLen || !sDir) return false;
+
+    // h the CONTRACTION travels (full contraction → its own edge hits zero):
+    const cInner = this.contraction.configuration.innerEdge.toLine();
+    const hC =
+      cInner &&
+      Math.abs(cInner.perpendicularDistanceToPoint(this.contraction.point));
+
+    // h the COMPENSATION travels — PARTIAL, area-balanced. MUST be getCompensationHeight,
+    // NOT compensation.point (which is the MAXIMAL distance, as you correctly noted).
+    const hK = this.compensation.getCompensationHeight(this.contraction.area);
+    if (hC === undefined || hK === undefined) return false;
+
+    // Convert each perpendicular travel into length consumed along S.
+    // consumption rate = |projection of the moved endpoint's slide onto S| per unit h
+    // (same dot-ratio construction used in getCompensationHeight / getPoint's dist).
+    const rateC = this.sharedConsumptionRate(this.contraction, sDir);
+    const rateK = this.sharedConsumptionRate(this.compensation, sDir);
+
+    // If either rate is undefined, we can't determine consumption reliably
+    if (rateC === undefined || rateK === undefined) return false;
+
+    const consumed = rateC * hC + rateK * hK;
+
+    return consumed >= sLen - EPSILON;
+  }
+
+  /**
+   * How much of the shared edge is consumed (shortened) per unit of perpendicular
+   * travel of the given configuration's inner edge.
+   *
+   * When the inner edge advances by perpendicular distance h along its normal n̂,
+   * its endpoint on the shared edge slides along the shared edge's track by
+   * h / (ŝ · n̂), where ŝ is the shared edge's unit direction. Because that vertex
+   * slides directly along S, the slide equals the length of S consumed.
+   *
+   * This mirrors getPoint's `outerEdge.getVector().dot(innerEdgeNormal)` relation:
+   * an outer edge of length L vanishes at h = L·(û · n̂), i.e. slide-per-h = 1/(û · n̂).
+   *
+   * @param contraction The Contraction whose inner edge drives the move.
+   * @param sharedDir    The UNIT direction vector of the shared edge (ŝ).
+   * @returns Unsigned length of S consumed per unit perpendicular travel,
+   *          or undefined if the geometry is degenerate.
+   */
+  private sharedConsumptionRate(
+    contraction: Contraction,
+    sharedDir: Vector2D,
+  ): number | undefined {
+    // Same fixed (counterclockwise) normal convention as getPoint uses for `dist`.
+    const innerNormal = contraction.configuration.innerEdge
+      .getVector()
+      ?.getNormal().unitVector; // getNormal(true) — matches getPoint's innerEdgeNormal
+    if (!innerNormal) return;
+
+    const denom = sharedDir.dot(innerNormal); // ŝ · n̂
+
+    // Shared edge (nearly) parallel to the inner edge → endpoint slides infinitely
+    // far per unit h. This shouldn't happen for a real outer edge / track and
+    // signals a degenerate configuration.
+    if (Math.abs(denom) < EPSILON) return;
+
+    return 1 / Math.abs(denom);
+  }
+
+  /**
    * Determines whether to use shared edge move logic.
    * Shared edge move should only be used if:
    * 1. The configurations share an outer edge
@@ -597,20 +689,38 @@ class ConfigurationPair {
    * @returns A boolean indicating whether shared edge move logic should be used.
    */
   shouldUseSharedEdgeMove(): boolean {
-    if (!this.isSharingEdge()) return false;
-
     const sharedEdge = this.findSharedOuterEdge();
-    const sharedSegment = sharedEdge?.toLineSegment();
-    const contractionPoint = this.contraction.point;
-    const compensationPoint = this.compensation.point;
+    if (!sharedEdge) return false;
 
-    return !!(
-      sharedSegment &&
-      contractionPoint &&
-      compensationPoint &&
-      (contractionPoint.isOnLineSegment(sharedSegment) ||
-        compensationPoint.isOnLineSegment(sharedSegment))
+    // Case A: the CONTRACTION itself collapses the shared edge.
+    // getPoint's winning candidate is the vanishing edge — if that edge IS the
+    // shared edge, the two moves are inherently coupled.
+    const point = Contraction.getPoint(
+      this.contraction.configuration,
+      this.contraction.type,
     );
+    const { vanishing } = point ?? {};
+    const vanishingEdge =
+      vanishing === OuterEdge.NEXT
+        ? this.contraction.configuration.innerEdge.next
+        : vanishing === OuterEdge.PREV
+          ? this.contraction.configuration.innerEdge.prev
+          : this.contraction.configuration.innerEdge;
+    const ve = vanishingEdge?.endpoints;
+    const se = sharedEdge.endpoints;
+    if (
+      ve &&
+      se &&
+      ((ve[0].equals(se[0]) && ve[1].equals(se[1])) ||
+        (ve[0].equals(se[1]) && ve[1].equals(se[0])))
+    )
+      return true;
+
+    // Case B: contraction completes on a NON-shared edge (your C2 case, where
+    // contraction.point is not on the shared edge). Then check whether the
+    // COMPENSATION's partial travel (getCompensationHeight — NOT compensation.point)
+    // would consume the shared edge past collapse before the contraction finishes.
+    return this.consumesSharedEdge(sharedEdge);
   }
 
   /**

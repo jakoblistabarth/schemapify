@@ -38,6 +38,10 @@ export default class ConfigurationLayer extends CompositeLayer<ConfigurationLaye
     ) as [ConfigurationPurpose, Contraction][];
   }
 
+  get configurationPair() {
+    return this.props.data;
+  }
+
   renderLayers(): LayersList | null {
     return [
       new TextLayer(
@@ -66,6 +70,26 @@ export default class ConfigurationLayer extends CompositeLayer<ConfigurationLaye
           }) => {
             return d.type === ContractionType.P ? [0, 255, 0] : [255, 0, 0];
           },
+        }),
+      ),
+      new ScatterplotLayer(
+        this.getSubLayerProps({
+          id: "compensation-point-layer",
+          data: (() => {
+            if (
+              !this.configurationPair ||
+              !(this.configurationPair instanceof ConfigurationPair)
+            )
+              return [];
+            const endpoints =
+              this.configurationPair.getNewCompensationPositions();
+            if (!endpoints) return [];
+            return endpoints.filter(Boolean).map((p) => ({
+              position: p?.xy,
+            }));
+          })(),
+          radiusMaxPixels: 8,
+          getFillColor: [255, 0, 255],
         }),
       ),
       new PolygonLayer(
