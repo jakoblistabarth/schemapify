@@ -13,6 +13,7 @@
     "lint": "oxlint app src test",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
+    "test-data": "./test/data/scripts/build.sh",
     "prepare": "husky"
   },
   "author": "Jakob Listabarth",
