@@ -19,7 +19,7 @@ const FileSelect: FC<Props> = ({ files }) => {
       key={source?.name ?? ""}
     >
       <Select.Trigger
-        className="gap--1.25 inline-flex h-8.75 items-center justify-center rounded bg-white px-4 text-[13px] leading-none shadow outline-none hover:bg-blue-50 focus:shadow-[0_0_0_2px] focus:shadow-black data-placeholder:text-blue-900"
+        className="gap--1.25 inline-flex h-8.75 items-center justify-center rounded bg-white px-4 text-sm leading-none shadow outline-none hover:bg-blue-50 focus:shadow-[0_0_0_2px] focus:shadow-black data-placeholder:text-blue-900"
         aria-label="Select File"
       >
         <Select.Value placeholder="Select a file…" />
