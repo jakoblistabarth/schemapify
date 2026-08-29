@@ -59,49 +59,53 @@ const isTooDetailed = (geoJSON: geojson.FeatureCollection) => {
   return countVertices(geoJSON) > MAX_VERTEX_COUNT;
 };
 
-export function validateGeoJSON(geoJSON: geojson.FeatureCollection): boolean {
+export const validateGeoJSON = (
+  geoJSON: geojson.FeatureCollection,
+): boolean => {
   if (!isRegion(geoJSON)) return false;
   if (isTooDetailed(geoJSON)) return false;
   return true;
-}
+};
 
-export function crawlArray<T>(array: T[], index: number, n: number) {
+export const crawlArray = <T>(array: T[], index: number, n: number) => {
   return array[(((index + n) % array.length) + array.length) % array.length];
-}
+};
 
-export function getOccurrence<T>(array: T[], value: string | number) {
+export const getOccurrence = <T>(array: T[], value: string | number) => {
   return array.filter((v) => v === value).length;
-}
+};
 
-export function createGeoJSON<
+export const createGeoJSON = <
   G extends
     | geojson.Point
     | geojson.LineString
     | geojson.Polygon
     | geojson.MultiPolygon,
->(features: geojson.Feature<G>[]): geojson.FeatureCollection<G> {
+>(
+  features: geojson.Feature<G>[],
+): geojson.FeatureCollection<G> => {
   return {
     type: "FeatureCollection",
     features: features,
   };
-}
+};
 
 /**
  * Turns an angle into a unit vector? // TO-DO: check if that's correct.
  * @param angle in radians
  * @returns a unit vector
  */
-export function getUnitVector(angle: number): Vector2D {
+export const getUnitVector = (angle: number): Vector2D => {
   angle = angle > Math.PI ? angle - TWO_PI : angle;
   return new Vector2D(Math.cos(angle), Math.sin(angle));
-}
+};
 
-export function copyInstance<T>(original: T): T {
+export const copyInstance = <T>(original: T): T => {
   return Object.assign(
     Object.create(Object.getPrototypeOf(original)),
     original,
   );
-}
+};
 
 /**
  * Return all permutations of `arr`.
