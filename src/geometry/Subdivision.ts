@@ -36,6 +36,27 @@ class Subdivision {
   }
 
   /**
+   * The subdivision's vertex count, excluding the repeated closing point
+   * each {@link Ring} stores.
+   */
+  get vertexCount() {
+    return this.multiPolygons.reduce(
+      (sum, multiPolygon) =>
+        sum +
+        multiPolygon.polygons.reduce(
+          (polygonSum, polygon) =>
+            polygonSum +
+            polygon.rings.reduce(
+              (ringSum, ring) => ringSum + ring.length - 1,
+              0,
+            ),
+          0,
+        ),
+      0,
+    );
+  }
+
+  /**
    * Transform the subdivision into a {@link Dcel}.
    * @returns {@link Dcel} representation of the subdivision.
    */

@@ -1,18 +1,21 @@
 "use client";
 
+import { formatCrs } from "@/src/Input/Crs";
+import { MAX_VERTEX_COUNT } from "@/src/utilities";
 import { FC, useMemo } from "react";
 import { MdClose } from "react-icons/md";
 import { GroupedTestFiles } from "../helpers/getGroupedTestFiles";
 import useAppStore from "../helpers/store";
 import CConfigurator from "./CConfigurator";
 import FileSelect from "./FileSelect";
+import FileUpload from "./FileUpload";
 
 type Props = {
   files: GroupedTestFiles;
 };
 
 const Configurator: FC<Props> = ({ files }) => {
-  const { source, removeSource, activeSnapshot } = useAppStore();
+  const { source, sourceError, removeSource, activeSnapshot } = useAppStore();
   const dcel = useMemo(() => {
     if (!activeSnapshot) return undefined;
     return activeSnapshot.subdivision.toDcel();
@@ -35,16 +38,42 @@ const Configurator: FC<Props> = ({ files }) => {
         <div className="mb-2">
           <FileSelect files={files} />
         </div>
+        {!source && (
+          <div className="mb-2">
+            <FileUpload />
+          </div>
+        )}
+        {sourceError && (
+          <div className="mb-2 rounded-md bg-red-50 p-2 text-sm text-red-900">
+            {sourceError}
+          </div>
+        )}
         {source && (
-          <div className="flex content-between items-center rounded-md bg-white p-2">
-            {source?.name}
-            {source && (
+          <div className="rounded-md bg-white p-2">
+            <div className="flex content-between items-center">
+              {source.name}
               <button
                 className="ml-5 rounded-full bg-blue-600 p-1 text-blue-50 transition-colors hover:bg-blue-950"
                 onClick={() => removeSource()}
               >
                 <MdClose />
               </button>
+            </div>
+            <div className="mt-1 text-xs text-gray-500">
+              {source.vertexCount} vertices · {formatCrs(source.crs)}
+            </div>
+            {source.skipped > 0 && (
+              <div className="mt-1 text-xs text-gray-500">
+                {source.skipped} non-polygonal feature
+                {source.skipped === 1 ? "" : "s"} skipped
+              </div>
+            )}
+            {source.vertexCount > MAX_VERTEX_COUNT && (
+              <div className="mt-2 rounded bg-amber-50 p-2 text-xs text-amber-900">
+                Above {MAX_VERTEX_COUNT} vertices. Schematization runs on the
+                main thread, so the interface will be unresponsive while it
+                works.
+              </div>
             )}
           </div>
         )}

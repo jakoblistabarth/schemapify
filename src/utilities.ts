@@ -21,8 +21,16 @@ function isRegion(geoJSON: geojson.FeatureCollection) {
     : false;
 }
 
-function isTooDetailed(geoJSON: geojson.FeatureCollection) {
-  const totalVertexCount = geoJSON.features.reduce((regionSum, feature) => {
+export const MAX_VERTEX_COUNT = 5000;
+
+/**
+ * Count the vertices of all areal features, ignoring the repeated closing
+ * point of each ring. Non-areal features contribute nothing.
+ * @param geoJSON the feature collection to measure
+ * @returns the total vertex count
+ */
+const countVertices = (geoJSON: geojson.FeatureCollection): number => {
+  return geoJSON.features.reduce((regionSum, feature) => {
     if (
       feature.geometry.type !== "Polygon" &&
       feature.geometry.type !== "MultiPolygon"
@@ -45,8 +53,11 @@ function isTooDetailed(geoJSON: geojson.FeatureCollection) {
 
     return regionSum + featureVertexCount;
   }, 0);
-  return totalVertexCount > 5000 ? true : false;
-}
+};
+
+const isTooDetailed = (geoJSON: geojson.FeatureCollection) => {
+  return countVertices(geoJSON) > MAX_VERTEX_COUNT;
+};
 
 export function validateGeoJSON(geoJSON: geojson.FeatureCollection): boolean {
   if (!isRegion(geoJSON)) return false;

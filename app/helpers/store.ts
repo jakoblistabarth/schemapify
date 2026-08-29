@@ -3,11 +3,12 @@ import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import { style as defaultStyle } from "@/src/c-oriented-schematization/schematization.style";
 import Dcel from "@/src/Dcel/Dcel";
 import Input from "@/src/Input/";
+import { Crs } from "@/src/Input/Crs";
 import Job from "@/src/Job/";
 import Snapshot from "@/src/Snapshot/Snapshot";
 import SnapshotList from "@/src/Snapshot/SnapshotList";
-import { FeatureCollection, MultiPolygon, Polygon } from "geojson";
 import { create } from "zustand";
+import { parseGeoFile } from "./parseGeoFile";
 
 export type ViewMode = "debug" | "simple";
 export type CConfig =
@@ -21,14 +22,23 @@ export type CConfig =
       angles: number[];
     };
 
+export type Source = {
+  name: string;
+  /** The CRS the data is defined in, where the source format declares one. */
+  crs?: Crs;
+  /** Vertex count, excluding the repeated closing point of each ring. */
+  vertexCount: number;
+  /** Number of features dropped because they are not areal. */
+  skipped: number;
+};
+
 type AppState = {
-  source?: {
-    name: string;
-    data: FeatureCollection<Polygon | MultiPolygon>;
-  };
+  source?: Source;
   loadedInput?: Input;
   setSource: (name: string) => void;
+  setSourceFromFile: (file: File) => Promise<void>;
   removeSource: () => void;
+  sourceError?: string;
   dcel?: Dcel;
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
@@ -43,6 +53,40 @@ type AppState = {
   runSchematization: (c: C) => void;
 };
 
+/**
+ * The state to reset to whenever the source changes, so that a stale
+ * schematization can never outlive the data it was computed from.
+ */
+const clearedState = {
+  source: undefined,
+  sourceError: undefined,
+  loadedInput: undefined,
+  dcel: undefined,
+  activeSnapshot: undefined,
+  nextSnapshot: undefined,
+  prevSnapshot: undefined,
+  snapshotList: undefined,
+  cConfig: undefined,
+} satisfies Partial<AppState>;
+
+/**
+ * Derive the loaded state from an {@link Input}.
+ * @param input the freshly loaded input
+ * @param counts diagnostics from the parser, recomputed when not supplied
+ */
+const loaded = (
+  input: Input,
+  counts?: { vertexCount: number; skipped: number },
+) => ({
+  source: {
+    name: input.name,
+    crs: input.crs,
+    vertexCount: counts?.vertexCount ?? input.data.vertexCount,
+    skipped: counts?.skipped ?? 0,
+  },
+  loadedInput: input,
+});
+
 const useAppStore = create<AppState>((set, get) => ({
   dcel: undefined,
   source: undefined,
@@ -52,28 +96,24 @@ const useAppStore = create<AppState>((set, get) => ({
     const data = await response.json();
     const input = name.includes(".subdivision")
       ? Input.fromCoordinates(name, data)
-      : Input.fromGeoJSON(data);
+      : Input.fromGeoJSON(data, name);
     // Just load the data and input, don't run schematization yet
-    set(() => {
-      return {
-        source: { name, data },
-        loadedInput: input,
-        dcel: undefined,
-        activeSnapshot: undefined,
-        snapshotList: undefined,
-        cConfig: undefined,
-      };
-    });
+    set(() => ({ ...clearedState, ...loaded(input) }));
+  },
+  setSourceFromFile: async (file: File) => {
+    const result = await parseGeoFile(file);
+    if (!result.ok) {
+      set(() => ({ ...clearedState, sourceError: result.error }));
+      return;
+    }
+    const { input, vertexCount, skipped } = result;
+    set(() => ({
+      ...clearedState,
+      ...loaded(input, { vertexCount, skipped }),
+    }));
   },
   removeSource: () => {
-    set(() => ({
-      source: undefined,
-      loadedInput: undefined,
-      dcel: undefined,
-      activeSnapshot: undefined,
-      snapshotList: undefined,
-      cConfig: undefined,
-    }));
+    set(() => ({ ...clearedState }));
   },
   cConfig: undefined,
   setCConfig: (config) => {
