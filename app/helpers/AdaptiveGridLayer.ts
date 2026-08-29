@@ -129,7 +129,6 @@ export default class AdaptiveGridLayer extends Layer<AdaptiveGridLayerProps> {
         blendAlphaDstFactor: "zero",
       },
     });
-    this.setState({ model });
     this.modelInstance = model;
   }
 
