@@ -11,6 +11,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "oxlint app src test",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
     "prepare": "husky"
   },
   "author": "Jakob Listabarth",

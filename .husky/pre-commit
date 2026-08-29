@@ -1,1 +1,1 @@
-pnpm tsc && pnpm lint && pnpm test --silent
+pnpm format:check && pnpm tsc && pnpm lint && pnpm test --silent
