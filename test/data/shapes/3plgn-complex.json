@@ -10,57 +10,57 @@
         "type": "Polygon",
         "coordinates": [
           [
-            [2,3],
-            [4,3],
-            [4,5],
-            [2,5],
-            [2,3]
+            [2, 3],
+            [4, 3],
+            [4, 5],
+            [2, 5],
+            [2, 3]
           ]
         ]
       }
     },
     {
-        "type": "Feature",
-        "properties": {
-          "id": 2
-        },
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": [
-            [
-              [4,3],
-              [2,3],
-              [2,5],
-              [0,5],
-              [1,1],
-              [5,0],
-              [10,1],
-              [4,3]
-            ]
-          ]
-        }
+      "type": "Feature",
+      "properties": {
+        "id": 2
       },
-      {
-        "type": "Feature",
-        "properties": {
-          "id": 3
-        },
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": [
-            [
-              [4,5],
-              [4,3],
-              [10,1],
-              [10,6],
-              [9,7],
-              [8,9],
-              [7,8],
-              [6,8],
-              [4,5]
-            ]
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [4, 3],
+            [2, 3],
+            [2, 5],
+            [0, 5],
+            [1, 1],
+            [5, 0],
+            [10, 1],
+            [4, 3]
           ]
-        }
+        ]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [4, 5],
+            [4, 3],
+            [10, 1],
+            [10, 6],
+            [9, 7],
+            [8, 9],
+            [7, 8],
+            [6, 8],
+            [4, 5]
+          ]
+        ]
+      }
+    }
   ]
 }
