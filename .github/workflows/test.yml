@@ -11,8 +11,6 @@ jobs:
         with:
           node-version-file: ".nvmrc"
       - uses: pnpm/action-setup@v5
-        with:
-          version: 9.x.x
       - name: Install modules
         run: pnpm i
       - name: Run linter
