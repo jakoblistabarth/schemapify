@@ -42,6 +42,7 @@ export default class VertexLayer extends CompositeLayer<VertexLayerProps> {
         lineWidthMinPixels: 1,
         getLineWidth: 1,
         getFillColor: [255, 255, 255],
+        updateTriggers: { getRadius: hoveredUuid },
         transitions: {
           getRadius: { duration: 150 },
           getLineWidth: { duration: 100 },

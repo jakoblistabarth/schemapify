@@ -186,6 +186,9 @@ const Canvas: FC<Props> = ({
       lineWidthUnits: "pixels",
       pickable: true,
       onHover: handleHover,
+      updateTriggers: {
+        getFillColor: hoveredUuid,
+      },
       transitions: {
         getFillColor: { duration: 200 },
       },
@@ -286,6 +289,7 @@ const Canvas: FC<Props> = ({
       getWidth: 1,
       widthUnits: "pixels",
       extensions: [new PathStyleExtension({ offset: true })],
+      updateTriggers: { getColor: hoveredUuid },
       transitions: { getColor: { duration: 300 } },
     });
 
