@@ -637,34 +637,28 @@ class Dcel {
     return coordinates;
   }
 
-  private getInnerRings(face: Face): [number, number][][] {
-    const innerRings: [number, number][][] = [];
-    face.innerEdges.forEach((innerEdge) => {
-      const ringCoordinates = this.getRingCoordinates(innerEdge);
-      innerRings.push(ringCoordinates);
-      // Recursively process nested rings
-      const nestedRings = this.getInnerRingsFromEdge(innerEdge);
-      innerRings.push(...nestedRings);
-    });
-    return innerRings;
-  }
+  /**
+   * Get the coordinates of a face's inner rings, and of any rings nested
+   * within those.
+   *
+   * `visited` guards against an inner edge leading back to a face already
+   * seen. Degenerate input can produce such a cycle, which would otherwise
+   * recurse until the stack overflows.
+   * @param face the face whose inner rings to collect
+   * @param visited the faces already collected, used to break cycles
+   * @returns one coordinate ring per hole
+   */
+  private getInnerRings(
+    face: Face,
+    visited = new Set<Face>(),
+  ): [number, number][][] {
+    if (visited.has(face)) return [];
+    visited.add(face);
 
-  private getInnerRingsFromEdge(edge: HalfEdge): [number, number][][] {
-    const innerRings: [number, number][][] = [];
-    const startEdge = edge;
-    do {
-      if (edge.face?.innerEdges) {
-        edge.face.innerEdges.forEach((innerEdge) => {
-          const ringCoordinates = this.getRingCoordinates(innerEdge);
-          innerRings.push(ringCoordinates);
-          // Recursively process nested rings
-          const nestedRings = this.getInnerRingsFromEdge(innerEdge);
-          innerRings.push(...nestedRings);
-        });
-      }
-      edge = edge.next ? edge.next : startEdge;
-    } while (edge !== startEdge);
-    return innerRings;
+    return face.innerEdges.flatMap((innerEdge) => [
+      this.getRingCoordinates(innerEdge),
+      ...(innerEdge.face ? this.getInnerRings(innerEdge.face, visited) : []),
+    ]);
   }
 
   /**
