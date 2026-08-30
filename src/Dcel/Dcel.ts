@@ -491,15 +491,16 @@ class Dcel {
         polygon.rings.forEach((ring, idx) => {
           const [firstPoint, secondPoint] = ring.points;
 
-          // Find first edge of the ring
-          const edge = dcel.getHalfEdges().find((e) => {
-            return (
-              e.tail.x === firstPoint.x &&
-              e.tail.y === firstPoint.y &&
+          // Find first edge of the ring.
+          // Looked up via the ring's first vertex rather than by scanning
+          // every half-edge, which allocated a fresh array of all of them for
+          // each ring.
+          const tail = dcel.findVertex(firstPoint.x, firstPoint.y);
+          const edge = tail?.edges.find(
+            (e) =>
               e.twin?.tail.x === secondPoint.x &&
-              e.twin?.tail.y === secondPoint.y
-            );
-          });
+              e.twin?.tail.y === secondPoint.y,
+          );
           if (!edge) return;
 
           // Check whether there's already a face related to this edge
