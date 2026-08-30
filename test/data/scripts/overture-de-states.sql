@@ -49,7 +49,7 @@ COPY (
     AND class = 'land'
   ORDER BY
     name
-) TO 'test/data/gpkg/DEU_adm1.gpkg'
+) TO 'test/data/generated/DEU_adm1.gpkg'
 WITH
   (
     FORMAT gdal,

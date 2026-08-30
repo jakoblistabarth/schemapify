@@ -3,7 +3,7 @@
 set -e
 
 cd "$(dirname "$0")/../../.."
-mkdir -p test/data/gpkg
+mkdir -p test/data/generated
 
 for file in test/data/scripts/*.sql; do
   echo "→ $file"

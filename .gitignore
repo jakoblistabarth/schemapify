@@ -7,7 +7,7 @@
 
 # testing
 /coverage
-/test/data/gpkg/
+/test/data/generated/
 
 # next.js
 /.next/
