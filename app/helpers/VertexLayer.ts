@@ -10,7 +10,6 @@ type LayerData = {
 
 type VertexLayerProps = {
   id: string;
-  visible: boolean;
   data: LayerData;
   hoveredUuid?: string;
   onHover?: (info: HoverInfo | undefined) => void;

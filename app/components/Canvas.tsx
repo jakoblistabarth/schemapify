@@ -152,19 +152,27 @@ const Canvas: FC<Props> = ({
   const staircaseRegions = activeSnapshot?.additionalData?.regions;
   const snapshotLabel = activeSnapshot?.label;
 
-  const simplePolygonLayer = useMemo(() => {
-    const subdivision = dcel.toSubdivision();
-    const polygonData = subdivision.multiPolygons.flatMap((multiPolygon, idx) =>
-      multiPolygon.polygons.map((polygon) => ({
-        multiPolygon,
-        polygon,
-        uuid: idx.toString(),
-      })),
-    );
+  // Kept out of the layer memo below: converting back to a Subdivision is
+  // expensive, and the layer has to be rebuilt whenever the hover changes.
+  const simplePolygonData = useMemo(
+    () =>
+      viewMode !== "simple"
+        ? undefined
+        : dcel.toSubdivision().multiPolygons.flatMap((multiPolygon, idx) =>
+            multiPolygon.polygons.map((polygon) => ({
+              multiPolygon,
+              polygon,
+              uuid: idx.toString(),
+            })),
+          ),
+    [dcel, viewMode],
+  );
 
+  const simplePolygonLayer = useMemo(() => {
+    if (!simplePolygonData) return undefined;
     return new PolygonLayer({
       id: "simple-polygons",
-      data: polygonData,
+      data: simplePolygonData,
       getPolygon: (feature: { polygon: Polygon }) =>
         feature.polygon.rings.map((ring) =>
           ring.points.map((point) => point.xy),
@@ -178,23 +186,22 @@ const Canvas: FC<Props> = ({
       lineWidthUnits: "pixels",
       pickable: true,
       onHover: handleHover,
-      visible: viewMode === "simple",
       transitions: {
         getFillColor: { duration: 200 },
       },
     });
-  }, [dcel, hoveredUuid, handleHover, viewMode]);
+  }, [simplePolygonData, hoveredUuid, handleHover]);
 
   const { baseLayers, view } = useMemo(() => {
     const view = new OrthographicView({ flipY: false, id: "ortho" });
 
-    // Always create debug layers but control visibility
     const showDebugLayers =
       viewMode === "debug" &&
       (snapshotLabel === LABEL.SIMPLIFY ||
         snapshotLabel === LABEL.STAIRCASEREGIONS);
 
-    const baseLayers: Layer[] = [gridLayer, simplePolygonLayer];
+    // `undefined` entries are dropped when the layers are combined below.
+    const baseLayers: (Layer | undefined)[] = [gridLayer, simplePolygonLayer];
 
     if (snapshotLabel === LABEL.STAIRCASEREGIONS && staircaseRegions) {
       const staircaseRegionLayer = new PolygonLayer({
@@ -257,12 +264,15 @@ const Canvas: FC<Props> = ({
 
   // Static layers (don't depend on animation time)
   const { staticLayers, vertexLayer } = useMemo(() => {
+    // debug layers are left out entirely, hiding them only would
+    // still cause deck.gl to build attributes and tesselating geometry.
+    if (viewMode !== "debug")
+      return { staticLayers: baseLayers, vertexLayer: undefined };
+
     const halfedges = Array.from(dcel.getHalfEdges());
     const vertices = Array.from(dcel.getVertices());
     const significantVertices =
       activeSnapshot?.additionalData?.significantVertices;
-
-    const isDebugMode = viewMode === "debug";
 
     const edgeLayer = new PathLayer({
       id: "edges",
@@ -277,7 +287,6 @@ const Canvas: FC<Props> = ({
       widthUnits: "pixels",
       extensions: [new PathStyleExtension({ offset: true })],
       transitions: { getColor: { duration: 300 } },
-      visible: isDebugMode,
     });
 
     const vertexLayer = new VertexLayer({
@@ -285,7 +294,6 @@ const Canvas: FC<Props> = ({
       data: { vertices, significantVertices },
       hoveredUuid,
       onHover: handleHover,
-      visible: isDebugMode,
     });
 
     return {
@@ -296,8 +304,8 @@ const Canvas: FC<Props> = ({
 
   // Animation layer (recomputes only when time changes)
   const edgeAnimationLayer = useMemo(() => {
+    if (viewMode !== "debug" || !isAnimating) return undefined;
     const halfedges = Array.from(dcel.getHalfEdges());
-    const isDebugMode = viewMode === "debug";
 
     return new TripsLayer({
       id: "edges-animated",
@@ -311,14 +319,17 @@ const Canvas: FC<Props> = ({
       widthUnits: "pixels",
       currentTime: time,
       extensions: [new PathStyleExtension({ offset: true })],
-      visible: isDebugMode,
     });
-  }, [time, dcel, viewMode]);
+  }, [time, dcel, viewMode, isAnimating]);
 
   // Combine all layers: trips layer before vertex layer
-  const layers = useMemo((): Layer[] => {
-    return [...staticLayers, edgeAnimationLayer, vertexLayer];
-  }, [staticLayers, edgeAnimationLayer, vertexLayer]);
+  const layers = useMemo(
+    (): Layer[] =>
+      [...staticLayers, edgeAnimationLayer, vertexLayer].filter(
+        (layer): layer is Layer => layer !== undefined,
+      ),
+    [staticLayers, edgeAnimationLayer, vertexLayer],
+  );
 
   return (
     <>
