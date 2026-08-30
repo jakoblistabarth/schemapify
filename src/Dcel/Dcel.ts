@@ -507,6 +507,17 @@ class Dcel {
           const existingFace = dcel.faces.find((f) => f.edge === edge);
           if (existingFace?.associatedFeatures) {
             existingFace.associatedFeatures.push(featureId);
+            // The ring already has a face, because it is also a feature in its
+            // own right — an enclave such as San Marino within Italy. The hole
+            // bookkeeping still has to happen, or the enclosing face gets no
+            // inner ring and the enclave, having no `outerRing`, is reported
+            // as a polygon rather than a hole.
+            if (idx === 0) {
+              outerRingFace = existingFace;
+            } else if (outerRingFace) {
+              existingFace.outerRing = outerRingFace;
+              outerRingFace.innerEdges.push(edge);
+            }
           } else {
             if (idx === 0) {
               // only for outer ring
