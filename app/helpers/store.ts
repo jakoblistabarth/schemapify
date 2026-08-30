@@ -87,6 +87,15 @@ const loaded = (
   loadedInput: input,
 });
 
+/**
+ * The geometry currently on display: the active snapshot's, or — as long as no
+ * schematization has run — the loaded input's. Deliberately a
+ * {@link Subdivision}, so that displaying data never requires building a
+ * {@link Dcel}.
+ */
+export const selectSubdivision = (state: AppState) =>
+  state.activeSnapshot?.subdivision ?? state.loadedInput?.data;
+
 const useAppStore = create<AppState>((set, get) => ({
   dcel: undefined,
   source: undefined,

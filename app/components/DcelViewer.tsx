@@ -8,7 +8,7 @@ import Canvas from "./Canvas";
 const DcelViewer: FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const { output } = useMemo(() => {
+  const { output, subdivision } = useMemo(() => {
     const dcel = Dcel.fromCoordinates([
       [
         [
@@ -23,12 +23,13 @@ const DcelViewer: FC = () => {
     ]);
     const schematization = new CSchematization();
     const output = schematization.run(dcel);
-    return { output };
+    return { output, subdivision: output.toSubdivision() };
   }, []);
   return (
     <div className="relative min-h-[500px] overflow-hidden rounded bg-gray-200/25">
       <Canvas
         isAnimating={isAnimating}
+        subdivision={subdivision}
         dcel={output}
         onAnimatingChange={setIsAnimating}
       />

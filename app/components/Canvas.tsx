@@ -6,8 +6,8 @@ import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceF
 import Staircase from "@/src/c-oriented-schematization/Staircase";
 import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
-import MultiPolygon from "@/src/geometry/MultiPolygon";
 import Polygon from "@/src/geometry/Polygon";
+import Subdivision from "@/src/geometry/Subdivision";
 import {
   Layer,
   OrthographicView,
@@ -32,12 +32,19 @@ const intervalMS = 24;
 const loopLength = 1;
 
 type Props = {
-  dcel: Dcel;
+  /** The geometry to display. */
+  subdivision: Subdivision;
+  /**
+   * The same geometry as a {@link Dcel}, required only by the debug layers.
+   * Without it the canvas stays in the simple view.
+   */
+  dcel?: Dcel;
   isAnimating?: boolean;
   onAnimatingChange?: (isAnimating: boolean) => void;
 };
 
 const Canvas: FC<Props> = ({
+  subdivision,
   dcel,
   isAnimating = false,
   onAnimatingChange,
@@ -48,8 +55,11 @@ const Canvas: FC<Props> = ({
   );
   const [time, setTime] = useState(0);
   const deckglRef = useRef<HTMLDivElement>(null);
-  const viewMode = useAppStore((state) => state.viewMode);
+  const selectedViewMode = useAppStore((state) => state.viewMode);
   const setViewMode = useAppStore((state) => state.setViewMode);
+  // The debug layers read the Dcel's topology, so without one there is
+  // nothing to debug.
+  const viewMode = dcel ? selectedViewMode : "simple";
   const [viewState, setViewState] = useState<OrthographicViewState | undefined>(
     undefined,
   );
@@ -68,13 +78,13 @@ const Canvas: FC<Props> = ({
   // Compute initial view state early so it's available for handleZoom
   // Memoize to prevent dependency changes on every render
   const initialViewState = useMemo(() => {
-    const bbox = dcel.getBbox();
+    const bbox = subdivision.getBbox();
     const initialZoom = getInitialZoom(bbox);
     return {
       target: bbox.center,
       zoom: initialZoom,
     };
-  }, [dcel]);
+  }, [subdivision]);
 
   const handleZoom = useCallback(
     (direction: "in" | "out" | "reset") => {
@@ -86,7 +96,7 @@ const Canvas: FC<Props> = ({
 
         if (direction === "reset") {
           // Reset to initial zoom
-          const bbox = dcel.getBbox();
+          const bbox = subdivision.getBbox();
           const zoom = getInitialZoom(bbox);
           return {
             ...current,
@@ -104,7 +114,7 @@ const Canvas: FC<Props> = ({
         };
       });
     },
-    [dcel, initialViewState],
+    [subdivision, initialViewState],
   );
 
   const animate = useCallback(() => {
@@ -152,20 +162,19 @@ const Canvas: FC<Props> = ({
   const staircaseRegions = activeSnapshot?.additionalData?.regions;
   const snapshotLabel = activeSnapshot?.label;
 
-  // Kept out of the layer memo below: converting back to a Subdivision is
-  // expensive, and the layer has to be rebuilt whenever the hover changes.
+  // Kept out of the layer memo below, which has to be rebuilt whenever the  hover changes.
   const simplePolygonData = useMemo(
     () =>
       viewMode !== "simple"
         ? undefined
-        : dcel.toSubdivision().multiPolygons.flatMap((multiPolygon, idx) =>
+        : subdivision.multiPolygons.flatMap((multiPolygon, idx) =>
             multiPolygon.polygons.map((polygon) => ({
               multiPolygon,
               polygon,
               uuid: idx.toString(),
             })),
           ),
-    [dcel, viewMode],
+    [subdivision, viewMode],
   );
 
   const simplePolygonLayer = useMemo(() => {
@@ -177,10 +186,8 @@ const Canvas: FC<Props> = ({
         feature.polygon.rings.map((ring) =>
           ring.points.map((point) => point.xy),
         ),
-      getFillColor: (feature: { multiPolygon: MultiPolygon }) =>
-        feature.multiPolygon.id == hoveredUuid
-          ? [0, 0, 255, 40]
-          : [0, 0, 255, 20],
+      getFillColor: (feature: { uuid: string }) =>
+        feature.uuid === hoveredUuid ? [0, 0, 255, 40] : [0, 0, 255, 20],
       getLineColor: [0, 0, 255, 255],
       getLineWidth: 1,
       lineWidthUnits: "pixels",
@@ -221,7 +228,7 @@ const Canvas: FC<Props> = ({
       baseLayers.push(staircaseRegionLayer);
     }
 
-    if (snapshotLabel === LABEL.SIMPLIFY) {
+    if (dcel && snapshotLabel === LABEL.SIMPLIFY) {
       const configurations = new ConfigurationGenerator().run(dcel);
 
       const contractionLayer = new SolidPolygonLayer({
@@ -269,7 +276,7 @@ const Canvas: FC<Props> = ({
   const { staticLayers, vertexLayer } = useMemo(() => {
     // debug layers are left out entirely, hiding them only would
     // still cause deck.gl to build attributes and tesselating geometry.
-    if (viewMode !== "debug")
+    if (viewMode !== "debug" || !dcel)
       return { staticLayers: baseLayers, vertexLayer: undefined };
 
     const halfedges = Array.from(dcel.getHalfEdges());
@@ -308,7 +315,7 @@ const Canvas: FC<Props> = ({
 
   // Animation layer (recomputes only when time changes)
   const edgeAnimationLayer = useMemo(() => {
-    if (viewMode !== "debug" || !isAnimating) return undefined;
+    if (viewMode !== "debug" || !isAnimating || !dcel) return undefined;
     const halfedges = Array.from(dcel.getHalfEdges());
 
     return new TripsLayer({

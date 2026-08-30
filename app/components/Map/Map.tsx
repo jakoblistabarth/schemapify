@@ -1,20 +1,22 @@
 "use client";
 
-import useAppStore from "@/app/helpers/store";
+import useAppStore, { selectSubdivision } from "@/app/helpers/store";
 import { FC, useMemo, useState } from "react";
 import Canvas from "../Canvas";
 
 const Map: FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
-  const { activeSnapshot, loadedInput } = useAppStore();
-  // Building the Dcel is expensive, so it must not repeat on every render.
+  const viewMode = useAppStore((state) => state.viewMode);
+  const subdivision = useAppStore(selectSubdivision);
+  // Only build DCEL when in debug view mode
   const dcel = useMemo(
-    () => activeSnapshot?.subdivision.toDcel() ?? loadedInput?.getDcel(),
-    [activeSnapshot, loadedInput],
+    () => (viewMode === "debug" ? subdivision?.toDcel() : undefined),
+    [subdivision, viewMode],
   );
-  return dcel ? (
+  return subdivision ? (
     <Canvas
       isAnimating={isAnimating}
+      subdivision={subdivision}
       dcel={dcel}
       onAnimatingChange={setIsAnimating}
     />

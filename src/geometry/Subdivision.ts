@@ -1,4 +1,5 @@
 import Dcel from "@/src/Dcel/Dcel";
+import BoundingBox from "../helpers/BoundingBox";
 import MultiPolygon from "./MultiPolygon";
 
 export type Coordinates = [number, number][][][][];
@@ -54,6 +55,19 @@ class Subdivision {
         ),
       0,
     );
+  }
+
+  /**
+   * The subdivision's bounding box.
+   * @returns A {@link BoundingBox} enclosing all of the subdivision's points.
+   */
+  getBbox() {
+    const points = this.multiPolygons.flatMap((multiPolygon) =>
+      multiPolygon.polygons.flatMap((polygon) =>
+        polygon.rings.flatMap((ring) => ring.points.map((point) => point.xy)),
+      ),
+    );
+    return new BoundingBox(points);
   }
 
   /**
