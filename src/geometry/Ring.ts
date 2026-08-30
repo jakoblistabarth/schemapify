@@ -53,9 +53,10 @@ class Ring {
    */
   get area() {
     return this.points.reduce((acc, point, i, points) => {
+      const next = points[i == points.length - 1 ? 0 : i + 1];
       const addX = point.x;
-      const addY = points[i == this.length - 1 ? 0 : i + 1].y;
-      const subX = points[i == this.length - 1 ? 0 : i + 1].x;
+      const addY = next.y;
+      const subX = next.x;
       const subY = point.y;
 
       acc += addX * addY * 0.5;
