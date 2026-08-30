@@ -48,6 +48,7 @@
     "flatgeobuf": "^4.4.0",
     "graham_scan": "^1.0.5",
     "leaflet": "^1.9.4",
+    "mapshaper": "^0.7.56",
     "next": "^16.3.3",
     "pretty-bytes": "^7.1.2",
     "react": "^19.2.8",
