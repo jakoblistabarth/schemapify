@@ -71,6 +71,7 @@ const Canvas: FC<Props> = ({
   );
 
   const { activeSnapshot } = useAppStore();
+  const sourceName = useAppStore((state) => state.source?.name);
 
   // Extract hoveredUuid once (dependency on hoverInfo directly would cause layer recomputation)
   const hoveredUuid = hoverInfo?.object?.uuid;
@@ -85,6 +86,16 @@ const Canvas: FC<Props> = ({
       zoom: initialZoom,
     };
   }, [subdivision]);
+
+  // Reading the latest value from a ref keeps the reset below tied to the input,
+  // not to every subdivision change (e.g. when stepping through snapshots).
+  const initialViewStateRef = useRef(initialViewState);
+  initialViewStateRef.current = initialViewState;
+
+  // Recenter whenever another input is loaded.
+  useEffect(() => {
+    setViewState(initialViewStateRef.current);
+  }, [sourceName]);
 
   const handleZoom = useCallback(
     (direction: "in" | "out" | "reset") => {
