@@ -12,11 +12,19 @@ type Props = { files: GroupedTestFiles };
 const FileSelect: FC<Props> = ({ files }) => {
   const { setSource, source } = useAppStore();
 
+  // An uploaded file has no matching item, which would leave the trigger
+  // blank; fall back to the placeholder in that case.
+  const selected = Object.values(files)
+    .flat()
+    .some((d) => d.name === source?.name)
+    ? source?.name
+    : undefined;
+
   return (
     <Select.Root
-      value={source?.name ?? undefined}
+      value={selected}
       onValueChange={(value) => setSource(value)}
-      key={source?.name ?? ""}
+      key={selected ?? ""}
     >
       <Select.Trigger
         className="gap--1.25 inline-flex h-8.75 items-center justify-center rounded bg-white px-4 text-sm leading-none shadow outline-none hover:bg-blue-50 focus:shadow-[0_0_0_2px] focus:shadow-black data-placeholder:text-blue-900"
