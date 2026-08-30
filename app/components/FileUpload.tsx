@@ -40,11 +40,11 @@ const FileUpload: FC = () => {
       }`}
     >
       <RiUploadLine />
-      Drop a .fgb or .geojson file
+      Drop a .fgb, .gpkg or .geojson file
       <input
         ref={inputRef}
         type="file"
-        accept=".fgb,.geojson,.json"
+        accept=".fgb,.gpkg,.geojson,.json"
         className="hidden"
         onChange={(event) => {
           handleFiles(event.target.files);

@@ -4,8 +4,16 @@ import Subdivision from "../geometry/Subdivision";
 import { geoJsonToGeometry } from "../utilities";
 import { Crs, wgs84 } from "./Crs";
 import { flatGeobufToGeometry } from "./flatGeobuf";
+import { geoPackageToGeometry } from "./geoPackage";
+import type { SqlJsConfig } from "sql.js";
 
-export type InputFormat = "shp" | "json" | "kml" | "coordinates" | "fgb";
+export type InputFormat =
+  | "shp"
+  | "json"
+  | "kml"
+  | "coordinates"
+  | "fgb"
+  | "gpkg";
 
 /**
  * Represents the input data for the schematization process.
@@ -52,6 +60,22 @@ class Input {
   static async fromFlatGeobuf(name: string, bytes: Uint8Array): Promise<Input> {
     const { data, crs } = await flatGeobufToGeometry(bytes);
     return new this(name, data, "fgb", crs);
+  }
+
+  /**
+   * Create an {@link Input} from a GeoPackage file.
+   * @param name the file's name
+   * @param bytes the contents of the `.gpkg` file
+   * @param config passed to sql.js, notably `locateFile` for its wasm
+   * @returns an {@link Input} carrying the file's CRS
+   */
+  static async fromGeoPackage(
+    name: string,
+    bytes: Uint8Array,
+    config?: SqlJsConfig,
+  ): Promise<Input> {
+    const { data, crs } = await geoPackageToGeometry(bytes, config);
+    return new this(name, data, "gpkg", crs);
   }
 
   /**

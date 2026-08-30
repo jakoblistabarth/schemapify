@@ -14,7 +14,7 @@
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
     "test-data": "./test/data/scripts/build.sh",
-    "prepare": "husky"
+    "prepare": "husky && cp node_modules/sql.js/dist/sql-wasm.wasm public/"
   },
   "author": "Jakob Listabarth",
   "license": "MIT",
@@ -42,6 +42,7 @@
     "@tailwindcss/postcss": "^4.3.3",
     "@turf/boolean-valid": "^7.4.0",
     "@turf/meta": "^7.4.0",
+    "@types/sql.js": "^1.4.11",
     "clsx": "^2.1.1",
     "d3": "^7.9.0",
     "flatgeobuf": "^4.4.0",
@@ -53,6 +54,7 @@
     "react-dom": "^19.2.8",
     "react-hotkeys-hook": "^5.3.3",
     "react-icons": "^5.7.0",
+    "sql.js": "^1.14.2",
     "uuid": "^14.0.2",
     "zustand": "^5.0.15"
   },

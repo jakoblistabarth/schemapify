@@ -1,4 +1,5 @@
 import { flatGeobufToGeometry } from "@/src/Input/flatGeobuf";
+import { geoPackageToGeometry } from "@/src/Input/geoPackage";
 import Input from "@/src/Input/Input";
 import { validateGeoJSON } from "@/src/utilities";
 import type { FeatureCollection, MultiPolygon, Polygon } from "geojson";
@@ -48,6 +49,47 @@ const parseFlatGeobuf = async (
 };
 
 /**
+ * sql.js resolves its wasm relative to the page, which fails in the browser.
+ * `pnpm prepare` copies the file into `public/`.
+ */
+const sqlJsConfig = { locateFile: () => "/sql-wasm.wasm" };
+
+/**
+ * Read a GeoPackage file.
+ *
+ * Like FlatGeobuf, the geometry blobs are decoded straight into the geometry
+ * classes, so the file's coordinate reference system is preserved.
+ */
+const parseGeoPackage = async (
+  name: string,
+  bytes: Uint8Array,
+): Promise<ParseResult> => {
+  try {
+    const { data, crs, skipped } = await geoPackageToGeometry(
+      bytes,
+      sqlJsConfig,
+    );
+    if (data.multiPolygons.length === 0)
+      return {
+        ok: false,
+        error:
+          "No polygonal features found. Schematization requires Polygon or MultiPolygon geometry.",
+      };
+    return {
+      ok: true,
+      input: new Input(name, data, "gpkg", crs),
+      vertexCount: data.vertexCount,
+      skipped,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: `Could not read GeoPackage: ${error instanceof Error ? error.message : "unknown error"}`,
+    };
+  }
+};
+
+/**
  * Read a GeoJSON file.
  *
  * Unlike FlatGeobuf this has no CRS of its own — RFC 7946 defines GeoJSON
@@ -84,7 +126,7 @@ const parseGeoJSON = (name: string, text: string): ParseResult => {
 /**
  * Parse an uploaded geodata file into an {@link Input}.
  *
- * Supported: FlatGeobuf (`.fgb`) and GeoJSON (`.geojson`, `.json`).
+ * Supported: FlatGeobuf (`.fgb`), GeoPackage (`.gpkg`) and GeoJSON.
  * @param file the uploaded file
  * @returns the parsed input, or a message describing why it was rejected
  */
@@ -96,13 +138,18 @@ export const parseGeoFile = async (file: File): Promise<ParseResult> => {
         file.name,
         new Uint8Array(await file.arrayBuffer()),
       );
+    case "gpkg":
+      return parseGeoPackage(
+        file.name,
+        new Uint8Array(await file.arrayBuffer()),
+      );
     case "geojson":
     case "json":
       return parseGeoJSON(file.name, await file.text());
     default:
       return {
         ok: false,
-        error: `Unsupported file type "${extension ?? file.name}". Use .fgb or .geojson.`,
+        error: `Unsupported file type "${extension ?? file.name}". Use .fgb, .gpkg or .geojson.`,
       };
   }
 };
