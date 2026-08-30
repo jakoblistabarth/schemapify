@@ -152,7 +152,7 @@ const useAppStore = create<AppState>((set, get) => ({
       };
     });
   },
-  viewMode: "debug",
+  viewMode: "simple",
   setViewMode: (mode: ViewMode) => set(() => ({ viewMode: mode })),
   toggleViewMode: () =>
     set((state) => ({
