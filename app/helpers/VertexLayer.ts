@@ -5,7 +5,7 @@ import { HoverInfo } from "../components/Tooltip";
 
 type LayerData = {
   vertices: Vertex[];
-  significantVertices?: Map<string | number, boolean>;
+  significantVertices?: Map<string, boolean>;
 };
 
 type VertexLayerProps = {

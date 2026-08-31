@@ -6,6 +6,7 @@ import { FC, useMemo } from "react";
 import { MdClose } from "react-icons/md";
 import { GroupedTestFiles } from "../helpers/getGroupedTestFiles";
 import useAppStore from "../helpers/store";
+import Button from "./Button";
 import CConfigurator from "./CConfigurator";
 import FileSelect from "./FileSelect";
 import FileUpload from "./FileUpload";
@@ -15,7 +16,16 @@ type Props = {
 };
 
 const Configurator: FC<Props> = ({ files }) => {
-  const { source, sourceError, removeSource, activeSnapshot } = useAppStore();
+  const {
+    source,
+    sourceError,
+    removeSource,
+    activeSnapshot,
+    isSchematizing,
+    schematizationProgress,
+    schematizationError,
+    cancelSchematization,
+  } = useAppStore();
   const dcel = useMemo(() => {
     if (!activeSnapshot) return undefined;
     return activeSnapshot.subdivision.toDcel();
@@ -70,14 +80,34 @@ const Configurator: FC<Props> = ({ files }) => {
             )}
             {source.vertexCount > MAX_VERTEX_COUNT && (
               <div className="mt-2 rounded bg-amber-50 p-2 text-xs text-amber-900">
-                Above {MAX_VERTEX_COUNT} vertices. Schematization runs on the
-                main thread, so the interface will be unresponsive while it
-                works.
+                Above {MAX_VERTEX_COUNT} vertices. Schematization runs in a
+                worker, so the interface stays responsive, but the run can take
+                a while.
               </div>
             )}
           </div>
         )}
-        {source && !activeSnapshot && <CConfigurator />}
+        {source && !activeSnapshot && !isSchematizing && <CConfigurator />}
+        {isSchematizing && (
+          <div className="mt-2 flex items-center justify-between gap-2 rounded-md bg-white p-2 text-sm">
+            <span className="text-gray-500">
+              <span className="text-shimmer">Schematizing</span>
+              {schematizationProgress && (
+                <>
+                  {" · "}
+                  <pre className="inline">{schematizationProgress.label}</pre> (
+                  {schematizationProgress.step})
+                </>
+              )}
+            </span>
+            <Button onClick={cancelSchematization}>Cancel</Button>
+          </div>
+        )}
+        {schematizationError && (
+          <div className="mt-2 rounded-md bg-red-50 p-2 text-sm text-red-900">
+            {schematizationError}
+          </div>
+        )}
         {activeSnapshot && (
           <div className="mt-2 rounded-md bg-white p-2 text-sm">
             <div className="mb-2 text-gray-500">

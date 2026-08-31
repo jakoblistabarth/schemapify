@@ -1,8 +1,12 @@
 import Dcel from "@/src/Dcel/Dcel";
 import BoundingBox from "../helpers/BoundingBox";
-import MultiPolygon from "./MultiPolygon";
+import MultiPolygon, {
+  type MultiPolygonCoordinates,
+  type SerializedMultiPolygon,
+} from "./MultiPolygon";
 
-export type Coordinates = [number, number][][][][];
+export type Coordinates = MultiPolygonCoordinates[];
+export type SerializedSubdivision = { multiPolygons: SerializedMultiPolygon[] };
 
 /**
  * Represents a subdivision.
@@ -37,6 +41,38 @@ class Subdivision {
   }
 
   /**
+   * Reduce the subdivision to plain coordinates, the inverse of {@link Subdivision.fromCoordinates}.
+   * Note that this drops the multipolygons' feature metadata, use {@link Subdivision#toSerialized} to keep it.
+   * @returns The subdivision's multipolygons as coordinates.
+   */
+  toCoordinates(): Coordinates {
+    return this.multiPolygons.map((multiPolygon) =>
+      multiPolygon.toCoordinates(),
+    );
+  }
+
+  /**
+   * Reduce the subdivision, including its feature metadata, to plain data.
+   * @returns The subdivision as structured-cloneable data.
+   */
+  toSerialized(): SerializedSubdivision {
+    return {
+      multiPolygons: this.multiPolygons.map((multiPolygon) =>
+        multiPolygon.toSerialized(),
+      ),
+    };
+  }
+
+  /**
+   * Rebuild a subdivision from its serialized form.
+   * @param serialized The output of {@link Subdivision#toSerialized}.
+   * @returns The restored subdivision.
+   */
+  static fromSerialized({ multiPolygons }: SerializedSubdivision) {
+    return new this(multiPolygons.map(MultiPolygon.fromSerialized));
+  }
+
+  /**
    * The subdivision's vertex count, excluding the repeated closing point
    * each {@link Ring} stores.
    */
@@ -62,12 +98,7 @@ class Subdivision {
    * @returns A {@link BoundingBox} enclosing all of the subdivision's points.
    */
   getBbox() {
-    const points = this.multiPolygons.flatMap((multiPolygon) =>
-      multiPolygon.polygons.flatMap((polygon) =>
-        polygon.rings.flatMap((ring) => ring.points.map((point) => point.xy)),
-      ),
-    );
-    return new BoundingBox(points);
+    return new BoundingBox(this.toCoordinates().flat(2).flat());
   }
 
   /**

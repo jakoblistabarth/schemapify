@@ -2,7 +2,10 @@ import HalfEdge from "../Dcel/HalfEdge";
 import { crawlArray } from "../utilities";
 import LineSegment from "./LineSegment";
 import Point from "./Point";
-import Ring from "./Ring";
+import Ring, { type RingCoordinates } from "./Ring";
+
+/** A polygon's rings as plain coordinates, the first one being its exterior ring. */
+export type PolygonCoordinates = RingCoordinates[];
 
 /**
  * Class representing a 2-dimensional polygon.
@@ -82,12 +85,20 @@ class Polygon {
    * @param coordinates The coordinates of the polygon.
    * @returns A new Polygon instance.
    */
-  static fromCoordinates(coordinates: [number, number][][]) {
+  static fromCoordinates(coordinates: PolygonCoordinates) {
     const rings = coordinates.map(
       (ring) => new Ring(ring.map(([x, y]) => new Point(x, y))),
     );
 
     return new Polygon(rings);
+  }
+
+  /**
+   * Reduce the polygon to plain coordinates, the inverse of {@link Polygon.fromCoordinates}.
+   * @returns The polygon's rings as coordinates.
+   */
+  toCoordinates(): PolygonCoordinates {
+    return this.rings.map((ring) => ring.toCoordinates());
   }
 }
 

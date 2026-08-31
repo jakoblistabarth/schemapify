@@ -1,5 +1,8 @@
 import Point from "./Point";
 
+/** A ring's points as plain coordinates. */
+export type RingCoordinates = [number, number][];
+
 /**
  * Class representing a ring.
  * It is defined by its {@link Point}s.
@@ -20,9 +23,17 @@ class Ring {
    * @param coordinates An array of coordinates.
    * @returns A new Ring.
    */
-  static fromCoordinates(coordinates: [number, number][]) {
+  static fromCoordinates(coordinates: RingCoordinates) {
     const points = coordinates.map(([x, y]) => new Point(x, y));
     return new Ring(points);
+  }
+
+  /**
+   * Reduce the ring to plain coordinates, the inverse of {@link Ring.fromCoordinates}.
+   * @returns The ring's points as coordinates, in counterclockwise order.
+   */
+  toCoordinates(): RingCoordinates {
+    return this.points.map((point) => point.xy);
   }
 
   static validatePoints(points: Point[]) {

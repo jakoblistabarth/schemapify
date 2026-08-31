@@ -58,14 +58,6 @@ class SnapshotList {
 
     return Array.from(mapByStep.entries());
   }
-
-  /**
-   * Add a snapshot to the list
-   * @param snapshot The snapshot to add to the list
-   */
-  add(snapshot: Snapshot) {
-    this.snapshots.push(snapshot);
-  }
 }
 
 export default SnapshotList;

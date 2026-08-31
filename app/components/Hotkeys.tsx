@@ -6,7 +6,6 @@ import useAppStore from "../helpers/store";
 
 const Hotkeys = () => {
   const {
-    dcel,
     removeSource,
     setSource,
     setActiveSnapshot,
@@ -19,7 +18,6 @@ const Hotkeys = () => {
   useHotkeys(
     ["ctrl+s"],
     () =>
-      dcel &&
       snapshotList &&
       //TO-DO: reimplement step by step simplification
       // ideally I could write something like this:

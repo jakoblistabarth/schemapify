@@ -1,26 +1,21 @@
-import C from "@/src/c-oriented-schematization/C";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
-import { style as defaultStyle } from "@/src/c-oriented-schematization/schematization.style";
-import Dcel from "@/src/Dcel/Dcel";
+import { LABEL } from "@/src/c-oriented-schematization/CSchematization";
 import Input from "@/src/Input/";
 import { Crs } from "@/src/Input/Crs";
-import Job from "@/src/Job/";
 import Snapshot from "@/src/Snapshot/Snapshot";
 import SnapshotList from "@/src/Snapshot/SnapshotList";
 import { create } from "zustand";
 import { parseGeoFile } from "./parseGeoFile";
+import type {
+  CConfig,
+  SchematizationRequest,
+  SchematizationResponse,
+} from "./schematizationWorkerMessages";
 
 export type ViewMode = "debug" | "simple";
-export type CConfig =
-  | {
-      type: "regular";
-      orientations: number;
-      beta: number;
-    }
-  | {
-      type: "irregular";
-      angles: number[];
-    };
+export type { CConfig };
+
+/** The progress of a schematization run, as last reported by the worker. */
+export type SchematizationProgress = { label: LABEL; step: number };
 
 export type Source = {
   name: string;
@@ -39,7 +34,6 @@ type AppState = {
   setSourceFromFile: (file: File) => Promise<void>;
   removeSource: () => void;
   sourceError?: string;
-  dcel?: Dcel;
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
   toggleViewMode: () => void;
@@ -49,8 +43,24 @@ type AppState = {
   setActiveSnapshot: (id: string) => void;
   snapshotList?: SnapshotList;
   cConfig?: CConfig;
-  setCConfig: (config: CConfig) => void;
-  runSchematization: (c: C) => void;
+  /** Whether a schematization is currently running in the worker. */
+  isSchematizing: boolean;
+  schematizationProgress?: SchematizationProgress;
+  schematizationError?: string;
+  runSchematization: (config: CConfig) => void;
+  cancelSchematization: () => void;
+};
+
+/**
+ * The worker of the currently running schematization, kept outside of the store:
+ * it is a handle to terminate, not state to render.
+ */
+let worker: Worker | undefined;
+
+/** Stop the running schematization, if there is one. */
+const terminateWorker = () => {
+  worker?.terminate();
+  worker = undefined;
 };
 
 /**
@@ -61,12 +71,14 @@ const clearedState = {
   source: undefined,
   sourceError: undefined,
   loadedInput: undefined,
-  dcel: undefined,
   activeSnapshot: undefined,
   nextSnapshot: undefined,
   prevSnapshot: undefined,
   snapshotList: undefined,
   cConfig: undefined,
+  isSchematizing: false,
+  schematizationProgress: undefined,
+  schematizationError: undefined,
 } satisfies Partial<AppState>;
 
 /**
@@ -97,10 +109,10 @@ export const selectSubdivision = (state: AppState) =>
   state.activeSnapshot?.subdivision ?? state.loadedInput?.data;
 
 const useAppStore = create<AppState>((set, get) => ({
-  dcel: undefined,
   source: undefined,
   loadedInput: undefined,
   setSource: async (name: string) => {
+    terminateWorker();
     const response = await fetch(`/api/data/shapes/${name}`);
     const data = await response.json();
     const input = name.includes(".subdivision")
@@ -110,6 +122,7 @@ const useAppStore = create<AppState>((set, get) => ({
     set(() => ({ ...clearedState, ...loaded(input) }));
   },
   setSourceFromFile: async (file: File) => {
+    terminateWorker();
     const result = await parseGeoFile(file);
     if (!result.ok) {
       set(() => ({ ...clearedState, sourceError: result.error }));
@@ -122,44 +135,73 @@ const useAppStore = create<AppState>((set, get) => ({
     }));
   },
   removeSource: () => {
+    terminateWorker();
     set(() => ({ ...clearedState }));
   },
   cConfig: undefined,
-  setCConfig: (config) => {
-    set(() => ({ cConfig: config }));
-  },
-  runSchematization: (c) => {
-    const { loadedInput } = get();
+  isSchematizing: false,
+  runSchematization: (config) => {
+    const { loadedInput, viewMode } = get();
     if (!loadedInput) return;
+    terminateWorker();
 
-    const schematization = new CSchematization(
-      { ...defaultStyle, c },
-      {
-        visualize: (args) => {
-          args.forSnapshots?.snapshotList.add(
-            new Snapshot(
-              args.dcel.toSubdivision(),
-              args.forSnapshots.triggeredAt,
-              args.label,
-              args.forSnapshots?.additionalData,
-            ),
+    worker = new Worker(new URL("./schematization.worker.ts", import.meta.url));
+    const request: SchematizationRequest = {
+      subdivision: loadedInput.data.toSerialized(),
+      cConfig: config,
+      // Every edge move is only worth recording when the steps are actually inspected.
+      keepIntermediateSteps: viewMode === "debug",
+    };
+
+    worker.onmessage = ({ data }: MessageEvent<SchematizationResponse>) => {
+      if (data.type === "progress")
+        return set(() => ({
+          schematizationProgress: { label: data.label, step: data.step },
+        }));
+      if (data.type === "snapshots")
+        return set((state) => {
+          const snapshotList = new SnapshotList([
+            ...(state.snapshotList?.snapshots ?? []),
+            ...data.snapshots.map(Snapshot.fromSerialized),
+          ]);
+          const activeSnapshot =
+            state.activeSnapshot ?? snapshotList.snapshots[0];
+          const [prevSnapshot, nextSnapshot] = snapshotList.getPrevNext(
+            activeSnapshot.id,
           );
-        },
-      },
-    );
-    const job = new Job(loadedInput, schematization);
-    const dcel = job.run();
-    const snapshotList = job.snapshots;
-    const activeSnapshot = snapshotList.snapshots[0];
-    const [, nextSnapshot] = job.snapshots.getPrevNext(activeSnapshot.id);
-    set(() => {
-      return {
-        dcel,
-        activeSnapshot,
-        nextSnapshot,
-        snapshotList,
-      };
-    });
+          return { snapshotList, activeSnapshot, prevSnapshot, nextSnapshot };
+        });
+      if (data.type === "error") {
+        terminateWorker();
+        return set(() => ({
+          isSchematizing: false,
+          schematizationError: data.message,
+        }));
+      }
+      terminateWorker();
+      set(() => ({ isSchematizing: false }));
+    };
+
+    worker.onerror = ({ message }) => {
+      terminateWorker();
+      set(() => ({ isSchematizing: false, schematizationError: message }));
+    };
+
+    set(() => ({
+      cConfig: config,
+      isSchematizing: true,
+      schematizationError: undefined,
+      schematizationProgress: undefined,
+      snapshotList: new SnapshotList(),
+      activeSnapshot: undefined,
+      prevSnapshot: undefined,
+      nextSnapshot: undefined,
+    }));
+    worker.postMessage(request);
+  },
+  cancelSchematization: () => {
+    terminateWorker();
+    set(() => ({ isSchematizing: false }));
   },
   viewMode: "simple",
   setViewMode: (mode: ViewMode) => set(() => ({ viewMode: mode })),

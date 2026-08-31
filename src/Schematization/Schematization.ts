@@ -1,13 +1,11 @@
 import Dcel from "@/src/Dcel/Dcel";
 import { LABEL } from "../c-oriented-schematization/CSchematization";
 import { AdditionalData } from "../Snapshot/Snapshot";
-import SnapshotList from "../Snapshot/SnapshotList";
 
 export type Callback = (args: {
   dcel: Dcel;
   label: LABEL;
   forSnapshots?: {
-    snapshotList: SnapshotList;
     triggeredAt: number;
     additionalData?: AdditionalData;
   };
@@ -24,7 +22,6 @@ abstract class Schematization {
   // Does not seem to be possible with abstract classes
   callbacks: Callbacks;
   style: object;
-  snapshots: SnapshotList;
 
   constructor({
     style,
@@ -33,7 +30,6 @@ abstract class Schematization {
     style: object;
     options: { callbacks: Callbacks };
   }) {
-    this.snapshots = new SnapshotList();
     this.callbacks = options.callbacks;
     this.style = style;
   }

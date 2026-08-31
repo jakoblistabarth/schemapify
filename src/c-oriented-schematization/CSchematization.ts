@@ -60,7 +60,7 @@ class CSchematization extends Schematization {
       level: "visualize",
       dcel: dcel,
       label: LABEL.LOAD,
-      forSnapshots: { snapshotList: this.snapshots, triggeredAt: t0 },
+      forSnapshots: { triggeredAt: t0 },
     });
 
     const t1 = performance.now();
@@ -70,7 +70,7 @@ class CSchematization extends Schematization {
       level: "visualize",
       dcel: output,
       label: LABEL.SUBDIVIDE,
-      forSnapshots: { snapshotList: this.snapshots, triggeredAt: t1 },
+      forSnapshots: { triggeredAt: t1 },
     });
     return output;
   }
@@ -93,7 +93,6 @@ class CSchematization extends Schematization {
       dcel: withSubdividedEdges,
       label: LABEL.CLASSIFY,
       forSnapshots: {
-        snapshotList: this.snapshots,
         triggeredAt: start,
         additionalData: {
           significantVertices: processor.getSignificantVertexKeys(),
@@ -111,7 +110,6 @@ class CSchematization extends Schematization {
       dcel: withSubdividedEdges,
       label: LABEL.CLASSIFY,
       forSnapshots: {
-        snapshotList: this.snapshots,
         triggeredAt: start,
         additionalData: {
           halfEdgeClasses,
@@ -131,10 +129,11 @@ class CSchematization extends Schematization {
       dcel: withSubdividedEdges,
       label: LABEL.STAIRCASEREGIONS,
       forSnapshots: {
-        snapshotList: this.snapshots,
         triggeredAt: start,
         additionalData: {
-          regions: staircases,
+          regions: new Map(
+            Array.from(staircases, ([id, staircase]) => [id, staircase.region]),
+          ),
         },
       },
     });
@@ -148,7 +147,7 @@ class CSchematization extends Schematization {
       level: "visualize",
       dcel: withStaircases,
       label: LABEL.STAIRCASEREGIONS,
-      forSnapshots: { snapshotList: this.snapshots, triggeredAt: start },
+      forSnapshots: { triggeredAt: start },
     });
 
     return withStaircases;
@@ -167,7 +166,7 @@ class CSchematization extends Schematization {
       level: "visualize",
       dcel: withoutCollinearPoints,
       label: LABEL.SIMPLIFY,
-      forSnapshots: { snapshotList: this.snapshots, triggeredAt: start },
+      forSnapshots: { triggeredAt: start },
     });
 
     let dcel: Dcel = withoutCollinearPoints;
@@ -193,7 +192,7 @@ class CSchematization extends Schematization {
         level: "visualize",
         dcel,
         label: LABEL.SIMPLIFY,
-        forSnapshots: { snapshotList: this.snapshots, triggeredAt: start },
+        forSnapshots: { triggeredAt: start },
       });
 
       // Break if no progress was made (prevents infinite loop)
