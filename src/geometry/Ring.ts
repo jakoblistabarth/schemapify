@@ -36,10 +36,15 @@ class Ring {
     return this.points.map((point) => point.xy);
   }
 
+  /**
+   * Close a ring's points, without touching the array which was passed in:
+   * callers reuse theirs, and an appended point would corrupt it.
+   * @param points the {@link Point}s of the ring
+   * @returns the points, closed
+   */
   static validatePoints(points: Point[]) {
     const [first, last] = [points[0], points[points.length - 1]];
-    if (!first.equals(last)) points.push(first);
-    return points;
+    return first.equals(last) ? [...points] : [...points, first];
   }
 
   /**

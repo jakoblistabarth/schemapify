@@ -1,3 +1,4 @@
+import Point from "@/src/geometry/Point";
 import Ring from "@/src/geometry/Ring";
 import { describe, expect, test } from "vitest";
 
@@ -85,5 +86,22 @@ describe("The first and last point are the same", function () {
 
     expect(ring.points.length).toBe(5);
     expect(ring.points.at(0)?.xy).toEqual(ring.points.at(-1)?.xy);
+  });
+});
+
+describe("Constructing a Ring", function () {
+  test("leaves the points which were passed in untouched.", function () {
+    const points = [
+      new Point(0, 0),
+      new Point(1, 0),
+      new Point(1, 1),
+      new Point(0, 1),
+    ];
+
+    const ring = new Ring(points);
+
+    // Callers reuse their array, so closing the ring must not append to it.
+    expect(points.length).toBe(4);
+    expect(ring.points.length).toBe(5);
   });
 });
