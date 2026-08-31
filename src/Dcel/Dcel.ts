@@ -652,7 +652,7 @@ class Dcel {
    * rather than reporting the broken topology.
    * @param edge the {@link HalfEdge} to start the walk at
    * @returns one coordinate pair per {@link HalfEdge} of the ring
-   * @throws if the ring revisits an edge before closing
+   * @throws if the ring revisits an edge before closing, or is missing a `next`
    */
   private getRingCoordinates(edge: HalfEdge): [number, number][] {
     const coordinates: [number, number][] = [];
@@ -665,7 +665,11 @@ class Dcel {
         );
       visited.add(edge);
       coordinates.push([edge.tail.x, edge.tail.y]);
-      edge = edge.next ? edge.next : startEdge;
+      if (!edge.next)
+        throw new Error(
+          `Ring is broken: edge ${edge.uuid} has no next pointer.`,
+        );
+      edge = edge.next;
     } while (edge !== startEdge);
     return coordinates;
   }

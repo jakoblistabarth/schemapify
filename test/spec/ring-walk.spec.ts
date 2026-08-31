@@ -23,6 +23,15 @@ describe("Walking a ring of a Dcel", () => {
     expect(ring.points.length).toBe(5);
   });
 
+  test("reports a ring with a missing next pointer", () => {
+    const dcel = square();
+    const face = dcel.getBoundedFaces()[0];
+    const [, , third] = face.getEdges();
+    third.next = undefined;
+
+    expect(() => dcel.toSubdivision()).toThrowError(/no next pointer/);
+  });
+
   test("reports a ring which never returns to its start", () => {
     const dcel = square();
     const face = dcel.getBoundedFaces()[0];
