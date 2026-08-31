@@ -20,27 +20,24 @@ class FaceFaceBoundary {
    * @returns A tuple of two complementary, feasible contractions, posing the minimal configuration pair of a {@link FaceFaceBoundary}.
    */
   getMinimalConfigurationPair(configurations: Map<string, Configuration>) {
-    const pContractions = this.edges
-      .reduce((contractions: Contraction[], edge) => {
-        const configuration = edge.coordKey
-          ? configurations.get(edge.coordKey)
-          : undefined;
-        const pContraction = configuration?.[ContractionType.P];
-        if (pContraction?.isFeasible) contractions.push(pContraction);
-        return contractions;
-      }, [])
-      .sort((a, b) => a.area - b.area);
+    /** A contraction paired with its area, which the sorts below would otherwise re-derive per comparison. */
+    type Candidate = { contraction: Contraction; area: number };
 
-    const nContractions = this.edges
-      .reduce((contractions: Contraction[], edge) => {
-        const configuration = edge.coordKey
-          ? configurations.get(edge.coordKey)
-          : undefined;
-        const nContraction = configuration?.[ContractionType.N];
-        if (nContraction?.isFeasible) contractions.push(nContraction);
-        return contractions;
-      }, [])
-      .sort((a, b) => a.area - b.area);
+    const feasibleContractions = (type: ContractionType) =>
+      this.edges
+        .reduce((candidates: Candidate[], edge) => {
+          const configuration = edge.coordKey
+            ? configurations.get(edge.coordKey)
+            : undefined;
+          const contraction = configuration?.[type];
+          if (contraction?.isFeasible)
+            candidates.push({ contraction, area: contraction.area });
+          return candidates;
+        }, [])
+        .sort((a, b) => a.area - b.area);
+
+    const pContractions = feasibleContractions(ContractionType.P);
+    const nContractions = feasibleContractions(ContractionType.N);
 
     const contractionCandidates = [
       ...pContractions.slice(0, 6),
@@ -52,20 +49,22 @@ class FaceFaceBoundary {
     let compensation: Contraction | undefined;
     for (const contractionCandidate of contractionCandidates) {
       const compensationCandidates =
-        contractionCandidate.type === ContractionType.N
+        contractionCandidate.contraction.type === ContractionType.N
           ? pContractions
           : nContractions;
       const compensationCandidateList = compensationCandidates
         .reduce((solutions: CompensationCandidate[], candidate) => {
           if (
-            !candidate.isConflicting(contractionCandidate) &&
+            !candidate.contraction.isConflicting(
+              contractionCandidate.contraction,
+            ) &&
             contractionCandidate.area <= candidate.area
           )
             solutions.push({
-              contraction: candidate,
+              contraction: candidate.contraction,
               distance:
-                contractionCandidate.configuration.innerEdge.getMinimalCycleDistance(
-                  candidate.configuration.innerEdge,
+                contractionCandidate.contraction.configuration.innerEdge.getMinimalCycleDistance(
+                  candidate.contraction.configuration.innerEdge,
                 ),
             });
           return solutions;
@@ -73,7 +72,7 @@ class FaceFaceBoundary {
         .sort((a, b) => a.distance - b.distance);
       const compensationCandidate = compensationCandidateList[0];
       if (compensationCandidate) {
-        contraction = contractionCandidate;
+        contraction = contractionCandidate.contraction;
         compensation = compensationCandidate.contraction;
         break;
       }
