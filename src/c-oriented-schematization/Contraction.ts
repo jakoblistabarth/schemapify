@@ -567,8 +567,12 @@ class Contraction {
 
     // c*h² + L*h − area = 0
     const disc = aLength * aLength + 4 * c * contractionArea;
-    if (disc < 0) return;
-    const sqrtD = Math.sqrt(disc);
+    // The discriminant is zero where the compensation takes on exactly the area asked
+    // of it, shrinking its inner edge to a point. Derived from coordinates it lands
+    // just short of zero as readily as just past it, so it is only taken as negative
+    // once it is negative by more than the rounding its own magnitude carries.
+    if (disc < -EPSILON * aLength * aLength) return;
+    const sqrtD = Math.sqrt(Math.max(disc, 0));
 
     return [(-aLength + sqrtD) / (2 * c), (-aLength - sqrtD) / (2 * c)]
       .filter((h) => h > EPSILON && aLength + (kHead - kTail) * h >= -EPSILON) // valid, before track apex

@@ -643,10 +643,16 @@ class ConfigurationPair {
         ? contractionEdge.moveTo(pointA, pointB)
         : contractionEdge.moveTo(pointB, pointA);
 
+    // From here on the Dcel carries the contraction, so giving up would leave the
+    // edge move half done. What the two moves may still run into is reported rather
+    // than returned, since the caller can no longer treat it as a move not taken.
     const movedPositions: Point[] = [];
     if (contractionAfterMove) {
       const contractionHead = contractionAfterMove.head;
-      if (!contractionHead) return;
+      if (!contractionHead)
+        throw new Error(
+          "Edge move left the contraction edge without a head, after moving it",
+        );
       movedPositions.push(
         contractionAfterMove.tail.toPoint(),
         contractionHead.toPoint(),
@@ -658,8 +664,19 @@ class ConfigurationPair {
 
     const compensationAfterMove = compensationEdge.moveTo(newTail, newHead);
 
-    // If compensation edge became degenerate, we can't continue
-    if (!compensationAfterMove) return;
+    if (!compensationAfterMove) {
+      // Both of the compensation's tracks meeting at the height it moves by collapses
+      // its inner edge, which is a legitimate outcome. Collapsing anywhere else means
+      // the contraction has invalidated the positions this move was derived from.
+      if (newTail.distanceToPoint(newHead) > EPSILON)
+        throw new Error(
+          "Edge move collapsed the compensation edge, whose endpoints lie " +
+            newTail.distanceToPoint(newHead) +
+            " apart, after the contraction was applied",
+        );
+      movedPositions.push(newTail);
+      return movedPositions;
+    }
 
     movedPositions.push(compensationAfterMove.tail.toPoint());
     const compensationHead = compensationAfterMove.head?.toPoint();

@@ -1,6 +1,9 @@
 import Configuration from "@/src/c-oriented-schematization/Configuration";
+import CRegular from "@/src/c-oriented-schematization/CRegular";
+import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
+import { style } from "@/src/c-oriented-schematization/schematization.style";
 import Dcel from "@/src/Dcel/Dcel";
 import fs from "fs";
 import path from "path";
@@ -71,6 +74,28 @@ describe("Contractions of two configurations across one edge", function () {
       });
 
       expect(conflicting.filter((d) => d !== undefined)).not.toContain(false);
+    },
+  );
+});
+
+describe("A compensation which takes on exactly the area asked of it", function () {
+  test.each([
+    ["collinear-vertices-square.json", 3],
+    ["edge-cases.json", 6],
+  ])(
+    "shrinks its inner edge to a point rather than failing (%s, C(%i))",
+    function (shape, orientations) {
+      // Both areas being equal puts the discriminant of the compensation's height at
+      // zero, which coordinates round to just below it.
+      const json = JSON.parse(
+        fs.readFileSync(path.resolve("test/data/shapes", shape), "utf8"),
+      );
+      const schematization = new CSchematization({
+        ...style,
+        c: new CRegular(orientations),
+      });
+
+      expect(() => schematization.run(Dcel.fromGeoJSON(json))).not.toThrow();
     },
   );
 });
