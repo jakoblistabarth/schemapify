@@ -1,4 +1,5 @@
 import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
+import CRegular from "@/src/c-oriented-schematization/CRegular";
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 import CSchematization, {
   LABEL,
@@ -7,6 +8,7 @@ import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import { isAlignedToC } from "@/src/c-oriented-schematization/HalfEdgeUtils";
 import Dcel from "@/src/Dcel/Dcel";
+import { style } from "@/src/c-oriented-schematization/schematization.style";
 import { DECIMAL_SCALE, EPSILON } from "@/src/geometry/constants";
 import Input from "@/src/Input";
 import fs from "fs";
@@ -453,4 +455,27 @@ describe("Contractions ending on a junction are not applied", function () {
       }
     },
   );
+});
+
+describe("A contraction whose inner edge vanishes", function () {
+  test("collapses that edge instead of laying it onto an outer edge", function () {
+    // The sixth edge move of this shape contracts an inner edge whose two tracks
+    // meet, which used to move it onto its own previous edge and break the cycle.
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/shapes/triangle-unaligned.json"),
+        "utf8",
+      ),
+    );
+    const schematization = new CSchematization({
+      ...style,
+      c: new CRegular(4),
+    });
+    const originalArea = Dcel.fromGeoJSON(json).getArea();
+
+    const result = schematization.run(Dcel.fromGeoJSON(json));
+
+    expect(result.getBoundedFaces()[0].getEdges().length).toBe(4);
+    expect(result.getArea()).toBeCloseTo(originalArea, DECIMAL_SCALE);
+  });
 });

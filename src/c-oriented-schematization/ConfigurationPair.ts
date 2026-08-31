@@ -632,19 +632,29 @@ class ConfigurationPair {
     const pointB = this.contraction.areaPoints.at(-1);
     if (!pointA || !pointB) return;
 
-    if (pointA.isOnLineSegment(prevEdgeLineSegment)) {
-      contractionEdge.moveTo(pointA, pointB);
+    // With only three area points the configuration's two tracks meet in the
+    // contraction point, which leaves no inner edge: both of its endpoints arrive
+    // there and the edge collapses, rather than coming to rest on a track. Sending
+    // them anywhere else lays the inner edge on top of one of the outer edges.
+    const innerEdgeVanishes = this.contraction.areaPoints.length === 3;
+    const contractionAfterMove = innerEdgeVanishes
+      ? contractionEdge.moveTo(pointA, pointA)
+      : pointA.isOnLineSegment(prevEdgeLineSegment)
+        ? contractionEdge.moveTo(pointA, pointB)
+        : contractionEdge.moveTo(pointB, pointA);
+
+    const movedPositions: Point[] = [];
+    if (contractionAfterMove) {
+      const contractionHead = contractionAfterMove.head;
+      if (!contractionHead) return;
+      movedPositions.push(
+        contractionAfterMove.tail.toPoint(),
+        contractionHead.toPoint(),
+      );
     } else {
-      contractionEdge.moveTo(pointB, pointA);
+      // The collapsed edge left both of its endpoints merged into this one vertex.
+      movedPositions.push(pointA);
     }
-
-    const contractionHead = contractionEdge.head;
-    if (!contractionHead) return;
-
-    const movedPositions = [
-      contractionEdge.tail.toPoint(),
-      contractionHead.toPoint(),
-    ];
 
     const compensationAfterMove = compensationEdge.moveTo(newTail, newHead);
 
