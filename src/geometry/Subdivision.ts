@@ -69,7 +69,7 @@ class Subdivision {
    * @returns The restored subdivision.
    */
   static fromSerialized({ multiPolygons }: SerializedSubdivision) {
-    return new this(multiPolygons.map(MultiPolygon.fromSerialized));
+    return new Subdivision(multiPolygons.map(MultiPolygon.fromSerialized));
   }
 
   /**

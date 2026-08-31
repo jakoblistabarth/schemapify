@@ -51,6 +51,15 @@ describe("A serialized Snapshot", () => {
     expect(multiPolygon.polygons[0].area).toBe(4);
   });
 
+  test("is restorable through a bare reference, as the store maps it", () => {
+    const [restored] = [clone(snapshot.toSerialized())].map(
+      Snapshot.fromSerialized,
+    );
+
+    expect(restored).toBeInstanceOf(Snapshot);
+    expect(restored.subdivision.vertexCount).toBe(subdivision.vertexCount);
+  });
+
   test("restores its additional data", () => {
     const { additionalData } = Snapshot.fromSerialized(
       clone(snapshot.toSerialized()),

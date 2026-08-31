@@ -116,7 +116,7 @@ class Snapshot {
    */
   static fromSerialized(serialized: SerializedSnapshot) {
     const { regions, ...rest } = serialized.additionalData ?? {};
-    const snapshot = new this(
+    const snapshot = new Snapshot(
       Subdivision.fromSerialized(serialized.subdivision),
       serialized.triggeredAt,
       serialized.label,
