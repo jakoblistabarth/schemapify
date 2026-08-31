@@ -1,6 +1,8 @@
 import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import CSchematization, {
+  LABEL,
+} from "@/src/c-oriented-schematization/CSchematization";
 import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import { isAlignedToC } from "@/src/c-oriented-schematization/HalfEdgeUtils";
@@ -368,5 +370,49 @@ describe("At least 6 iterations shall be possible for diamond shape", function (
     const schematization = new CSchematization();
 
     expect(() => schematization.run(dcel, 6)).not.toThrow();
+  });
+});
+
+describe("Simplification stops as soon as no configuration pair is left", function () {
+  /**
+   * Collects the number of half edges of every snapshot the simplify step records.
+   * @param shape The name of a shape in `test/data/shapes`.
+   * @returns The half edge count per recorded simplification snapshot.
+   */
+  const getSimplifySnapshotSizes = (shape: string) => {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("test/data/shapes", shape), "utf8"),
+    );
+    const sizes: number[] = [];
+    const schematization = new CSchematization(undefined, {
+      visualize: ({ dcel, label }) => {
+        if (label === LABEL.SIMPLIFY) sizes.push(dcel.halfEdges.size);
+      },
+    });
+    schematization.run(Dcel.fromGeoJSON(json));
+    return sizes;
+  };
+
+  test("records no snapshot for a simplification step which changes nothing", function () {
+    // The first snapshot stems from removing collinear points, all others from edge moves.
+    expect(getSimplifySnapshotSizes("triangle.json")).toEqual([
+      24, 20, 16, 12, 8,
+    ]);
+    expect(getSimplifySnapshotSizes("smallest-contraction.json")).toEqual([
+      20, 16, 12, 8,
+    ]);
+  });
+
+  test("stops right away for a shape without a feasible pair", function () {
+    expect(getSimplifySnapshotSizes("square.json")).toEqual([8]);
+  });
+
+  test("does not throw when asked for more edge moves than are possible", function () {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("test/data/shapes/square.json"), "utf8"),
+    );
+    const schematization = new CSchematization();
+
+    expect(() => schematization.run(Dcel.fromGeoJSON(json), 10)).not.toThrow();
   });
 });

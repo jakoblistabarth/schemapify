@@ -30,6 +30,9 @@ class EdgeMoveProcessor {
       this.configurations,
     );
     return {
+      // Without a feasible pair nothing is left to simplify, which callers need to
+      // know before they treat the untouched Dcel as the result of a move.
+      hasMoved: !!edgeMove,
       dcel: edgeMove ? edgeMove.dcel : input,
       configurations: edgeMove ? edgeMove.configurations : this.configurations,
       faceFaceBoundaryList: edgeMove

@@ -183,10 +183,16 @@ class CSchematization extends Schematization {
       iteration++;
       const edgeCountBeforeMove = dcel.halfEdges.size;
       const {
+        hasMoved,
         dcel: newDcel,
         configurations: updatedConfigurations,
         faceFaceBoundaryList: updatedFaceFaceBoundaryList,
       } = new EdgeMoveProcessor(faceFaceBoundaryList, configurations).run(dcel);
+
+      // Without a feasible pair the Dcel is as simple as it gets, so the iteration
+      // is stopped before it records another snapshot of the unchanged Dcel.
+      if (!hasMoved) break;
+
       dcel = newDcel;
       configurations = updatedConfigurations;
       faceFaceBoundaryList = updatedFaceFaceBoundaryList;
@@ -199,19 +205,10 @@ class CSchematization extends Schematization {
         forSnapshots: { triggeredAt: start },
       });
 
-      // Break if no progress was made (prevents infinite loop)
-      if (dcel.halfEdges.size === edgeCountBeforeMove) {
-        if (
-          maxIterations !== undefined &&
-          maxIterations !== 0 &&
-          iteration >= maxIterations
-        ) {
-          throw new Error(
-            "No progress made in edge move iteration " + iteration,
-          );
-        }
-        break;
-      }
+      // An edge move always collapses at least one edge, so a stable edge count
+      // means the move left the Dcel in an unexpected state.
+      if (dcel.halfEdges.size === edgeCountBeforeMove)
+        throw new Error("No progress made in edge move iteration " + iteration);
     }
     // TO-DO: is it possible to return here a simplification function
     // which I can then use for handling simplifying e.g. with hotkeys?
