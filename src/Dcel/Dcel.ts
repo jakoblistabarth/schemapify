@@ -644,10 +644,26 @@ class Dcel {
     return new Subdivision(multiPolygons);
   }
 
+  /**
+   * Walk a ring and collect its tail coordinates.
+   *
+   * A face whose `edge` was detached from its ring leads into a cycle that
+   * never returns to the start, which without the guard exhausts the heap
+   * rather than reporting the broken topology.
+   * @param edge the {@link HalfEdge} to start the walk at
+   * @returns one coordinate pair per {@link HalfEdge} of the ring
+   * @throws if the ring revisits an edge before closing
+   */
   private getRingCoordinates(edge: HalfEdge): [number, number][] {
     const coordinates: [number, number][] = [];
     const startEdge = edge;
+    const visited = new Set<HalfEdge>();
     do {
+      if (visited.has(edge))
+        throw new Error(
+          `Ring is broken or not simple: revisited edge ${edge.uuid} before returning to ${startEdge.uuid}.`,
+        );
+      visited.add(edge);
       coordinates.push([edge.tail.x, edge.tail.y]);
       edge = edge.next ? edge.next : startEdge;
     } while (edge !== startEdge);
