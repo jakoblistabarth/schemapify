@@ -16,3 +16,32 @@
     @apply font-display text-xl;
   }
 }
+
+/* A highlight sweeping across text, to signal that a long-running process is still alive. */
+@keyframes shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@utility text-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-gray-400) 45%,
+    var(--color-blue-600) 50%,
+    var(--color-gray-400) 55%
+  );
+  background-size: 300% 100%;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 2.5s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    background-image: none;
+    color: var(--color-gray-500);
+    animation: none;
+  }
+}

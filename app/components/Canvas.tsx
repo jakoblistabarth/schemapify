@@ -3,7 +3,6 @@ import Contraction from "@/src/c-oriented-schematization/Contraction";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
 import { LABEL } from "@/src/c-oriented-schematization/CSchematization";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
-import Staircase from "@/src/c-oriented-schematization/Staircase";
 import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Polygon from "@/src/geometry/Polygon";
@@ -192,9 +191,7 @@ const Canvas: FC<Props> = ({
       id: "simple-polygons",
       data: simplePolygonData,
       getPolygon: (feature: { polygon: Polygon }) =>
-        feature.polygon.rings.map((ring) =>
-          ring.points.map((point) => point.xy),
-        ),
+        feature.polygon.toCoordinates(),
       getFillColor: (feature: { uuid: string }) =>
         feature.uuid === hoveredUuid ? [0, 0, 255, 40] : [0, 0, 255, 20],
       getLineColor: [0, 0, 255, 255],
@@ -226,8 +223,7 @@ const Canvas: FC<Props> = ({
       const staircaseRegionLayer = new PolygonLayer({
         id: "staircase-regions",
         data: Array.from(staircaseRegions.values()),
-        getPolygon: (d: Staircase) =>
-          d.region.exteriorRing.points.map((p) => p.xy),
+        getPolygon: (d: Polygon) => d.exteriorRing.toCoordinates(),
         getFillColor: [0, 0, 255, 20],
         getLineColor: [0, 0, 255, 80],
         getLineWidth: 1,

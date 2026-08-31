@@ -16,7 +16,7 @@ import CPreview from "./CPreview";
 type Props = Record<string, never>;
 
 const CConfigurator: FC<Props> = () => {
-  const { setCConfig, runSchematization, cConfig } = useAppStore();
+  const { runSchematization, cConfig } = useAppStore();
   const [type, setType] = useState<CConfig["type"]>(cConfig?.type ?? "regular");
   const [orientations, setOrientations] = useState<number>(
     cConfig?.type === "regular" ? cConfig.orientations : 4,
@@ -56,8 +56,7 @@ const CConfigurator: FC<Props> = () => {
             angles: c.angles,
           };
 
-    setCConfig(config);
-    runSchematization(c);
+    runSchematization(config);
   };
 
   const isCType = (value: string): value is CConfig["type"] => {

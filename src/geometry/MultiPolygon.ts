@@ -1,5 +1,18 @@
 import { GeoJsonProperties } from "geojson";
-import Polygon from "./Polygon";
+import Polygon, { type PolygonCoordinates } from "./Polygon";
+
+/** A multipolygon's polygons as plain coordinates. */
+export type MultiPolygonCoordinates = PolygonCoordinates[];
+
+/**
+ * A multipolygon reduced to plain data, so that it survives structured cloning
+ * (which drops class prototypes).
+ */
+export type SerializedMultiPolygon = {
+  id?: number | string;
+  properties?: GeoJsonProperties;
+  coordinates: MultiPolygonCoordinates;
+};
 
 /**
  * Class representing a 2-dimensional multipolygon.
@@ -35,9 +48,47 @@ class MultiPolygon {
    * @param coordinates An array of coordinates.
    * @returns A new MultiPolygon.
    */
-  static fromCoordinates(coordinates: [number, number][][][]) {
+  static fromCoordinates(coordinates: MultiPolygonCoordinates) {
     return new MultiPolygon(
       coordinates.map((polygon) => Polygon.fromCoordinates(polygon)),
+    );
+  }
+
+  /**
+   * Reduce the multipolygon to plain coordinates, the inverse of {@link MultiPolygon.fromCoordinates}.
+   * Note that this drops the multipolygon's id and properties, use {@link MultiPolygon#toSerialized} to keep them.
+   * @returns The multipolygon's polygons as coordinates.
+   */
+  toCoordinates(): MultiPolygonCoordinates {
+    return this.polygons.map((polygon) => polygon.toCoordinates());
+  }
+
+  /**
+   * Reduce the multipolygon, including its feature metadata, to plain data.
+   * @returns The multipolygon as structured-cloneable data.
+   */
+  toSerialized(): SerializedMultiPolygon {
+    return {
+      id: this.id,
+      properties: this.properties,
+      coordinates: this.toCoordinates(),
+    };
+  }
+
+  /**
+   * Rebuild a multipolygon from its serialized form.
+   * @param serialized The output of {@link MultiPolygon#toSerialized}.
+   * @returns The restored multipolygon.
+   */
+  static fromSerialized({
+    id,
+    properties,
+    coordinates,
+  }: SerializedMultiPolygon) {
+    return new MultiPolygon(
+      coordinates.map((polygon) => Polygon.fromCoordinates(polygon)),
+      id,
+      properties,
     );
   }
 }
