@@ -279,6 +279,10 @@ class HalfEdge {
       f1.replaceInnerEdge(et, et_);
     }
 
+    // `et.remove()` also unregisters its twin `e` from f2's inner edges, so the
+    // registration has to be remembered before it is lost.
+    const eWasInnerEdgeOfF2 = f2.innerEdges.includes(e);
+
     et.remove();
 
     const e_ = this.dcel.addHalfEdge(e.tail, N);
@@ -307,9 +311,10 @@ class HalfEdge {
       e.face.replaceOuterRingEdge(e, e_);
     });
 
-    if (f1.outerRing) {
-      // if f1 is a hole
-      f2.replaceInnerEdge(e, e_);
+    if (f1.outerRing && eWasInnerEdgeOfF2) {
+      // if f1 is a hole, re-register the hole boundary on the replacement edge
+      if (f2.innerEdges.includes(e)) f2.replaceInnerEdge(e, e_);
+      else f2.innerEdges.push(e_);
     }
 
     e.remove();

@@ -517,6 +517,9 @@ class Dcel {
             } else if (outerRingFace) {
               existingFace.outerRing = outerRingFace;
               outerRingFace.innerEdges.push(edge);
+              // Without this the hole's outward-facing cycle keeps no face and
+              // the fallback below hands it to the unbounded face.
+              edge.twin?.getCycle().forEach((e) => (e.face = outerRingFace));
             }
           } else {
             if (idx === 0) {
