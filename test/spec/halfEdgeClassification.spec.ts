@@ -5,6 +5,7 @@ import HalfEdgeClassGenerator, {
 } from "@/src/c-oriented-schematization/HalfEdgeClassGenerator";
 import {
   getSignificantVertex,
+  isAligned,
   isDeviating,
 } from "@/src/c-oriented-schematization/HalfEdgeUtils";
 import { style } from "@/src/c-oriented-schematization/schematization.style";
@@ -461,5 +462,62 @@ describe("classifyEdges() in a classification where all edges are classified and
     expect(edgesWithoutAssignedAngles.length).toBe(0);
     expect(edgesWithConflictingClasses.length).toBe(0);
     expect(edgesWithoutClassification.length).toBe(0);
+  });
+});
+
+describe("isAligned()", function () {
+  /**
+   * Builds a single HalfEdge from the origin to the given point.
+   * @param x The head's x coordinate.
+   * @param y The head's y coordinate.
+   * @returns The {@link HalfEdge} between the two.
+   */
+  const edgeTo = (x: number, y: number) => {
+    const dcel = new Dcel();
+    const [tail, head] = [dcel.addVertex(0, 0), dcel.addVertex(x, y)];
+    const edge = dcel.addHalfEdge(tail, head);
+    // The head is read through the twin, so the edge needs one to have an angle.
+    edge.twin = dcel.addHalfEdge(head, tail);
+    return edge;
+  };
+
+  test("holds for an edge along a direction of C reached by arithmetic", function () {
+    // (4, 2) -> (4.2, 1.8) runs along 315 degrees, but its angle derived from those
+    // coordinates misses 315 degrees by an ulp.
+    const c = new CRegular(4);
+
+    expect(isAligned(edgeTo(4.2 - 4, 1.8 - 2), c.sectors)).toBe(true);
+  });
+
+  test("does not hold for an edge between two directions of C", function () {
+    const c = new CRegular(4);
+
+    expect(isAligned(edgeTo(4, 1), c.sectors)).toBe(false);
+  });
+});
+
+describe("An edge along a direction of C gets no staircase", function () {
+  test("so the face it borders survives the angle constraining", function () {
+    // The second polygon's (4, 2) -> (4.2, 1.8) edge is aligned to C(4). Taken as
+    // unaligned it gets a staircase whose steps all land on the same point, which
+    // collapses the polygon into a single edge of zero area.
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/shapes/2plgn-complex.json"),
+        "utf8",
+      ),
+    );
+    const schematization = new CSchematization({
+      ...style,
+      c: new CRegular(4),
+    });
+    const input = Dcel.fromGeoJSON(json);
+
+    const constrained = schematization.constrainAngles(
+      schematization.preProcess(input),
+    );
+
+    expect(constrained.getBoundedFaces().length).toBe(2);
+    expect(constrained.getArea()).toBeCloseTo(input.getArea(), 6);
   });
 });

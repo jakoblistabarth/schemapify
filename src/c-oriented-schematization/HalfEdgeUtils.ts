@@ -35,9 +35,11 @@ export const getAssociatedAngles = (halfEdge: HalfEdge, sectors: Sector[]) => {
   if (typeof angle !== "number") return [];
   const directions: number[] = [];
   sectors.some(function (sector) {
-    if (angle === sector.lower) {
+    // Compared with a tolerance: an angle derived from coordinates misses the
+    // direction it was built from by an ulp, which made aligned edges look unaligned.
+    if (Math.abs(angle - sector.lower) < EPSILON) {
       return directions.push(sector.lower);
-    } else if (angle === sector.upper) {
+    } else if (Math.abs(angle - sector.upper) < EPSILON) {
       return directions.push(sector.upper);
     } else if (angle > sector.lower && angle < sector.upper) {
       return directions.push(sector.lower, sector.upper);
