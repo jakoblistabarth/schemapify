@@ -288,7 +288,9 @@ class Contraction {
     if (x.includes(edge)) return false;
     const edgeLine = edge.toLineSegment();
     if (!edgeLine) return;
-    const area = new Polygon([new Ring(this.areaPoints)]);
+    // The getter walks the configuration's tracks, so it is read only once.
+    const areaPoints = this.areaPoints;
+    const area = new Polygon([new Ring(areaPoints)]);
     const pointsInPolygon = edge.endpoints.filter((vertex) =>
       vertex.isInPolygon(area),
     );
@@ -297,28 +299,31 @@ class Contraction {
     if (pointsInPolygon.length === 2) return true;
 
     const intersections = area.getIntersections(edge);
-    const xLineSegments = x.reduce((acc: LineSegment[], edge) => {
-      const lineSegment = edge.toLineSegment();
-      if (typeof lineSegment === "object") acc.push(lineSegment);
-      return acc;
-    }, []);
 
     //TODO: make robuster, seems to make algorithm stop too early at times.
     // Case 2: Improper boundary crossing (intersection not on X edges) blocks
     // Exception: if this is a 4-point area with P3 very close to an edge that
     // is part of the configuration (edge in X), it should not block.
     if (intersections) {
+      // The segments of X are only needed to judge a crossing.
+      const xLineSegments = intersections.length
+        ? x.reduce((acc: LineSegment[], edge) => {
+            const lineSegment = edge.toLineSegment();
+            if (typeof lineSegment === "object") acc.push(lineSegment);
+            return acc;
+          }, [])
+        : [];
       const hasImproperCrossing = intersections.some(
         (intersection) => !intersection.isOnLineSegments(xLineSegments),
       );
       const hasTrackPointCloseToEdge =
-        this.areaPoints.length === 4 &&
-        this.areaPoints[3].distanceToLineSegment(edgeLine) < EPSILON;
+        areaPoints.length === 4 &&
+        areaPoints[3].distanceToLineSegment(edgeLine) < EPSILON;
       const hasTrackPointOutsideOfX =
-        this.areaPoints.length === 4 &&
+        areaPoints.length === 4 &&
         !this.configuration.x
           .flatMap((e) => e.endpoints)
-          .some((v) => v.equals(this.areaPoints[3]));
+          .some((v) => v.equals(areaPoints[3]));
 
       if (
         hasImproperCrossing ||
@@ -343,7 +348,10 @@ class Contraction {
     // - Case 1: Edges entirely inside the area
     // - Case 2: Improper boundary crossing (intersections at non-X edge points)
     // - Case 3: One endpoint inside with improper crossing
-    this.configuration.x_.forEach((boundaryEdge) => {
+    // Read once: the getter walks the configuration's face cycle.
+    const x_ = this.configuration.x_;
+
+    x_.forEach((boundaryEdge) => {
       if (this.isBlockedBy(boundaryEdge, configurations)) {
         blockingNumber++;
       }
@@ -360,7 +368,7 @@ class Contraction {
     // The contraction area polygon might extend into adjacent faces, trapping vertices.
     // Get all vertices connected to the configuration's x_ boundary edges
     const boundaryVertices = new Set<Vertex>();
-    this.configuration.x_.forEach((edge) => {
+    x_.forEach((edge) => {
       boundaryVertices.add(edge.tail);
       if (edge.head) boundaryVertices.add(edge.head);
     });
@@ -375,14 +383,15 @@ class Contraction {
 
     // Get all vertices from adjacent faces (via x_ edges)
     const adjacentFaceVertices = new Set<Vertex>();
-    this.configuration.x_.forEach((edge) => {
-      const adjacentFace = edge.twin?.face;
-      if (adjacentFace) {
-        adjacentFace.getEdges().forEach((e) => {
-          adjacentFaceVertices.add(e.tail);
-          if (e.head) adjacentFaceVertices.add(e.head);
-        });
-      }
+    // Several x_ edges usually border the same face; walk each cycle once.
+    const adjacentFaces = new Set(
+      x_.flatMap((edge) => (edge.twin?.face ? [edge.twin.face] : [])),
+    );
+    adjacentFaces.forEach((adjacentFace) => {
+      adjacentFace.getEdges().forEach((e) => {
+        adjacentFaceVertices.add(e.tail);
+        if (e.head) adjacentFaceVertices.add(e.head);
+      });
     });
 
     // Check if any interior vertices (not on x_ boundary, not in own face) from adjacent faces fall inside the area

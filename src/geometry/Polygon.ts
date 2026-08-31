@@ -55,12 +55,10 @@ class Polygon {
    * Get the polygon's exterior line segments.
    */
   get exteriorLineSegments() {
-    return this.exteriorRing.points
+    const points = this.exteriorRing.points;
+    return points
       .slice(0, -1)
-      .map(
-        (p, idx) =>
-          new LineSegment(p, crawlArray(this.exteriorRing.points, idx, +1)),
-      );
+      .map((p, idx) => new LineSegment(p, crawlArray(points, idx, +1)));
   }
 
   /**
@@ -70,10 +68,9 @@ class Polygon {
    * @returns An array of {@link Point}s where the edge intersects the polygon.
    */
   getIntersections(edge: HalfEdge) {
+    const segment = edge.toLineSegment();
     return this.exteriorLineSegments.reduce((acc: Point[], boundaryEdge) => {
-      const intersection = edge
-        .toLineSegment()
-        ?.intersectsLineSegment(boundaryEdge);
+      const intersection = segment?.intersectsLineSegment(boundaryEdge);
       if (intersection && acc.every((point) => !point.equals(intersection)))
         acc.push(intersection);
       return acc;

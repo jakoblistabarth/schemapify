@@ -124,10 +124,12 @@ class Point {
     const B: number[] = [];
     const C: number[] = [];
 
-    polygon.exteriorRing.points.forEach((p, idx) => {
+    // Read once: the getter re-derives the ring's winding on every access.
+    const points = polygon.exteriorRing.points;
+
+    points.forEach((p, idx) => {
       const p1 = p;
-      const p2 =
-        polygon.exteriorRing.points[(idx + 1) % polygon.exteriorRing.length];
+      const p2 = points[(idx + 1) % points.length];
 
       // calculate A, B and C
       const a = -(p2.y - p1.y);
