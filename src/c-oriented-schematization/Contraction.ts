@@ -24,6 +24,17 @@ type BlockingContext = {
   areaBounds: { minX: number; minY: number; maxX: number; maxY: number };
 };
 
+/**
+ * Determines whether the HalfEdge is one of the given HalfEdges, or the twin of one.
+ * Two configurations on opposite sides of an edge hold a half edge and its twin
+ * rather than the same one, so comparing by identity alone misses what they share.
+ * @param edge The {@link HalfEdge} to look for.
+ * @param candidates The {@link HalfEdge}s to look in.
+ * @returns A boolean, indicating whether the edge is among the candidates.
+ */
+const isOneOf = (edge: HalfEdge, candidates: HalfEdge[]) =>
+  candidates.some((candidate) => candidate === edge || candidate === edge.twin);
+
 class Contraction {
   type: ContractionType;
   configuration: Configuration;
@@ -114,7 +125,7 @@ class Contraction {
    */
   getOverlappingEdges(other: Contraction) {
     return this.configuration.x.filter((edge) =>
-      other.configuration.x.includes(edge),
+      isOneOf(edge, other.configuration.x),
     );
   }
 
@@ -136,25 +147,17 @@ class Contraction {
     const hasOverlappingEdges = overlappingEdges.length > 0;
     if (!hasOverlappingEdges) return false;
     // "Two configurations conflict when they share an edge, unless they share only outer edges and one of these has a convex and a reflex vertex."
-    const overlappingInnerEdges = overlappingEdges.filter((overlappingEdge) => {
-      const oeid = overlappingEdge.id;
-      if (!(typeof oeid === "number" && oeid > 0)) return false;
-      const a = this.configuration.innerEdge.id;
-      const b = complementary.configuration.innerEdge.id;
-      return (
-        (typeof a === "number" && a > 0 && a === oeid) ||
-        (typeof b === "number" && b > 0 && b === oeid)
-      );
-    });
+    const overlappingInnerEdges = overlappingEdges.filter((overlappingEdge) =>
+      isOneOf(overlappingEdge, [
+        this.configuration.innerEdge,
+        complementary.configuration.innerEdge,
+      ]),
+    );
     // isConflicting if overlapping edges are inner edge
     if (overlappingInnerEdges.length > 0) return true;
-    const overlappingOuterEdges = overlappingEdges.filter((overlappingEdge) => {
-      const oeid = overlappingEdge.id;
-      if (!(typeof oeid === "number" && oeid > 0)) return false;
-      return outerEdges
-        .map((edge) => edge.id)
-        .some((id) => typeof id === "number" && id > 0 && id === oeid);
-    });
+    const overlappingOuterEdges = overlappingEdges.filter((overlappingEdge) =>
+      isOneOf(overlappingEdge, outerEdges),
+    );
     if (
       overlappingOuterEdges.some(
         (edge) => edge.getInflectionType() === InflectionType.B,
