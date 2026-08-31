@@ -195,24 +195,34 @@ class ConfigurationPair {
       sharedEndpointPosition: Vector2D,
       angle: number,
       track: Line,
+      direction: Vector2D,
     ) => {
       const landing = new Line(
         sharedEndpointPosition.toPoint(),
         angle,
       ).intersectsLine(track);
       if (!landing) return;
-      return landing.vector.minus(sharedEndpointPosition).magnitude;
+      // Measured along the direction the inner edge starts out in, rather than as a
+      // distance: beyond the point where its two tracks meet the edge has flipped
+      // over, and a distance would report it growing again from zero.
+      return landing.vector.minus(sharedEndpointPosition).dot(direction);
     };
 
+    const contractionSharedStart = sharedStart.plus(sharedVector.times(startS));
+    const compensationSharedStart = sharedStart.plus(
+      sharedVector.times(targetS),
+    );
     const contractionLengthEnd = lengthAtSharedEndpoint(
-      sharedStart.plus(sharedVector.times(targetS)),
+      compensationSharedStart,
       contractionEdgeAngle,
       contractionTrack,
+      contractionNonSharedStart.minus(contractionSharedStart).unitVector,
     );
     const compensationLengthEnd = lengthAtSharedEndpoint(
-      sharedStart.plus(sharedVector.times(startS)),
+      contractionSharedStart,
       compensationEdgeAngle,
       compensationTrack,
+      compensationNonSharedStart.minus(compensationSharedStart).unitVector,
     );
     if (
       contractionLengthEnd === undefined ||

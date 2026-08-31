@@ -1,11 +1,14 @@
 import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
 import ConfigurationPair from "@/src/c-oriented-schematization/ConfigurationPair";
+import CRegular from "@/src/c-oriented-schematization/CRegular";
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import { isAlignedToC } from "@/src/c-oriented-schematization/HalfEdgeUtils";
+import { style } from "@/src/c-oriented-schematization/schematization.style";
 import Dcel from "@/src/Dcel/Dcel";
+import { DECIMAL_SCALE } from "@/src/geometry/constants";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { describe, expect, test, vi } from "vitest";
@@ -115,5 +118,34 @@ describe("SharedEdgeMove on smallest-contraction-1a.json", function () {
     // After all moves, verify that we made progress and no invalid angles exist
     expect(moveCount).toBeGreaterThan(0);
     expect(lastUnalignedEdges).toHaveLength(0); // Final state should have no unaligned edges
+  });
+});
+
+/**
+ * The shapes below each reach a pair whose contraction leaves no inner edge and
+ * whose two moves are coupled, which is where the meeting point used to let the
+ * contraction travel past the point its two tracks meet in.
+ */
+describe("A coupled edge move whose contraction leaves no inner edge", function () {
+  test.each([
+    ["contractions-equal.json", 3],
+    ["inflection-test.json", 3],
+    ["edge-move-test.json", 3],
+    ["edge-cases.json", 3],
+    ["2plgn-complex.json", 6],
+    ["3plgn-complex.json", 6],
+  ])("preserves the area of %s under C(%i)", function (shape, orientations) {
+    const inputJson = JSON.parse(
+      readFileSync(resolve("test/data/shapes", shape), "utf8"),
+    );
+    const schematization = new CSchematization({
+      ...style,
+      c: new CRegular(orientations),
+    });
+    const originalArea = Dcel.fromGeoJSON(inputJson).getArea();
+
+    const result = schematization.run(Dcel.fromGeoJSON(inputJson));
+
+    expect(result.getArea()).toBeCloseTo(originalArea, DECIMAL_SCALE);
   });
 });
