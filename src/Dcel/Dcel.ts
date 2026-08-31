@@ -503,8 +503,11 @@ class Dcel {
           );
           if (!edge) return;
 
-          // Check whether there's already a face related to this edge
-          const existingFace = dcel.faces.find((f) => f.edge === edge);
+          // Check whether this directed cycle already carries a face. Matching
+          // on `f.edge === edge` alone missed enclaves whose ring and hole ring
+          // no longer start at the same vertex after being subdivided.
+          const existingFace =
+            edge.face ?? dcel.faces.find((f) => f.edge === edge);
           if (existingFace?.associatedFeatures) {
             existingFace.associatedFeatures.push(featureId);
             // The ring already has a face, because it is also a feature in its

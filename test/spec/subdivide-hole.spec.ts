@@ -58,6 +58,34 @@ describe.each(["enclave", "enclave2"])(
   },
 );
 
+describe("Cloning real-world geodata with an enclave after the staircase step", () => {
+  test("keeps the enclave and the hole on one shared face", async () => {
+    const { data } = await geoPackageToGeometry(
+      new Uint8Array(
+        fs.readFileSync(path.join("test/data/gpkg", "AUT_adm1-31287.gpkg")),
+      ),
+    );
+    const schematization = new CSchematization({ ...style });
+    const withStaircases = schematization.constrainAngles(
+      schematization.preProcess(Dcel.fromSubdivision(data)),
+    );
+    const clone = withStaircases.clone();
+
+    expect(clone.faces.length).toBe(withStaircases.faces.length);
+    expect(
+      clone.faces.filter((f) => f.associatedFeatures.length > 1).length,
+    ).toBe(
+      withStaircases.faces.filter((f) => f.associatedFeatures.length > 1)
+        .length,
+    );
+    // An orphaned face keeps a stale `edge`, whose ring walk never terminates
+    // once the collinear step removes that edge.
+    expect(clone.faces.filter((f) => f.edge && f.edge.face !== f).length).toBe(
+      0,
+    );
+  }, 60_000);
+});
+
 describe("Schematizing real-world geodata with an enclave", () => {
   test("preserves the enclave's hole through the staircase step", async () => {
     const { data } = await geoPackageToGeometry(
