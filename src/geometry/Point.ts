@@ -163,13 +163,15 @@ class Point {
 
   /**
    * Tests whether the point lies on a given (infinite) line.
-   * More specifically, it checks whether the point satisfies the line's equation.
+   * Measured as the distance to the line rather than as the line equation's residual:
+   * the equation adds two terms as large as the coordinates themselves before they
+   * cancel, which for coordinates in the millions leaves a residual well past
+   * EPSILON for a point which lies on the line to within a fraction of a micron.
    * @param line The {@link Line} to check for collinearity with the point.
    * @returns A boolean, indicating whether or not the point lies on the line.
    */
   isOnLine(line: Line) {
-    const [A, B, C] = line.abc;
-    return Math.abs(A * this.x + B * this.y - C) < EPSILON;
+    return line.perpendicularDistanceToPoint(this) < EPSILON;
   }
 }
 

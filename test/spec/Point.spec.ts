@@ -208,4 +208,26 @@ describe("isOnLine()", function () {
     expect(point4.isOnLine(line)).toBe(false);
     expect(point5.isOnLine(line)).toBe(false);
   });
+
+  test("holds for a point on a line through coordinates in the millions", function () {
+    // Projected coordinates reach this far, where the line equation's two terms are
+    // themselves in the millions and cancel to a residual larger than EPSILON.
+    const origin = new Point(4392359.017, 3455198.362);
+    const line = new Line(origin, Math.PI / 3);
+    const distance = 13825.733;
+    const point = new Point(
+      origin.x + Math.cos(Math.PI / 3) * distance,
+      origin.y + Math.sin(Math.PI / 3) * distance,
+    );
+
+    expect(point.isOnLine(line)).toBe(true);
+  });
+
+  test("does not hold for a point beside such a line", function () {
+    const origin = new Point(4392359.017, 3455198.362);
+    const line = new Line(origin, Math.PI / 3);
+    const point = new Point(origin.x + 1, origin.y);
+
+    expect(point.isOnLine(line)).toBe(false);
+  });
 });
