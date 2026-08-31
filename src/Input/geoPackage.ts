@@ -167,12 +167,32 @@ export const geoPackageToGeometry = async (
           }
         : undefined;
 
-    const [rows] = db.exec(`SELECT "${column}" FROM "${table}"`);
+    const [tableInfo] = db.exec(`PRAGMA table_info("${table}")`);
+    // `table_info` yields cid, name, type, notnull, dflt_value, pk per column.
+    const columns = (tableInfo?.values ?? []).map((row) => ({
+      name: row[1] as string,
+      isPrimaryKey: (row[5] as number) > 0,
+    }));
+    const idColumn = columns.find((d) => d.isPrimaryKey)?.name;
+    const attributeColumns = columns
+      .map((d) => d.name)
+      .filter((name) => name !== column && name !== idColumn);
+
+    // The geometry comes first, then the feature id, then the attributes, so
+    // the row can be destructured positionally below.
+    const selected = [
+      column,
+      ...(idColumn ? [idColumn] : []),
+      ...attributeColumns,
+    ];
+    const [rows] = db.exec(
+      `SELECT ${selected.map((name) => `"${name}"`).join(", ")} FROM "${table}"`,
+    );
 
     let skipped = 0;
     const multiPolygons: MultiPolygon[] = [];
-    for (const [value] of rows?.values ?? []) {
-      const blob = value as Uint8Array | null;
+    for (const row of rows?.values ?? []) {
+      const blob = row[0] as Uint8Array | null;
       if (!blob) {
         skipped++;
         continue;
@@ -183,10 +203,16 @@ export const geoPackageToGeometry = async (
         skipped++;
         continue;
       }
+      const attributes = row.slice(idColumn ? 2 : 1);
       multiPolygons.push(
         new MultiPolygon(
           polygons.map(toPolygon),
-          multiPolygons.length.toString(),
+          idColumn
+            ? ((row[1] ?? multiPolygons.length) as number | string).toString()
+            : multiPolygons.length.toString(),
+          Object.fromEntries(
+            attributeColumns.map((name, i) => [name, attributes[i]]),
+          ),
         ),
       );
     }

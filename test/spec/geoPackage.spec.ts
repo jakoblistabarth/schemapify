@@ -71,6 +71,29 @@ describe("Reading a GeoPackage", () => {
     );
   });
 
+  test("carries feature properties through.", async () => {
+    const { data } = await geoPackageToGeometry(
+      readGpkg("AUT_adm1-simple.gpkg"),
+    );
+
+    expect(data.multiPolygons[0].properties?.NAME_0).toBe("Austria");
+    const names = data.multiPolygons.map((d) => d.properties?.NAME_1);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  test("takes the feature id from the table's primary key.", async () => {
+    const { data } = await geoPackageToGeometry(
+      readGpkg("AUT_adm1-simple.gpkg"),
+    );
+
+    // ogr2ogr names the key `fid` and numbers it from one, not from zero.
+    expect(data.multiPolygons.map((d) => d.id)).toEqual(
+      Array.from({ length: 9 }, (_, i) => (i + 1).toString()),
+    );
+    // The key is not exposed a second time as a property.
+    expect(data.multiPolygons[0].properties).not.toHaveProperty("fid");
+  });
+
   test("rejects a file that is not a GeoPackage.", async () => {
     await expect(
       geoPackageToGeometry(new Uint8Array([1, 2, 3, 4])),
