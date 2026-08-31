@@ -183,6 +183,7 @@ class CSchematization extends Schematization {
       iteration++;
       const edgeCountBeforeMove = dcel.halfEdges.size;
       const {
+        hasPair,
         hasMoved,
         dcel: newDcel,
         configurations: updatedConfigurations,
@@ -191,7 +192,17 @@ class CSchematization extends Schematization {
 
       // Without a feasible pair the Dcel is as simple as it gets, so the iteration
       // is stopped before it records another snapshot of the unchanged Dcel.
-      if (!hasMoved) break;
+      if (!hasPair) break;
+
+      // A pair which cannot be moved is not a finished simplification: the edge
+      // move gives up half way, leaving the Dcel behind in whatever state it
+      // reached. Reporting that as the outcome would hide the defect.
+      if (!hasMoved)
+        throw new Error(
+          "Edge move failed in iteration " +
+            iteration +
+            " despite a feasible pair",
+        );
 
       dcel = newDcel;
       configurations = updatedConfigurations;

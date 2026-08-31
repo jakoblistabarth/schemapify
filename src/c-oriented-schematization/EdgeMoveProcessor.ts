@@ -31,7 +31,10 @@ class EdgeMoveProcessor {
     );
     return {
       // Without a feasible pair nothing is left to simplify, which callers need to
-      // know before they treat the untouched Dcel as the result of a move.
+      // know before they treat the untouched Dcel as the result of a move. A pair
+      // which then fails to move is a different matter: it leaves the Dcel half
+      // moved, so the two cannot be reported as one.
+      hasPair: !!pair,
       hasMoved: !!edgeMove,
       dcel: edgeMove ? edgeMove.dcel : input,
       configurations: edgeMove ? edgeMove.configurations : this.configurations,

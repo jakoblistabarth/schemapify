@@ -479,3 +479,37 @@ describe("A contraction whose inner edge vanishes", function () {
     expect(result.getArea()).toBeCloseTo(originalArea, DECIMAL_SCALE);
   });
 });
+
+describe("EdgeMoveProcessor reports a missing pair apart from a failed move", function () {
+  /**
+   * Runs a single edge move on a shape.
+   * @param shape The name of a shape in `test/data/shapes`.
+   * @returns What the {@link EdgeMoveProcessor} reported.
+   */
+  const runOneMove = (shape: string) => {
+    const json = JSON.parse(
+      fs.readFileSync(path.resolve("test/data/shapes", shape), "utf8"),
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    const configurations = new ConfigurationGenerator().run(dcel);
+    const faceFaceBoundaryList = new FaceFaceBoundaryListGenerator().run(dcel);
+
+    return new EdgeMoveProcessor(faceFaceBoundaryList, configurations).run(
+      dcel,
+    );
+  };
+
+  test("finds no pair for a shape which is already as simple as it gets", function () {
+    const { hasPair, hasMoved } = runOneMove("square.json");
+
+    expect(hasPair).toBe(false);
+    expect(hasMoved).toBe(false);
+  });
+
+  test("moves the pair it finds", function () {
+    const { hasPair, hasMoved } = runOneMove("smallest-contraction.json");
+
+    expect(hasPair).toBe(true);
+    expect(hasMoved).toBe(true);
+  });
+});
