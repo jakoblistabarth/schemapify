@@ -184,25 +184,82 @@ class ConfigurationPair {
       sharedEndpoint.minus(sharedStart).dot(sharedVector) /
       Math.pow(sharedVector.magnitude, 2);
 
-    // To balance area changes, we solve for the meeting 's'.
-    // If the whole shared edge collapses to a point M, the contraction edge moves from shared endpoint to M
-    // and compensation edge moves from shared endpoint to M.
-    // However, they already share that point. The "move" in a shared edge move is actually
-    // collapsing the shared segment itself.
-
-    // The shared segment endpoints in 's' space are 0 and 1.
-    // The inner edges share ONE of these endpoints. They move towards the OTHER.
+    // The shared segment endpoints in 's' space are 0 and 1. Each inner edge is
+    // attached to one of them and slides towards the other, collapsing the segment.
     const startS = Math.abs(currentS - 0) < EPSILON ? 0 : 1;
     const targetS = 1 - startS;
 
-    // To preserve area, we don't necessarily go all the way to targetS.
-    // We find s such that (s - startS) * weight_c = -(s - startS) * weight_comp ?
-    // No, that's for regular moves. In shared moves, they move together.
-    // The "meeting point" is where the segment shrinks to.
-    // If weight_c == weight_comp, s is the midpoint (0.5).
-    const s =
-      (areaWeightContraction * startS + areaWeightCompensation * targetS) /
-      (areaWeightContraction + areaWeightCompensation);
+    // Both inner edges keep their angle, so their length varies linearly with how far
+    // their shared endpoint has slid; sampling the far end pins that rate down.
+    const lengthAtSharedEndpoint = (
+      sharedEndpointPosition: Vector2D,
+      angle: number,
+      track: Line,
+    ) => {
+      const landing = new Line(
+        sharedEndpointPosition.toPoint(),
+        angle,
+      ).intersectsLine(track);
+      if (!landing) return;
+      return landing.vector.minus(sharedEndpointPosition).magnitude;
+    };
+
+    const contractionLengthEnd = lengthAtSharedEndpoint(
+      sharedStart.plus(sharedVector.times(targetS)),
+      contractionEdgeAngle,
+      contractionTrack,
+    );
+    const compensationLengthEnd = lengthAtSharedEndpoint(
+      sharedStart.plus(sharedVector.times(startS)),
+      compensationEdgeAngle,
+      compensationTrack,
+    );
+    if (
+      contractionLengthEnd === undefined ||
+      compensationLengthEnd === undefined
+    )
+      return;
+
+    const contractionLengthChange =
+      contractionLengthEnd - contractionSegmentLength;
+    const compensationLengthChange =
+      compensationLengthEnd - compensationSegmentLength;
+
+    // Each swept region is a trapeze, not a parallelogram: with u the share of the
+    // shared edge the contraction travels (and 1 - u the compensation's share),
+    //   swept(u) = u * |shared| * sin(phi) * (length + u * lengthChange / 2)
+    // Equating both swept areas leaves a quadratic in u.
+    const quadratic =
+      (sinPhiContraction * contractionLengthChange -
+        sinPhiCompensation * compensationLengthChange) /
+      2;
+    const linear =
+      sinPhiContraction * contractionSegmentLength +
+      sinPhiCompensation *
+        (compensationSegmentLength + compensationLengthChange);
+    const constant =
+      -sinPhiCompensation *
+      (compensationSegmentLength + compensationLengthChange / 2);
+
+    const isInUnitRange = (value: number) =>
+      value >= -EPSILON && value <= 1 + EPSILON;
+    const u =
+      Math.abs(quadratic) < EPSILON
+        ? Math.abs(linear) < EPSILON
+          ? undefined
+          : -constant / linear
+        : (() => {
+            const discriminant = linear * linear - 4 * quadratic * constant;
+            if (discriminant < 0) return;
+            const root = Math.sqrt(discriminant);
+            return [
+              (-linear + root) / (2 * quadratic),
+              (-linear - root) / (2 * quadratic),
+            ].find(isInUnitRange);
+          })();
+    if (u === undefined || !Number.isFinite(u) || !isInUnitRange(u)) return;
+
+    const s = startS + u * (targetS - startS);
 
     if (s < -EPSILON || s > 1 + EPSILON) return;
 
@@ -611,75 +668,78 @@ class ConfigurationPair {
   }
 
   /**
-   * Determines whether the shared edge will be consumed by the contraction and compensation moves.
-   * This is used to determine whether to use the shared edge move logic, which requires that at least one of the points lies on the shared edge.
-   * @returns A boolean indicating whether the shared edge will be consumed by the moves.
+   * Determines whether performing the two moves one after the other would consume
+   * the shared outer edge past its own length.
+   *
+   * Both inner edges keep one endpoint on the shared edge's track, so each move slides
+   * that endpoint along the track. Sliding towards the other endpoint shortens the shared
+   * edge, sliding away lengthens it. The moves over-consume the shared edge exactly when
+   * the two landing points swap places (or meet), which is what makes them inseparable.
+   * @param shared The outer {@link HalfEdge} both configurations have in common.
+   * @returns A boolean indicating whether the shared edge is consumed past collapse.
    */
   private consumesSharedEdge(shared: HalfEdge): boolean {
-    const sLen = shared.toLineSegment()?.length;
-    const sDir = shared.getVector()?.unitVector;
-    if (!sLen || !sDir) return false;
+    const sharedSegment = shared.toLineSegment();
+    const sharedDirection = shared.getVector()?.unitVector;
+    const sharedLine = shared.toLine();
+    if (!sharedSegment || !sharedDirection || !sharedLine) return false;
 
-    // h the CONTRACTION travels (full contraction → its own edge hits zero):
-    const cInner = this.contraction.configuration.innerEdge.toLine();
-    const hC =
-      cInner &&
-      Math.abs(cInner.perpendicularDistanceToPoint(this.contraction.point));
+    const origin = sharedSegment.endPoint1.vector;
+    const offset = ({ vector }: { vector: Vector2D }) =>
+      vector.minus(origin).dot(sharedDirection);
 
-    // h the COMPENSATION travels — PARTIAL, area-balanced. MUST be getCompensationHeight,
-    // NOT compensation.point (which is the MAXIMAL distance, as you correctly noted).
-    const hK = this.compensation.getCompensationHeight(this.contraction.area);
-    if (hC === undefined || hK === undefined) return false;
+    const travel = [
+      ConfigurationPurpose.CONTRACTION,
+      ConfigurationPurpose.COMPENSATION,
+    ].map((purpose) => {
+      const start = this.getSharedEndpoint(purpose, shared);
+      const landing = this.getSharedLanding(purpose, sharedLine);
+      return start && landing
+        ? { start: offset(start), landing: offset(landing) }
+        : undefined;
+    });
+    const [contraction, compensation] = travel;
+    if (!contraction || !compensation) return false;
 
-    // Convert each perpendicular travel into length consumed along S.
-    // consumption rate = |projection of the moved endpoint's slide onto S| per unit h
-    // (same dot-ratio construction used in getCompensationHeight / getPoint's dist).
-    const rateC = this.sharedConsumptionRate(this.contraction, sDir);
-    const rateK = this.sharedConsumptionRate(this.compensation, sDir);
+    const before = compensation.start - contraction.start;
+    const after = compensation.landing - contraction.landing;
 
-    // If either rate is undefined, we can't determine consumption reliably
-    if (rateC === undefined || rateK === undefined) return false;
-
-    const consumed = rateC * hC + rateK * hK;
-
-    return consumed >= sLen - EPSILON;
+    return after * Math.sign(before) <= EPSILON;
   }
 
   /**
-   * How much of the shared edge is consumed (shortened) per unit of perpendicular
-   * travel of the given configuration's inner edge.
-   *
-   * When the inner edge advances by perpendicular distance h along its normal n̂,
-   * its endpoint on the shared edge slides along the shared edge's track by
-   * h / (ŝ · n̂), where ŝ is the shared edge's unit direction. Because that vertex
-   * slides directly along S, the slide equals the length of S consumed.
-   *
-   * This mirrors getPoint's `outerEdge.getVector().dot(innerEdgeNormal)` relation:
-   * an outer edge of length L vanishes at h = L·(û · n̂), i.e. slide-per-h = 1/(û · n̂).
-   *
-   * @param contraction The Contraction whose inner edge drives the move.
-   * @param sharedDir    The UNIT direction vector of the shared edge (ŝ).
-   * @returns Unsigned length of S consumed per unit perpendicular travel,
-   *          or undefined if the geometry is degenerate.
+   * Gets the endpoint the given configuration's inner edge has in common with the shared outer edge.
+   * @param purpose Which configuration of the pair to look at.
+   * @param shared The shared outer {@link HalfEdge}.
+   * @returns The common {@link Vertex}, or undefined if the inner edge does not touch the shared edge.
    */
-  private sharedConsumptionRate(
-    contraction: Contraction,
-    sharedDir: Vector2D,
-  ): number | undefined {
-    // Same fixed (counterclockwise) normal convention as getPoint uses for `dist`.
-    const innerNormal = contraction.configuration.innerEdge
-      .getVector()
-      ?.getNormal().unitVector; // getNormal(true) — matches getPoint's innerEdgeNormal
-    if (!innerNormal) return;
+  private getSharedEndpoint(purpose: ConfigurationPurpose, shared: HalfEdge) {
+    const innerEdge = this.getConfiguration(purpose).configuration.innerEdge;
+    const sharedEndpoints = shared.endpoints;
+    if (!sharedEndpoints) return;
+    return innerEdge.endpoints.find((vertex) =>
+      sharedEndpoints.some((endpoint) => endpoint.equals(vertex)),
+    );
+  }
 
-    const denom = sharedDir.dot(innerNormal); // ŝ · n̂
-
-    // Shared edge (nearly) parallel to the inner edge → endpoint slides infinitely
-    // far per unit h. This shouldn't happen for a real outer edge / track and
-    // signals a degenerate configuration.
-    if (Math.abs(denom) < EPSILON) return;
-
-    return 1 / Math.abs(denom);
+  /**
+   * Gets where the given configuration's inner edge endpoint lands on the shared edge's
+   * track once that configuration has performed its (regular, uncoupled) move.
+   * @param purpose Which configuration of the pair to look at.
+   * @param sharedLine The {@link Line} through the shared outer edge.
+   * @returns The landing {@link Point}, or undefined if it cannot be derived.
+   */
+  private getSharedLanding(purpose: ConfigurationPurpose, sharedLine: Line) {
+    const candidates =
+      purpose === ConfigurationPurpose.CONTRACTION
+        ? [this.contraction.point, this.contraction.areaPoints.at(-1)]
+        : this.getNewCompensationPositions();
+    return candidates
+      ?.filter((point): point is Point => !!point)
+      .find(
+        (point) =>
+          Math.abs(sharedLine.perpendicularDistanceToPoint(point)) < EPSILON,
+      );
   }
 
   /**

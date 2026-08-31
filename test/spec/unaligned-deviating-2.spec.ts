@@ -1,5 +1,6 @@
 import CSchematization from "@/src/c-oriented-schematization/CSchematization";
 import { isAlignedToC } from "@/src/c-oriented-schematization/HalfEdgeUtils";
+import Face from "@/src/Dcel/Face";
 import Dcel from "@/src/Dcel/Dcel";
 import { DECIMAL_SCALE } from "@/src/geometry/constants";
 import fs from "fs";
@@ -52,6 +53,50 @@ describe("unaligned-deviating-2.json - Geometry Progression", function () {
       expect(unalignedCount).toBe(0);
       expect(finalArea).toBeCloseTo(8, DECIMAL_SCALE);
       expect(areaLostPercent).toBeLessThan(0.1); // Arbitrary threshold to catch major collapses
+    }
+  });
+});
+
+describe("unaligned-deviating-2.json - Face simplicity", function () {
+  const json = JSON.parse(
+    fs.readFileSync(
+      path.resolve("test/data/shapes/unaligned-deviating-2.json"),
+      "utf8",
+    ),
+  );
+
+  /**
+   * Finds a pair of non-adjacent boundary segments of a face that cross or overlap.
+   * @param face The {@link Face} to check.
+   * @returns A description of the offending pair, or undefined if the face is simple.
+   */
+  const findSelfIntersection = (face: Face) => {
+    const segments = face
+      .getEdges()
+      .flatMap((edge) => edge.toLineSegment() ?? []);
+    return segments.reduce<string | undefined>((found, segment, i) => {
+      if (found) return found;
+      const conflict = segments.findIndex(
+        (other, j) =>
+          j > i + 1 &&
+          !(i === 0 && j === segments.length - 1) &&
+          segment.intersectsLineSegment(other, true),
+      );
+      return conflict === -1 ? undefined : `segments ${i} and ${conflict}`;
+    }, undefined);
+  };
+
+  test("Faces stay simple during every edge move", function () {
+    const schematization = new CSchematization();
+
+    for (let maxMoves = 1; maxMoves <= 10; maxMoves++) {
+      const result = schematization.run(Dcel.fromGeoJSON(json), maxMoves);
+      result.getBoundedFaces().forEach((face, i) => {
+        expect(
+          findSelfIntersection(face),
+          `move ${maxMoves}, face ${i}`,
+        ).toBeUndefined();
+      });
     }
   });
 });

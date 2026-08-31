@@ -52,8 +52,7 @@ describe("c4-edge-move.subdivision.json", function () {
     expect(unalignedAfterMove).toHaveLength(0);
   });
 
-  // fails due to error in shareḍ edge move
-  test.fails("should preserve area and edge alignment through first edge move", function () {
+  test("should preserve area and edge alignment through first edge move", function () {
     const dcel = Dcel.fromCoordinates(c4edgemove);
     const originalArea = dcel.getArea();
     // No constraint needed, data is already an angle-constrained subdivision.
@@ -69,9 +68,7 @@ describe("c4-edge-move.subdivision.json", function () {
     expect(dcelAfterMove.getArea()).toBeCloseTo(originalArea, DECIMAL_SCALE);
   });
 
-  //TODO: comment in
-  // fails due to error in shared edge move
-  test.fails("should preserve area and edge alignment through full schematization", function () {
+  test("should preserve area and edge alignment through full schematization", function () {
     const dcel = Dcel.fromCoordinates(c4edgemove);
     const schematization = new CSchematization({
       lambda: 1,
