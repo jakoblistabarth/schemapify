@@ -10,6 +10,20 @@ import Vector2D from "../geometry/Vector2D";
 import Configuration, { OuterEdge } from "./Configuration";
 import { ContractionType } from "./ContractionType";
 
+/**
+ * The parts of a blocking check which do not depend on the edge being checked.
+ */
+type BlockingContext = {
+  /** The configuration's own edges, plus those of its twin's configuration. */
+  x: HalfEdge[];
+  areaPoints: Point[];
+  area: Polygon;
+  xLineSegments: LineSegment[];
+  hasTrackPointOutsideOfX: boolean;
+  /** The area's extent, grown by EPSILON so that near-touching edges survive it. */
+  areaBounds: { minX: number; minY: number; maxX: number; maxY: number };
+};
+
 class Contraction {
   type: ContractionType;
   configuration: Configuration;
@@ -278,19 +292,81 @@ class Contraction {
    * @returns A boolean, indicating whether or not the {@link Contraction} is blocked by the specified {@link HalfEdge}.
    */
   isBlockedBy(edge: HalfEdge, configurations: Map<string, Configuration>) {
-    const x = this.configuration.x;
+    const context = this.getBlockingContext(configurations);
+    return context && this.isBlockedByEdge(edge, context);
+  }
+
+  /**
+   * Collects what a blocking check needs but does not derive from the edge
+   * being checked, so that a sweep over many edges derives it only once.
+   * @param configurations The {@link Configuration}s of the {@link Dcel}.
+   * @returns A {@link BlockingContext}, or undefined if the inner edge has no twin.
+   */
+  private getBlockingContext(
+    configurations: Map<string, Configuration>,
+  ): BlockingContext | undefined {
     const twin = this.configuration.innerEdge.twin;
     if (!twin) return;
+    const x = this.configuration.x;
     const xOfTwin = twin.coordKey
       ? configurations.get(twin.coordKey)?.x
       : undefined;
     if (xOfTwin) x.push(...xOfTwin);
+    // The getter walks the configuration's tracks, so it is read only once.
+    const areaPoints = this.areaPoints;
+    return {
+      x,
+      areaPoints,
+      area: new Polygon([new Ring(areaPoints)]),
+      xLineSegments: x.reduce((acc: LineSegment[], edge) => {
+        const lineSegment = edge.toLineSegment();
+        if (typeof lineSegment === "object") acc.push(lineSegment);
+        return acc;
+      }, []),
+      hasTrackPointOutsideOfX:
+        areaPoints.length === 4 &&
+        !this.configuration.x
+          .flatMap((e) => e.endpoints)
+          .some((v) => v.equals(areaPoints[3])),
+      areaBounds: {
+        minX: Math.min(...areaPoints.map(({ x }) => x)) - EPSILON,
+        minY: Math.min(...areaPoints.map(({ y }) => y)) - EPSILON,
+        maxX: Math.max(...areaPoints.map(({ x }) => x)) + EPSILON,
+        maxY: Math.max(...areaPoints.map(({ y }) => y)) + EPSILON,
+      },
+    };
+  }
+
+  /**
+   * Determines whether the specified HalfEdge blocks the contraction.
+   * @param edge The {@link HalfEdge} to check.
+   * @param context The edge-independent part of the check.
+   * @returns A boolean, or undefined if the edge has no line segment.
+   */
+  private isBlockedByEdge(edge: HalfEdge, context: BlockingContext) {
+    const {
+      x,
+      areaPoints,
+      area,
+      xLineSegments,
+      hasTrackPointOutsideOfX,
+      areaBounds,
+    } = context;
     if (x.includes(edge)) return false;
     const edgeLine = edge.toLineSegment();
     if (!edgeLine) return;
-    // The getter walks the configuration's tracks, so it is read only once.
-    const areaPoints = this.areaPoints;
-    const area = new Polygon([new Ring(areaPoints)]);
+
+    // An edge clear of the area's extent can neither lie in it nor cross it,
+    // which spares the great majority of edges the geometry below.
+    const { endPoint1, endPoint2 } = edgeLine;
+    if (
+      Math.min(endPoint1.x, endPoint2.x) > areaBounds.maxX ||
+      Math.max(endPoint1.x, endPoint2.x) < areaBounds.minX ||
+      Math.min(endPoint1.y, endPoint2.y) > areaBounds.maxY ||
+      Math.max(endPoint1.y, endPoint2.y) < areaBounds.minY
+    )
+      return false;
+
     const pointsInPolygon = edge.endpoints.filter((vertex) =>
       vertex.isInPolygon(area),
     );
@@ -298,41 +374,21 @@ class Contraction {
     // Case 1: Both endpoints inside the contraction area
     if (pointsInPolygon.length === 2) return true;
 
-    const intersections = area.getIntersections(edge);
-
     //TODO: make robuster, seems to make algorithm stop too early at times.
     // Case 2: Improper boundary crossing (intersection not on X edges) blocks
     // Exception: if this is a 4-point area with P3 very close to an edge that
     // is part of the configuration (edge in X), it should not block.
-    if (intersections) {
-      // The segments of X are only needed to judge a crossing.
-      const xLineSegments = intersections.length
-        ? x.reduce((acc: LineSegment[], edge) => {
-            const lineSegment = edge.toLineSegment();
-            if (typeof lineSegment === "object") acc.push(lineSegment);
-            return acc;
-          }, [])
-        : [];
-      const hasImproperCrossing = intersections.some(
-        (intersection) => !intersection.isOnLineSegments(xLineSegments),
-      );
-      const hasTrackPointCloseToEdge =
-        areaPoints.length === 4 &&
-        areaPoints[3].distanceToLineSegment(edgeLine) < EPSILON;
-      const hasTrackPointOutsideOfX =
-        areaPoints.length === 4 &&
-        !this.configuration.x
-          .flatMap((e) => e.endpoints)
-          .some((v) => v.equals(areaPoints[3]));
+    const hasImproperCrossing = area
+      .getIntersections(edge)
+      .some((intersection) => !intersection.isOnLineSegments(xLineSegments));
+    const hasTrackPointCloseToEdge =
+      areaPoints.length === 4 &&
+      areaPoints[3].distanceToLineSegment(edgeLine) < EPSILON;
 
-      if (
-        hasImproperCrossing ||
-        (hasTrackPointCloseToEdge && hasTrackPointOutsideOfX)
-      )
-        return true;
-    }
-
-    return false;
+    return (
+      hasImproperCrossing ||
+      (hasTrackPointCloseToEdge && hasTrackPointOutsideOfX)
+    );
   }
 
   /**
@@ -350,12 +406,14 @@ class Contraction {
     // - Case 3: One endpoint inside with improper crossing
     // Read once: the getter walks the configuration's face cycle.
     const x_ = this.configuration.x_;
+    const context = this.getBlockingContext(configurations);
 
-    x_.forEach((boundaryEdge) => {
-      if (this.isBlockedBy(boundaryEdge, configurations)) {
-        blockingNumber++;
-      }
-    });
+    if (context)
+      x_.forEach((boundaryEdge) => {
+        if (this.isBlockedByEdge(boundaryEdge, context)) {
+          blockingNumber++;
+        }
+      });
 
     // ARCHITECTURAL NOTE: Adjacent vertex checking is performed here (not in isBlockedBy)
     // because it requires calling x_ and getCycle(), which traverse the DCEL cycle.
@@ -395,7 +453,7 @@ class Contraction {
     });
 
     // Check if any interior vertices (not on x_ boundary, not in own face) from adjacent faces fall inside the area
-    const area = new Polygon([new Ring(this.areaPoints)]);
+    const area = context?.area ?? new Polygon([new Ring(this.areaPoints)]);
     adjacentFaceVertices.forEach((vertex) => {
       // Skip if it's part of the configuration's boundary or its own face
       if (!boundaryVertices.has(vertex) && !ownFaceVertices.has(vertex)) {
@@ -428,8 +486,10 @@ class Contraction {
     configurations: Map<string, Configuration>,
   ) {
     if (this.blockingNumber === 0) return; // Skip check for interference when no blocking point exists
+    const context = this.getBlockingContext(configurations);
+    if (!context) return;
     const decrement = x1x2.reduce((acc: number, edge) => {
-      if (this.isBlockedBy(edge, configurations)) ++acc;
+      if (this.isBlockedByEdge(edge, context)) ++acc;
       return acc;
     }, 0);
     this.blockingNumber = this.blockingNumber - decrement;
@@ -447,8 +507,10 @@ class Contraction {
     x1x2: HalfEdge[],
     configurations: Map<string, Configuration>,
   ) {
+    const context = this.getBlockingContext(configurations);
+    if (!context) return;
     const increment = x1x2.reduce((acc: number, edge) => {
-      if (this.isBlockedBy(edge, configurations)) {
+      if (this.isBlockedByEdge(edge, context)) {
         ++acc;
       }
       return acc;
