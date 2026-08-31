@@ -236,10 +236,11 @@ class Dcel {
     // FIXME: confusing for map output:
     // sometimes clockwise/counterclockwise assignment in map output wrong
     const simpleEdges: HalfEdge[] = [];
+    const seen = new Set<HalfEdge>();
     edges.forEach((e) => {
-      if (!e.twin) return;
-      const idx = simpleEdges.indexOf(e.twin);
-      if (idx < 0) simpleEdges.push(e);
+      if (!e.twin || seen.has(e.twin)) return;
+      seen.add(e);
+      simpleEdges.push(e);
     });
     return simpleEdges;
   }

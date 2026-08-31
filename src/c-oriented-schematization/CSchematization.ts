@@ -171,6 +171,9 @@ class CSchematization extends Schematization {
 
     let dcel: Dcel = withoutCollinearPoints;
     let configurations = new ConfigurationGenerator().run(dcel);
+    // The edge move hands back a list matching the Dcel it produced, so the
+    // list is built once here rather than again on every iteration.
+    let faceFaceBoundaryList = new FaceFaceBoundaryListGenerator().run(dcel);
     let iteration = 0;
     while (
       maxIterations !== undefined
@@ -179,13 +182,14 @@ class CSchematization extends Schematization {
     ) {
       iteration++;
       const edgeCountBeforeMove = dcel.halfEdges.size;
-      const faceFaceBoundaryList = new FaceFaceBoundaryListGenerator().run(
-        dcel,
-      );
-      const { dcel: newDcel, configurations: updatedConfigurations } =
-        new EdgeMoveProcessor(faceFaceBoundaryList, configurations).run(dcel);
+      const {
+        dcel: newDcel,
+        configurations: updatedConfigurations,
+        faceFaceBoundaryList: updatedFaceFaceBoundaryList,
+      } = new EdgeMoveProcessor(faceFaceBoundaryList, configurations).run(dcel);
       dcel = newDcel;
       configurations = updatedConfigurations;
+      faceFaceBoundaryList = updatedFaceFaceBoundaryList;
 
       start = performance.now();
       this.doAction({
