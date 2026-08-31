@@ -49,8 +49,9 @@ class VertexClassGenerator implements Generator {
     );
     if (occupiedSectors.length !== uniqueSectors.length) return true;
 
-    // Classify as significant if neighbor sectors are not empty
-    return uniqueSectors.every((sector: Sector) => {
+    // Classify as significant if any two edges sit in neighbouring sectors: those
+    // share a bounding direction, which both edges may end up assigned to.
+    return uniqueSectors.some((sector: Sector) => {
       const [prevSector, nextSector] = sector.getNeighbors();
       return (
         getEdgesInSector(vertex, prevSector).length > 0 ||
