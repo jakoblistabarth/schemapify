@@ -416,3 +416,41 @@ describe("Simplification stops as soon as no configuration pair is left", functi
     expect(() => schematization.run(Dcel.fromGeoJSON(json), 10)).not.toThrow();
   });
 });
+
+describe("Contractions ending on a junction are not applied", function () {
+  /**
+   * Finds vertices with two incident edges of the same direction, which means the
+   * two edges overlap, leaving the boundary with a spur of zero width.
+   * @param dcel The {@link Dcel} to check.
+   * @returns A description of every offending vertex.
+   */
+  const findOverlappingEdges = (dcel: Dcel) =>
+    dcel.getVertices().flatMap((vertex) => {
+      const angles = vertex.edges.map((edge) => edge.getAngle());
+      const hasDuplicate = angles.some(
+        (angle, index) =>
+          angle !== undefined &&
+          angles.findIndex(
+            (other) => other !== undefined && Math.abs(other - angle) < EPSILON,
+          ) !== index,
+      );
+      return hasDuplicate ? [`(${vertex.x}, ${vertex.y})`] : [];
+    });
+
+  test.each(["3plgn-complex.json", "edge-move-test.json"])(
+    "%s keeps its edges free of overlaps",
+    function (shape) {
+      const json = JSON.parse(
+        fs.readFileSync(path.resolve("test/data/shapes", shape), "utf8"),
+      );
+
+      for (let maxMoves = 1; maxMoves <= 12; maxMoves++) {
+        const result = new CSchematization().run(
+          Dcel.fromGeoJSON(json),
+          maxMoves,
+        );
+        expect(findOverlappingEdges(result), `move ${maxMoves}`).toEqual([]);
+      }
+    },
+  );
+});

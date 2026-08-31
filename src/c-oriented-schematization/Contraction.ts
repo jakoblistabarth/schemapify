@@ -74,11 +74,28 @@ class Contraction {
     if (!this.point) return false;
     return this.area > 0 &&
       this.blockingNumber === 0 &&
-      //TO-DO: remove this condition, as soon as edge moves
+      //TO-DO: remove these conditions, as soon as edge moves
       // for junctions (degree-3) are implemented
-      !this.configuration.hasJunction
+      !this.configuration.hasJunction &&
+      !this.endsAtJunction
       ? true
       : false;
+  }
+
+  /**
+   * Determines whether the Contraction slides an endpoint of the inner edge onto a junction.
+   *
+   * The contraction ends where one of the outer edges vanishes, which merges that outer
+   * edge's far endpoint with the inner edge. Is that endpoint a junction, its remaining
+   * edges decide where the inner edge may go – a case distinction which is not implemented
+   * yet. Without it the inner edge can come to lie on top of one of those edges.
+   * @returns A boolean, indicating whether or not the Contraction ends on a junction.
+   */
+  private get endsAtJunction() {
+    const { prev, next } = this.configuration.innerEdge;
+    return [prev?.tail, next?.head].some(
+      (vertex) => !!vertex && vertex.degree > 2 && this.point.equals(vertex),
+    );
   }
 
   /**
