@@ -509,9 +509,9 @@ export const getClosestAssociatedAngle = (
   if (orientation !== Orientation.UD || !associatedSector) return; // TO-DO: error handling, this function is only meant to be used for unaligned deviating edges
   const sector = associatedSector[0];
 
-  // TO-DO: refactor: find better solution for last sector and it's upper bound
-  // Set upper bound of last to TWO_PI ?
-  const upper = sector.idx === sectors.length - 1 ? 0 : sector.upper;
+  // The last sector's upper bound reaches past 2π, and is wanted here as the angle
+  // it stands for.
+  const upper = sector.upper >= TWO_PI ? sector.upper - TWO_PI : sector.upper;
   const lower = sector.lower;
   const angle =
     getAssignedAngle(assignedDirection, sectors) === 0

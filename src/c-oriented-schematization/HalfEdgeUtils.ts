@@ -35,13 +35,16 @@ export const getAssociatedAngles = (halfEdge: HalfEdge, sectors: Sector[]) => {
   if (typeof angle !== "number") return [];
   const directions: number[] = [];
   sectors.some(function (sector) {
+    // The last sector reaches past 2π, so an angle below its lower bound is measured
+    // once around before it can be compared.
+    const reached = angle < sector.lower ? angle + TWO_PI : angle;
     // Compared with a tolerance: an angle derived from coordinates misses the
     // direction it was built from by an ulp, which made aligned edges look unaligned.
-    if (Math.abs(angle - sector.lower) < EPSILON) {
+    if (Math.abs(reached - sector.lower) < EPSILON) {
       return directions.push(sector.lower);
-    } else if (Math.abs(angle - sector.upper) < EPSILON) {
+    } else if (Math.abs(reached - sector.upper) < EPSILON) {
       return directions.push(sector.upper);
-    } else if (angle > sector.lower && angle < sector.upper) {
+    } else if (reached > sector.lower && reached < sector.upper) {
       return directions.push(sector.lower, sector.upper);
     }
   });

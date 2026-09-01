@@ -50,8 +50,13 @@ class CRegular extends C {
    */
   get sectors(): Sector[] {
     return this.angles.map((angle, idx) => {
+      // The last sector reaches around to the first angle, which is 2π only for an
+      // unshifted C: with a beta the arc between 2π and the first angle belongs to
+      // it as well, and is left to no sector at all if the bound stops at 2π.
       const upperBound =
-        idx + 1 == this.angles.length ? TWO_PI : this.angles[idx + 1];
+        idx + 1 == this.angles.length
+          ? this.angles[0] + TWO_PI
+          : this.angles[idx + 1];
       return new Sector(this, idx, angle, upperBound);
     });
   }

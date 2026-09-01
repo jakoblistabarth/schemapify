@@ -1,3 +1,4 @@
+import { TWO_PI } from "../geometry/constants";
 import C from "./C";
 
 class Sector {
@@ -48,7 +49,10 @@ class Sector {
    */
   encloses(angle: number) {
     const [lowerBound, upperBound] = this.getBounds();
-    return angle >= lowerBound && angle <= upperBound;
+    // The last sector reaches past 2π, so an angle below its lower bound is measured
+    // once around before it can be compared.
+    const reached = angle < lowerBound ? angle + TWO_PI : angle;
+    return reached >= lowerBound && reached <= upperBound;
   }
 }
 

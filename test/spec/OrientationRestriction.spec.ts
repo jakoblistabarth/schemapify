@@ -9,8 +9,9 @@ import { style } from "@/src/c-oriented-schematization/schematization.style";
 import Sector from "@/src/c-oriented-schematization/Sector";
 import VertexClassGenerator from "@/src/c-oriented-schematization/VertexClassGenerator";
 import { getEdgesInSector } from "@/src/c-oriented-schematization/VertexUtils";
-import { TWO_PI } from "@/src/geometry/constants";
-import { crawlArray } from "@/src/utilities";
+import Dcel from "@/src/Dcel/Dcel";
+import { DECIMAL_SCALE, TWO_PI } from "@/src/geometry/constants";
+import { crawlArray, degreesToRadians } from "@/src/utilities";
 import { beforeEach, describe, expect, test } from "vitest";
 import { createEdgeVertexSetup, idOr, TestSetup } from "./test-setup";
 
@@ -257,5 +258,53 @@ describe("crawlArray()", function () {
 
   test("crawls backward -2", function () {
     expect(crawlArray(arr, 0, -2)).toBe("secondlast");
+  });
+});
+
+describe("The sectors of a C shifted by a beta", function () {
+  const beta = degreesToRadians(5);
+
+  test.each([2, 3, 4, 6])(
+    "cover the whole circle for C(%i)",
+    function (orientations) {
+      const sectors = new CRegular(orientations, beta).sectors;
+
+      // Each sector picks up where the one before it left off, the last one reaching
+      // around to where the first one starts.
+      sectors.forEach((sector, index) => {
+        const next = sectors[(index + 1) % sectors.length];
+        const start =
+          index + 1 === sectors.length ? next.lower + TWO_PI : next.lower;
+        expect(sector.upper).toBeCloseTo(start, DECIMAL_SCALE);
+      });
+    },
+  );
+
+  test.each([2, 3, 4, 6])(
+    "enclose an angle between zero and beta for C(%i)",
+    function (orientations) {
+      const sectors = new CRegular(orientations, beta).sectors;
+      const angle = beta / 2;
+
+      // Only the last sector reaches around past 2π to cover it.
+      expect(sectors.filter((sector) => sector.encloses(angle))).toEqual([
+        sectors[sectors.length - 1],
+      ]);
+    },
+  );
+
+  test("associate an edge along zero with the sector reaching around to it", function () {
+    const c = new CRegular(2, beta);
+    const dcel = new Dcel();
+    const [tail, head] = [dcel.addVertex(0, 0), dcel.addVertex(1, 0)];
+    const edge = dcel.addHalfEdge(tail, head);
+    edge.twin = dcel.addHalfEdge(head, tail);
+
+    // Without the last sector reaching around, an edge along zero belongs to no
+    // sector at all, which leaves its staircase without a region.
+    expect(getAssociatedAngles(edge, c.sectors).length).toBeGreaterThan(0);
+    expect(getAssociatedSector(edge, c.sectors)).toEqual([
+      c.sectors[c.sectors.length - 1],
+    ]);
   });
 });
