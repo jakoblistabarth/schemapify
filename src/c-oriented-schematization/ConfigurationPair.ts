@@ -461,8 +461,9 @@ class ConfigurationPair {
     // A contraction takes an edge with it, so the move leaves the Dcel with fewer
     // than it found — unless it left a copy of a junction behind, which adds one of
     // its own and can make up the difference.
-    const leftCopyBehind =
-      this.contraction.leftCopyBehind || this.compensation.leftCopyBehind;
+    const leftCopyBehind = [this.contraction, this.compensation].some(
+      ({ copiesLeft }) => copiesLeft.length > 0,
+    );
     if (edgesAfterMove.size >= edgesBeforeMove.size && !leftCopyBehind)
       throw new Error(
         "Edge move left the Dcel with no fewer edges than it found",
@@ -489,6 +490,14 @@ class ConfigurationPair {
         configurations.set(edge.coordKey, newConfiguration);
       }
     });
+
+    // A junction left behind rearranges the edges around itself and around the vertex
+    // it was left on, so those count among the edges the move touched.
+    [this.contraction, this.compensation].forEach(({ copiesLeft }) =>
+      copiesLeft.forEach((vertex) =>
+        vertex.edges.forEach((edge) => remainingEdges.push(edge)),
+      ),
+    );
 
     // Reinitialize configurations whose outer edges were affected by the move.
     // When outer edges change, contraction areas may change, so we need to recalculate them.
