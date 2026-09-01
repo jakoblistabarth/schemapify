@@ -94,13 +94,36 @@ class Contraction {
   }
 
   /**
+   * Leaves a copy of every junction the inner edge meets behind, so that the edges
+   * which do not travel with it keep the vertex they have.
+   *
+   * Without it the junction's other edges are dragged along with the endpoint, which
+   * changes their direction and the area of the faces beyond them.
+   * @param tail Where the inner edge's tail is headed.
+   * @param head Where its head is headed.
+   */
+  leaveJunctionsBehind(tail: Point, head: Point) {
+    const innerEdge = this.configuration.innerEdge;
+    const ends: [Vertex | undefined, HalfEdge | undefined, Point][] = [
+      [innerEdge.tail, innerEdge, tail],
+      [innerEdge.head, innerEdge.twin, head],
+    ];
+    ends.forEach(([vertex, outgoing, landing]) => {
+      if (!vertex || !outgoing || vertex.degree <= 2) return;
+      if (this.configuration.getJunctionType(vertex) === Junction.A) return;
+      const track = this.configuration.getJunctionTrackEdge(vertex, this.type);
+      if (track) vertex.splitOff(outgoing, track, landing);
+    });
+  }
+
+  /**
    * Determines whether the inner edge meets a junction the edge move cannot carry out.
    *
    * At a junction of type A the two edges the moving vertex does not belong to run in
    * opposite directions along one line — the very line the configuration takes its
    * track from — so the vertex slides along them and the faces on their far side keep
-   * their area. The other types have the vertex leave a copy of itself behind
-   * (Buchin et al. 2016), which is not implemented yet.
+   * their area. The other types have the vertex leave a copy of itself behind, which
+   * is not implemented yet.
    * @returns A boolean, indicating whether a junction stands in the move's way.
    */
   private get hasUnhandledJunction() {

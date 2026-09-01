@@ -556,6 +556,17 @@ class ConfigurationPair {
       newCompensationHead = newCompensationPoint;
     }
 
+    // A junction either inner edge meets is left behind before the move, so that its
+    // other edges keep the vertex they have rather than being dragged along.
+    this.contraction.leaveJunctionsBehind(
+      newContractionTail,
+      newContractionHead,
+    );
+    this.compensation.leaveJunctionsBehind(
+      newCompensationTail,
+      newCompensationHead,
+    );
+
     // Perform the actual edge moves using moveTo
     contractionEdge.moveTo(newContractionTail, newContractionHead);
     compensationEdge.moveTo(newCompensationTail, newCompensationHead);
@@ -653,6 +664,17 @@ class ConfigurationPair {
     // there and the edge collapses, rather than coming to rest on a track. Sending
     // them anywhere else lays the inner edge on top of one of the outer edges.
     const innerEdgeVanishes = this.contraction.areaPoints.length === 3;
+    const [newContractionTail, newContractionHead] = innerEdgeVanishes
+      ? [pointA, pointA]
+      : pointA.isOnLineSegment(prevEdgeLineSegment)
+        ? [pointA, pointB]
+        : [pointB, pointA];
+    // A junction the inner edge meets is left behind before the move, so that its
+    // other edges keep the vertex they have rather than being dragged along.
+    this.contraction.leaveJunctionsBehind(
+      newContractionTail,
+      newContractionHead,
+    );
     const contractionAfterMove = innerEdgeVanishes
       ? contractionEdge.moveTo(pointA, pointA)
       : pointA.isOnLineSegment(prevEdgeLineSegment)
@@ -678,6 +700,7 @@ class ConfigurationPair {
       movedPositions.push(pointA);
     }
 
+    this.compensation.leaveJunctionsBehind(newTail, newHead);
     const compensationAfterMove = compensationEdge.moveTo(newTail, newHead);
 
     if (!compensationAfterMove) {

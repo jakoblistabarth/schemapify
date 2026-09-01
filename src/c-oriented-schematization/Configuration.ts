@@ -137,17 +137,27 @@ class Configuration {
    * @returns A {@link Line} representing the track, if there is one such edge.
    */
   private getJunctionTrack(vertex: Vertex, type: ContractionType) {
+    const angle = this.getJunctionTrackEdge(vertex, type)?.getAngle();
+    return typeof angle === "number" ? new Line(vertex, angle) : undefined;
+  }
+
+  /**
+   * Gets the edge a junction on the inner edge travels along, which is the one of the
+   * junction's other edges the inner edge moves towards.
+   * @param vertex The junction the inner edge meets.
+   * @param type The {@link ContractionType}, which decides the direction of the move.
+   * @returns The {@link HalfEdge} leaving the junction on that side.
+   */
+  getJunctionTrackEdge(vertex: Vertex, type: ContractionType) {
     const innerEdgeVector = this.innerEdge.getVector()?.unitVector;
     if (!innerEdgeVector) return;
     // The side the inner edge moves towards, as the compensation's height measures it.
     const normal = innerEdgeVector.getNormal(type === ContractionType.N);
-    const towards = vertex.edges.find((edge) => {
+    return vertex.edges.find((edge) => {
       if (edge === this.innerEdge || edge === this.innerEdge.twin) return false;
       const vector = edge.getVector();
       return vector ? vector.dot(normal) > EPSILON : false;
     });
-    const angle = towards?.getAngle();
-    return typeof angle === "number" ? new Line(vertex, angle) : undefined;
   }
 
   /**

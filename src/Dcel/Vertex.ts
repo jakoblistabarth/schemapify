@@ -160,6 +160,74 @@ class Vertex extends Point {
   }
 
   /**
+   * Hands one of the Vertex's incident HalfEdges over to a new Vertex, placed on
+   * another of them, and leaves the rest where they are.
+   *
+   * The edge which moves takes the new vertex, the edges which stay keep this one, and
+   * the piece of track they are split apart along joins the two.
+   * @param edge The incident {@link HalfEdge} to hand over.
+   * @param track The incident {@link HalfEdge} to place the new {@link Vertex} on.
+   * @param point Where on the track the new {@link Vertex} goes.
+   * @returns The new {@link Vertex}, or nothing if it could not be placed.
+   */
+  splitOff(edge: HalfEdge, track: HalfEdge, point: Point) {
+    if (edge.tail !== this || track.tail !== this || edge === track) return;
+
+    // The piece of the track between this vertex and the new one, which the boundary
+    // reaches the handed over edge through from here on.
+    const piece = track.subdivide(point);
+    const split = piece?.head;
+    if (!piece || !split) return;
+
+    this.removeIncidentEdge(edge);
+    edge.tail = split;
+    split.edges.push(edge);
+
+    // Which faces the two vertices lie between follows from the order of the edges
+    // around them, which the handover has changed for both.
+    [this as Vertex, split].forEach((vertex) => vertex.rewire());
+
+    // Only the two pieces of the track can bound a face other than the one they were
+    // cut out of, the handed over edge keeping the faces it already had. Each of them
+    // takes the face of the first edge along the boundary which did not move.
+    const rest = split.edges.find((incident) => incident !== piece.twin);
+    const pieces = [piece, piece.twin, rest, rest?.twin].filter(
+      (incident) => incident !== undefined,
+    );
+    pieces.forEach((incident) => {
+      let following = incident.next;
+      while (following && following !== incident && pieces.includes(following))
+        following = following.next;
+      if (!following?.face || following.face === incident.face) return;
+
+      const left = incident.face;
+      incident.face = following.face;
+      // A face reached through a piece which has changed sides has to be reached
+      // through one of the edges it kept instead.
+      if (left?.edge === incident)
+        left.edge = this.dcel
+          .getHalfEdges()
+          .find((candidate) => candidate.face === left);
+    });
+
+    return split;
+  }
+
+  /**
+   * Derives the next and prev pointers of the Vertex's incident HalfEdges from the
+   * order they sit around it in.
+   */
+  private rewire() {
+    this.sortEdges();
+    this.edges.forEach((edge, index) => {
+      const next = this.edges[(index + 1) % this.degree];
+      if (!edge.twin) return;
+      edge.twin.next = next;
+      next.prev = edge.twin;
+    });
+  }
+
+  /**
    * Removes the specified halfedge from the Array of incident Halfedges of the vertex.
    * @param edge The {@link HalfEdge} to be removed.
    * @returns An Array containing the remaining incident {@link HalfEdge}s.

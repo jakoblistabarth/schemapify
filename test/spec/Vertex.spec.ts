@@ -1,7 +1,8 @@
 import Dcel from "@/src/Dcel/Dcel";
 import HalfEdge from "@/src/Dcel/HalfEdge";
 import Vertex from "@/src/Dcel/Vertex";
-import { EPSILON } from "@/src/geometry/constants";
+import { DECIMAL_SCALE, EPSILON } from "@/src/geometry/constants";
+import Point from "@/src/geometry/Point";
 import { normalizeAngle, permute } from "@/src/utilities";
 import fs from "fs";
 import path from "path";
@@ -283,5 +284,74 @@ describe("equals() on a vertex", function () {
     const pointA = dcel.addVertex(0.25, -3);
 
     expect(pointA.equals(vertexA)).toBe(true);
+  });
+});
+
+describe("splitOff()", function () {
+  /**
+   * The junction at (1, 2) of edge-move-test, where three faces meet: an edge leaves
+   * it at 270, one at 135 and one at 0 degrees.
+   */
+  const junctionSetup = () => {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/shapes/edge-move-test.json"),
+        "utf8",
+      ),
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    const junction = dcel.findVertex(1, 2);
+    const edge = junction?.edges.find(
+      ({ head }) => head?.x === 1 && head?.y === 1,
+    );
+    const track = junction?.edges.find(
+      ({ head }) => head?.x === 3 && head?.y === 2,
+    );
+    if (!junction || !edge || !track) throw new Error("expected a junction");
+    return { dcel, junction, edge, track };
+  };
+
+  test("hands the edge to a new vertex and leaves the rest on the old one", function () {
+    const { junction, edge, track } = junctionSetup();
+
+    const split = junction.splitOff(edge, track, new Point(1.5, 2));
+
+    expect(split?.xy).toEqual([1.5, 2]);
+    expect(junction.degree).toBe(2);
+    expect(split?.degree).toBe(3);
+    expect(split?.edges).toContain(edge);
+    expect(junction.edges).not.toContain(edge);
+  });
+
+  test("leaves the boundary walkable and the area untouched", function () {
+    const { dcel, junction, edge, track } = junctionSetup();
+    const area = dcel.getArea();
+
+    junction.splitOff(edge, track, new Point(1.5, 2));
+
+    expect(() => dcel.toSubdivision()).not.toThrow();
+    expect(dcel.getArea()).toBeCloseTo(area, DECIMAL_SCALE);
+  });
+
+  test("hands the faces beside the track over with it", function () {
+    // The edge takes the area between where it was and where it now runs with it,
+    // which the face on its other side gives up.
+    const { dcel, junction, edge, track } = junctionSetup();
+    const before = dcel.getBoundedFaces().map((face) => face.getArea());
+
+    junction.splitOff(edge, track, new Point(1.5, 2));
+
+    const after = dcel.getBoundedFaces().map((face) => face.getArea());
+    expect(after[0]).toBeCloseTo((before[0] ?? 0) + 0.25, DECIMAL_SCALE);
+    expect(after[1]).toBeCloseTo((before[1] ?? 0) - 0.25, DECIMAL_SCALE);
+  });
+
+  test("does nothing where the edge and the track are not both on the vertex", function () {
+    const { junction, edge, track } = junctionSetup();
+
+    expect(junction.splitOff(edge, edge, new Point(1.5, 2))).toBeUndefined();
+    expect(
+      junction.splitOff(track.twin as HalfEdge, track, new Point(1.5, 2)),
+    ).toBeUndefined();
   });
 });
