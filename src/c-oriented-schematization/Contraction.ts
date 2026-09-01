@@ -259,6 +259,15 @@ class Contraction {
         );
       });
       if (travels) return false;
+      // Reaching an edge's far end or past it hands the copy to the vertex there, or
+      // carries it out over ground the edge already covers. Turned away before the
+      // extension is considered: an edge leading the way and another pointing back
+      // along the heading can hold at once, and travelling wins.
+      const overruns = others.some((edge) => {
+        const angle = edge.getAngle();
+        return typeof angle === "number" && isSameAngle(angle, along);
+      });
+      if (overruns) return true;
       // Out along the extension of an edge, which the move reaches after with a new
       // piece of boundary. It has nowhere to put one where a vertex already sits.
       return !others.some((edge) => {
