@@ -106,20 +106,23 @@ class HalfEdge {
     do {
       if (visited.has(currentEdge) && currentEdge !== initialEdge) {
         throw new Error(
-          `Cycle is broken or not simple: revisited edge before completing cycle.
-          Current edge: ${currentEdge.uuid} (initial: ${initialEdge.uuid})`,
+          `Ring is broken or not simple: revisited edge ${currentEdge.uuid} before returning to ${initialEdge.uuid}.`,
         );
       }
       visited.add(currentEdge);
       halfEdges.push(currentEdge);
       if (forwards) {
         if (!currentEdge.next) {
-          throw new Error("Cycle is broken (forwards): missing next pointer");
+          throw new Error(
+            `Ring is broken: edge ${currentEdge.uuid} has no next pointer.`,
+          );
         }
         currentEdge = currentEdge.next;
       } else {
         if (!currentEdge.prev) {
-          throw new Error("Cycle is broken (backwards): missing prev pointer");
+          throw new Error(
+            `Ring is broken: edge ${currentEdge.uuid} has no prev pointer.`,
+          );
         }
         currentEdge = currentEdge.prev;
       }
@@ -213,13 +216,10 @@ class HalfEdge {
     // Also remove the twin if it exists
     if (this.twin) {
       this.twin.tail.removeIncidentEdge(this.twin);
-      if (this.twin.face?.outerRing)
-        this.twin.face.outerRing.removeInnerEdge(this.twin);
       this.dcel?.removeHalfEdge(this.twin);
     }
 
     this.tail.removeIncidentEdge(this);
-    if (this.face?.outerRing) this.face.outerRing.removeInnerEdge(this);
     this.dcel?.removeHalfEdge(this);
   }
 

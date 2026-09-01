@@ -78,6 +78,31 @@ class Face {
   }
 
   /**
+   * Gets the rings bounding the face: the one it is enclosed by, followed by the one
+   * around each of its holes. Only the first is reachable through the face's own
+   * edge, which is why a check of the face cycles alone leaves the holes unvisited.
+   * @param counterclockwise Whether to walk the rings counterclockwise.
+   * @returns One array of {@link HalfEdge}s per ring.
+   */
+  getRings(
+    counterclockwise: boolean = true,
+    visited = new Set<Face>(),
+  ): HalfEdge[][] {
+    if (visited.has(this)) return [];
+    visited.add(this);
+
+    const outerRing = this.getEdges(counterclockwise);
+    return [
+      ...(outerRing.length ? [outerRing] : []),
+      ...this.innerEdges.flatMap((edge) => [
+        edge.getCycle(counterclockwise),
+        // A hole can enclose holes of its own, which bound this face just as much.
+        ...(edge.face?.getRings(counterclockwise, visited).slice(1) ?? []),
+      ]),
+    ];
+  }
+
+  /**
    * Remove the face's inner edge.
    * @param the {@link HalfEdge} to be removed from the face's inner edges
    * @returns the face's remaining inner edges

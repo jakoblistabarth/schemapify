@@ -351,6 +351,11 @@ class Dcel {
    * @returns The remaining {@link HalfEdge}s in the DCEL.
    */
   removeHalfEdge(edge: HalfEdge) {
+    // Given up here rather than by whoever removes the edge: this is the one way out
+    // of the Dcel, so a face cannot be left holding a gone edge as the start of one
+    // of its holes, whichever path removed it.
+    if (edge.face?.outerRing) edge.face.outerRing.removeInnerEdge(edge);
+
     const head = edge.head;
     if (!head) return this.halfEdges;
 
@@ -620,16 +625,16 @@ class Dcel {
                 face.outerRing &&
                 !faces.map(({ id }) => id).includes(face.outerRing?.id)),
           )
-          .map((face) => {
-            const outerRing = this.getRingCoordinates(face.edge);
-            const innerRings = this.getInnerRings(face);
-            const rings = [outerRing, ...innerRings];
-            return new Polygon(
-              rings.map(
-                (ring) => new Ring(ring.map(([x, y]) => new Point(x, y))),
+          .map(
+            (face) =>
+              new Polygon(
+                face
+                  .getRings()
+                  .map(
+                    (ring) => new Ring(ring.map(({ tail }) => tail.toPoint())),
+                  ),
               ),
-            );
-          });
+          );
 
         const properties = this.featureProperties?.at(featureId);
 
@@ -643,60 +648,6 @@ class Dcel {
     );
 
     return new Subdivision(multiPolygons);
-  }
-
-  /**
-   * Walk a ring and collect its tail coordinates.
-   *
-   * A face whose `edge` was detached from its ring leads into a cycle that
-   * never returns to the start, which without the guard exhausts the heap
-   * rather than reporting the broken topology.
-   * @param edge the {@link HalfEdge} to start the walk at
-   * @returns one coordinate pair per {@link HalfEdge} of the ring
-   * @throws if the ring revisits an edge before closing, or is missing a `next`
-   */
-  private getRingCoordinates(edge: HalfEdge): [number, number][] {
-    const coordinates: [number, number][] = [];
-    const startEdge = edge;
-    const visited = new Set<HalfEdge>();
-    do {
-      if (visited.has(edge))
-        throw new Error(
-          `Ring is broken or not simple: revisited edge ${edge.uuid} before returning to ${startEdge.uuid}.`,
-        );
-      visited.add(edge);
-      coordinates.push([edge.tail.x, edge.tail.y]);
-      if (!edge.next)
-        throw new Error(
-          `Ring is broken: edge ${edge.uuid} has no next pointer.`,
-        );
-      edge = edge.next;
-    } while (edge !== startEdge);
-    return coordinates;
-  }
-
-  /**
-   * Get the coordinates of a face's inner rings, and of any rings nested
-   * within those.
-   *
-   * `visited` guards against an inner edge leading back to a face already
-   * seen. Degenerate input can produce such a cycle, which would otherwise
-   * recurse until the stack overflows.
-   * @param face the face whose inner rings to collect
-   * @param visited the faces already collected, used to break cycles
-   * @returns one coordinate ring per hole
-   */
-  private getInnerRings(
-    face: Face,
-    visited = new Set<Face>(),
-  ): [number, number][][] {
-    if (visited.has(face)) return [];
-    visited.add(face);
-
-    return face.innerEdges.flatMap((innerEdge) => [
-      this.getRingCoordinates(innerEdge),
-      ...(innerEdge.face ? this.getInnerRings(innerEdge.face, visited) : []),
-    ]);
   }
 
   /**
