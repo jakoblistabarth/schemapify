@@ -130,6 +130,18 @@ class Configuration {
   }
 
   /**
+   * Gets the inner edge as it leaves the specified one of its endpoints, so that its
+   * direction can be compared with the other edges leaving there.
+   * @param vertex One of the inner edge's endpoints.
+   * @returns The {@link HalfEdge} pointing away from the vertex.
+   */
+  private getOutgoingInnerEdge(vertex: Vertex) {
+    return vertex === this.innerEdge.tail
+      ? this.innerEdge
+      : this.innerEdge.twin;
+  }
+
+  /**
    * Gets the track a junction on the inner edge travels along, which is the edge it
    * heads towards as the inner edge moves.
    * @param vertex The junction the inner edge meets.
@@ -153,12 +165,26 @@ class Configuration {
     if (!innerEdgeVector) return;
     // The side the inner edge moves towards, as the compensation's height measures it.
     const normal = innerEdgeVector.getNormal(type === ContractionType.N);
-    return vertex.edges.find((edge) => {
+    const leading = vertex.edges.filter((edge) => {
       if (edge === this.innerEdge || edge === this.innerEdge.twin) return false;
       // Measured on the edge's direction rather than on the edge: an edge lying along
       // the inner edge points nowhere the move is going, however long it is.
       const direction = edge.getVector()?.unitVector;
       return direction ? direction.dot(normal) > EPSILON : false;
+    });
+    if (leading.length < 2) return leading[0];
+
+    // Both of the junction's other edges lead the way, which is the junction of type C
+    // moved towards them. The vertex follows the one departing least from the inner
+    // edge, the two of them enclosing the face the contraction eats into.
+    const inner = this.getOutgoingInnerEdge(vertex)?.getVector()?.unitVector;
+    if (!inner) return leading[0];
+    return leading.reduce((closest, edge) => {
+      const [a, b] = [edge, closest].map(
+        (candidate) =>
+          candidate.getVector()?.unitVector.dot(inner) ?? -Infinity,
+      );
+      return a > b ? edge : closest;
     });
   }
 

@@ -35,6 +35,9 @@ type BlockingContext = {
 const isOneOf = (edge: HalfEdge, candidates: HalfEdge[]) =>
   candidates.some((candidate) => candidate === edge || candidate === edge.twin);
 
+/** The share of its own scale below which a contraction is not going anywhere. */
+const VANISHING = 1e-9;
+
 class Contraction {
   type: ContractionType;
   configuration: Configuration;
@@ -85,6 +88,12 @@ class Contraction {
    */
   get isFeasible() {
     if (!this.point) return false;
+    // Taken against the inner edge's length, which the area scales with the square of:
+    // a contraction of a few square millimetres is the move standing still, and being
+    // the smallest one going it is picked before any that would get somewhere. Well
+    // below EPSILON, which at this scale would turn away moves that do get somewhere.
+    const length = this.configuration.innerEdge.getLength();
+    if (!length || this.area <= VANISHING * length * length) return false;
     return this.area > 0 &&
       this.blockingNumber === 0 &&
       !this.hasUnhandledJunction &&
@@ -93,6 +102,34 @@ class Contraction {
       !this.endsAtJunction
       ? true
       : false;
+  }
+
+  /**
+   * The edges leaving a junction on the inner edge which bound none of the faces the
+   * configuration does. They stand in the move's way just as the boundary does, but
+   * the face cycle never reaches them, so they are collected on their own.
+   * @returns An array of {@link HalfEdge}s.
+   */
+  private get junctionEdges() {
+    const { innerEdge } = this.configuration;
+    return innerEdge.endpoints
+      .filter((vertex) => vertex.degree > 2)
+      .flatMap((vertex) => {
+        // The edge the junction travels along carries the move rather than standing in
+        // its way, and so does the boundary, which is counted on its own.
+        const track = this.configuration.getJunctionTrackEdge(
+          vertex,
+          this.type,
+        );
+        const spared = [innerEdge, innerEdge.twin, track, track?.twin];
+        return vertex.edges.filter(
+          (edge) =>
+            !spared.includes(edge) &&
+            !this.configuration.x_.some(
+              (boundary) => boundary === edge || boundary === edge.twin,
+            ),
+        );
+      });
   }
 
   /**
@@ -483,7 +520,7 @@ class Contraction {
     const context = this.getBlockingContext(configurations);
 
     if (context)
-      x_.forEach((boundaryEdge) => {
+      [...x_, ...this.junctionEdges].forEach((boundaryEdge) => {
         if (this.isBlockedByEdge(boundaryEdge, context)) {
           blockingNumber++;
         }
@@ -628,7 +665,13 @@ class Contraction {
     if (disc < -EPSILON * aLength * aLength) return;
     const sqrtD = Math.sqrt(Math.max(disc, 0));
 
-    return [(-aLength + sqrtD) / (2 * c), (-aLength - sqrtD) / (2 * c)]
+    // Both heights are taken from the sum rather than one of them from the difference:
+    // tracks running nearly parallel leave the quadratic a leading coefficient close
+    // to zero, where the difference cancels away nearly every digit it has.
+    const sum = -(aLength + (aLength < 0 ? -sqrtD : sqrtD)) / 2;
+    if (!sum) return;
+    const heights = [sum / c, -contractionArea / sum];
+    return heights
       .filter((h) => h > EPSILON && aLength + (kHead - kTail) * h >= -EPSILON) // valid, before track apex
       .sort((x, y) => x - y)[0];
   }
