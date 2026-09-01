@@ -243,11 +243,11 @@ class Vertex extends Point {
           if (e.twin.next) e.twin.next.prev = e.twin.prev;
           if (e.twin.face?.edge === e.twin)
             e.twin.face.edge = e.twin.next ?? e.twin.prev;
-          existing.removeIncidentEdge(e.twin);
-          this.dcel.removeHalfEdge(e.twin);
         }
-        existing.removeIncidentEdge(e);
-        this.dcel.removeHalfEdge(e);
+        // Removed through the half edge itself, which also gives up the edge's
+        // registration as the inner edge of an enclosing face. Left registered, it
+        // is walked as the start of that face's hole long after it is gone.
+        e.remove();
       });
 
       return existing;
