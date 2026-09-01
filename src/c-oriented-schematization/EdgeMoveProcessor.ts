@@ -1,6 +1,7 @@
 import Dcel from "../Dcel/Dcel";
 // import Processor from "../Schematization/Processor";
 import Configuration from "./Configuration";
+import Contraction from "./Contraction";
 import FaceFaceBoundaryList from "./FaceFaceBoundaryList";
 
 //TO-DO: make this class more in line with the other processors?
@@ -20,15 +21,25 @@ class EdgeMoveProcessor {
   // TO-DO: the return type here is wrong,
   // the edge move is perhaps the combination of a processor and a generator?
   public run(input: Dcel) {
-    const pair = this.faceFaceBoundaryList.getMinimalConfigurationPair(
+    // A pair whose move declines leaves the Dcel as it found it, so the next one is
+    // taken in its place. Only a move which gives up half way is a defect, and one
+    // reports that by throwing rather than by declining.
+    const passedOver = new Set<Contraction>();
+    let pair = this.faceFaceBoundaryList.getMinimalConfigurationPair(
       this.configurations,
+      passedOver,
     );
-    // Contractions and configurations are updated as side effects in doEdgeMove()
-    const edgeMove = pair?.doEdgeMove(
-      input,
-      this.contractions,
-      this.configurations,
-    );
+    let edgeMove;
+    while (pair) {
+      // Contractions and configurations are updated as side effects in doEdgeMove()
+      edgeMove = pair.doEdgeMove(input, this.contractions, this.configurations);
+      if (edgeMove) break;
+      passedOver.add(pair.contraction);
+      pair = this.faceFaceBoundaryList.getMinimalConfigurationPair(
+        this.configurations,
+        passedOver,
+      );
+    }
     return {
       // Without a feasible pair nothing is left to simplify, which callers need to
       // know before they treat the untouched Dcel as the result of a move. A pair

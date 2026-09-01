@@ -376,7 +376,16 @@ class ConfigurationPair {
       ? this.doSharedEdgeMove(contractionEdge, compensationEdge)
       : this.doRegularEdgeMove(contractionEdge, compensationEdge);
 
-    if (!movedPositions) return;
+    // The move declined before it touched the Dcel, so the blocking numbers are put
+    // back as they were and the pair can be passed over for another.
+    if (!movedPositions) {
+      contractions.forEach((contractions) => {
+        Object.values(contractions).forEach((d) =>
+          d?.incrementBlockingNumber(x1x2Edges, configurations),
+        );
+      });
+      return;
+    }
 
     const remainingEdges = movedPositions.reduce(
       (acc: HalfEdge[], pos: Point) => {

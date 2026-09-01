@@ -19,7 +19,10 @@ class FaceFaceBoundary {
    * @param configurations The current configuration map, containing all configurations of the current DCEL state.
    * @returns A tuple of two complementary, feasible contractions, posing the minimal configuration pair of a {@link FaceFaceBoundary}.
    */
-  getMinimalConfigurationPair(configurations: Map<string, Configuration>) {
+  getMinimalConfigurationPair(
+    configurations: Map<string, Configuration>,
+    passedOver: Set<Contraction> = new Set(),
+  ) {
     /** A contraction paired with its area, which the sorts below would otherwise re-derive per comparison. */
     type Candidate = { contraction: Contraction; area: number };
 
@@ -30,7 +33,7 @@ class FaceFaceBoundary {
             ? configurations.get(edge.coordKey)
             : undefined;
           const contraction = configuration?.[type];
-          if (contraction?.isFeasible)
+          if (contraction?.isFeasible && !passedOver.has(contraction))
             candidates.push({ contraction, area: contraction.area });
           return candidates;
         }, [])
