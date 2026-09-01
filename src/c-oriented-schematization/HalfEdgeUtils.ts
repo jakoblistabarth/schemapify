@@ -1,6 +1,7 @@
 import HalfEdge from "../Dcel/HalfEdge";
 import { EPSILON, TWO_PI } from "../geometry/constants";
 import C from "./C";
+import { isSameAngle } from "../utilities";
 import Sector from "./Sector";
 
 /**
@@ -128,10 +129,5 @@ export const isAlignedToC = (halfEdge: HalfEdge, c: C) => {
   if (angle === undefined)
     throw "Angle is undefined. Cannot determine if edge is aligned to C.";
   const validAngles = c.angles;
-  return validAngles.some((validAngle) => {
-    // Compared the short way around: an angle just short of a full turn is a hair
-    // away from zero, and a whole turn away from it as the difference alone reads.
-    const difference = Math.abs(angle - validAngle) % TWO_PI;
-    return Math.min(difference, TWO_PI - difference) < EPSILON;
-  });
+  return validAngles.some((validAngle) => isSameAngle(angle, validAngle));
 };

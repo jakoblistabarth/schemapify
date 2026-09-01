@@ -193,12 +193,15 @@ class Configuration {
     const edge2 = crawlArray(vertex.edges, idx, +2);
 
     if (edge1.getAngle() === edge2.twin?.getAngle()) return Junction.A;
+
     const normal = this.innerEdge.getVector()?.getNormal();
     if (!normal) return;
 
     const o1 = edge1.getVector()?.dot(normal);
     const o2 = edge2.getVector()?.dot(normal);
-    if (!o1 || !o2) return;
+    // An edge square to the normal lies along the inner edge's own line, which is
+    // neither side of it, so it counts among the ones on the same side.
+    if (o1 === undefined || o2 === undefined) return;
     if ((o1 > 0 && o2 < 0) || (o1 < 0 && o2 > 0)) return Junction.B;
     else return Junction.C;
   }

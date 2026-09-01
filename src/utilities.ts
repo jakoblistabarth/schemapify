@@ -4,7 +4,7 @@ import Polygon from "./geometry/Polygon";
 import Ring from "./geometry/Ring";
 import Subdivision from "./geometry/Subdivision";
 import Vector2D from "./geometry/Vector2D";
-import { TWO_PI } from "./geometry/constants";
+import { EPSILON, TWO_PI } from "./geometry/constants";
 
 export async function getJSON(path: string) {
   const response = await fetch(path);
@@ -153,6 +153,21 @@ export const geoJsonToGeometry = (
  */
 export const normalizeAngle = (a: number) => {
   return ((a % TWO_PI) + TWO_PI) % TWO_PI;
+};
+
+/**
+ * Determines whether two angles point in the same direction.
+ *
+ * Compared the short way around and with a tolerance: an angle derived from
+ * coordinates lands a hair off the direction those coordinates were built from, and a
+ * hair under a whole turn is a hair from zero rather than a whole turn away from it.
+ * @param a the first angle in radians
+ * @param b the second angle in radians
+ * @returns whether the two point the same way
+ */
+export const isSameAngle = (a: number, b: number) => {
+  const difference = Math.abs(normalizeAngle(a) - normalizeAngle(b));
+  return Math.min(difference, TWO_PI - difference) < EPSILON;
 };
 
 /**
