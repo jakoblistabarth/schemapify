@@ -155,8 +155,10 @@ class Configuration {
     const normal = innerEdgeVector.getNormal(type === ContractionType.N);
     return vertex.edges.find((edge) => {
       if (edge === this.innerEdge || edge === this.innerEdge.twin) return false;
-      const vector = edge.getVector();
-      return vector ? vector.dot(normal) > EPSILON : false;
+      // Measured on the edge's direction rather than on the edge: an edge lying along
+      // the inner edge points nowhere the move is going, however long it is.
+      const direction = edge.getVector()?.unitVector;
+      return direction ? direction.dot(normal) > EPSILON : false;
     });
   }
 
@@ -194,11 +196,11 @@ class Configuration {
 
     if (edge1.getAngle() === edge2.twin?.getAngle()) return Junction.A;
 
-    const normal = this.innerEdge.getVector()?.getNormal();
+    const normal = this.innerEdge.getVector()?.unitVector.getNormal();
     if (!normal) return;
 
-    const o1 = edge1.getVector()?.dot(normal);
-    const o2 = edge2.getVector()?.dot(normal);
+    const o1 = edge1.getVector()?.unitVector.dot(normal);
+    const o2 = edge2.getVector()?.unitVector.dot(normal);
     // An edge square to the normal lies along the inner edge's own line, which is
     // neither side of it, so it counts among the ones on the same side.
     if (o1 === undefined || o2 === undefined) return;
