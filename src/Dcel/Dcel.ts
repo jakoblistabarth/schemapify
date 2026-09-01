@@ -354,7 +354,25 @@ class Dcel {
     // Given up here rather than by whoever removes the edge: this is the one way out
     // of the Dcel, so a face cannot be left holding a gone edge as the start of one
     // of its holes, whichever path removed it.
-    if (edge.face?.outerRing) edge.face.outerRing.removeInnerEdge(edge);
+    const enclosing = edge.face?.outerRing;
+    if (enclosing) {
+      // A hole is reached through one of its edges, so a hole which outlives the one
+      // it is reached through is handed over to the next edge along it.
+      const following = edge.next;
+      // Only for an edge which has collapsed onto itself: a hole reached through one
+      // is reached through nothing, while its ring goes on. Edges removed with a
+      // length to them are replaced by whoever removes them.
+      const outlives =
+        !!edge.head &&
+        edge.tail.equals(edge.head) &&
+        enclosing.innerEdges.includes(edge) &&
+        following &&
+        following !== edge &&
+        following !== edge.twin &&
+        following.face === edge.face;
+      if (outlives && following) enclosing.replaceInnerEdge(edge, following);
+      else enclosing.removeInnerEdge(edge);
+    }
 
     const head = edge.head;
     if (!head) return this.halfEdges;

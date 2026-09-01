@@ -55,3 +55,35 @@ describe("Every step of a schematization can be turned into a subdivision", func
     },
   );
 });
+
+describe("A hole outlives the edge it is reached through", function () {
+  /**
+   * Counts the rings of every polygon, so a hole going missing shows up.
+   * @param dcel The {@link Dcel} to count in.
+   * @returns One count per polygon.
+   */
+  const ringCounts = (dcel: Dcel) =>
+    dcel
+      .toSubdivision()
+      .multiPolygons.flatMap((multiPolygon) =>
+        multiPolygon.polygons.map((polygon) => polygon.rings.length),
+      );
+
+  test("keeps the lakes of edge-cases under C(4)", function () {
+    // Both lakes used to be lost, at the point where the edge each was reached
+    // through collapsed onto itself and was removed with the hole still there.
+    const json = JSON.parse(
+      readFileSync(resolve("test/data/shapes/edge-cases.json"), "utf8"),
+    );
+    const schematization = new CSchematization({
+      ...style,
+      c: new CRegular(4),
+    });
+    const before = ringCounts(Dcel.fromGeoJSON(json));
+
+    const result = schematization.run(Dcel.fromGeoJSON(json));
+
+    expect(before).toContain(3);
+    expect(ringCounts(result)).toEqual(before);
+  });
+});

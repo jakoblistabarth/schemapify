@@ -4,6 +4,7 @@ import {
   getAssociatedAngles,
   getAssociatedSector,
   isAligned,
+  isAlignedToC,
 } from "@/src/c-oriented-schematization/HalfEdgeUtils";
 import { style } from "@/src/c-oriented-schematization/schematization.style";
 import Sector from "@/src/c-oriented-schematization/Sector";
@@ -306,5 +307,34 @@ describe("The sectors of a C shifted by a beta", function () {
     expect(getAssociatedSector(edge, c.sectors)).toEqual([
       c.sectors[c.sectors.length - 1],
     ]);
+  });
+});
+
+describe("isAlignedToC() compares the short way around", function () {
+  /**
+   * Builds a HalfEdge from the origin to the given point.
+   * @param x The head's x coordinate.
+   * @param y The head's y coordinate.
+   * @returns The {@link HalfEdge} between the two.
+   */
+  const edgeTo = (x: number, y: number) => {
+    const dcel = new Dcel();
+    const [tail, head] = [dcel.addVertex(0, 0), dcel.addVertex(x, y)];
+    const edge = dcel.addHalfEdge(tail, head);
+    edge.twin = dcel.addHalfEdge(head, tail);
+    return edge;
+  };
+
+  test("holds for an edge just short of a whole turn", function () {
+    // A horizontal edge whose angle comes out as a hair under 2π is a hair from
+    // zero, and a whole turn from it as the difference alone reads.
+    const edge = edgeTo(1, 0);
+    edge.getAngle = () => TWO_PI - 1e-11;
+
+    expect(isAlignedToC(edge, new CRegular(2))).toBe(true);
+  });
+
+  test("does not hold for an edge between two directions", function () {
+    expect(isAlignedToC(edgeTo(2, 1), new CRegular(2))).toBe(false);
   });
 });
