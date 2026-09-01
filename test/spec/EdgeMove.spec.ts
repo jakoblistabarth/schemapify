@@ -517,9 +517,10 @@ describe("EdgeMoveProcessor reports a missing pair apart from a failed move", fu
 describe("Edge moves over a junction of type A", function () {
   // The vertex slides along the two edges it does not belong to, which run in
   // opposite directions along one line, so these shapes simplify a step further
-  // than they do while every junction is refused.
+  // than they do while every junction is refused. The counts are where each shape
+  // settles, running out of feasible pairs rather than stopping short.
   test.each([
-    ["unaligned-deviating.json", 2, 15],
+    ["unaligned-deviating.json", 2, 16],
     ["aligned-deviating.json", 4, 19],
     ["edge-cases.json", 2, 43],
   ])(

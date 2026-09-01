@@ -309,7 +309,6 @@ class Contraction {
         : [[next?.head, normalizeAngle(innerAngle + Math.PI), tail]];
     return ends.some(([vertex, onward, other]) => {
       if (!vertex || !this.point.equals(vertex)) return false;
-      if (vertex.degree > 2) return true;
       if (vanishes || !other) return false;
       // Both endpoints landing on the vertex collapses the inner edge there,
       // leaving nothing behind which could double the boundary back.

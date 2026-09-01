@@ -362,7 +362,20 @@ class Vertex extends Point {
    * @param y A number, indicating the new y position of the {@link Vertex}.
    * @returns The moved {@link Vertex}.
    */
-  moveTo(x: number, y: number) {
+  moveTo(targetX: number, targetY: number) {
+    // Coming to rest a hair off a vertex it shares an edge with leaves a piece of
+    // boundary too short to carry a direction of its own. Snapped onto it, the two
+    // merge as they would have had the arithmetic come out even.
+    // Measured against the edge's own length, which is what "reaches its far end"
+    // means: an absolute distance would be spent on rounding alone at coordinates
+    // in the millions.
+    const landedOn = this.edges.find((edge) => {
+      const { head } = edge;
+      const length = edge.getLength();
+      if (!head || head === this || !length) return false;
+      return Math.hypot(head.x - targetX, head.y - targetY) < EPSILON * length;
+    })?.head;
+    const [x, y] = landedOn ? landedOn.xy : [targetX, targetY];
     if (this.x === x && this.y === y) return this;
     // If a vertex already exists at the target position, merge into it by
     // reassigning all incident edges to the existing vertex, then removing
