@@ -91,11 +91,10 @@ describe("Schematizing projected geodata", { timeout: 60_000 }, function () {
       const { result, originalArea } = await schematizeGermany(orientations);
 
       // Relative, since an area of 3.4e11 accumulates rounding over a hundred odd
-      // moves which no absolute tolerance can be stated for. Under C(3) a single
-      // coupled move accounts for nearly all of what is left, see issue #35.
+      // moves which no absolute tolerance can be stated for.
       expect(
         Math.abs(result.getArea() - originalArea) / originalArea,
-      ).toBeLessThan(2e-8);
+      ).toBeLessThan(1e-8);
     },
   );
 

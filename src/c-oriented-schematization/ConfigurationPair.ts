@@ -266,10 +266,13 @@ class ConfigurationPair {
             const discriminant = linear * linear - 4 * quadratic * constant;
             if (discriminant < 0) return;
             const root = Math.sqrt(discriminant);
-            return [
-              (-linear + root) / (2 * quadratic),
-              (-linear - root) / (2 * quadratic),
-            ].find(isInUnitRange);
+            // Both roots are taken from the sum rather than one of them from the
+            // difference: two swept regions which barely change shape leave a leading
+            // coefficient close to zero, and the difference then cancels away nearly
+            // every digit the root has.
+            const sum = -(linear + (linear < 0 ? -root : root)) / 2;
+            if (!sum) return;
+            return [sum / quadratic, constant / sum].find(isInUnitRange);
           })();
     if (u === undefined || !Number.isFinite(u) || !isInUnitRange(u)) return;
 
