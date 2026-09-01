@@ -226,11 +226,20 @@ class Vertex extends Point {
       const left = incident.face;
       incident.face = following.face;
       // A face reached through a piece which has changed sides has to be reached
-      // through one of the edges it kept instead.
-      if (left?.edge === incident)
+      // through one of the edges it kept instead. Only an edge on the ring enclosing
+      // the face will do: reached through the ring around one of its holes it reports
+      // the hole's area as its own. The holes are kept as the half edges facing away
+      // from the face, so it is their twins which run along its side of the ring.
+      if (left?.edge === incident) {
+        const holes = new Set(
+          left.innerEdges.flatMap((hole) => hole.twin?.getCycle() ?? []),
+        );
         left.edge = this.dcel
           .getHalfEdges()
-          .find((candidate) => candidate.face === left);
+          .find(
+            (candidate) => candidate.face === left && !holes.has(candidate),
+          );
+      }
     });
 
     return split;
