@@ -92,7 +92,7 @@ describe("Schematizing projected geodata", { timeout: 60_000 }, function () {
 
       // Relative, since an area of 3.4e11 accumulates rounding over a hundred odd
       // moves which no absolute tolerance can be stated for. Under C(3) a single
-      // regular move, meeting no junction, accounts for nearly all of what is left.
+      // coupled move accounts for nearly all of what is left, see issue #35.
       expect(
         Math.abs(result.getArea() - originalArea) / originalArea,
       ).toBeLessThan(2e-8);
