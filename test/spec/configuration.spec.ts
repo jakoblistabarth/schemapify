@@ -492,3 +492,58 @@ describe("getJunctionType() determines the type of a junction in respect to the 
     expect(c?.getJunctionType(junction2)).toBe(Junction.A);
   });
 });
+
+describe("A contraction of a configuration meeting a junction", function () {
+  let dcel: Dcel;
+  beforeEach(function () {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/shapes/edge-move-test.json"),
+        "utf8",
+      ),
+    );
+    dcel = Dcel.fromGeoJSON(json);
+  });
+
+  /**
+   * Builds the configurations and returns the one on the given half edge.
+   * @param index The index of the half edge in the {@link Dcel}.
+   * @returns The {@link Configuration} on that half edge.
+   */
+  const configurationOn = (index: number) => {
+    const edge = dcel.getHalfEdges()[index];
+    return new ConfigurationGenerator().run(dcel).get(coordKeyOr(edge));
+  };
+
+  test("is feasible where the junction is of type A", function () {
+    // The two edges the moving vertex does not belong to run in opposite directions
+    // along one line, so it slides along them and no copy of it is left behind.
+    const configuration = configurationOn(2);
+    const junction = dcel.findVertex(2, 0);
+    if (!junction || !configuration) throw new Error("expected a junction");
+    expect(configuration.getJunctionType(junction)).toBe(Junction.A);
+
+    const contractions = [
+      configuration[ContractionType.P],
+      configuration[ContractionType.N],
+    ].filter((contraction) => contraction !== undefined);
+
+    expect(contractions.length).toBeGreaterThan(0);
+    expect(contractions.some(({ isFeasible }) => isFeasible)).toBe(true);
+  });
+
+  test("is not feasible where the junction is of type B", function () {
+    // Type B has the vertex leave a copy of itself behind, which the move cannot do.
+    const configuration = configurationOn(6);
+    const junction = dcel.findVertex(1, 2);
+    if (!junction || !configuration) throw new Error("expected a junction");
+    expect(configuration.getJunctionType(junction)).toBe(Junction.B);
+
+    const contractions = [
+      configuration[ContractionType.P],
+      configuration[ContractionType.N],
+    ].filter((contraction) => contraction !== undefined);
+
+    expect(contractions.every(({ isFeasible }) => !isFeasible)).toBe(true);
+  });
+});

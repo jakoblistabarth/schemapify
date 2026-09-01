@@ -513,3 +513,33 @@ describe("EdgeMoveProcessor reports a missing pair apart from a failed move", fu
     expect(hasMoved).toBe(true);
   });
 });
+
+describe("Edge moves over a junction of type A", function () {
+  // The vertex slides along the two edges it does not belong to, which run in
+  // opposite directions along one line, so these shapes simplify a step further
+  // than they do while every junction is refused.
+  test.each([
+    ["unaligned-deviating.json", 2, 15],
+    ["aligned-deviating.json", 4, 19],
+    ["edge-cases.json", 2, 43],
+  ])(
+    "simplify %s under C(%i) down to %i edges",
+    function (shape, orientations, edges) {
+      const json = JSON.parse(
+        fs.readFileSync(path.resolve("test/data/shapes", shape), "utf8"),
+      );
+      const schematization = new CSchematization({
+        ...style,
+        c: new CRegular(orientations),
+      });
+      const originalArea = Dcel.fromGeoJSON(json).getArea();
+
+      const result = schematization.run(Dcel.fromGeoJSON(json));
+
+      expect(result.halfEdges.size / 2).toBeLessThanOrEqual(edges);
+      expect(result.getArea()).toBeCloseTo(originalArea, DECIMAL_SCALE);
+      // Walking the rings reaches the holes a check of the face cycles would miss.
+      expect(() => result.toSubdivision()).not.toThrow();
+    },
+  );
+});

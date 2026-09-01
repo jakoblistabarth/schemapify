@@ -7,7 +7,7 @@ import Point from "../geometry/Point";
 import Polygon from "../geometry/Polygon";
 import Ring from "../geometry/Ring";
 import Vector2D from "../geometry/Vector2D";
-import Configuration, { OuterEdge } from "./Configuration";
+import Configuration, { Junction, OuterEdge } from "./Configuration";
 import { ContractionType } from "./ContractionType";
 
 /**
@@ -85,12 +85,30 @@ class Contraction {
     if (!this.point) return false;
     return this.area > 0 &&
       this.blockingNumber === 0 &&
-      //TO-DO: remove these conditions, as soon as edge moves
-      // for junctions (degree-3) are implemented
-      !this.configuration.hasJunction &&
+      !this.hasUnhandledJunction &&
+      //TO-DO: remove this condition, as soon as edge moves onto junctions
+      // (degree-3) are implemented
       !this.endsAtJunction
       ? true
       : false;
+  }
+
+  /**
+   * Determines whether the inner edge meets a junction the edge move cannot carry out.
+   *
+   * At a junction of type A the two edges the moving vertex does not belong to run in
+   * opposite directions along one line — the very line the configuration takes its
+   * track from — so the vertex slides along them and the faces on their far side keep
+   * their area. The other types have the vertex leave a copy of itself behind
+   * (Buchin et al. 2016), which is not implemented yet.
+   * @returns A boolean, indicating whether a junction stands in the move's way.
+   */
+  private get hasUnhandledJunction() {
+    return this.configuration.innerEdge.endpoints.some(
+      (vertex) =>
+        vertex.degree > 2 &&
+        this.configuration.getJunctionType(vertex) !== Junction.A,
+    );
   }
 
   /**
