@@ -1,4 +1,3 @@
-import { degreesToRadians } from "@/src/utilities";
 import type C from "./C";
 import CIrregular from "./CIrregular";
 import CRegular from "./CRegular";
@@ -11,7 +10,7 @@ export type CConfig =
   | {
       type: "regular";
       orientations: number;
-      /** The rotation of C, in degrees. */
+      /** The rotation of C, in radians. */
       beta: number;
     }
   | {
@@ -27,5 +26,5 @@ export type CConfig =
  */
 export const createC = (config: CConfig): C =>
   config.type === "regular"
-    ? new CRegular(config.orientations, degreesToRadians(config.beta))
+    ? new CRegular(config.orientations, config.beta)
     : new CIrregular(config.angles);

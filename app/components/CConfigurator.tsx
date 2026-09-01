@@ -21,27 +21,31 @@ const CConfigurator: FC<Props> = () => {
   const [orientations, setOrientations] = useState<number>(
     cConfig?.type === "regular" ? cConfig.orientations : 4,
   );
-  const [beta, setBeta] = useState<number>(
-    cConfig?.type === "regular" ? cConfig.beta : 0,
+  const [betaDegrees, setBetaDegrees] = useState<number>(
+    cConfig?.type === "regular" ? radiansToDegrees(cConfig.beta) : 0,
   );
   const [angles, setAngles] = useState<string>(
     cConfig?.type === "irregular"
       ? cConfig.angles.map((a) => radiansToDegrees(a)).join(", ")
       : "0, 30, 90, 150",
   );
-  const betaMax = type === "regular" ? 180 / Math.max(orientations, 2) : 180;
-  const normalizedBeta = Math.min(beta, betaMax);
+  const betaMaxDegrees =
+    type === "regular" ? 180 / Math.max(orientations, 2) : 180;
+  const normalizedBetaDegrees = Math.min(betaDegrees, betaMaxDegrees);
 
   const c = useMemo<C>(() => {
     if (type === "regular") {
-      return new CRegular(orientations, degreesToRadians(normalizedBeta));
+      return new CRegular(
+        orientations,
+        degreesToRadians(normalizedBetaDegrees),
+      );
     } else {
       const angleValues = angles
         .split(",")
         .map((a) => degreesToRadians(parseFloat(a.trim())));
       return new CIrregular(angleValues);
     }
-  }, [type, orientations, normalizedBeta, angles]);
+  }, [type, orientations, normalizedBetaDegrees, angles]);
 
   const handleStart = () => {
     const config =
@@ -49,7 +53,7 @@ const CConfigurator: FC<Props> = () => {
         ? {
             type: "regular" as const,
             orientations,
-            beta: normalizedBeta,
+            beta: degreesToRadians(normalizedBetaDegrees),
           }
         : {
             type: "irregular" as const,
@@ -142,20 +146,22 @@ const CConfigurator: FC<Props> = () => {
             <div className="flex gap-2">
               <input
                 type="number"
-                value={beta}
+                value={betaDegrees}
                 step={1}
-                max={betaMax}
+                max={betaMaxDegrees}
                 min={0}
                 onChange={(e) =>
-                  setBeta(Math.min(parseFloat(e.target.value) || 0, betaMax))
+                  setBetaDegrees(
+                    Math.min(parseFloat(e.target.value) || 0, betaMaxDegrees),
+                  )
                 }
                 className="rounded border border-gray-300 px-2 py-1 text-xs"
               />
               <Slider.Root
                 className="relative flex h-5 w-full touch-none items-center select-none"
-                onValueChange={(value) => setBeta(value[0])}
-                value={[normalizedBeta]}
-                max={betaMax}
+                onValueChange={(value) => setBetaDegrees(value[0])}
+                value={[normalizedBetaDegrees]}
+                max={betaMaxDegrees}
                 min={0}
                 step={1}
               >
