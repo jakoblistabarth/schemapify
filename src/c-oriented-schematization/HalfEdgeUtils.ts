@@ -1,5 +1,5 @@
 import HalfEdge from "../Dcel/HalfEdge";
-import { EPSILON, TWO_PI } from "../geometry/constants";
+import { TWO_PI } from "../geometry/constants";
 import C from "./C";
 import { isSameAngle } from "../utilities";
 import Sector from "./Sector";
@@ -37,13 +37,11 @@ export const getAssociatedAngles = (halfEdge: HalfEdge, sectors: Sector[]) => {
   const directions: number[] = [];
   sectors.some(function (sector) {
     // The last sector reaches past 2π, so an angle below its lower bound is measured
-    // once around before it can be compared.
+    // once around before it can be told apart from the bounds.
     const reached = angle < sector.lower ? angle + TWO_PI : angle;
-    // Compared with a tolerance: an angle derived from coordinates misses the
-    // direction it was built from by an ulp, which made aligned edges look unaligned.
-    if (Math.abs(reached - sector.lower) < EPSILON) {
+    if (isSameAngle(angle, sector.lower)) {
       return directions.push(sector.lower);
-    } else if (Math.abs(reached - sector.upper) < EPSILON) {
+    } else if (isSameAngle(angle, sector.upper)) {
       return directions.push(sector.upper);
     } else if (reached > sector.lower && reached < sector.upper) {
       return directions.push(sector.lower, sector.upper);
