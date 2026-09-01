@@ -458,6 +458,16 @@ class ConfigurationPair {
       }
     });
 
+    // A contraction takes an edge with it, so the move leaves the Dcel with fewer
+    // than it found — unless it left a copy of a junction behind, which adds one of
+    // its own and can make up the difference.
+    const leftCopyBehind =
+      this.contraction.leftCopyBehind || this.compensation.leftCopyBehind;
+    if (edgesAfterMove.size >= edgesBeforeMove.size && !leftCopyBehind)
+      throw new Error(
+        "Edge move left the Dcel with no fewer edges than it found",
+      );
+
     // Remove configurations for deleted edges
     const staleCofigurationKeys = configurations
       .entries()

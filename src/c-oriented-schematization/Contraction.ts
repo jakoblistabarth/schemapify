@@ -40,6 +40,8 @@ class Contraction {
   configuration: Configuration;
   point: Point;
   blockingNumber: number;
+  /** Whether the last move left a copy of a junction the inner edge met behind. */
+  leftCopyBehind = false;
 
   constructor(
     configuration: Configuration,
@@ -103,6 +105,7 @@ class Contraction {
    * @param head Where its head is headed.
    */
   leaveJunctionsBehind(tail: Point, head: Point) {
+    this.leftCopyBehind = false;
     const innerEdge = this.configuration.innerEdge;
     const ends: [Vertex | undefined, HalfEdge | undefined, Point][] = [
       [innerEdge.tail, innerEdge, tail],
@@ -112,7 +115,8 @@ class Contraction {
       if (!vertex || !outgoing || vertex.degree <= 2) return;
       if (this.configuration.getJunctionType(vertex) === Junction.A) return;
       const track = this.configuration.getJunctionTrackEdge(vertex, this.type);
-      if (track) vertex.splitOff(outgoing, track, landing);
+      if (track && vertex.splitOff(outgoing, track, landing))
+        this.leftCopyBehind = true;
     });
   }
 

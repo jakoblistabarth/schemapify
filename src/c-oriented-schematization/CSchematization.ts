@@ -16,6 +16,13 @@ import StaircaseGenerator from "./StaircaseGenerator";
 import StaircaseProcessor from "./StaircaseProcessor";
 import VertexClassGenerator from "./VertexClassGenerator";
 
+/**
+ * How many iterations may pass without the Dcel shedding an edge before the
+ * simplification counts as stalled. An edge move which leaves a copy of a junction
+ * behind adds an edge of its own, so a handful in a row is ordinary.
+ */
+const MAX_STAGNANT_ITERATIONS = 10;
+
 export enum LABEL {
   // TO-DO: is a default label needed?
   DEFAULT = "default",
@@ -175,6 +182,7 @@ class CSchematization extends Schematization {
     // list is built once here rather than again on every iteration.
     let faceFaceBoundaryList = new FaceFaceBoundaryListGenerator().run(dcel);
     let iteration = 0;
+    let stagnant = 0;
     while (
       maxIterations !== undefined
         ? iteration < maxIterations
@@ -216,10 +224,15 @@ class CSchematization extends Schematization {
         forSnapshots: { triggeredAt: start },
       });
 
-      // An edge move always collapses at least one edge, so a stable edge count
-      // means the move left the Dcel in an unexpected state.
-      if (dcel.halfEdges.size === edgeCountBeforeMove)
-        throw new Error("No progress made in edge move iteration " + iteration);
+      // Whether one iteration leaves the Dcel with fewer edges is the edge move's own
+      // business — one which leaves a copy of a junction behind need not. What the
+      // loop is left to watch is the simplification as a whole coming to a halt while
+      // pairs are still being found, which would otherwise run for ever.
+      stagnant = dcel.halfEdges.size < edgeCountBeforeMove ? 0 : stagnant + 1;
+      if (stagnant > MAX_STAGNANT_ITERATIONS)
+        throw new Error(
+          `Simplification stalled: ${stagnant} iterations without shedding an edge, the last of them iteration ${iteration}`,
+        );
     }
     // TO-DO: is it possible to return here a simplification function
     // which I can then use for handling simplifying e.g. with hotkeys?
