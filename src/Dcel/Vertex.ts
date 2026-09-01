@@ -246,6 +246,50 @@ class Vertex extends Point {
   }
 
   /**
+   * Hands the specified edge to a new Vertex out beyond this one, joined to it by a
+   * new edge. Where the vertex travels along no edge of its own but out along the
+   * extension of one, the boundary has to grow the piece which reaches after it.
+   * @param edge The {@link HalfEdge} which travels, leaving this vertex.
+   * @param point Where the new {@link Vertex} goes.
+   * @param destination Where the handed over edge's far end is headed.
+   * @returns The new {@link Vertex}, or nothing if it could not be placed.
+   */
+  splitOffBeyond(edge: HalfEdge, point: Point, destination: Point) {
+    const twin = edge.twin;
+    if (edge.tail !== this || !twin || this.equals(point)) return;
+    if (this.dcel.findVertex(point.x, point.y)) return;
+
+    const split = this.dcel.addVertex(point.x, point.y);
+    const outward = this.dcel.addHalfEdge(this, split);
+    const inward = this.dcel.addHalfEdge(split, this);
+    outward.twin = inward;
+    inward.twin = outward;
+    // The new edge bounds the same faces the handed over edge does, which reach it
+    // through the new vertex from here on.
+    outward.face = edge.face;
+    inward.face = twin.face;
+
+    this.removeIncidentEdge(edge);
+    edge.tail = split;
+    split.edges.push(edge);
+
+    // The handed over edge is ordered by where it is headed rather than by where it
+    // sits meanwhile, as in splitOff().
+    const heading = destination.vector.minus(split.vector);
+    const headed =
+      heading.magnitude < EPSILON
+        ? new Map<HalfEdge | undefined, number>()
+        : new Map([
+            [edge, normalizeAngle(heading.angle)],
+            [twin, normalizeAngle(heading.times(-1).angle)],
+          ]);
+    [this as Vertex, split].forEach((vertex) => vertex.rewire(headed));
+    edge.head?.rewire();
+
+    return split;
+  }
+
+  /**
    * Derives the next and prev pointers of the Vertex's incident HalfEdges from the
    * order they sit around it in.
    * @param headed Angles to order edges by instead of the one they currently have.

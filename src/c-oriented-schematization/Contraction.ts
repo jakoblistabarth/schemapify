@@ -175,19 +175,29 @@ class Contraction {
       // The vertex travels along one of its own edges, which is the one to leave the
       // copy on. Derived from where the endpoint is actually headed rather than
       // worked out again, so the two cannot disagree.
+      const along = normalizeAngle(heading.angle);
       const track = vertex.edges.find((edge) => {
+        if (edge === outgoing) return false;
+        const angle = edge.getAngle();
+        return typeof angle === "number" && isSameAngle(angle, along);
+      });
+      // Out along the extension of an edge rather than along the edge itself, so
+      // there is nothing to travel and a piece has to be grown to reach after it.
+      const beyond = vertex.edges.some((edge) => {
         if (edge === outgoing) return false;
         const angle = edge.getAngle();
         return (
           typeof angle === "number" &&
-          isSameAngle(angle, normalizeAngle(heading.angle))
+          isSameAngle(angle, normalizeAngle(along + Math.PI))
         );
       });
-      if (!track)
+      if (!track && !beyond)
         throw new Error(
           "Edge move sends a junction along none of its own edges",
         );
-      const split = vertex.splitOff(outgoing, track, landing, destination);
+      const split = track
+        ? vertex.splitOff(outgoing, track, landing, destination)
+        : vertex.splitOffBeyond(outgoing, landing, destination);
       // Both of them bound different faces than they did, so whatever is configured
       // around them has to be worked out again.
       if (split) this.copiesLeft.push(vertex, split);
@@ -233,14 +243,30 @@ class Contraction {
       if (!landing) return true;
       const heading = landing.vector.minus(vertex.vector);
       if (heading.magnitude < EPSILON) return false;
-      return !vertex.edges.some((edge) => {
-        if (isOneOf(edge, [this.configuration.innerEdge])) return false;
+      const along = normalizeAngle(heading.angle);
+      const others = vertex.edges.filter(
+        (edge) => !isOneOf(edge, [this.configuration.innerEdge]),
+      );
+      // Travelling an edge whole hands the copy to the vertex at its far end, which
+      // is the move onto a junction the contraction does not support.
+      const travels = others.some((edge) => {
         const [angle, length] = [edge.getAngle(), edge.getLength()];
         return (
           typeof angle === "number" &&
           typeof length === "number" &&
-          isSameAngle(angle, normalizeAngle(heading.angle)) &&
+          isSameAngle(angle, along) &&
           heading.magnitude < length - EPSILON
+        );
+      });
+      if (travels) return false;
+      // Out along the extension of an edge, which the move reaches after with a new
+      // piece of boundary. It has nowhere to put one where a vertex already sits.
+      return !others.some((edge) => {
+        const angle = edge.getAngle();
+        return (
+          typeof angle === "number" &&
+          isSameAngle(angle, normalizeAngle(along + Math.PI)) &&
+          !vertex.dcel.findVertex(landing.x, landing.y)
         );
       });
     });

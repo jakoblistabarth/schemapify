@@ -172,20 +172,34 @@ class Configuration {
       const direction = edge.getVector()?.unitVector;
       return direction ? direction.dot(normal) > EPSILON : false;
     });
-    if (leading.length < 2) return leading[0];
+    const inner = this.getOutgoingInnerEdge(vertex)?.getVector()?.unitVector;
+    if (leading.length === 1 || !inner) return leading[0];
+    // How far an edge departs from the inner edge, as the cosine of the angle
+    // between the two: the closer to it, the larger.
+    const closeness = (edge: HalfEdge) =>
+      edge.getVector()?.unitVector.dot(inner) ?? -Infinity;
 
     // Both of the junction's other edges lead the way, which is the junction of type C
     // moved towards them. The vertex follows the one departing least from the inner
     // edge, the two of them enclosing the face the contraction eats into.
-    const inner = this.getOutgoingInnerEdge(vertex)?.getVector()?.unitVector;
-    if (!inner) return leading[0];
-    return leading.reduce((closest, edge) => {
-      const [a, b] = [edge, closest].map(
-        (candidate) =>
-          candidate.getVector()?.unitVector.dot(inner) ?? -Infinity,
+    if (leading.length > 1)
+      return leading.reduce((closest, edge) =>
+        closeness(edge) > closeness(closest) ? edge : closest,
       );
-      return a > b ? edge : closest;
+
+    // Neither leads the way, which is the junction of type C moved away from its
+    // edges. The vertex travels out along the extension of the one departing most
+    // from the inner edge, leaving out any which runs along it and so extends
+    // nowhere the move is going.
+    const trailing = vertex.edges.filter((edge) => {
+      if (edge === this.innerEdge || edge === this.innerEdge.twin) return false;
+      const departure = closeness(edge);
+      return departure > -1 + EPSILON && departure < 1 - EPSILON;
     });
+    if (!trailing.length) return;
+    return trailing.reduce((furthest, edge) =>
+      closeness(edge) < closeness(furthest) ? edge : furthest,
+    );
   }
 
   /**

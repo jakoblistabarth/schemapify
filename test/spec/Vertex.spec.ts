@@ -328,6 +328,42 @@ describe("splitOff()", function () {
     expect(junction.edges).not.toContain(edge);
   });
 
+  test("grows a piece of boundary where the vertex travels beyond its edges", function () {
+    // Out along the extension of the edge running to (3, 2), which reaches away from
+    // the junction rather than towards it, so nothing of it can be travelled.
+    const { junction, edge } = junctionSetup();
+
+    const split = junction.splitOffBeyond(
+      edge,
+      new Point(0, 2),
+      new Point(1, 1),
+    );
+
+    expect(split?.xy).toEqual([0, 2]);
+    // The copy left behind keeps its two other edges and the piece grown to reach
+    // after the one which travelled.
+    expect(junction.degree).toBe(3);
+    expect(split?.degree).toBe(2);
+    expect(split?.edges).toContain(edge);
+    expect(junction.edges).not.toContain(edge);
+  });
+
+  test("leaves the boundary walkable when it grows a piece to reach beyond", function () {
+    const { dcel, junction, edge } = junctionSetup();
+
+    junction.splitOffBeyond(edge, new Point(0, 2), new Point(1, 1));
+
+    expect(() => dcel.toSubdivision()).not.toThrow();
+  });
+
+  test("refuses to reach beyond onto a vertex which is already there", function () {
+    const { junction, edge } = junctionSetup();
+
+    expect(
+      junction.splitOffBeyond(edge, new Point(3, 2), new Point(1, 1)),
+    ).toBeUndefined();
+  });
+
   test("leaves the boundary walkable and the area untouched", function () {
     const { dcel, junction, edge, track } = junctionSetup();
     const area = dcel.getArea();
