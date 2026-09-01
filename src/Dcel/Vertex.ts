@@ -1,4 +1,6 @@
+import { EPSILON } from "../geometry/constants";
 import Point from "../geometry/Point";
+import { normalizeAngle } from "../utilities";
 import Dcel from "./Dcel";
 import Face from "./Face";
 import HalfEdge from "./HalfEdge";
@@ -168,9 +170,10 @@ class Vertex extends Point {
    * @param edge The incident {@link HalfEdge} to hand over.
    * @param track The incident {@link HalfEdge} to place the new {@link Vertex} on.
    * @param point Where on the track the new {@link Vertex} goes.
+   * @param destination Where the handed over edge's far end is headed.
    * @returns The new {@link Vertex}, or nothing if it could not be placed.
    */
-  splitOff(edge: HalfEdge, track: HalfEdge, point: Point) {
+  splitOff(edge: HalfEdge, track: HalfEdge, point: Point, destination: Point) {
     if (edge.tail !== this || track.tail !== this || edge === track) return;
 
     // The piece of the track between this vertex and the new one, which the boundary
@@ -188,9 +191,20 @@ class Vertex extends Point {
     split.edges.push(edge);
 
     // Which faces a vertex lies between follows from the order of the edges around it.
-    // The handover changes that order for the two vertices it is between, and for the
-    // one at the handed over edge's far end, which it now reaches from elsewhere.
-    [this as Vertex, split, edge.head].forEach((vertex) => vertex?.rewire());
+    // The handed over edge is ordered by where it is headed rather than by where it
+    // sits meanwhile, which is across a face it has no business in.
+    const heading = destination.vector.minus(split.vector);
+    // An edge landing on the vertex has no direction to be ordered by, so it keeps its own.
+    const headed =
+      heading.magnitude < EPSILON
+        ? new Map<HalfEdge | undefined, number>()
+        : new Map([
+            [edge, normalizeAngle(heading.angle)],
+            [edge.twin, normalizeAngle(heading.times(-1).angle)],
+          ]);
+    [this as Vertex, split].forEach((vertex) => vertex.rewire(headed));
+    // Its own neighbourhood has not moved, so it is read as it stands.
+    edge.head?.rewire();
 
     // Only the pieces of the track can bound a face other than the one they were cut
     // out of, the handed over edge keeping the faces it already had. Each of them
@@ -225,9 +239,15 @@ class Vertex extends Point {
   /**
    * Derives the next and prev pointers of the Vertex's incident HalfEdges from the
    * order they sit around it in.
+   * @param headed Angles to order edges by instead of the one they currently have.
    */
-  private rewire() {
-    this.sortEdges();
+  private rewire(headed = new Map<HalfEdge | undefined, number>()) {
+    const angleOf = (edge: HalfEdge) => headed.get(edge) ?? edge.getAngle();
+    this.edges.sort((a, b) => {
+      const [angleA, angleB] = [angleOf(a), angleOf(b)];
+      if (typeof angleA !== "number" || typeof angleB !== "number") return 0;
+      return angleB - angleA;
+    });
     this.edges.forEach((edge, index) => {
       const next = this.edges[(index + 1) % this.degree];
       if (!edge.twin) return;

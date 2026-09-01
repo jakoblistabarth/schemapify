@@ -314,7 +314,12 @@ describe("splitOff()", function () {
   test("hands the edge to a new vertex and leaves the rest on the old one", function () {
     const { junction, edge, track } = junctionSetup();
 
-    const split = junction.splitOff(edge, track, new Point(1.5, 2));
+    const split = junction.splitOff(
+      edge,
+      track,
+      new Point(1.5, 2),
+      new Point(1, 1),
+    );
 
     expect(split?.xy).toEqual([1.5, 2]);
     expect(junction.degree).toBe(2);
@@ -327,7 +332,7 @@ describe("splitOff()", function () {
     const { dcel, junction, edge, track } = junctionSetup();
     const area = dcel.getArea();
 
-    junction.splitOff(edge, track, new Point(1.5, 2));
+    junction.splitOff(edge, track, new Point(1.5, 2), new Point(1, 1));
 
     expect(() => dcel.toSubdivision()).not.toThrow();
     expect(dcel.getArea()).toBeCloseTo(area, DECIMAL_SCALE);
@@ -339,7 +344,7 @@ describe("splitOff()", function () {
     const { dcel, junction, edge, track } = junctionSetup();
     const before = dcel.getBoundedFaces().map((face) => face.getArea());
 
-    junction.splitOff(edge, track, new Point(1.5, 2));
+    junction.splitOff(edge, track, new Point(1.5, 2), new Point(1, 1));
 
     const after = dcel.getBoundedFaces().map((face) => face.getArea());
     expect(after[0]).toBeCloseTo((before[0] ?? 0) + 0.25, DECIMAL_SCALE);
@@ -349,9 +354,16 @@ describe("splitOff()", function () {
   test("does nothing where the edge and the track are not both on the vertex", function () {
     const { junction, edge, track } = junctionSetup();
 
-    expect(junction.splitOff(edge, edge, new Point(1.5, 2))).toBeUndefined();
     expect(
-      junction.splitOff(track.twin as HalfEdge, track, new Point(1.5, 2)),
+      junction.splitOff(edge, edge, new Point(1.5, 2), new Point(1, 1)),
+    ).toBeUndefined();
+    expect(
+      junction.splitOff(
+        track.twin as HalfEdge,
+        track,
+        new Point(1.5, 2),
+        new Point(1, 1),
+      ),
     ).toBeUndefined();
   });
 });
@@ -377,7 +389,12 @@ describe("splitOff() where the edge travels the whole track", function () {
 
     // Subdividing at the far end would leave a piece of no length at all, which the
     // boundary then walks around for ever.
-    const split = junction.splitOff(edge, track, new Point(3, 2));
+    const split = junction.splitOff(
+      edge,
+      track,
+      new Point(3, 2),
+      new Point(1, 1),
+    );
 
     expect(split?.xy).toEqual([3, 2]);
     expect(

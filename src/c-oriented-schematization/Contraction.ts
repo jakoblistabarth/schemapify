@@ -107,16 +107,16 @@ class Contraction {
   leaveJunctionsBehind(tail: Point, head: Point) {
     this.copiesLeft = [];
     const innerEdge = this.configuration.innerEdge;
-    const ends: [Vertex | undefined, HalfEdge | undefined, Point][] = [
-      [innerEdge.tail, innerEdge, tail],
-      [innerEdge.head, innerEdge.twin, head],
+    const ends: [Vertex | undefined, HalfEdge | undefined, Point, Point][] = [
+      [innerEdge.tail, innerEdge, tail, head],
+      [innerEdge.head, innerEdge.twin, head, tail],
     ];
-    ends.forEach(([vertex, outgoing, landing]) => {
+    ends.forEach(([vertex, outgoing, landing, destination]) => {
       if (!vertex || !outgoing || vertex.degree <= 2) return;
       if (this.configuration.getJunctionType(vertex) === Junction.A) return;
       const track = this.configuration.getJunctionTrackEdge(vertex, this.type);
       if (!track) return;
-      const split = vertex.splitOff(outgoing, track, landing);
+      const split = vertex.splitOff(outgoing, track, landing, destination);
       // Both of them bound different faces than they did, so whatever is configured
       // around them has to be worked out again.
       if (split) this.copiesLeft.push(vertex, split);
