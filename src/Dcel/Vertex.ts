@@ -187,9 +187,10 @@ class Vertex extends Point {
     edge.tail = split;
     split.edges.push(edge);
 
-    // Which faces the two vertices lie between follows from the order of the edges
-    // around them, which the handover has changed for both.
-    [this as Vertex, split].forEach((vertex) => vertex.rewire());
+    // Which faces a vertex lies between follows from the order of the edges around it.
+    // The handover changes that order for the two vertices it is between, and for the
+    // one at the handed over edge's far end, which it now reaches from elsewhere.
+    [this as Vertex, split, edge.head].forEach((vertex) => vertex?.rewire());
 
     // Only the pieces of the track can bound a face other than the one they were cut
     // out of, the handed over edge keeping the faces it already had. Each of them

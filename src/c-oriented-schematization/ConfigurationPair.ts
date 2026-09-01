@@ -468,11 +468,13 @@ class ConfigurationPair {
         "Edge move left the Dcel with no fewer edges than it found",
       );
 
-    // Remove configurations for deleted edges
+    // Remove configurations whose edge the move has taken away. Comparing against
+    // what the Dcel holds rather than against what the move deleted also reaches an
+    // edge which came and went within the move, as a junction left behind can leave.
     const staleCofigurationKeys = configurations
       .entries()
       .flatMap(([key, config]) =>
-        deletedEdges.has(config.innerEdge) ? [key] : [],
+        edgesAfterMove.has(config.innerEdge) ? [] : [key],
       );
     staleCofigurationKeys.forEach((key) => configurations.delete(key));
 
