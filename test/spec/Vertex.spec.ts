@@ -355,3 +355,35 @@ describe("splitOff()", function () {
     ).toBeUndefined();
   });
 });
+
+describe("splitOff() where the edge travels the whole track", function () {
+  test("hands the edge to the vertex already at the far end", function () {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/shapes/edge-move-test.json"),
+        "utf8",
+      ),
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+    const junction = dcel.findVertex(1, 2);
+    const edge = junction?.edges.find(
+      ({ head }) => head?.x === 1 && head?.y === 1,
+    );
+    const track = junction?.edges.find(
+      ({ head }) => head?.x === 3 && head?.y === 2,
+    );
+    if (!junction || !edge || !track) throw new Error("expected a junction");
+    const area = dcel.getArea();
+
+    // Subdividing at the far end would leave a piece of no length at all, which the
+    // boundary then walks around for ever.
+    const split = junction.splitOff(edge, track, new Point(3, 2));
+
+    expect(split?.xy).toEqual([3, 2]);
+    expect(
+      dcel.getHalfEdges().filter(({ tail, head }) => head && tail.equals(head)),
+    ).toEqual([]);
+    expect(() => dcel.toSubdivision()).not.toThrow();
+    expect(dcel.getArea()).toBeCloseTo(area, DECIMAL_SCALE);
+  });
+});

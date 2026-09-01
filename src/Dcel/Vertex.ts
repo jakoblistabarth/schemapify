@@ -174,10 +174,14 @@ class Vertex extends Point {
     if (edge.tail !== this || track.tail !== this || edge === track) return;
 
     // The piece of the track between this vertex and the new one, which the boundary
-    // reaches the handed over edge through from here on.
-    const piece = track.subdivide(point);
-    const split = piece?.head;
-    if (!piece || !split) return;
+    // reaches the handed over edge through from here on. Travelling the whole track
+    // leaves nothing to subdivide: the vertex at its far end is already there.
+    const subdivided = track.head?.equals(point)
+      ? undefined
+      : track.subdivide(point);
+    const joining = subdivided ?? track;
+    const split = joining.head;
+    if (!split || split === this) return;
 
     this.removeIncidentEdge(edge);
     edge.tail = split;
@@ -187,11 +191,15 @@ class Vertex extends Point {
     // around them, which the handover has changed for both.
     [this as Vertex, split].forEach((vertex) => vertex.rewire());
 
-    // Only the two pieces of the track can bound a face other than the one they were
-    // cut out of, the handed over edge keeping the faces it already had. Each of them
+    // Only the pieces of the track can bound a face other than the one they were cut
+    // out of, the handed over edge keeping the faces it already had. Each of them
     // takes the face of the first edge along the boundary which did not move.
-    const rest = split.edges.find((incident) => incident !== piece.twin);
-    const pieces = [piece, piece.twin, rest, rest?.twin].filter(
+    const remainder = subdivided
+      ? split.edges.find(
+          (incident) => incident !== joining.twin && incident !== edge,
+        )
+      : undefined;
+    const pieces = [joining, joining.twin, remainder, remainder?.twin].filter(
       (incident) => incident !== undefined,
     );
     pieces.forEach((incident) => {
