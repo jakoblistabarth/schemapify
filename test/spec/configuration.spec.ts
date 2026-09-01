@@ -541,8 +541,8 @@ describe("A contraction of a configuration meeting a junction", function () {
     expect(contractions.some(({ isFeasible }) => isFeasible)).toBe(true);
   });
 
-  test("is not feasible where the junction is of type B", function () {
-    // Type B has the vertex leave a copy of itself behind, which the move cannot do.
+  test("is feasible where the junction is of type B", function () {
+    // Type B has the vertex leave a copy of itself behind on the track it slides along.
     const configuration = configurationOn(6);
     const junction = dcel.findVertex(1, 2);
     if (!junction || !configuration) throw new Error("expected a junction");
@@ -553,7 +553,8 @@ describe("A contraction of a configuration meeting a junction", function () {
       configuration[ContractionType.N],
     ].filter((contraction) => contraction !== undefined);
 
-    expect(contractions.every(({ isFeasible }) => !isFeasible)).toBe(true);
+    expect(contractions.length).toBeGreaterThan(0);
+    expect(contractions.some(({ isFeasible }) => isFeasible)).toBe(true);
   });
 });
 

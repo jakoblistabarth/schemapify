@@ -134,11 +134,13 @@ class Contraction {
    * @returns A boolean, indicating whether a junction stands in the move's way.
    */
   private get hasUnhandledJunction() {
-    return this.configuration.innerEdge.endpoints.some(
-      (vertex) =>
-        vertex.degree > 2 &&
-        this.configuration.getJunctionType(vertex) !== Junction.A,
-    );
+    return this.configuration.innerEdge.endpoints.some((vertex) => {
+      if (vertex.degree <= 2) return false;
+      const junction = this.configuration.getJunctionType(vertex);
+      if (junction === Junction.A) return false;
+      if (junction !== Junction.B) return true;
+      return !this.configuration.getJunctionTrackEdge(vertex, this.type);
+    });
   }
 
   /**

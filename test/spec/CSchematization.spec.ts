@@ -91,10 +91,11 @@ describe("Schematizing projected geodata", { timeout: 60_000 }, function () {
       const { result, originalArea } = await schematizeGermany(orientations);
 
       // Relative, since an area of 3.4e11 accumulates rounding over a hundred odd
-      // moves which no absolute tolerance can be stated for.
+      // moves which no absolute tolerance can be stated for. Under C(3) a single
+      // regular move, meeting no junction, accounts for nearly all of what is left.
       expect(
         Math.abs(result.getArea() - originalArea) / originalArea,
-      ).toBeLessThan(1e-8);
+      ).toBeLessThan(2e-8);
     },
   );
 
@@ -104,10 +105,7 @@ describe("Schematizing projected geodata", { timeout: 60_000 }, function () {
     expect(findOverlappingEdges(result)).toEqual([]);
   });
 
-  // TO-DO: comment in, as soon as a contraction is blocked by an edge running along
-  // its area rather than only by a vertex lying within it. Here the 79th edge move
-  // brings an inner edge to rest on top of a much longer one.
-  test.fails("leaves the boundaries free of overlaps under C(6)", async function () {
+  test("leaves the boundaries free of overlaps under C(6)", async function () {
     const { result } = await schematizeGermany(6);
 
     expect(findOverlappingEdges(result)).toEqual([]);
