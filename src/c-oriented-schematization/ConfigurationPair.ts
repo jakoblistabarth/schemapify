@@ -40,8 +40,12 @@ class ConfigurationPair {
   getNonSharedTracks() {
     const sharedSegment = this.getSharedSegment();
     if (!sharedSegment) return;
-    const contractionTracks = this.contraction.configuration.tracks;
-    const compensationTracks = this.compensation.configuration.tracks;
+    const contractionTracks = this.contraction.configuration.getTracks(
+      this.contraction.type,
+    );
+    const compensationTracks = this.compensation.configuration.getTracks(
+      this.compensation.type,
+    );
     const contractionTrack = contractionTracks.find(
       (track) => track && !sharedSegment.isOnLine(track),
     );
@@ -572,7 +576,9 @@ class ConfigurationPair {
    */
   getNewCompensationPositions() {
     const compensationEdge = this.compensation.configuration.innerEdge;
-    const [prevTrack, nextTrack] = this.compensation.configuration.tracks;
+    const [prevTrack, nextTrack] = this.compensation.configuration.getTracks(
+      this.compensation.type,
+    );
     if (!prevTrack || !nextTrack) return;
 
     const compensationHeight = this.compensation.getCompensationHeight(

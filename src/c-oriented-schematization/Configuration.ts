@@ -1,5 +1,6 @@
 import HalfEdge from "../Dcel/HalfEdge";
 import Vertex from "../Dcel/Vertex";
+import { EPSILON } from "../geometry/constants";
 import Line from "../geometry/Line";
 import { crawlArray } from "../utilities";
 import Contraction from "./Contraction";
@@ -96,7 +97,7 @@ class Configuration {
    * @param outerEdge The outer edge for which to get the track.
    * @returns A {@link Line} representing the track of the configuration.
    */
-  getTrack(outerEdge: OuterEdge) {
+  getTrack(outerEdge: OuterEdge, type: ContractionType) {
     const [prev, next] = [
       this.getOuterEdge(OuterEdge.PREV),
       this.getOuterEdge(OuterEdge.NEXT),
@@ -112,27 +113,53 @@ class Configuration {
       !head
     )
       return;
+
+    const vertex = outerEdge === OuterEdge.PREV ? this.innerEdge.tail : head;
+    // Where the inner edge meets a junction whose two other edges lie on either side
+    // of it, the endpoint travels along whichever of them the edge moves towards,
+    // rather than along the configuration's own outer edge. At a junction of type A
+    // the two lie on one line with that outer edge, so it is the track either way.
+    if (vertex.degree > 2 && this.getJunctionType(vertex) !== Junction.A) {
+      const junctionTrack = this.getJunctionTrack(vertex, type);
+      if (junctionTrack) return junctionTrack;
+    }
+
     if (outerEdge === OuterEdge.PREV)
       return new Line(this.innerEdge.tail, prevAngle);
     else return new Line(head, nextAngle);
   }
 
   /**
-   * Get the two tracks of the configuration.
-   * @returns An array of {@link Line}s representing the two tracks of the configuration.
+   * Gets the track a junction on the inner edge travels along, which is the edge it
+   * heads towards as the inner edge moves.
+   * @param vertex The junction the inner edge meets.
+   * @param type The {@link ContractionType}, which decides the direction of the move.
+   * @returns A {@link Line} representing the track, if there is one such edge.
    */
-  get tracks() {
-    return [this.getTrack(OuterEdge.PREV), this.getTrack(OuterEdge.NEXT)];
+  private getJunctionTrack(vertex: Vertex, type: ContractionType) {
+    const innerEdgeVector = this.innerEdge.getVector()?.unitVector;
+    if (!innerEdgeVector) return;
+    // The side the inner edge moves towards, as the compensation's height measures it.
+    const normal = innerEdgeVector.getNormal(type === ContractionType.N);
+    const towards = vertex.edges.find((edge) => {
+      if (edge === this.innerEdge || edge === this.innerEdge.twin) return false;
+      const vector = edge.getVector();
+      return vector ? vector.dot(normal) > EPSILON : false;
+    });
+    const angle = towards?.getAngle();
+    return typeof angle === "number" ? new Line(vertex, angle) : undefined;
   }
 
   /**
-   * Get the intersection point of the two tracks of the configuration.
-   * @returns A {@link Point} representing the intersection point of the two tracks of the configuration.
+   * Get the two tracks of the configuration.
+   * @param type The {@link ContractionType}, which decides the direction of the move.
+   * @returns An array of {@link Line}s representing the two tracks of the configuration.
    */
-  get trackIntersection() {
-    const [prev, next] = this.tracks;
-    if (!prev || !next) return;
-    return prev?.intersectsLine(next);
+  getTracks(type: ContractionType) {
+    return [
+      this.getTrack(OuterEdge.PREV, type),
+      this.getTrack(OuterEdge.NEXT, type),
+    ];
   }
 
   /**

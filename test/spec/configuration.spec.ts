@@ -6,6 +6,7 @@ import ConfigurationGenerator from "@/src/c-oriented-schematization/Configuratio
 import Contraction from "@/src/c-oriented-schematization/Contraction";
 import { ContractionType } from "@/src/c-oriented-schematization/ContractionType";
 import Dcel from "@/src/Dcel/Dcel";
+import { DECIMAL_SCALE } from "@/src/geometry/constants";
 import Point from "@/src/geometry/Point";
 import fs from "fs";
 import path from "path";
@@ -33,10 +34,18 @@ describe("getTrack()", function () {
     const configurationA = configurations.get(coordKeyOr(outerEdgeA));
     const configurationB = configurations.get(coordKeyOr(outerEdgeB));
 
-    expect(configurationA?.getTrack(OuterEdge.PREV)?.angle).toBe(Math.PI * 1.5);
-    expect(configurationA?.getTrack(OuterEdge.NEXT)?.angle).toBe(Math.PI * 0.5);
-    expect(configurationB?.getTrack(OuterEdge.PREV)?.angle).toBe(Math.PI * 0);
-    expect(configurationB?.getTrack(OuterEdge.NEXT)?.angle).toBe(Math.PI);
+    expect(
+      configurationA?.getTrack(OuterEdge.PREV, ContractionType.P)?.angle,
+    ).toBe(Math.PI * 1.5);
+    expect(
+      configurationA?.getTrack(OuterEdge.NEXT, ContractionType.P)?.angle,
+    ).toBe(Math.PI * 0.5);
+    expect(
+      configurationB?.getTrack(OuterEdge.PREV, ContractionType.P)?.angle,
+    ).toBe(Math.PI * 0);
+    expect(
+      configurationB?.getTrack(OuterEdge.NEXT, ContractionType.P)?.angle,
+    ).toBe(Math.PI);
   });
 });
 
@@ -545,5 +554,50 @@ describe("A contraction of a configuration meeting a junction", function () {
     ].filter((contraction) => contraction !== undefined);
 
     expect(contractions.every(({ isFeasible }) => !isFeasible)).toBe(true);
+  });
+});
+
+describe("getTrack() at a junction of type B", function () {
+  let dcel: Dcel;
+  let configuration: Configuration | undefined;
+  beforeEach(function () {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/shapes/edge-move-test.json"),
+        "utf8",
+      ),
+    );
+    dcel = Dcel.fromGeoJSON(json);
+    const edge = dcel.getHalfEdges()[6];
+    configuration = new ConfigurationGenerator()
+      .run(dcel)
+      .get(coordKeyOr(edge));
+  });
+
+  // The inner edge (1,1) -> (1,2) meets a junction at its head, whose two other
+  // edges leave at 135 and at 0 degrees — one to either side of the inner edge. The
+  // endpoint travels along whichever of them the edge moves towards.
+  test("takes the edge the inner edge moves towards, for a positive contraction", function () {
+    const track = configuration?.getTrack(OuterEdge.NEXT, ContractionType.P);
+
+    expect(track?.angle).toBeCloseTo(0, DECIMAL_SCALE);
+    expect(track?.point.xy).toEqual([1, 2]);
+  });
+
+  test("takes the other one, for a negative contraction", function () {
+    const track = configuration?.getTrack(OuterEdge.NEXT, ContractionType.N);
+
+    expect(track?.angle).toBeCloseTo(Math.PI * 0.75, DECIMAL_SCALE);
+    expect(track?.point.xy).toEqual([1, 2]);
+  });
+
+  test("is unaffected at the end without a junction", function () {
+    // The tail is of degree two, so its track is the configuration's own outer edge
+    // either way.
+    const [prevForP, prevForN] = [ContractionType.P, ContractionType.N].map(
+      (type) => configuration?.getTrack(OuterEdge.PREV, type)?.angle,
+    );
+
+    expect(prevForP).toBe(prevForN);
   });
 });

@@ -136,7 +136,9 @@ export default class ConfigurationLayer extends CompositeLayer<ConfigurationLaye
         this.getSubLayerProps({
           id: `track-layer`,
           data: this.contractions
-            .map(([, contraction]) => contraction.configuration.tracks)
+            .map(([, contraction]) =>
+              contraction.configuration.getTracks(contraction.type),
+            )
             .flat(),
           getSourcePosition: (l: Line) => l.getPointOnLine(-1e4).xy,
           getTargetPosition: (l: Line) => l.getPointOnLine(1e4).xy,

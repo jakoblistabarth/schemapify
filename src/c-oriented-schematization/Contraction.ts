@@ -205,8 +205,8 @@ class Contraction {
     const A = configuration.innerEdge.prev?.tail.toPoint();
     const D = configuration.innerEdge.next?.head?.toPoint();
     const [trackPrev, trackNext] = [
-      configuration.getTrack(OuterEdge.PREV),
-      configuration.getTrack(OuterEdge.NEXT),
+      configuration.getTrack(OuterEdge.PREV, type),
+      configuration.getTrack(OuterEdge.NEXT, type),
     ];
     if (!innerEdgeNormal || !A || !D || !trackPrev || !trackNext) return;
 
@@ -279,7 +279,9 @@ class Contraction {
         innerEdgeHead.toPoint(),
       ];
       if (this.point.equals(prev.tail)) {
-        const point = c.getTrack(OuterEdge.NEXT)?.intersectsLine(innerEdge_);
+        const point = c
+          .getTrack(OuterEdge.NEXT, this.type)
+          ?.intersectsLine(innerEdge_);
         if (point) areaPoints.push(point);
       }
     } else {
@@ -289,7 +291,9 @@ class Contraction {
         c.innerEdge.tail.toPoint(),
       ];
       if (this.point.equals(nextHead)) {
-        const point = c.getTrack(OuterEdge.PREV)?.intersectsLine(innerEdge_);
+        const point = c
+          .getTrack(OuterEdge.PREV, this.type)
+          ?.intersectsLine(innerEdge_);
         if (point) areaPoints.push(point);
       }
     }
@@ -570,8 +574,8 @@ class Contraction {
     const normal = edgeVector?.getNormal(this.type === ContractionType.N); // SAME normal used in the move
     if (!edgeVector || !normal) return;
 
-    const prevTrack = this.configuration.getTrack(OuterEdge.PREV);
-    const nextTrack = this.configuration.getTrack(OuterEdge.NEXT);
+    const prevTrack = this.configuration.getTrack(OuterEdge.PREV, this.type);
+    const nextTrack = this.configuration.getTrack(OuterEdge.NEXT, this.type);
     if (!prevTrack || !nextTrack) return;
     const tTail = Vector2D.fromAngle(prevTrack.angle)?.unitVector;
     const tHead = Vector2D.fromAngle(nextTrack.angle)?.unitVector;
