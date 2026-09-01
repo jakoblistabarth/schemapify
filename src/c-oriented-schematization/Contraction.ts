@@ -1,5 +1,6 @@
 import HalfEdge, { InflectionType } from "../Dcel/HalfEdge";
 import Vertex from "../Dcel/Vertex";
+import { isSameAngle, normalizeAngle } from "../utilities";
 import { EPSILON } from "../geometry/constants";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
@@ -35,13 +36,12 @@ type BlockingContext = {
 const isOneOf = (edge: HalfEdge, candidates: HalfEdge[]) =>
   candidates.some((candidate) => candidate === edge || candidate === edge.twin);
 
-/** The share of its own scale below which a contraction is not going anywhere. */
-const VANISHING = 1e-9;
-
 class Contraction {
   type: ContractionType;
   configuration: Configuration;
   point: Point;
+  /** Which of the configuration's edges the contraction makes vanish. */
+  vanishing: OuterEdge | "inner";
   blockingNumber: number;
   /** The junctions the last move left a copy of, and the vertices it left them on. */
   copiesLeft: Vertex[] = [];
@@ -50,11 +50,13 @@ class Contraction {
     configuration: Configuration,
     contractionType: ContractionType,
     point: Point,
+    vanishing: OuterEdge | "inner",
     configurations: Map<string, Configuration>,
   ) {
     this.type = contractionType;
     this.configuration = configuration;
     this.point = point;
+    this.vanishing = vanishing;
     this.blockingNumber = this.initializeBlockingNumber(configurations);
   }
 
@@ -75,6 +77,7 @@ class Contraction {
           configuration,
           contractionType,
           point.point,
+          point.vanishing,
           configurations,
         )
       : undefined;
@@ -90,10 +93,9 @@ class Contraction {
     if (!this.point) return false;
     // Taken against the inner edge's length, which the area scales with the square of:
     // a contraction of a few square millimetres is the move standing still, and being
-    // the smallest one going it is picked before any that would get somewhere. Well
-    // below EPSILON, which at this scale would turn away moves that do get somewhere.
+    // the smallest one going it is picked before any that would get somewhere.
     const length = this.configuration.innerEdge.getLength();
-    if (!length || this.area <= VANISHING * length * length) return false;
+    if (!length || this.area <= EPSILON * length * length) return false;
     return this.area > 0 &&
       this.blockingNumber === 0 &&
       !this.hasUnhandledJunction &&
@@ -133,6 +135,22 @@ class Contraction {
   }
 
   /**
+   * Where the specified endpoint of the inner edge comes to rest after the move.
+   * @param vertex One of the inner edge's endpoints.
+   * @returns A {@link Point}, or nothing where the contraction has no destination.
+   */
+  private landingOf(vertex: Vertex) {
+    const pointA = this.point;
+    const pointB = this.areaPoints.at(-1);
+    if (!pointA || !pointB) return;
+    if (this.vanishing === "inner" || this.areaPoints.length === 3)
+      return pointA;
+    const [tail, head] =
+      this.vanishing === OuterEdge.PREV ? [pointA, pointB] : [pointB, pointA];
+    return vertex === this.configuration.innerEdge.tail ? tail : head;
+  }
+
+  /**
    * Leaves a copy of every junction the inner edge meets behind, so that the edges
    * which do not travel with it keep the vertex they have.
    *
@@ -151,8 +169,24 @@ class Contraction {
     ends.forEach(([vertex, outgoing, landing, destination]) => {
       if (!vertex || !outgoing || vertex.degree <= 2) return;
       if (this.configuration.getJunctionType(vertex) === Junction.A) return;
-      const track = this.configuration.getJunctionTrackEdge(vertex, this.type);
-      if (!track) return;
+      // The vertex stays put, so nothing is dragged along and no copy is needed.
+      const heading = landing.vector.minus(vertex.vector);
+      if (heading.magnitude < EPSILON) return;
+      // The vertex travels along one of its own edges, which is the one to leave the
+      // copy on. Derived from where the endpoint is actually headed rather than
+      // worked out again, so the two cannot disagree.
+      const track = vertex.edges.find((edge) => {
+        if (edge === outgoing) return false;
+        const angle = edge.getAngle();
+        return (
+          typeof angle === "number" &&
+          isSameAngle(angle, normalizeAngle(heading.angle))
+        );
+      });
+      if (!track)
+        throw new Error(
+          "Edge move sends a junction along none of its own edges",
+        );
       const split = vertex.splitOff(outgoing, track, landing, destination);
       // Both of them bound different faces than they did, so whatever is configured
       // around them has to be worked out again.
@@ -175,8 +209,40 @@ class Contraction {
       if (vertex.degree <= 2) return false;
       const junction = this.configuration.getJunctionType(vertex);
       if (junction === Junction.A) return false;
-      if (junction !== Junction.B) return true;
-      return !this.configuration.getJunctionTrackEdge(vertex, this.type);
+      // An edge lying along the inner edge's own line makes the contraction where the
+      // outer edge vanishes cost nothing, sending the vertex down that line and
+      // doubling the boundary back over itself.
+      const innerAngle = this.configuration.innerEdge.getAngle();
+      const doublesBack = vertex.edges.some((edge) => {
+        if (isOneOf(edge, [this.configuration.innerEdge])) return false;
+        const angle = edge.getAngle();
+        return (
+          typeof angle === "number" &&
+          typeof innerAngle === "number" &&
+          (isSameAngle(angle, innerAngle) ||
+            isSameAngle(angle, normalizeAngle(innerAngle + Math.PI)))
+        );
+      });
+      if (doublesBack) return true;
+      // Both of the other types leave a copy behind on the edge the vertex travels
+      // along. The landing has to fall short of that edge's far end: travelling it
+      // whole hands the copy to the vertex there, which is the move onto a junction
+      // the contraction does not support. Type C moved away from its edges has no
+      // edge to travel along at all, only their extensions.
+      const landing = this.landingOf(vertex);
+      if (!landing) return true;
+      const heading = landing.vector.minus(vertex.vector);
+      if (heading.magnitude < EPSILON) return false;
+      return !vertex.edges.some((edge) => {
+        if (isOneOf(edge, [this.configuration.innerEdge])) return false;
+        const [angle, length] = [edge.getAngle(), edge.getLength()];
+        return (
+          typeof angle === "number" &&
+          typeof length === "number" &&
+          isSameAngle(angle, normalizeAngle(heading.angle)) &&
+          heading.magnitude < length - EPSILON
+        );
+      });
     });
   }
 
@@ -191,9 +257,46 @@ class Contraction {
    */
   private get endsAtJunction() {
     const { prev, next } = this.configuration.innerEdge;
-    return [prev?.tail, next?.head].some(
-      (vertex) => !!vertex && vertex.degree > 2 && this.point.equals(vertex),
-    );
+    const innerAngle = this.configuration.innerEdge.getAngle();
+    if (typeof innerAngle !== "number") return true;
+    // An inner edge whose two tracks meet in the contraction point collapses there,
+    // leaving no edge behind which could double the boundary back.
+    const vanishes = this.areaPoints.length === 3;
+    // The direction the inner edge leaves the vertex it lands on: onward for its
+    // tail, backward for its head. The far end names where the edge's other
+    // endpoint comes to rest.
+    const { tail, head } = this.configuration.innerEdge;
+    // On a small enough ring the two outer edges' far ends are one vertex, so only
+    // the end the vanishing edge sends there is the one which lands.
+    const ends: [Vertex | undefined, number, Vertex | undefined][] =
+      this.vanishing === OuterEdge.PREV
+        ? [[prev?.tail, innerAngle, head]]
+        : [[next?.head, normalizeAngle(innerAngle + Math.PI), tail]];
+    return ends.some(([vertex, onward, other]) => {
+      if (!vertex || !this.point.equals(vertex)) return false;
+      if (vertex.degree > 2) return true;
+      if (vanishes || !other) return false;
+      // Both endpoints landing on the vertex collapses the inner edge there,
+      // leaving nothing behind which could double the boundary back.
+      const farEnd = this.landingOf(other);
+      if (farEnd?.equals(vertex)) return false;
+      // The vertex reached may own an edge leaving it the same way the arriving
+      // inner edge does. Coming to rest exactly on top of it the two cancel each
+      // other out, anywhere short of that they double the boundary back over itself.
+      return vertex.edges.some((edge) => {
+        if (
+          isOneOf(
+            edge,
+            [prev, next].filter((e) => e !== undefined),
+          )
+        )
+          return false;
+        const angle = edge.getAngle();
+        if (typeof angle !== "number" || !isSameAngle(angle, onward))
+          return false;
+        return !(edge.head && farEnd?.equals(edge.head));
+      });
+    });
   }
 
   /**
