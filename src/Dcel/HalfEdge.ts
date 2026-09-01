@@ -1,5 +1,5 @@
 import Sector from "../c-oriented-schematization/Sector";
-import { TWO_PI } from "../geometry/constants";
+import { EPSILON, TWO_PI } from "../geometry/constants";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
 import Point from "../geometry/Point";
@@ -340,13 +340,15 @@ class HalfEdge {
     }
 
     // 2. If tail and head have ended up at the same position but are different
-    // objects, merge them now.
+    // objects, merge them now. Taken as near enough rather than exactly the same,
+    // which the arithmetic behind the two positions rarely comes out as, and which
+    // is how the edge move reads a collapse of its own.
     const updatedHead = this.head;
     if (
       updatedHead &&
       this.tail !== updatedHead &&
-      this.tail.x === updatedHead.x &&
-      this.tail.y === updatedHead.y
+      Math.hypot(this.tail.x - updatedHead.x, this.tail.y - updatedHead.y) <
+        EPSILON
     ) {
       const merged = this.dcel.mergeVertices(this.tail, updatedHead);
       this.tail = merged;
@@ -358,7 +360,8 @@ class HalfEdge {
     if (finalHead) {
       const isDegen = this.tail === finalHead;
       const hasSameCoords =
-        this.tail.x === finalHead.x && this.tail.y === finalHead.y;
+        Math.hypot(this.tail.x - finalHead.x, this.tail.y - finalHead.y) <
+        EPSILON;
       if (isDegen || hasSameCoords) {
         this.remove();
         return null;

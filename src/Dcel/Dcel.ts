@@ -1,4 +1,5 @@
 import * as geojson from "geojson";
+import { EPSILON } from "../geometry/constants";
 import MultiPolygon from "../geometry/MultiPolygon";
 import Point from "../geometry/Point";
 import Polygon from "../geometry/Polygon";
@@ -771,7 +772,10 @@ class Dcel {
    */
   mergeVertices(v1: Vertex, v2: Vertex): Vertex {
     if (v1 === v2) return v1;
-    if (v1.x !== v2.x || v1.y !== v2.y) {
+    // Near enough rather than exactly the same: two positions arrived at by different
+    // arithmetic rarely come out equal to the last bit, and the vertex kept is the
+    // one whose position both of them take.
+    if (Math.hypot(v1.x - v2.x, v1.y - v2.y) >= EPSILON) {
       throw new Error("mergeVertices: Vertices are not at the same position");
     }
     // Reassign all incident edges of v2 to v1

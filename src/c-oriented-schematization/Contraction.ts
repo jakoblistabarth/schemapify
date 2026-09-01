@@ -36,6 +36,9 @@ type BlockingContext = {
 const isOneOf = (edge: HalfEdge, candidates: HalfEdge[]) =>
   candidates.some((candidate) => candidate === edge || candidate === edge.twin);
 
+/** How much of a quantity's own size can be left behind by terms cancelling in it. */
+const CANCELLATION = 1e-9;
+
 class Contraction {
   type: ContractionType;
   configuration: Configuration;
@@ -798,9 +801,17 @@ class Contraction {
     // The discriminant is zero where the compensation takes on exactly the area asked
     // of it, shrinking its inner edge to a point. Derived from coordinates it lands
     // just short of zero as readily as just past it, so it is only taken as negative
-    // once it is negative by more than the rounding its own magnitude carries.
-    if (disc < -EPSILON * aLength * aLength) return;
-    const sqrtD = Math.sqrt(Math.max(disc, 0));
+    // once it is negative by more than the rounding its own magnitude carries, and
+    // as zero either way within that. Left as it lands, the root of the rounding is
+    // a millionth of it, which is enough to hold the collapsing edge open.
+    const negligible = EPSILON * aLength * aLength;
+    if (disc < -negligible) return;
+    // The two terms it is made of are the size of the square of the length, so what
+    // survives their cancelling is rounding once they agree to a few digits short of
+    // the last. Left as it lands, the root of that is enough to hold the collapsing
+    // edge open by a millionth of its length.
+    const cancelled = CANCELLATION * aLength * aLength;
+    const sqrtD = Math.abs(disc) < cancelled ? 0 : Math.sqrt(Math.max(disc, 0));
 
     // Both heights are taken from the sum rather than one of them from the difference:
     // tracks running nearly parallel leave the quadratic a leading coefficient close
