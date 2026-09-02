@@ -14,7 +14,7 @@
     "lint": "oxlint app src test",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
-    "test-data": "./test/data/scripts/build.sh",
+    "test-data": "node --experimental-strip-types test/data/scripts/build.mts",
     "prepare": "husky"
   },
   "author": "Jakob Listabarth",
@@ -61,6 +61,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@duckdb/node-api": "1.5.5-r.4",
     "@types/d3": "^7.4.3",
     "@types/geojson": "^7946.0.16",
     "@types/graham_scan": "^1.0.32",

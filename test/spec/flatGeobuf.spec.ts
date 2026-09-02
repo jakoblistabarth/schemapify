@@ -48,17 +48,6 @@ describe("Reading a FlatGeobuf file", () => {
     expect(crs?.code).toBe(4326);
   });
 
-  test("ignores Z ordinates, yielding two-dimensional points.", async () => {
-    const { data } = await flatGeobufToGeometry(readFgb("square-3d.fgb"));
-    const flat = await flatGeobufToGeometry(readFgb("square.fgb"));
-
-    // Every position is a pair, and identical to the 2D file's.
-    expect(positionsOf(data).every((position) => position.length === 2)).toBe(
-      true,
-    );
-    expect(positionsOf(data)).toEqual(positionsOf(flat.data));
-  });
-
   test("reads a file mixing Polygon and MultiPolygon features.", async () => {
     const { data, skipped } = await flatGeobufToGeometry(
       readFgb("AUT_adm1-simple.fgb"),

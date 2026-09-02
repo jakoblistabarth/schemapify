@@ -73,7 +73,7 @@ describe("Schematizing projected geodata", { timeout: 60_000 }, function () {
    */
   const schematizeGermany = async (orientations: number) => {
     const bytes = new Uint8Array(
-      readFileSync(resolve("test/data/generated/DEU_adm1-s0.01.gpkg")),
+      readFileSync(resolve("test/data/simplified/DEU_adm1-s0.01.gpkg")),
     );
     const input = await Input.fromGeoPackage("DEU", bytes);
     const schematization = new CSchematization({

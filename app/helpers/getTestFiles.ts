@@ -10,12 +10,16 @@ export type TestFile = SampleFile & { path: string };
 const supported = /\.(json|fgb|gpkg)$/;
 
 /** Directories under `test/data` whose contents are not worth offering. */
-const excludedDirs = ["scripts", "invalid", "geodata", "gpkg", "fgb"];
-
-/** Narrows a directory to matching files: the full-resolution sources next to the simplified variants in `generated` are too detailed to schematize. */
-const includedFiles: Record<string, RegExp> = {
-  generated: /-s[\d.]+\.gpkg$/,
-};
+const excludedDirs = [
+  "scripts",
+  "invalid",
+  "geodata",
+  "gpkg",
+  "fgb",
+  // Full-resolution sources, too detailed to schematize; `simplified` holds the
+  // variants derived from them.
+  "generated",
+];
 
 /**
  * Enumerate the bundled fixtures.
@@ -30,9 +34,7 @@ const getTestFiles = () => {
     .map((d) => d.name);
   const files = subDirs.flatMap((subDir) => {
     const filesInDir = readdirSync(`${baseDir}/${subDir}`)
-      .filter(
-        (d) => supported.test(d) && (includedFiles[subDir]?.test(d) ?? true),
-      )
+      .filter((d) => supported.test(d))
       .map((d) => {
         const path = `${baseDir}/${subDir}/${d}`;
         const { size } = statSync(path);
