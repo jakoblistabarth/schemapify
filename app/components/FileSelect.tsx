@@ -29,11 +29,13 @@ const FileSelect: FC<Props> = ({ files }) => {
       key={selected ?? ""}
     >
       <Select.Trigger
-        className="gap--1.25 inline-flex h-8.75 items-center justify-center rounded bg-white px-4 text-sm leading-none shadow outline-none hover:bg-blue-50 focus:shadow-[0_0_0_2px] focus:shadow-black data-placeholder:text-blue-900"
+        className="inline-flex h-8.75 w-full items-center justify-between gap-1.25 rounded bg-white px-4 text-sm leading-none whitespace-nowrap shadow outline-none hover:bg-blue-50 focus:shadow-[0_0_0_2px] focus:shadow-black data-placeholder:text-blue-900"
         aria-label="Select File"
       >
-        <Select.Value placeholder="Select a file…" />
-        <Select.Icon>
+        <span className="min-w-0 truncate">
+          <Select.Value placeholder="Select a file…" />
+        </span>
+        <Select.Icon className="shrink-0">
           <GoChevronDown />
         </Select.Icon>
       </Select.Trigger>

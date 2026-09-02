@@ -21,7 +21,7 @@ const Home = async () => {
             <div className="mt-5 self-start justify-self-center [grid-area:header]">
               <Brand />
             </div>
-            <div className="self-start justify-self-start [grid-area:sidebar]">
+            <div className="self-start [grid-area:sidebar]">
               <Configurator files={files} />
             </div>
             <div className="self-center [grid-area:main]">

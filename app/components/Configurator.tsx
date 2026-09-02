@@ -44,7 +44,7 @@ const Configurator: FC<Props> = ({ files }) => {
 
   return (
     <>
-      <div className="relative float-left ml-3">
+      <div className="relative ml-3 w-72">
         <div className="mb-2">
           <FileSelect files={files} />
         </div>
