@@ -1,7 +1,7 @@
 "use client";
 
 import { formatCrs } from "@/src/Input/Crs";
-import { MAX_VERTEX_COUNT } from "@/src/utilities";
+import { formatFloat, formatInteger, MAX_VERTEX_COUNT } from "@/src/utilities";
 import { FC, useMemo } from "react";
 import { MdClose } from "react-icons/md";
 import { GroupedTestFiles } from "../helpers/getGroupedTestFiles";
@@ -35,10 +35,10 @@ const Configurator: FC<Props> = ({ files }) => {
     if (!dcel) return undefined;
     return {
       duration: `${activeSnapshot?.duration}ms`,
-      vertices: dcel.vertices.size,
-      halfEdges: dcel.halfEdges.size,
-      faces: dcel.getBoundedFaces().length,
-      area: dcel.getArea(),
+      vertices: formatInteger(dcel.vertices.size),
+      halfEdges: formatInteger(dcel.halfEdges.size),
+      faces: formatInteger(dcel.getBoundedFaces().length),
+      area: formatFloat(dcel.getArea()),
     };
   }, [dcel, activeSnapshot]);
 
@@ -70,7 +70,8 @@ const Configurator: FC<Props> = ({ files }) => {
               </button>
             </div>
             <div className="mt-1 text-xs text-gray-500">
-              {source.vertexCount} vertices · {formatCrs(source.crs)}
+              {formatInteger(source.vertexCount)} vertices ·{" "}
+              {formatCrs(source.crs)}
             </div>
             {source.skipped > 0 && (
               <div className="mt-1 text-xs text-gray-500">

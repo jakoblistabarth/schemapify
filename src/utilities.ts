@@ -1,3 +1,4 @@
+import { format } from "d3";
 import * as geojson from "geojson";
 import MultiPolygon from "./geometry/MultiPolygon";
 import Polygon from "./geometry/Polygon";
@@ -187,3 +188,17 @@ export const radiansToDegrees = (radians: number) => {
 export const degreesToRadians = (degrees: number) => {
   return (degrees * Math.PI) / 180;
 };
+
+/**
+ * Formats an integer to a readable string.
+ * @param num the number to format
+ * @returns the formatted string
+ */
+export const formatInteger = (num: number) => format(",")(num);
+
+/**
+ * Formats a float to a readable string.
+ * @param num the number to format
+ * @returns the formatted string
+ */
+export const formatFloat = (num: number) => format(",.2f")(num);
