@@ -172,11 +172,10 @@ const useAppStore = create<AppState>((set, get) => ({
             ...(state.snapshotList?.snapshots ?? []),
             ...data.snapshots.map(Snapshot.fromSerialized),
           ]);
-          const activeSnapshot =
-            state.activeSnapshot ?? snapshotList.snapshots[0];
-          const [prevSnapshot, nextSnapshot] = snapshotList.getPrevNext(
-            activeSnapshot.id,
-          );
+          const activeSnapshot = snapshotList.getMostRecentSnapshot();
+          const [prevSnapshot, nextSnapshot] = activeSnapshot
+            ? snapshotList.getPrevNext(activeSnapshot.id)
+            : [];
           return { snapshotList, activeSnapshot, prevSnapshot, nextSnapshot };
         });
       if (data.type === "error") {
