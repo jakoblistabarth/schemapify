@@ -6,6 +6,7 @@ import CRegular from "@/src/c-oriented-schematization/CRegular";
 import { degreesToRadians, radiansToDegrees } from "@/src/utilities";
 import * as Slider from "@radix-ui/react-slider";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
+import clsx from "clsx";
 import { range } from "d3";
 import { FC, useMemo, useState } from "react";
 import { RiArrowLeftLine, RiArrowRightLine } from "react-icons/ri";
@@ -13,9 +14,14 @@ import useAppStore, { CConfig } from "../helpers/store";
 import Button from "./Button";
 import CPreview from "./CPreview";
 
-type Props = Record<string, never>;
+type Props = {
+  /** Leaves the configurator without running, only offered when there is a run to return to. */
+  onCancel?: () => void;
+  /** Called after a run was requested, so the caller can close the configurator. */
+  onSubmit?: () => void;
+};
 
-const CConfigurator: FC<Props> = () => {
+const CConfigurator: FC<Props> = ({ onCancel, onSubmit }) => {
   const { runSchematization, cConfig } = useAppStore();
   const [type, setType] = useState<CConfig["type"]>(cConfig?.type ?? "regular");
   const [orientations, setOrientations] = useState<number>(
@@ -61,6 +67,7 @@ const CConfigurator: FC<Props> = () => {
           };
 
     runSchematization(config);
+    onSubmit?.();
   };
 
   const isCType = (value: string): value is CConfig["type"] => {
@@ -189,13 +196,21 @@ const CConfigurator: FC<Props> = () => {
           />
         </div>
       )}
-      <div className="gap flex justify-between">
-        <Button>
-          <RiArrowLeftLine className="mr-1" />
-          Back
-        </Button>
+      <div
+        className={clsx(
+          "gap flex",
+          onCancel ? "justify-between" : "justify-end",
+        )}
+      >
+        {onCancel && (
+          <Button onClick={onCancel}>
+            <RiArrowLeftLine className="mr-1" />
+            Back
+          </Button>
+        )}
         <Button variant="primary" onClick={handleStart}>
-          Continue <RiArrowRightLine className="ml-1" />
+          {onCancel ? "Restart" : "Continue"}
+          <RiArrowRightLine className="ml-1" />
         </Button>
       </div>
     </div>

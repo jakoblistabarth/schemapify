@@ -2,8 +2,9 @@
 
 import { formatCrs } from "@/src/Input/Crs";
 import { formatFloat, formatInteger, MAX_VERTEX_COUNT } from "@/src/utilities";
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { MdClose } from "react-icons/md";
+import { RiSettings3Line } from "react-icons/ri";
 import { GroupedTestFiles } from "../helpers/getGroupedTestFiles";
 import useAppStore from "../helpers/store";
 import Button from "./Button";
@@ -26,6 +27,11 @@ const Configurator: FC<Props> = ({ files }) => {
     schematizationError,
     cancelSchematization,
   } = useAppStore();
+  const [isConfiguring, setIsConfiguring] = useState(false);
+
+  // A new source starts over from the configurator, so the reopened one must not linger.
+  useEffect(() => setIsConfiguring(false), [source]);
+
   const dcel = useMemo(() => {
     if (!activeSnapshot) return undefined;
     return activeSnapshot.subdivision.toDcel();
@@ -88,7 +94,14 @@ const Configurator: FC<Props> = ({ files }) => {
             )}
           </div>
         )}
-        {source && !activeSnapshot && !isSchematizing && <CConfigurator />}
+        {source && !isSchematizing && (!activeSnapshot || isConfiguring) && (
+          <CConfigurator
+            onCancel={
+              activeSnapshot ? () => setIsConfiguring(false) : undefined
+            }
+            onSubmit={() => setIsConfiguring(false)}
+          />
+        )}
         {isSchematizing && (
           <div className="mt-2 flex items-center justify-between gap-2 rounded-md bg-white p-2 text-sm">
             <span className="text-gray-500">
@@ -109,12 +122,19 @@ const Configurator: FC<Props> = ({ files }) => {
             {schematizationError}
           </div>
         )}
-        {activeSnapshot && (
+        {activeSnapshot && !isConfiguring && (
           <div className="mt-2 rounded-md bg-white p-2 text-sm">
-            <div className="mb-2 text-gray-500">
-              Snapshot{" "}
-              <pre className="inline font-black">{activeSnapshot.label}</pre>
+            <div className="mb-2 flex items-center justify-between gap-2 text-gray-500">
+              <span>
+                Snapshot{" "}
+                <pre className="inline font-black">{activeSnapshot.label}</pre>
+              </span>
+              <Button onClick={() => setIsConfiguring(true)}>
+                <RiSettings3Line className="mr-1" />
+                Configure
+              </Button>
             </div>
+
             <table>
               <tbody>
                 {info &&
