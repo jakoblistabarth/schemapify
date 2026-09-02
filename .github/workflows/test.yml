@@ -6,13 +6,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      # Before setup-node, otherwise `cache: pnpm` has no pnpm to find.
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
-      - uses: pnpm/action-setup@v5
+          cache: pnpm
       - name: Install modules
-        run: pnpm i
+        run: pnpm install --frozen-lockfile
       - name: Run linter
         run: pnpm lint
       - name: Create next-env.d.ts for type checking
@@ -21,3 +23,5 @@ jobs:
         run: pnpm tsc
       - name: Run tests
         run: pnpm test
+      - name: Build static export
+        run: pnpm build
