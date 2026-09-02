@@ -33,6 +33,28 @@ Start the developing server with:
 npm run dev
 ```
 
+### Test data
+
+The fixtures under `test/data` are rebuilt by `pnpm test-data`. It has three stages, always run in this order:
+
+| Stage      | Writes                                       | Cost                     |
+| ---------- | -------------------------------------------- | ------------------------ |
+| `overture` | full-resolution `*_adm1.gpkg` in `generated` | ~4 min, several GB of S3 |
+| `simplify` | topology-aware variants in `simplified`      | seconds                  |
+| `fixtures` | the reader fixtures in `gpkg` and `fgb`      | seconds                  |
+
+Name stages to rebuild a subset, which is worth doing to skip the Overture scan:
+
+```bash
+pnpm test-data                    # all three
+pnpm test-data simplify fixtures  # reuse the last Overture fetch
+```
+
+Add a country by adding a `COPY` to `test/data/scripts/overture-adm.sql`;
+`simplify` picks up whatever that stage wrote. `generated` is gitignored, as
+its sources are large and only feed `simplify`; everything else is committed,
+and reruns are byte-identical so they leave no diff.
+
 ## License
 
 This software is licensed under the [MIT License](https://mit-license.org/).
