@@ -3,6 +3,7 @@ import { geoPackageToGeometry } from "@/src/Input/geoPackage";
 import Input from "@/src/Input/Input";
 import { validateGeoJSON } from "@/src/utilities";
 import type { FeatureCollection, MultiPolygon, Polygon } from "geojson";
+import { withBasePath } from "./basePath";
 
 export type ParseResult =
   | {
@@ -50,9 +51,9 @@ const parseFlatGeobuf = async (
 
 /**
  * sql.js resolves its wasm relative to the page, which fails in the browser.
- * `pnpm prepare` copies the file into `public/`.
+ * `pnpm assets` copies the file into `public/`.
  */
-const sqlJsConfig = { locateFile: () => "/sql-wasm.wasm" };
+const sqlJsConfig = { locateFile: () => withBasePath("/sql-wasm.wasm") };
 
 /**
  * Read a GeoPackage file.
@@ -124,32 +125,88 @@ const parseGeoJSON = (name: string, text: string): ParseResult => {
 };
 
 /**
+ * Read the `.subdivision.json` fixtures: bare nested coordinate arrays rather
+ * than GeoJSON, and so without a CRS of their own.
+ */
+const parseSubdivision = (name: string, text: string): ParseResult => {
+  try {
+    const coordinates = JSON.parse(text) as [number, number][][][][];
+    const input = Input.fromCoordinates(name, coordinates);
+    return { ok: true, input, vertexCount: input.data.vertexCount, skipped: 0 };
+  } catch (error) {
+    return {
+      ok: false,
+      error: `Could not read subdivision: ${error instanceof Error ? error.message : "unknown error"}`,
+    };
+  }
+};
+
+/**
+ * Parse geodata into an {@link Input}, dispatching on the name's extension.
+ *
+ * The single entry point for both uploaded files and bundled samples fetched
+ * over the network.
+ * @param name the file name, whose extension selects the reader
+ * @param bytes the file's contents
+ * @returns the parsed input, or a message describing why it was rejected
+ */
+export const parseGeoBytes = async (
+  name: string,
+  bytes: Uint8Array,
+): Promise<ParseResult> => {
+  const lower = name.toLowerCase();
+  // Checked before the extension switch, since the extension is `.json`.
+  if (lower.endsWith(".subdivision.json"))
+    return parseSubdivision(name, new TextDecoder().decode(bytes));
+  const extension = lower.split(".").pop();
+  switch (extension) {
+    case "fgb":
+      return parseFlatGeobuf(name, bytes);
+    case "gpkg":
+      return parseGeoPackage(name, bytes);
+    case "geojson":
+    case "json":
+      return parseGeoJSON(name, new TextDecoder().decode(bytes));
+    default:
+      return {
+        ok: false,
+        error: `Unsupported file type "${extension ?? name}". Use .fgb, .gpkg or .geojson.`,
+      };
+  }
+};
+
+/**
  * Parse an uploaded geodata file into an {@link Input}.
  *
  * Supported: FlatGeobuf (`.fgb`), GeoPackage (`.gpkg`) and GeoJSON.
  * @param file the uploaded file
  * @returns the parsed input, or a message describing why it was rejected
  */
-export const parseGeoFile = async (file: File): Promise<ParseResult> => {
-  const extension = file.name.split(".").pop()?.toLowerCase();
-  switch (extension) {
-    case "fgb":
-      return parseFlatGeobuf(
-        file.name,
-        new Uint8Array(await file.arrayBuffer()),
-      );
-    case "gpkg":
-      return parseGeoPackage(
-        file.name,
-        new Uint8Array(await file.arrayBuffer()),
-      );
-    case "geojson":
-    case "json":
-      return parseGeoJSON(file.name, await file.text());
-    default:
+export const parseGeoFile = async (file: File): Promise<ParseResult> =>
+  parseGeoBytes(file.name, new Uint8Array(await file.arrayBuffer()));
+
+/**
+ * Fetch and parse a bundled sample.
+ * @param name the sample's file name, whose extension selects the reader
+ * @param url the URL to fetch it from, base path already applied
+ * @returns the parsed input, or a message describing why it was rejected
+ */
+export const parseGeoUrl = async (
+  name: string,
+  url: string,
+): Promise<ParseResult> => {
+  try {
+    const response = await fetch(url);
+    if (!response.ok)
       return {
         ok: false,
-        error: `Unsupported file type "${extension ?? file.name}". Use .fgb, .gpkg or .geojson.`,
+        error: `Could not load "${name}" (${response.status}).`,
       };
+    return parseGeoBytes(name, new Uint8Array(await response.arrayBuffer()));
+  } catch (error) {
+    return {
+      ok: false,
+      error: `Could not load "${name}": ${error instanceof Error ? error.message : "unknown error"}`,
+    };
   }
 };

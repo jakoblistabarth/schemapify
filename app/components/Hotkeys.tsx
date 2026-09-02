@@ -7,7 +7,6 @@ import useAppStore from "../helpers/store";
 const Hotkeys = () => {
   const {
     removeSource,
-    setSource,
     setActiveSnapshot,
     prevSnapshot,
     nextSnapshot,
@@ -26,10 +25,6 @@ const Hotkeys = () => {
       console.log("Simplifying..."),
   );
   useHotkeys(["ctrl+c"], () => removeSource());
-  useHotkeys(["ctrl+1"], () => setSource("diamond.json"));
-  useHotkeys(["ctrl+2"], () => setSource("unaligned-deviating-2.json"));
-  useHotkeys(["ctrl+3"], () => setSource("triangle.json"));
-  useHotkeys(["ctrl+4"], () => setSource("c4-edge-move.subdivision.json"));
   useHotkeys(["left"], () =>
     prevSnapshot ? setActiveSnapshot(prevSnapshot.id) : undefined,
   );

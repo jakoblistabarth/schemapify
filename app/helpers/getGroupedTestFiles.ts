@@ -1,17 +1,22 @@
-import getTestFiles, { TestFile } from "./getTestFiles";
+import { getSampleFiles } from "./getTestFiles";
+import { type SampleFile } from "./sampleFile";
 
+/**
+ * The samples offered in the file select, grouped by the directory they live in.
+ */
 const getGroupedTestFiles = () => {
-  const files = getTestFiles();
-  const filesGrouped = files
-    ?.filter((d) => d.type != "invalid")
-    .reduce((acc: { [key: string]: TestFile[] }, d) => {
+  const files = getSampleFiles();
+  const filesGrouped = files.reduce(
+    (acc: { [key: string]: SampleFile[] }, d) => {
       if (acc[d.type]) {
         acc[d.type].push(d);
         return acc;
       }
       acc[d.type] = [d];
       return acc;
-    }, {});
+    },
+    {},
+  );
   return filesGrouped;
 };
 

@@ -4,7 +4,9 @@ import { Crs } from "@/src/Input/Crs";
 import Snapshot from "@/src/Snapshot/Snapshot";
 import SnapshotList from "@/src/Snapshot/SnapshotList";
 import { create } from "zustand";
-import { parseGeoFile } from "./parseGeoFile";
+import { withBasePath } from "./basePath";
+import { parseGeoFile, parseGeoUrl, type ParseResult } from "./parseGeoFile";
+import type { SourceRef } from "./sampleFile";
 import type {
   CConfig,
   SchematizationRequest,
@@ -30,7 +32,7 @@ export type Source = {
 type AppState = {
   source?: Source;
   loadedInput?: Input;
-  setSource: (name: string) => void;
+  setSource: (file: SourceRef) => Promise<void>;
   setSourceFromFile: (file: File) => Promise<void>;
   removeSource: () => void;
   sourceError?: string;
@@ -100,6 +102,26 @@ const loaded = (
 });
 
 /**
+ * Commit a parse result, replacing whatever was loaded before.
+ *
+ * Shared by the two ways a source arrives — a bundled sample and an upload —
+ * which differ only in how the bytes are obtained.
+ * @param set the store's setter
+ * @param result what the parser made of the bytes
+ */
+const applyResult = (
+  set: (partial: () => Partial<AppState>) => void,
+  result: ParseResult,
+) => {
+  if (!result.ok) {
+    set(() => ({ ...clearedState, sourceError: result.error }));
+    return;
+  }
+  const { input, vertexCount, skipped } = result;
+  set(() => ({ ...clearedState, ...loaded(input, { vertexCount, skipped }) }));
+};
+
+/**
  * The geometry currently on display: the active snapshot's, or — as long as no
  * schematization has run — the loaded input's. Deliberately a
  * {@link Subdivision}, so that displaying data never requires building a
@@ -111,28 +133,14 @@ export const selectSubdivision = (state: AppState) =>
 const useAppStore = create<AppState>((set, get) => ({
   source: undefined,
   loadedInput: undefined,
-  setSource: async (name: string) => {
+  // Both entry points just load the data and input, they don't schematize yet.
+  setSource: async ({ name, url }: SourceRef) => {
     terminateWorker();
-    const response = await fetch(`/api/data/shapes/${name}`);
-    const data = await response.json();
-    const input = name.includes(".subdivision")
-      ? Input.fromCoordinates(name, data)
-      : Input.fromGeoJSON(data, name);
-    // Just load the data and input, don't run schematization yet
-    set(() => ({ ...clearedState, ...loaded(input) }));
+    applyResult(set, await parseGeoUrl(name, withBasePath(url)));
   },
   setSourceFromFile: async (file: File) => {
     terminateWorker();
-    const result = await parseGeoFile(file);
-    if (!result.ok) {
-      set(() => ({ ...clearedState, sourceError: result.error }));
-      return;
-    }
-    const { input, vertexCount, skipped } = result;
-    set(() => ({
-      ...clearedState,
-      ...loaded(input, { vertexCount, skipped }),
-    }));
+    applyResult(set, await parseGeoFile(file));
   },
   removeSource: () => {
     terminateWorker();

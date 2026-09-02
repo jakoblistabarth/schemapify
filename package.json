@@ -8,14 +8,14 @@
   "scripts": {
     "test": "vitest run",
     "tsc": "tsc",
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "assets": "cp node_modules/sql.js/dist/sql-wasm.wasm public/",
+    "dev": "pnpm assets && next dev",
+    "build": "pnpm assets && next build",
     "lint": "oxlint app src test",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
     "test-data": "./test/data/scripts/build.sh",
-    "prepare": "husky && cp node_modules/sql.js/dist/sql-wasm.wasm public/"
+    "prepare": "husky"
   },
   "author": "Jakob Listabarth",
   "license": "MIT",

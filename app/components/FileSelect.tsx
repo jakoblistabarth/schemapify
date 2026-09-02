@@ -12,18 +12,20 @@ type Props = { files: GroupedTestFiles };
 const FileSelect: FC<Props> = ({ files }) => {
   const { setSource, source } = useAppStore();
 
+  const allFiles = Object.values(files).flat();
+  // Items are keyed by url, not name: the same name exists in several formats
+  // (e.g. AUT_adm1-simple as .json, .fgb and .gpkg).
   // An uploaded file has no matching item, which would leave the trigger
   // blank; fall back to the placeholder in that case.
-  const selected = Object.values(files)
-    .flat()
-    .some((d) => d.name === source?.name)
-    ? source?.name
-    : undefined;
+  const selected = allFiles.find((d) => d.name === source?.name)?.url;
 
   return (
     <Select.Root
       value={selected}
-      onValueChange={(value) => setSource(value)}
+      onValueChange={(url) => {
+        const file = allFiles.find((d) => d.url === url);
+        if (file) setSource(file);
+      }}
       key={selected ?? ""}
     >
       <Select.Trigger
@@ -49,7 +51,7 @@ const FileSelect: FC<Props> = ({ files }) => {
                       {groupName}
                     </Select.Label>
                     {filesInGroup.map((d) => (
-                      <SelectItem key={d.name} value={d.name}>
+                      <SelectItem key={d.url} value={d.url}>
                         {d.name} ({d.size})
                       </SelectItem>
                     ))}
