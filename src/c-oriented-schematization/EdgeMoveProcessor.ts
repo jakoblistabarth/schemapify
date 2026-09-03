@@ -31,9 +31,19 @@ class EdgeMoveProcessor {
     );
     let edgeMove;
     while (pair) {
-      // Contractions and configurations are updated as side effects in doEdgeMove()
-      edgeMove = pair.doEdgeMove(input, this.contractions, this.configurations);
-      if (edgeMove) break;
+      // A pair which sheds no edge is not permitted, however small its contraction
+      // area: it leaves the Dcel no simpler than it found it, and two such pairs can
+      // undo one another and repeat for ever. Checked before the move rather than
+      // after, since a move cannot be taken back once the Dcel carries it.
+      if (pair.complexityReduction > 0) {
+        // Contractions and configurations are updated as side effects in doEdgeMove()
+        edgeMove = pair.doEdgeMove(
+          input,
+          this.contractions,
+          this.configurations,
+        );
+        if (edgeMove) break;
+      }
       passedOver.add(pair.contraction);
       pair = this.faceFaceBoundaryList.getMinimalConfigurationPair(
         this.configurations,

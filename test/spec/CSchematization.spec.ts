@@ -85,6 +85,24 @@ describe("Schematizing projected geodata", { timeout: 60_000 }, function () {
     return { result: schematization.run(input.getDcel()), originalArea };
   };
 
+  test("terminates where two edge moves would otherwise undo each other", async function () {
+    const bytes = new Uint8Array(
+      readFileSync(resolve("test/data/simplified/AT_adm1-s.05.gpkg")),
+    );
+    const input = await Input.fromGeoPackage("AT", bytes);
+    const schematization = new CSchematization({
+      ...style,
+      c: new CRegular(4),
+    });
+    const originalArea = input.getDcel().getArea();
+
+    const result = schematization.run(input.getDcel());
+
+    expect(
+      Math.abs(result.getArea() - originalArea) / originalArea,
+    ).toBeLessThan(1e-8);
+  }, 30_000);
+
   test.each([3, 6])(
     "preserves the area of Germany's states under C(%i)",
     async function (orientations) {

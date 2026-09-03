@@ -154,27 +154,82 @@ class Contraction {
   }
 
   /**
-   * Leaves a copy of every junction the inner edge meets behind, so that the edges
-   * which do not travel with it keep the vertex they have.
+   * The edges the collinear cleanup after the contraction is certain to take.
    *
-   * Without it the junction's other edges are dragged along with the endpoint, which
-   * changes their direction and the area of the faces beyond them.
+   * The contraction lands the inner edge's endpoint on the far end of the edge it
+   * makes vanish, so the two meet in one vertex. Where that vertex is left with just
+   * the inner edge and the edge beyond the vanished one, and the two run along the
+   * same line, it carries no information and is removed together with one of them.
+   *
+   * Only the cases which are certain are counted, since the reduction this contributes
+   * to has to be one the move is sure to deliver.
+   * @returns The number of edges the cleanup is certain to remove.
+   */
+  private get collinearGain() {
+    const { innerEdge } = this.configuration;
+    const innerAngle = innerEdge.getAngle();
+    if (typeof innerAngle !== "number") return 0;
+    // The inner edge collapses instead of landing, so no two edges are known to meet.
+    if (this.vanishing === "inner" || this.areaPoints.length === 3) return 0;
+
+    const vanishingEdge =
+      this.vanishing === OuterEdge.PREV ? innerEdge.prev : innerEdge.next;
+    const beyond =
+      this.vanishing === OuterEdge.PREV
+        ? innerEdge.prev?.prev
+        : innerEdge.next?.next;
+    const landing =
+      this.vanishing === OuterEdge.PREV
+        ? innerEdge.prev?.tail
+        : innerEdge.next?.head;
+    const travelling =
+      this.vanishing === OuterEdge.PREV ? innerEdge.tail : innerEdge.head;
+    if (!vanishingEdge || !beyond || !landing || !travelling) return 0;
+
+    // Either endpoint being a junction leaves the merged vertex with edges of its own
+    // besides these two, so it is not the plain corner the cleanup looks for.
+    if (landing.degree !== 2 || travelling.degree !== 2) return 0;
+
+    const beyondAngle = beyond.getAngle();
+    if (typeof beyondAngle !== "number") return 0;
+    // An edge move never turns an edge, so both angles are the ones they will have.
+    return isSameAngle(normalizeAngle(beyondAngle), normalizeAngle(innerAngle))
+      ? 1
+      : 0;
+  }
+
+  /**
+   * How many edges the contraction is certain to take out of the Dcel, before the
+   * copies a travelling junction needs are counted against it.
+   * @returns The number of edges shed, at least.
+   */
+  get certainReduction() {
+    // The contraction always takes the edge it makes vanish with it.
+    return 1 + this.collinearGain;
+  }
+
+  /**
+   * The junctions on the inner edge which the move would carry along, and so has to
+   * leave a copy of behind.
+   *
+   * Worked out without touching the Dcel, so that a move can be judged before it is
+   * made as well as carried out.
    * @param tail Where the inner edge's tail is headed.
    * @param head Where its head is headed.
+   * @returns One entry per junction which travels, naming the edge to leave the copy on.
    */
-  leaveJunctionsBehind(tail: Point, head: Point) {
-    this.copiesLeft = [];
+  private travellingJunctions(tail: Point, head: Point) {
     const innerEdge = this.configuration.innerEdge;
     const ends: [Vertex | undefined, HalfEdge | undefined, Point, Point][] = [
       [innerEdge.tail, innerEdge, tail, head],
       [innerEdge.head, innerEdge.twin, head, tail],
     ];
-    ends.forEach(([vertex, outgoing, landing, destination]) => {
-      if (!vertex || !outgoing || vertex.degree <= 2) return;
-      if (this.configuration.getJunctionType(vertex) === Junction.A) return;
+    return ends.flatMap(([vertex, outgoing, landing, destination]) => {
+      if (!vertex || !outgoing || vertex.degree <= 2) return [];
+      if (this.configuration.getJunctionType(vertex) === Junction.A) return [];
       // The vertex stays put, so nothing is dragged along and no copy is needed.
       const heading = landing.vector.minus(vertex.vector);
-      if (heading.magnitude < EPSILON) return;
+      if (heading.magnitude < EPSILON) return [];
       // The vertex travels along one of its own edges, which is the one to leave the
       // copy on. Derived from where the endpoint is actually headed rather than
       // worked out again, so the two cannot disagree.
@@ -194,17 +249,46 @@ class Contraction {
           isSameAngle(angle, normalizeAngle(along + Math.PI))
         );
       });
-      if (!track && !beyond)
-        throw new Error(
-          "Edge move sends a junction along none of its own edges",
-        );
-      const split = track
-        ? vertex.splitOff(outgoing, track, landing, destination)
-        : vertex.splitOffBeyond(outgoing, landing, destination);
-      // Both of them bound different faces than they did, so whatever is configured
-      // around them has to be worked out again.
-      if (split) this.copiesLeft.push(vertex, split);
+      return [{ vertex, outgoing, landing, destination, track, beyond }];
     });
+  }
+
+  /**
+   * How many copies of a junction the move would leave behind, each of which grows an
+   * edge of its own and so works against the contraction's own reduction.
+   * @param tail Where the inner edge's tail is headed.
+   * @param head Where its head is headed.
+   * @returns The number of junctions which travel with the move.
+   */
+  countJunctionsLeftBehind(tail: Point, head: Point) {
+    return this.travellingJunctions(tail, head).length;
+  }
+
+  /**
+   * Leaves a copy of every junction the inner edge meets behind, so that the edges
+   * which do not travel with it keep the vertex they have.
+   *
+   * Without it the junction's other edges are dragged along with the endpoint, which
+   * changes their direction and the area of the faces beyond them.
+   * @param tail Where the inner edge's tail is headed.
+   * @param head Where its head is headed.
+   */
+  leaveJunctionsBehind(tail: Point, head: Point) {
+    this.copiesLeft = [];
+    this.travellingJunctions(tail, head).forEach(
+      ({ vertex, outgoing, landing, destination, track, beyond }) => {
+        if (!track && !beyond)
+          throw new Error(
+            "Edge move sends a junction along none of its own edges",
+          );
+        const split = track
+          ? vertex.splitOff(outgoing, track, landing, destination)
+          : vertex.splitOffBeyond(outgoing, landing, destination);
+        // Both of them bound different faces than they did, so whatever is configured
+        // around them has to be worked out again.
+        if (split) this.copiesLeft.push(vertex, split);
+      },
+    );
   }
 
   /**

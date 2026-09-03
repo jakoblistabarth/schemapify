@@ -316,6 +316,32 @@ class ConfigurationPair {
   }
 
   /**
+   * How many edges the move would take out of the Dcel.
+   *
+   * A combination of edge moves which fails to strictly reduce the subdivision's
+   * complexity is not permitted. A contraction always takes its vanishing edge with it,
+   * but a junction the move carries along has to be left a copy of, and each copy
+   * grows an edge of its own — so a pair which leaves as many copies as it sheds
+   * edges gets nowhere, and two such pairs can be each other's inverse and repeat for ever.
+   *
+   * Only what the move is certain to shed is counted — the cleanup after it removes
+   * collinear vertices whose number depends on geometry this cannot all foresee
+   * — so this is a lower bound, and a pair it clears is sure to leave the Dcel simpler.
+   * @returns The number of edges the move sheds, at least.
+   */
+  get complexityReduction() {
+    const landings = this.shouldUseSharedEdgeMove()
+      ? this.getSharedLandings()
+      : this.getRegularLandings();
+    // The move has no solution at all, so it is not one to permit either.
+    if (!landings) return 0;
+    const copies =
+      this.contraction.countJunctionsLeftBehind(...landings.contraction) +
+      this.compensation.countJunctionsLeftBehind(...landings.compensation);
+    return this.contraction.certainReduction - copies;
+  }
+
+  /**
    * Perform the edge move.
    * @param dcel The {@link Dcel} to perform the edge move on.
    * @param contractions A map of edge IDs to their corresponding {@link Contraction}s.
@@ -470,13 +496,7 @@ class ConfigurationPair {
       }
     });
 
-    // A contraction takes an edge with it, so the move leaves the Dcel with fewer
-    // than it found — unless it left a copy of a junction behind, which adds one of
-    // its own and can make up the difference.
-    const leftCopyBehind = [this.contraction, this.compensation].some(
-      ({ copiesLeft }) => copiesLeft.length > 0,
-    );
-    if (edgesAfterMove.size >= edgesBeforeMove.size && !leftCopyBehind)
+    if (edgesAfterMove.size >= edgesBeforeMove.size)
       throw new Error(
         "Edge move left the Dcel with no fewer edges than it found",
       );
@@ -552,6 +572,36 @@ class ConfigurationPair {
   }
 
   /**
+   * Where both inner edges come to rest when the two configurations share an outer edge.
+   * @returns The landing points of both inner edges, or undefined when the coupled move
+   * has no solution.
+   */
+  private getSharedLandings() {
+    const meeting = this.getMeetingPoint();
+    if (!meeting) return;
+
+    const { meetingPoint, newContractionPoint, newCompensationPoint } = meeting;
+
+    // Which end of each inner edge sits on the shared edge decides which of the two
+    // points is its tail and which its head.
+    const contraction = this.hasHeadOnSharedEdge(
+      ConfigurationPurpose.CONTRACTION,
+    )
+      ? [newContractionPoint, meetingPoint]
+      : [meetingPoint, newContractionPoint];
+    const compensation = this.hasHeadOnSharedEdge(
+      ConfigurationPurpose.COMPENSATION,
+    )
+      ? [newCompensationPoint, meetingPoint]
+      : [meetingPoint, newCompensationPoint];
+
+    return { contraction, compensation } as {
+      contraction: [Point, Point];
+      compensation: [Point, Point];
+    };
+  }
+
+  /**
    * Perform the edge move when the contraction and compensation share an outer edge.
    * Both edges move proportionally based on the area change they cause, converging towards a meeting point where area change is balanced.
    * @param contractionEdge An edge reference from the DCEL.
@@ -560,34 +610,10 @@ class ConfigurationPair {
    * Returns void if the edge move could not be performed due to incomplete DCEL links.
    */
   doSharedEdgeMove(contractionEdge: HalfEdge, compensationEdge: HalfEdge) {
-    const meeting = this.getMeetingPoint();
-
-    if (!meeting) return;
-
-    const { meetingPoint, newContractionPoint, newCompensationPoint } = meeting;
-
-    // Assign to head/tail based on which endpoint was on shared edge
-    let newContractionHead: Point;
-    let newContractionTail: Point;
-
-    if (this.hasHeadOnSharedEdge(ConfigurationPurpose.CONTRACTION)) {
-      newContractionHead = meetingPoint;
-      newContractionTail = newContractionPoint;
-    } else {
-      newContractionTail = meetingPoint;
-      newContractionHead = newContractionPoint;
-    }
-
-    let newCompensationHead: Point;
-    let newCompensationTail: Point;
-
-    if (this.hasHeadOnSharedEdge(ConfigurationPurpose.COMPENSATION)) {
-      newCompensationHead = meetingPoint;
-      newCompensationTail = newCompensationPoint;
-    } else {
-      newCompensationTail = meetingPoint;
-      newCompensationHead = newCompensationPoint;
-    }
+    const landings = this.getSharedLandings();
+    if (!landings) return;
+    const [newContractionTail, newContractionHead] = landings.contraction;
+    const [newCompensationTail, newCompensationHead] = landings.compensation;
 
     // A junction either inner edge meets is left behind before the move, so that its
     // other edges keep the vertex they have rather than being dragged along.
@@ -657,36 +683,29 @@ class ConfigurationPair {
   }
 
   /**
-   * Perform the edge move when the contraction and compensation do not share an outer edge.
-   * This is the regular case, where the contraction and compensation can be performed independently.
-   * @param contractionEdge An edge reference from the DCEL.
-   * @param compensationEdge An edge reference from the DCEL.
-   * @returns An array of {@link Point}s representing the positions of the moved edges, which can be used to update the configurations.
-   * Returns void if the edge move could not be performed due to incomplete DCEL links.
+   * Where both inner edges come to rest when the two configurations are moved one
+   * after the other.
+   * @returns The landing points of both inner edges, or undefined when the move has no
+   * solution.
    */
-  doRegularEdgeMove(contractionEdge: HalfEdge, compensationEdge: HalfEdge) {
-    // 1 Get references
-    const contractionArea = this.contraction.area;
-
+  private getRegularLandings() {
+    const compensationEdge = this.compensation.configuration.innerEdge;
     const compensationLength = compensationEdge.toLineSegment()?.length;
-    const compensationEdgeLine = compensationEdge.toLine();
-    if (!compensationLength || !compensationEdgeLine) return;
+    if (!compensationLength) return;
+    if (
+      this.compensation.getCompensationHeight(this.contraction.area) ===
+      undefined
+    )
+      return;
 
-    // 2 Calculate compensation trapeze height
-    const compensationHeight =
-      this.compensation.getCompensationHeight(contractionArea);
-    if (compensationHeight === undefined) return;
-
-    // 3 Calculate new positions for compensation edge
     const endpoints = this.getNewCompensationPositions();
     if (!endpoints) return;
     const [newTail, newHead] = endpoints;
     if (!newTail || !newHead) return;
 
-    // 4 Do the contraction and the compensation
+    const contractionEdge = this.contraction.configuration.innerEdge;
     const prevEdgeLineSegment = contractionEdge.prev?.toLineSegment();
-    const nextEdgeLineSegment = contractionEdge.next?.toLineSegment();
-    if (!prevEdgeLineSegment || !nextEdgeLineSegment) return;
+    if (!prevEdgeLineSegment || !contractionEdge.next?.toLineSegment()) return;
 
     const pointA = this.contraction.point;
     const pointB = this.contraction.areaPoints.at(-1);
@@ -697,22 +716,39 @@ class ConfigurationPair {
     // there and the edge collapses, rather than coming to rest on a track. Sending
     // them anywhere else lays the inner edge on top of one of the outer edges.
     const innerEdgeVanishes = this.contraction.areaPoints.length === 3;
-    const [newContractionTail, newContractionHead] = innerEdgeVanishes
+    const contraction: [Point, Point] = innerEdgeVanishes
       ? [pointA, pointA]
       : pointA.isOnLineSegment(prevEdgeLineSegment)
         ? [pointA, pointB]
         : [pointB, pointA];
+
+    return { contraction, compensation: [newTail, newHead] as [Point, Point] };
+  }
+
+  /**
+   * Perform the edge move when the contraction and compensation do not share an outer edge.
+   * This is the regular case, where the contraction and compensation can be performed independently.
+   * @param contractionEdge An edge reference from the DCEL.
+   * @param compensationEdge An edge reference from the DCEL.
+   * @returns An array of {@link Point}s representing the positions of the moved edges, which can be used to update the configurations.
+   * Returns void if the edge move could not be performed due to incomplete DCEL links.
+   */
+  doRegularEdgeMove(contractionEdge: HalfEdge, compensationEdge: HalfEdge) {
+    const landings = this.getRegularLandings();
+    if (!landings) return;
+    const [newContractionTail, newContractionHead] = landings.contraction;
+    const [newTail, newHead] = landings.compensation;
+
     // A junction the inner edge meets is left behind before the move, so that its
     // other edges keep the vertex they have rather than being dragged along.
     this.contraction.leaveJunctionsBehind(
       newContractionTail,
       newContractionHead,
     );
-    const contractionAfterMove = innerEdgeVanishes
-      ? contractionEdge.moveTo(pointA, pointA)
-      : pointA.isOnLineSegment(prevEdgeLineSegment)
-        ? contractionEdge.moveTo(pointA, pointB)
-        : contractionEdge.moveTo(pointB, pointA);
+    const contractionAfterMove = contractionEdge.moveTo(
+      newContractionTail,
+      newContractionHead,
+    );
 
     // From here on the Dcel carries the contraction, so giving up would leave the
     // edge move half done. What the two moves may still run into is reported rather
@@ -730,7 +766,7 @@ class ConfigurationPair {
       );
     } else {
       // The collapsed edge left both of its endpoints merged into this one vertex.
-      movedPositions.push(pointA);
+      movedPositions.push(newContractionTail);
     }
 
     this.compensation.leaveJunctionsBehind(newTail, newHead);
