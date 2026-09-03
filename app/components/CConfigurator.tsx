@@ -39,21 +39,31 @@ const CConfigurator: FC<Props> = ({ onCancel, onSubmit }) => {
     type === "regular" ? 180 / Math.max(orientations, 2) : 180;
   const normalizedBetaDegrees = Math.min(betaDegrees, betaMaxDegrees);
 
-  const c = useMemo<C>(() => {
-    if (type === "regular") {
-      return new CRegular(
-        orientations,
-        degreesToRadians(normalizedBetaDegrees),
-      );
-    } else {
+  // A half-typed set of angles is not a C, so building it is allowed to fail
+  // and the error is shown rather than thrown.
+  const { c, error } = useMemo<{ c?: C; error?: string }>(() => {
+    try {
+      if (type === "regular")
+        return {
+          c: new CRegular(
+            orientations,
+            degreesToRadians(normalizedBetaDegrees),
+          ),
+        };
       const angleValues = angles
         .split(",")
-        .map((a) => degreesToRadians(parseFloat(a.trim())));
-      return new CIrregular(angleValues);
+        .filter((a) => a.trim().length > 0)
+        .map((a) => degreesToRadians(Number(a.trim())));
+      return { c: new CIrregular(angleValues) };
+    } catch (e) {
+      return {
+        error: e instanceof Error ? e.message : "Invalid set of angles.",
+      };
     }
   }, [type, orientations, normalizedBetaDegrees, angles]);
 
   const handleStart = () => {
+    if (!c) return;
     const config =
       type === "regular"
         ? {
@@ -108,7 +118,13 @@ const CConfigurator: FC<Props> = ({ onCancel, onSubmit }) => {
         </ToggleGroup.Root>
       </div>
 
-      <CPreview c={c} />
+      {c ? (
+        <CPreview c={c} />
+      ) : (
+        <div className="mb-3 rounded bg-red-50 p-2 text-xs text-red-700">
+          {error}
+        </div>
+      )}
 
       {type === "regular" ? (
         <>
@@ -208,7 +224,7 @@ const CConfigurator: FC<Props> = ({ onCancel, onSubmit }) => {
             Back
           </Button>
         )}
-        <Button variant="primary" onClick={handleStart}>
+        <Button variant="primary" onClick={handleStart} disabled={!c}>
           {onCancel ? "Restart" : "Continue"}
           <RiArrowRightLine className="ml-1" />
         </Button>

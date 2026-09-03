@@ -1,5 +1,4 @@
 import C from "@/src/c-oriented-schematization/C";
-import CRegular from "@/src/c-oriented-schematization/CRegular";
 import { radiansToDegrees } from "@/src/utilities";
 import clsx from "clsx";
 import { FC, Fragment } from "react";
@@ -10,10 +9,7 @@ type Props = {
 
 const CPreview: FC<Props> = ({ c }) => {
   const size = 200;
-  const angles =
-    c instanceof CRegular
-      ? c.angles
-      : c?.angles.flatMap((d) => [d, d + Math.PI]).toSorted();
+  const angles = c?.angles;
   return (
     <div className="mb-5 flex aspect-square w-full items-center justify-center rounded bg-slate-100 p-2">
       <svg width={size} height={size}>
