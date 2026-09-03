@@ -10,6 +10,16 @@ export default abstract class C {
   abstract get sectors(): Sector[];
 
   /**
+   * The number of orientations C describes.
+   *
+   * An orientation is a line, which C holds as two opposite directions, so
+   * there are half as many orientations as there are {@link C.angles}.
+   */
+  get orientations() {
+    return this.angles.length / 2;
+  }
+
+  /**
    * Get the number of directions in C.
    */
   get directions() {

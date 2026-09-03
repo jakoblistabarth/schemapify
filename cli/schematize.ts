@@ -74,7 +74,7 @@ const program = new Command()
     "-c, --orientations <n>",
     "orientations of a regular C",
     toNumber,
-    defaultStyle.c.angles.length / 2,
+    defaultStyle.c.orientations,
   )
   .option("-b, --beta <deg>", "rotation of C, in degrees", toNumber, 0)
   .addOption(

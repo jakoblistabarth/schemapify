@@ -62,6 +62,13 @@ describe("An irregular C", () => {
     expect(widestSector(c)).toBeLessThan(Math.PI);
   });
 
+  test("reports half as many orientations as it has directions.", () => {
+    const c = new CIrregular(degrees([0, 45, 90, 135]));
+
+    expect(c.angles.length).toBe(8);
+    expect(c.orientations).toBe(4);
+  });
+
   test("matches a regular C given the same angles.", () => {
     const regular = new CRegular(4);
     const irregular = new CIrregular(regular.angles);

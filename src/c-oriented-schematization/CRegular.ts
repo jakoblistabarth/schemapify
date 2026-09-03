@@ -7,28 +7,30 @@ class CRegular extends C {
    * The shift of the set C, in radians. By default a horizontal line, (0 radians).
    */
   beta: number;
-  /**
-   * The number of orientation, at least 2
-   */
-  orientations: number;
 
+  /**
+   * @param orientations the number of orientations, at least 2 //TO-DO: enforce
+   * @param beta the shift of C, in radians
+   */
   constructor(orientations: number, beta: number = 0) {
     super();
     this.beta = beta;
-    this.orientations = orientations; //TO-DO: at least 2
-    this.angles = this.initializeAngles();
+    // The count is not kept: `orientations` is derived from the angles by C,
+    // which is what keeps the two from drifting apart.
+    this.angles = this.initializeAngles(orientations);
   }
 
   /**
-   * Get the angles of C.
+   * Get the angles of C, two opposite directions per orientation.
+   * @param orientations the number of orientations
    * @returns an array of angles
    */
-  private initializeAngles() {
+  private initializeAngles(orientations: number) {
     const twoPi = TWO_PI;
-    return Array(this.orientations * 2)
+    return Array(orientations * 2)
       .fill(0)
       .map((_, idx) => {
-        let angle = this.beta + (idx * Math.PI) / this.orientations;
+        let angle = this.beta + (idx * Math.PI) / orientations;
         // Normalize angle if it's very close to 2π
         if (Math.abs(angle - twoPi) <= EPSILON) angle = 0;
         return angle;
