@@ -25,8 +25,8 @@ const defaultProps: DefaultProps<AdaptiveGridLayerProps> = {
 
 const glslUniformBlock = /* glsl */ `\
 uniform adaptiveGridUniforms {
-  vec2 worldMin;
-  vec2 worldMax;
+  vec2 worldSpan;
+  vec2 gridOffset;
   float gridStep;
   float dotWorldRadius;
   vec4 dotColor;
@@ -42,8 +42,8 @@ const adaptiveGridModule = {
   vs: glslUniformBlock,
   fs: glslUniformBlock,
   uniformTypes: {
-    worldMin: "vec2<f32>",
-    worldMax: "vec2<f32>",
+    worldSpan: "vec2<f32>",
+    gridOffset: "vec2<f32>",
     gridStep: "f32",
     dotWorldRadius: "f32",
     dotColor: "vec4<f32>",
@@ -62,14 +62,14 @@ in vec2 uv;
 out vec4 fragColor;
 
 void main() {
-  // Map UV [0,1] to world coordinates.
-  // uv (0,0) = bottom-left of viewport = worldMin
-  // uv (1,1) = top-right  of viewport = worldMax
-  vec2 worldPos = mix(adaptiveGrid.worldMin, adaptiveGrid.worldMax, uv);
+  // Everything here is relative to the viewport's bottom-left corner.
+  // Offsets stay small, so the precision stays fine.
+  vec2 localPos = adaptiveGrid.worldSpan * uv;
 
-  // Nearest grid point
-  vec2 gridPos = round(worldPos / adaptiveGrid.gridStep) * adaptiveGrid.gridStep;
-  float dist = length(worldPos - gridPos);
+  // Nearest grid point, measured from the first grid line in view.
+  vec2 fromFirstLine = localPos - adaptiveGrid.gridOffset;
+  vec2 gridPos = round(fromFirstLine / adaptiveGrid.gridStep) * adaptiveGrid.gridStep;
+  float dist = length(fromFirstLine - gridPos);
 
   // Smooth dot edge for antialiasing
   float aa = 1.0 - smoothstep(
@@ -91,13 +91,24 @@ void main() {
  * @param targetCount - desired number of grid divisions
  * @returns nice grid step in world units
  */
-const getGridStep = (worldSpan: number, targetCount: number): number => {
+export const getGridStep = (worldSpan: number, targetCount: number): number => {
   const rawStep = worldSpan / targetCount;
   const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
   const normalised = rawStep / magnitude;
   const niceFactor = normalised < 1.5 ? 1 : normalised < 3.5 ? 2 : 5;
   return niceFactor * magnitude;
 };
+
+/**
+ * How far the first grid line sits from the viewport's lower edge.
+ *
+ * Computed here in double precision and passed to the shader.
+ * @param min the lower edge of the visible world range, on one axis
+ * @param gridStep the spacing between grid lines
+ * @returns the offset, in world units, always within `[0, gridStep)`
+ */
+export const getGridOffset = (min: number, gridStep: number): number =>
+  Math.ceil(min / gridStep) * gridStep - min;
 
 /**
  * AdaptiveGridLayer renders a viewport-filling dot grid using a custom GLSL
@@ -171,10 +182,15 @@ export default class AdaptiveGridLayer extends Layer<AdaptiveGridLayerProps> {
       (dotColor?.[3] ?? 38) / 255,
     ];
 
+    const gridOffset: [number, number] = [
+      getGridOffset(minX, gridStep),
+      getGridOffset(minY, gridStep),
+    ];
+
     this.modelInstance.shaderInputs.setProps({
       adaptiveGrid: {
-        worldMin: [minX, minY],
-        worldMax: [maxX, maxY],
+        worldSpan: [worldWidth, worldHeight],
+        gridOffset,
         gridStep,
         dotWorldRadius,
         dotColor: normalizedDotColor,
