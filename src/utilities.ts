@@ -1,8 +1,7 @@
 import { format } from "d3";
 import * as geojson from "geojson";
 import MultiPolygon from "./geometry/MultiPolygon";
-import Polygon from "./geometry/Polygon";
-import Ring from "./geometry/Ring";
+import Polygon, { type PolygonCoordinates } from "./geometry/Polygon";
 import Subdivision from "./geometry/Subdivision";
 import Vector2D from "./geometry/Vector2D";
 import { EPSILON, TWO_PI } from "./geometry/constants";
@@ -131,15 +130,9 @@ export const geoJsonToGeometry = (
         ? [feature.geometry.coordinates]
         : feature.geometry.coordinates;
 
-    const polygons = multipolygons.map((polygon) => {
-      const rings = polygon.map((ringPositions) => {
-        const ring = Ring.fromCoordinates(ringPositions as [number, number][]);
-        // The rings points are already by definition sorted counterclockwise
-        // remove redundant last point from GeoJSON rings
-        return new Ring(ring.points.slice(0, -1));
-      });
-      return new Polygon(rings);
-    });
+    const polygons = multipolygons.map((polygon) =>
+      Polygon.fromUnorderedCoordinates(polygon as PolygonCoordinates),
+    );
 
     return new MultiPolygon(polygons, idx.toString(), feature.properties);
   });

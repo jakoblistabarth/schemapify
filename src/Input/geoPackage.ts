@@ -1,7 +1,6 @@
 import initSqlJs, { type SqlJsConfig } from "sql.js";
 import MultiPolygon from "../geometry/MultiPolygon";
 import Polygon from "../geometry/Polygon";
-import Ring from "../geometry/Ring";
 import Subdivision from "../geometry/Subdivision";
 import type { Crs } from "./Crs";
 
@@ -107,18 +106,6 @@ const readPolygons = (blob: Uint8Array, offset: number) => {
 };
 
 /**
- * Build a {@link Polygon}, re-wrapping each {@link Ring} so the counterclockwise
- * ordering enforced by {@link Ring.points} is what gets stored.
- */
-const toPolygon = (rings: [number, number][][]) =>
-  new Polygon(
-    rings.map((positions) => {
-      const ring = Ring.fromCoordinates(positions);
-      return new Ring(ring.points.slice(0, -1));
-    }),
-  );
-
-/**
  * Read a GeoPackage into a {@link Subdivision}.
  *
  * The geometry blobs are decoded directly into the geometry classes, so the
@@ -206,7 +193,7 @@ export const geoPackageToGeometry = async (
       const attributes = row.slice(idColumn ? 2 : 1);
       multiPolygons.push(
         new MultiPolygon(
-          polygons.map(toPolygon),
+          polygons.map(Polygon.fromUnorderedCoordinates),
           idColumn
             ? ((row[1] ?? multiPolygons.length) as number | string).toString()
             : multiPolygons.length.toString(),

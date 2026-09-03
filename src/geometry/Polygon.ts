@@ -91,6 +91,26 @@ class Polygon {
   }
 
   /**
+   * Creates a polygon from ring coordinates of unknown winding.
+   *
+   * Every {@link Ring} is re-wrapped so that the counterclockwise ordering its
+   * {@link Ring#points} getter enforces is what gets stored. File formats make
+   * no promise about ring order, so the readers normalize on the way in rather
+   * than leaving every read to reverse.
+   * @param coordinates The coordinates of the polygon, exterior ring first.
+   * @returns A new Polygon instance.
+   */
+  static fromUnorderedCoordinates(coordinates: PolygonCoordinates) {
+    return new Polygon(
+      coordinates.map((positions) => {
+        const ring = Ring.fromCoordinates(positions);
+        // The closing point is redundant, the constructor re-adds it.
+        return new Ring(ring.points.slice(0, -1));
+      }),
+    );
+  }
+
+  /**
    * Reduce the polygon to plain coordinates, the inverse of {@link Polygon.fromCoordinates}.
    * @returns The polygon's rings as coordinates.
    */

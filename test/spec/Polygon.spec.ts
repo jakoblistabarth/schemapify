@@ -149,3 +149,44 @@ describe("A polygon created from a set of coordinates", function () {
     expect(p.interiorRings[0].points[0]).toEqual(new Point(1, 1));
   });
 });
+
+describe("Polygon.fromUnorderedCoordinates", function () {
+  /** A square, wound clockwise, as a file format may well store it. */
+  const clockwise: [number, number][] = [
+    [0, 0],
+    [0, 2],
+    [2, 2],
+    [2, 0],
+  ];
+
+  test("stores a clockwise ring counterclockwise, so no read has to reverse it.", function () {
+    const polygon = Polygon.fromUnorderedCoordinates([clockwise]);
+
+    expect(polygon.exteriorRing.isClockwise).toBe(false);
+    expect(polygon.exteriorRing._points.map((point) => point.xy)).toEqual([
+      [0, 0],
+      [2, 0],
+      [2, 2],
+      [0, 2],
+      [0, 0],
+    ]);
+  });
+
+  test("leaves a counterclockwise ring as it is, and closes it.", function () {
+    const counterclockwise = clockwise.toReversed();
+    const polygon = Polygon.fromUnorderedCoordinates([counterclockwise]);
+
+    expect(polygon.exteriorRing.toCoordinates()).toEqual([
+      ...counterclockwise,
+      counterclockwise[0],
+    ]);
+  });
+
+  test("keeps the closing point from being stored twice.", function () {
+    const closed = [...clockwise, clockwise[0]];
+
+    expect(Polygon.fromUnorderedCoordinates([closed]).exteriorRing.length).toBe(
+      Polygon.fromUnorderedCoordinates([clockwise]).exteriorRing.length,
+    );
+  });
+});

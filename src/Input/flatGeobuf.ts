@@ -2,7 +2,6 @@ import type { Feature, HeaderMeta, IFeature } from "flatgeobuf";
 import { generic, Geometry } from "flatgeobuf";
 import MultiPolygon from "../geometry/MultiPolygon";
 import Polygon from "../geometry/Polygon";
-import Ring from "../geometry/Ring";
 import Subdivision from "../geometry/Subdivision";
 import type { Crs } from "./Crs";
 
@@ -58,21 +57,6 @@ const toRings = (geometry: Geometry): [number, number][][] => {
 };
 
 /**
- * Build a {@link Polygon} from a geometry's rings.
- *
- * The rings are re-wrapped so that the counterclockwise ordering enforced by
- * {@link Ring.points} is what gets stored, mirroring how `geoJsonToGeometry`
- * normalizes the GeoJSON input path.
- */
-const toPolygon = (rings: [number, number][][]) =>
-  new Polygon(
-    rings.map((positions) => {
-      const ring = Ring.fromCoordinates(positions);
-      return new Ring(ring.points.slice(0, -1));
-    }),
-  );
-
-/**
  * Read one feature's geometry as a {@link MultiPolygon}, or `undefined` if the
  * feature is not areal.
  */
@@ -98,9 +82,9 @@ const toMultiPolygon = (
           geometry.parts(i),
         )
           .filter((part) => part !== null)
-          .map((part) => toPolygon(toRings(part)))
+          .map((part) => Polygon.fromUnorderedCoordinates(toRings(part)))
       : type === GeometryType.Polygon
-        ? [toPolygon(toRings(geometry))]
+        ? [Polygon.fromUnorderedCoordinates(toRings(geometry))]
         : [];
 
   if (polygons.length === 0) return undefined;
