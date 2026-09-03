@@ -3,7 +3,7 @@ import { geoPackageToGeometry } from "@/src/Input/geoPackage";
 import Input from "@/src/Input/Input";
 import { validateGeoJSON } from "@/src/utilities";
 import type { FeatureCollection, MultiPolygon, Polygon } from "geojson";
-import { withBasePath } from "./basePath";
+import sqlJsConfig from "./sqlJsConfig";
 
 export type ParseResult =
   | {
@@ -48,12 +48,6 @@ const parseFlatGeobuf = async (
     };
   }
 };
-
-/**
- * sql.js resolves its wasm relative to the page, which fails in the browser.
- * `pnpm assets` copies the file into `public/`.
- */
-const sqlJsConfig = { locateFile: () => withBasePath("/sql-wasm.wasm") };
 
 /**
  * Read a GeoPackage file.
