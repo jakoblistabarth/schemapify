@@ -3,6 +3,10 @@
 import C from "@/src/c-oriented-schematization/C";
 import CIrregular from "@/src/c-oriented-schematization/CIrregular";
 import CRegular from "@/src/c-oriented-schematization/CRegular";
+import {
+  formatAngles,
+  parseAngles,
+} from "@/src/c-oriented-schematization/CConfig";
 import { degreesToRadians, radiansToDegrees } from "@/src/utilities";
 import * as Slider from "@radix-ui/react-slider";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
@@ -32,7 +36,7 @@ const CConfigurator: FC<Props> = ({ onCancel, onSubmit }) => {
   );
   const [angles, setAngles] = useState<string>(
     cConfig?.type === "irregular"
-      ? cConfig.angles.map((a) => radiansToDegrees(a)).join(", ")
+      ? formatAngles(cConfig.angles)
       : "0, 30, 90, 150",
   );
   const betaMaxDegrees =
@@ -50,11 +54,7 @@ const CConfigurator: FC<Props> = ({ onCancel, onSubmit }) => {
             degreesToRadians(normalizedBetaDegrees),
           ),
         };
-      const angleValues = angles
-        .split(",")
-        .filter((a) => a.trim().length > 0)
-        .map((a) => degreesToRadians(Number(a.trim())));
-      return { c: new CIrregular(angleValues) };
+      return { c: new CIrregular(parseAngles(angles)) };
     } catch (e) {
       return {
         error: e instanceof Error ? e.message : "Invalid set of angles.",
