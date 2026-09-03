@@ -34,6 +34,16 @@ Start the developing server with:
 npm run dev
 ```
 
+### CLI
+
+A schematization can also be run, without the web UI, using the CLI:
+
+```bash
+pnpm schematize <input> -o <output>
+```
+
+Run `pnpm schematize --help` for the remaining options.
+
 ### Test data
 
 The fixtures under `test/data` are rebuilt by `pnpm test-data`. It has three stages, always run in this order:

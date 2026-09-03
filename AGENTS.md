@@ -12,6 +12,7 @@ This file contains concise, machine-readable guidance for coding agents working 
 - Run a single test: `pnpm vitest run -t "<test name>"` (or the equivalent test runner command)
 - Run linter: `pnpm lint`
 - Run type checks: `pnpm tsc`
+- Schematize a file headlessly: `pnpm schematize <input> -o <output>` (see `cli/schematize.ts`, `pnpm schematize --help`)
 
 ## Project Conventions
 
