@@ -24,6 +24,15 @@ export const wgs84: Crs = {
 };
 
 /**
+ * Whether a {@link Crs} is WGS84, the only CRS GeoJSON can express.
+ * An unknown CRS is not assumed to be WGS84: the coordinates could be anything.
+ * @param crs the CRS to test
+ * @returns whether the data is defined in WGS84
+ */
+export const isWgs84 = (crs?: Crs) =>
+  crs?.code === wgs84.code && (crs?.org ?? wgs84.org) === wgs84.org;
+
+/**
  * Format a {@link Crs} for display, e.g. `"EPSG:31287 (MGI / Austria Lambert)"`.
  */
 export const formatCrs = (crs?: Crs) => {
