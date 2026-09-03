@@ -4,6 +4,7 @@
 
 _Schemapify_ aims to be a web based cartographic schematization tool, written in TypeScript.
 It aims to support the schematization of geodata (Shapefile, GeoJSON) in an interactive and accessible way.
+A schematization can be exported as geodata (GeoPackage, FlatGeobuf, or — for WGS84 data only, as RFC 7946 requires — GeoJSON), all of which keep the source's coordinate reference system, or as graphics (SVG) for finishing in vector software.
 
 It uses the _Area-Preserving Simplification and Schematization of Polygonal Subdivisions_ (Buchin, K., Meulemans, W., Van Renssen, A., & Speckmann, B. (2016). Area-Preserving Simplification and Schematization of Polygonal Subdivisions. ACM Transactions on Spatial Algorithms and Systems , 2(1), 1-36. [2]. https://doi.org/10.1145/2818373.)
 
