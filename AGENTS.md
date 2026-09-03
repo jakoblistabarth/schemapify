@@ -11,7 +11,7 @@ This file contains concise, machine-readable guidance for coding agents working 
 - Run tests: `pnpm test`
 - Run a single test: `pnpm vitest run -t "<test name>"` (or the equivalent test runner command)
 - Run linter: `pnpm lint`
-- Run type checks: `pnpm typecheck`
+- Run type checks: `pnpm tsc`
 
 ## Project Conventions
 
