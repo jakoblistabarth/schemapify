@@ -21,6 +21,10 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AdaptiveGridLayer from "../helpers/AdaptiveGridLayer";
 import ConfigurationLayer from "../helpers/ConfigurationLayer";
 import { getInitialZoom } from "../helpers/getInitialZoom";
+import {
+  getZoomedViewState,
+  type ZoomDirection,
+} from "../helpers/getZoomedViewState";
 import useAppStore from "../helpers/store";
 import VertexLayer from "../helpers/VertexLayer";
 import MapViewWidget from "./MapViewWidget";
@@ -97,30 +101,15 @@ const Canvas: FC<Props> = ({
   }, [sourceName]);
 
   const handleZoom = useCallback(
-    (direction: "in" | "out" | "reset") => {
-      const transitionDuration = 500;
-      setViewState((prev) => {
-        // Initialize from initialViewState if viewState is undefined
-        const current = prev ?? initialViewState;
-        // deck.gl's orthographic controller derives the zoom from zoomX/zoomY
-        // whenever they are set, so they have to be dropped for a new zoom to apply.
-        const { zoomX, ...rest } = current as OrthographicViewState & {
-          zoomX?: number;
-          zoomY?: number;
-        };
-
-        if (direction === "reset")
-          return { ...rest, ...initialViewState, transitionDuration };
-
-        const currentZoom =
-          zoomX ??
-          (typeof rest.zoom === "number" ? rest.zoom : (rest.zoom?.[0] ?? 0));
-        return {
-          ...rest,
-          zoom: currentZoom + (direction === "in" ? 1 : -1),
-          transitionDuration,
-        };
-      });
+    (direction: ZoomDirection) => {
+      setViewState((prev) =>
+        // Without a view state of its own the canvas is still at the fitted one.
+        getZoomedViewState(
+          prev ?? initialViewState,
+          direction,
+          initialViewState,
+        ),
+      );
     },
     [initialViewState],
   );
