@@ -4,6 +4,8 @@ import { geoPackageToGeometry } from "@/src/Input/geoPackage";
 import { flatGeobufToGeometry } from "@/src/Input/flatGeobuf";
 import {
   canExportGeoJson,
+  outputFormatOf,
+  serializeSubdivision,
   subdivisionToFlatGeobuf,
   subdivisionToGeoJson,
   subdivisionToGeoPackage,
@@ -206,5 +208,53 @@ describe("Exporting as FlatGeobuf", () => {
 
     // The magic bytes are 0x66 0x67 0x62 ("fgb") and a version marker.
     expect([...bytes.slice(0, 3)]).toEqual([0x66, 0x67, 0x62]);
+  });
+});
+
+describe("Serializing through the format dispatcher", () => {
+  test("picks the format an extension names, dot or no dot.", () => {
+    expect(outputFormatOf(".gpkg")).toBe("gpkg");
+    expect(outputFormatOf("fgb")).toBe("fgb");
+    expect(outputFormatOf(".GeoJSON")).toBe("geojson");
+    // `.json` is accepted for GeoJSON, as the readers accept it.
+    expect(outputFormatOf(".json")).toBe("geojson");
+    expect(outputFormatOf(".svg")).toBe("svg");
+    expect(outputFormatOf(".shp")).toBeUndefined();
+  });
+
+  test("writes each format, text as text and binaries as bytes.", async () => {
+    const svg = await serializeSubdivision(subdivision(), "svg");
+    // GeoJSON needs the CRS stated: an unknown one could be anything.
+    const geoJson = await serializeSubdivision(subdivision(), "geojson", {
+      crs: wgs84,
+    });
+    const fgb = await serializeSubdivision(subdivision(), "fgb");
+    const gpkg = await serializeSubdivision(subdivision(), "gpkg");
+
+    expect(svg).toContain("<svg");
+    expect(JSON.parse(geoJson as string).features.length).toBe(2);
+    expect(fgb).toBeInstanceOf(Uint8Array);
+    expect(gpkg).toBeInstanceOf(Uint8Array);
+  });
+
+  test("refuses GeoJSON for data whose CRS is unknown.", async () => {
+    await expect(
+      serializeSubdivision(subdivision(), "geojson"),
+    ).rejects.toThrow(/RFC 7946/);
+  });
+
+  test("refuses GeoJSON for projected data.", async () => {
+    await expect(
+      serializeSubdivision(subdivision(), "geojson", { crs: austriaLambert }),
+    ).rejects.toThrow(/RFC 7946/);
+  });
+
+  test("keeps a projected CRS in the formats that can express it.", async () => {
+    const bytes = await serializeSubdivision(subdivision(), "gpkg", {
+      crs: austriaLambert,
+      layerName: "regions",
+    });
+
+    expect(bytes).toBeInstanceOf(Uint8Array);
   });
 });

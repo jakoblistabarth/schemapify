@@ -1,10 +1,8 @@
 import type Subdivision from "@/src/geometry/Subdivision";
 import type { Crs } from "@/src/Input/Crs";
 import {
-  subdivisionToFlatGeobuf,
-  subdivisionToGeoJson,
-  subdivisionToGeoPackage,
-  subdivisionToSvg,
+  outputExtensions,
+  serializeSubdivision,
   type OutputFormat,
 } from "@/src/Output";
 import sqlJsConfig from "./sqlJsConfig";
@@ -23,14 +21,19 @@ export const outputGroups = {
 
 /** How each format names itself, and which group it belongs to. */
 export const outputFormats = {
-  gpkg: { label: "GeoPackage", extension: "gpkg", group: "geodata" },
-  fgb: { label: "FlatGeobuf", extension: "fgb", group: "geodata" },
-  geojson: { label: "GeoJSON", extension: "geojson", group: "geodata" },
-  svg: { label: "SVG", extension: "svg", group: "graphics" },
-} satisfies Record<
-  OutputFormat,
-  { label: string; extension: string; group: OutputGroup }
->;
+  gpkg: { label: "GeoPackage", group: "geodata" },
+  fgb: { label: "FlatGeobuf", group: "geodata" },
+  geojson: { label: "GeoJSON", group: "geodata" },
+  svg: { label: "SVG", group: "graphics" },
+} satisfies Record<OutputFormat, { label: string; group: OutputGroup }>;
+
+/** The MIME type each format is handed to the browser as. */
+const mimeTypes = {
+  gpkg: "application/geopackage+sqlite3",
+  fgb: "application/vnd.flatgeobuf",
+  geojson: "application/geo+json",
+  svg: "image/svg+xml",
+} satisfies Record<OutputFormat, string>;
 
 /** The formats of one group, in the order they are declared. */
 export const formatsOf = (group: OutputGroup) =>
@@ -60,43 +63,19 @@ export const toExportFile = async (
   format: OutputFormat,
   { name, crs }: { name: string; crs?: Crs },
 ) => {
-  const fileName = `${baseName(name)}-schematized.${outputFormats[format].extension}`;
-  if (format === "svg")
-    return {
-      fileName,
-      blob: new Blob([subdivisionToSvg(subdivision)], {
-        type: "image/svg+xml",
-      }),
-    };
-  if (format === "geojson")
-    return {
-      fileName,
-      blob: new Blob([JSON.stringify(subdivisionToGeoJson(subdivision))], {
-        type: "application/geo+json",
-      }),
-    };
-  if (format === "fgb")
-    return {
-      fileName,
-      // Copied into a fresh buffer, as for the GeoPackage below.
-      blob: new Blob(
-        [new Uint8Array(subdivisionToFlatGeobuf(subdivision, crs))],
-        {
-          type: "application/vnd.flatgeobuf",
-        },
-      ),
-    };
-  const bytes = await subdivisionToGeoPackage(subdivision, {
+  const contents = await serializeSubdivision(subdivision, format, {
     crs,
     layerName: baseName(name).replace(/\W/g, "_") || "schematization",
     config: sqlJsConfig,
   });
   return {
-    fileName,
-    // Copied into a fresh buffer: sql.js exports a view into its wasm memory.
-    blob: new Blob([new Uint8Array(bytes)], {
-      type: "application/geopackage+sqlite3",
-    }),
+    fileName: `${baseName(name)}-schematized.${outputExtensions[format]}`,
+    // The binary writers return a view into wasm memory, so the bytes are
+    // copied into a fresh buffer before the blob takes them.
+    blob: new Blob(
+      [typeof contents === "string" ? contents : new Uint8Array(contents)],
+      { type: mimeTypes[format] },
+    ),
   };
 };
 

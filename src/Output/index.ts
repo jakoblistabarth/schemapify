@@ -7,3 +7,10 @@ export type { SvgOptions } from "./svg";
 
 /** The formats a schematization can be exported to. */
 export type OutputFormat = "gpkg" | "fgb" | "geojson" | "svg";
+
+export {
+  outputExtensions,
+  outputFormatOf,
+  serializeSubdivision,
+} from "./serialize";
+export type { SerializeOptions } from "./serialize";
