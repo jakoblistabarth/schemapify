@@ -11,7 +11,7 @@
     "assets": "cp node_modules/sql.js/dist/sql-wasm.wasm public/",
     "dev": "pnpm assets && next dev",
     "build": "pnpm assets && next build",
-    "lint": "oxlint app src test",
+    "lint": "oxlint .",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
     "test-data": "node --experimental-strip-types test/data/scripts/build.mts",
