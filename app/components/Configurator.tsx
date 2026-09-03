@@ -9,6 +9,7 @@ import { GroupedTestFiles } from "../helpers/getGroupedTestFiles";
 import useAppStore from "../helpers/store";
 import Button from "./Button";
 import CConfigurator from "./CConfigurator";
+import ExportMenu from "./ExportMenu";
 import FileSelect from "./FileSelect";
 import FileUpload from "./FileUpload";
 
@@ -148,6 +149,7 @@ const Configurator: FC<Props> = ({ files }) => {
             </table>
           </div>
         )}
+        {activeSnapshot && !isConfiguring && <ExportMenu />}
       </div>
     </>
   );
