@@ -95,6 +95,47 @@ describe("The schematize CLI", () => {
   );
 
   test(
+    "says why the simplification stopped, when the target is out of reach.",
+    async () => {
+      const { stderr } = await run("./node_modules/.bin/tsx", [
+        "cli/schematize.ts",
+        "test/data/geodata/AUT_adm1-simple.json",
+        "-o",
+        path.join(outDir, "outcome.svg"),
+      ]);
+
+      // The default k of 8 is far below what the edge moves can reach, which has to
+      // read as the run running out rather than as -k being ignored.
+      expect(stderr).toContain("ran out of feasible edge moves");
+      expect(stderr).toContain("short of the 8 asked for");
+    },
+    timeout,
+  );
+
+  test(
+    "counts k in edges rather than in half-edges.",
+    async () => {
+      const output = path.join(outDir, "k.geojson");
+      const { stderr } = await run("./node_modules/.bin/tsx", [
+        "cli/schematize.ts",
+        "test/data/geodata/AUT_adm1-simple.json",
+        "-o",
+        output,
+        "-k",
+        "100",
+      ]);
+
+      // Stopping just under k is what counting in edges looks like; counting the two
+      // half-edges the Dcel holds per edge would carry on to about half of it.
+      const edges = Number(/Simplified to ([\d,]+) edge/.exec(stderr)?.[1]);
+      expect(edges).toBeLessThan(100);
+      expect(edges).toBeGreaterThan(50);
+      expect(stderr).toContain("reached the target number of edges");
+    },
+    timeout,
+  );
+
+  test(
     "rejects options that describe C twice over.",
     async () => {
       await expect(

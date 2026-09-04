@@ -23,6 +23,16 @@ import VertexClassGenerator from "./VertexClassGenerator";
  */
 const MAX_STAGNANT_ITERATIONS = 10;
 
+/** Why a simplification came to a stop. */
+export enum Outcome {
+  /** The Dcel has as few edges as it was asked for. */
+  REACHED_K = "reached the target number of edges",
+  /** No edge move is left which would simplify the Dcel any further. */
+  NO_PAIR = "ran out of feasible edge moves",
+  /** The caller's cap on the number of edge moves was reached. */
+  MAX_ITERATIONS = "reached the cap on edge moves",
+}
+
 export enum LABEL {
   // TO-DO: is a default label needed?
   DEFAULT = "default",
@@ -39,6 +49,7 @@ export enum LABEL {
  */
 class CSchematization extends Schematization {
   style: CStyle;
+  outcome?: Outcome;
 
   constructor(style: CStyle = defaultStyle, callbacks: Callbacks = {}) {
     super({ style, options: { callbacks } });
@@ -183,13 +194,15 @@ class CSchematization extends Schematization {
     let faceFaceBoundaryList = new FaceFaceBoundaryListGenerator().run(dcel);
     let iteration = 0;
     let stagnant = 0;
+    this.outcome =
+      maxIterations !== undefined ? Outcome.MAX_ITERATIONS : Outcome.REACHED_K;
     while (
       maxIterations !== undefined
         ? iteration < maxIterations
-        : dcel.halfEdges.size >= this.style.k
+        : dcel.edgeCount >= this.style.k
     ) {
       iteration++;
-      const edgeCountBeforeMove = dcel.halfEdges.size;
+      const edgeCountBeforeMove = dcel.edgeCount;
       const {
         hasPair,
         hasMoved,
@@ -200,7 +213,10 @@ class CSchematization extends Schematization {
 
       // Without a feasible pair the Dcel is as simple as it gets, so the iteration
       // is stopped before it records another snapshot of the unchanged Dcel.
-      if (!hasPair) break;
+      if (!hasPair) {
+        this.outcome = Outcome.NO_PAIR;
+        break;
+      }
 
       // A pair which cannot be moved is not a finished simplification: the edge
       // move gives up half way, leaving the Dcel behind in whatever state it
@@ -228,7 +244,7 @@ class CSchematization extends Schematization {
       // business — one which leaves a copy of a junction behind need not. What the
       // loop is left to watch is the simplification as a whole coming to a halt while
       // pairs are still being found, which would otherwise run for ever.
-      stagnant = dcel.halfEdges.size < edgeCountBeforeMove ? 0 : stagnant + 1;
+      stagnant = dcel.edgeCount < edgeCountBeforeMove ? 0 : stagnant + 1;
       if (stagnant > MAX_STAGNANT_ITERATIONS)
         throw new Error(
           `Simplification stalled: ${stagnant} iterations without shedding an edge, the last of them iteration ${iteration}`,

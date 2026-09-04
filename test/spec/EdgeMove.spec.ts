@@ -1,14 +1,14 @@
 import CollinearPointProcessor from "@/src/c-oriented-schematization/CollinearPointProcessor";
-import CRegular from "@/src/c-oriented-schematization/CRegular";
 import ConfigurationGenerator from "@/src/c-oriented-schematization/ConfigurationGenerator";
+import CRegular from "@/src/c-oriented-schematization/CRegular";
 import CSchematization, {
   LABEL,
 } from "@/src/c-oriented-schematization/CSchematization";
 import EdgeMoveProcessor from "@/src/c-oriented-schematization/EdgeMoveProcessor";
 import FaceFaceBoundaryListGenerator from "@/src/c-oriented-schematization/FaceFaceBoundaryListGenerator";
 import { isAlignedToC } from "@/src/c-oriented-schematization/HalfEdgeUtils";
-import Dcel from "@/src/Dcel/Dcel";
 import { style } from "@/src/c-oriented-schematization/schematization.style";
+import Dcel from "@/src/Dcel/Dcel";
 import { DECIMAL_SCALE, EPSILON } from "@/src/geometry/constants";
 import Input from "@/src/Input";
 import fs from "fs";
@@ -386,11 +386,14 @@ describe("Simplification stops as soon as no configuration pair is left", functi
       fs.readFileSync(path.resolve("test/data/shapes", shape), "utf8"),
     );
     const sizes: number[] = [];
-    const schematization = new CSchematization(undefined, {
-      visualize: ({ dcel, label }) => {
-        if (label === LABEL.SIMPLIFY) sizes.push(dcel.halfEdges.size);
+    const schematization = new CSchematization(
+      { ...style, k: 4 },
+      {
+        visualize: ({ dcel, label }) => {
+          if (label === LABEL.SIMPLIFY) sizes.push(dcel.halfEdges.size);
+        },
       },
-    });
+    );
     schematization.run(Dcel.fromGeoJSON(json));
     return sizes;
   };
@@ -470,6 +473,7 @@ describe("A contraction whose inner edge vanishes", function () {
     const schematization = new CSchematization({
       ...style,
       c: new CRegular(4),
+      k: 4,
     });
     const originalArea = Dcel.fromGeoJSON(json).getArea();
 

@@ -218,6 +218,14 @@ class Dcel {
   }
 
   /**
+   * The number of edges of the DCEL, as opposed to the number of half-edges, of
+   * which the DCEL holds two per edge.
+   */
+  get edgeCount() {
+    return this.halfEdges.size / 2;
+  }
+
+  /**
    * Returns Halfedges of the DCEL.
    * @param simple If true, for every pair of {@link HalfEdge}s only one will be returned. false by default.
    * @returns A (sub)set of {@link HalfEdge}s.

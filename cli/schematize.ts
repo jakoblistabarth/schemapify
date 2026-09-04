@@ -3,7 +3,9 @@ import {
   parseAngles,
   type CConfig,
 } from "@/src/c-oriented-schematization/CConfig";
-import CSchematization from "@/src/c-oriented-schematization/CSchematization";
+import CSchematization, {
+  Outcome,
+} from "@/src/c-oriented-schematization/CSchematization";
 import { style as defaultStyle } from "@/src/c-oriented-schematization/schematization.style";
 import { formatCrs } from "@/src/Input/Crs";
 import { readGeoData } from "@/src/Input/readGeoData";
@@ -85,7 +87,12 @@ const program = new Command()
       .argParser(toAngles)
       .conflicts(["orientations", "beta"]),
   )
-  .option("-k, --k <n>", "target number of edges", toNumber, defaultStyle.k)
+  .option(
+    "-k, --k <n>",
+    "target number of edges; this number is not guaranteed to be reached, but the simplification will stop the latest when it is reached",
+    toNumber,
+    defaultStyle.k,
+  )
   .option(
     "--lambda <n>",
     "subdivide edges longer than diameter × lambda",
@@ -183,6 +190,16 @@ const main = async (inputPath: string, options: Options) => {
   const schematized = schematization.run(dcel, options.maxIterations);
   flushStage();
   const subdivision = schematized.toSubdivision();
+
+  // Report in case target k was not reached.
+  if (schematization.outcome)
+    log(
+      `Simplified to ${formatInteger(schematized.edgeCount)} edge(s); ${schematization.outcome}${
+        schematization.outcome === Outcome.NO_PAIR
+          ? ` short of the ${formatInteger(options.k)} asked for`
+          : ""
+      }.`,
+    );
 
   await writeFile(
     outputPath,
