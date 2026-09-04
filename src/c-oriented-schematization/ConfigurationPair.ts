@@ -738,6 +738,8 @@ class ConfigurationPair {
     if (!landings) return;
     const [newContractionTail, newContractionHead] = landings.contraction;
     const [newTail, newHead] = landings.compensation;
+    // Read before the moves, which can leave the edge with no length to measure by.
+    const compensationLength = compensationEdge.getLength();
 
     // A junction the inner edge meets is left behind before the move, so that its
     // other edges keep the vertex they have rather than being dragged along.
@@ -776,11 +778,16 @@ class ConfigurationPair {
       // Both of the compensation's tracks meeting at the height it moves by collapses
       // its inner edge, which is a legitimate outcome. Collapsing anywhere else means
       // the contraction has invalidated the positions this move was derived from.
-      if (newTail.distanceToPoint(newHead) > EPSILON)
+      // Measured against the edge's own length, like the snapping which merges the
+      // endpoints: at coordinates in the millions an absolute EPSILON is too tight.
+      const gap = newTail.distanceToPoint(newHead);
+      if (!compensationLength || gap > EPSILON * compensationLength)
         throw new Error(
           "Edge move collapsed the compensation edge, whose endpoints lie " +
-            newTail.distanceToPoint(newHead) +
-            " apart, after the contraction was applied",
+            gap +
+            " apart on an edge of length " +
+            compensationLength +
+            ", after the contraction was applied",
         );
       movedPositions.push(newTail);
       return movedPositions;
