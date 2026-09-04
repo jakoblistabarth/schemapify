@@ -1,6 +1,5 @@
 import HalfEdge, { InflectionType } from "../Dcel/HalfEdge";
 import Vertex from "../Dcel/Vertex";
-import { isSameAngle, normalizeAngle } from "../utilities";
 import { EPSILON } from "../geometry/constants";
 import Line from "../geometry/Line";
 import LineSegment from "../geometry/LineSegment";
@@ -8,6 +7,7 @@ import Point from "../geometry/Point";
 import Polygon from "../geometry/Polygon";
 import Ring from "../geometry/Ring";
 import Vector2D from "../geometry/Vector2D";
+import { isSameAngle, normalizeAngle } from "../utilities";
 import Configuration, { Junction, OuterEdge } from "./Configuration";
 import { ContractionType } from "./ContractionType";
 
@@ -48,6 +48,14 @@ class Contraction {
   blockingNumber: number;
   /** The junctions the last move left a copy of, and the vertices it left them on. */
   copiesLeft: Vertex[] = [];
+  /**
+   * The area points, once they have been worked out.
+   *
+   * A contraction describes one edge move of one Dcel state, and is replaced rather
+   * than brought up to date when that state changes, so these are worked out once.
+   */
+  private areaPointsCache?: Point[];
+  private areaCache?: number;
 
   constructor(
     configuration: Configuration,
@@ -94,19 +102,22 @@ class Contraction {
    */
   get isFeasible() {
     if (!this.point) return false;
+    // Read once: the area is worked out from the configuration's geometry on every
+    // read, and this is read for every edge of every face-face boundary.
+    const { area } = this;
     // Taken against the inner edge's length, which the area scales with the square of:
     // a contraction of a few square millimetres is the move standing still, and being
     // the smallest one going it is picked before any that would get somewhere.
     const length = this.configuration.innerEdge.getLength();
-    if (!length || this.area <= EPSILON * length * length) return false;
-    return this.area > 0 &&
+    if (!length || area <= EPSILON * length * length) return false;
+    return (
+      area > 0 &&
       this.blockingNumber === 0 &&
       !this.hasUnhandledJunction &&
       //TO-DO: remove this condition, as soon as edge moves onto junctions
       // (degree-3) are implemented
       !this.endsAtJunction
-      ? true
-      : false;
+    );
   }
 
   /**
@@ -545,6 +556,19 @@ class Contraction {
    * @returns An array of {@link Point}s representing the area points of the Contraction.
    */
   get areaPoints() {
+    return (this.areaPointsCache ??= this.getAreaPoints());
+  }
+
+  /**
+   * Works out the points bounding the area the contraction sweeps.
+   *
+   * Kept apart from {@link Contraction.areaPoints} so that the result can be held on
+   * to: the points follow from the configuration's geometry, which stands still for as
+   * long as the contraction does, in the same way {@link Contraction.blockingNumber}
+   * is worked out once and then only adjusted.
+   * @returns The bounding {@link Point}s, or none where the configuration is incomplete.
+   */
+  private getAreaPoints() {
     const c = this.configuration;
     const prev = c.getOuterEdge(OuterEdge.PREV);
     const prevHead = prev?.head;
@@ -599,7 +623,9 @@ class Contraction {
    * @returns A number, indicating the area of the Contraction.
    */
   get area() {
-    return this.areaPoints ? new Ring(this.areaPoints).area : 0;
+    return (this.areaCache ??= this.areaPoints
+      ? new Ring(this.areaPoints).area
+      : 0);
   }
 
   /**
