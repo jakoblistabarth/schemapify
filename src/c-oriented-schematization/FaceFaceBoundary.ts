@@ -26,6 +26,40 @@ class FaceFaceBoundary {
     /** A contraction paired with its area, which the sorts below would otherwise re-derive per comparison. */
     type Candidate = { contraction: Contraction; area: number };
 
+    /**
+     * Where each edge sits on the cycle around a given one, in both directions.
+     *
+     * Walking a cycle costs its whole length, and the distance below is wanted from
+     * one inner edge to every candidate for its compensation, so each cycle is walked
+     * once and looked up per candidate rather than walked again for each of them.
+     */
+    const cycles = new Map<
+      HalfEdge,
+      { forwards: Map<HalfEdge, number>; backwards: Map<HalfEdge, number> }
+    >();
+    const positionsAround = (edge: HalfEdge) => {
+      const known = cycles.get(edge);
+      if (known) return known;
+      const positions = {
+        forwards: new Map(edge.getCycle().map((e, index) => [e, index])),
+        backwards: new Map(edge.getCycle(false).map((e, index) => [e, index])),
+      };
+      cycles.set(edge, positions);
+      return positions;
+    };
+    /**
+     * How far apart two inner edges are along the cycle they share.
+     * @param from The contraction's inner edge.
+     * @param to The compensation's inner edge.
+     * @returns The smaller of the two distances around the cycle.
+     */
+    const minimalCycleDistance = (from: HalfEdge, to: HalfEdge) => {
+      const { forwards, backwards } = positionsAround(from);
+      // An edge on neither cycle counts as -1, as looking for its index reports it,
+      // so that this stays the distance {@link HalfEdge.getMinimalCycleDistance} gives.
+      return Math.min(forwards.get(to) ?? -1, backwards.get(to) ?? -1);
+    };
+
     const feasibleContractions = (type: ContractionType) =>
       this.edges
         .reduce((candidates: Candidate[], edge) => {
@@ -65,10 +99,10 @@ class FaceFaceBoundary {
           )
             solutions.push({
               contraction: candidate.contraction,
-              distance:
-                contractionCandidate.contraction.configuration.innerEdge.getMinimalCycleDistance(
-                  candidate.contraction.configuration.innerEdge,
-                ),
+              distance: minimalCycleDistance(
+                contractionCandidate.contraction.configuration.innerEdge,
+                candidate.contraction.configuration.innerEdge,
+              ),
             });
           return solutions;
         }, [])
