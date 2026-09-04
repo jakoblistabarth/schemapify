@@ -1,1 +1,17 @@
-* text=autpo eol=lf
+* text=auto eol=lf
+
+# Never converted. "text=auto" leaves a file alone once it detects binary content,
+# but detection reads only the start of a file, and a format whose signature carries
+# a CRLF on purpose — a PNG's does, to catch this very mangling — loses it and stops
+# being readable. Naming them costs nothing and does not depend on the detection.
+*.png binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.gpkg binary
+*.fgb binary
+*.wasm binary
