@@ -135,11 +135,18 @@ class HalfEdge {
    * Gets the minimum amount of steps it takes to get from the halfedge to another.
    * Looking at both directions, clock-wise and counter-clockwise.
    * @param other {@link HalfEdge} to which the distance in steps is measured.
-   * @returns An integer, indicating the minimum step distance to the {@link Halfedge}.
+   * @returns An integer, indicating the minimum step distance to the {@link Halfedge},
+   * or Infinity where the other {@link HalfEdge} is on neither cycle.
    */
   getMinimalCycleDistance(other: HalfEdge) {
     const forwards = this.getCycle().indexOf(other);
     const backwards = this.getCycle(false).indexOf(other);
+    // A face is bounded by one cycle per ring, and walking one of them never reaches
+    // an edge on another. Such an edge is no distance at all rather than a distance
+    // of -1, which would otherwise make the edges furthest from reach the nearest.
+    if (forwards < 0 && backwards < 0) return Infinity;
+    if (forwards < 0) return backwards;
+    if (backwards < 0) return forwards;
     return Math.min(forwards, backwards);
   }
 

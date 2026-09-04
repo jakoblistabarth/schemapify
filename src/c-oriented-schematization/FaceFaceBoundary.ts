@@ -55,9 +55,17 @@ class FaceFaceBoundary {
      */
     const minimalCycleDistance = (from: HalfEdge, to: HalfEdge) => {
       const { forwards, backwards } = positionsAround(from);
-      // An edge on neither cycle counts as -1, as looking for its index reports it,
-      // so that this stays the distance {@link HalfEdge.getMinimalCycleDistance} gives.
-      return Math.min(forwards.get(to) ?? -1, backwards.get(to) ?? -1);
+      const [ahead, behind] = [forwards.get(to), backwards.get(to)];
+      // Every edge of a boundary bounds the same face, and each of that face's rings
+      // separates it from a different part of what surrounds it — so a face on one of
+      // them is on no other, and the edges of a boundary all lie on a single cycle.
+      // Reaching here means either that this no longer holds or that a configuration
+      // is left holding an edge the Dcel has replaced.
+      if (ahead === undefined || behind === undefined)
+        throw new Error(
+          "Face-face boundary holds an edge which is not on the cycle of its own edges",
+        );
+      return Math.min(ahead, behind);
     };
 
     const feasibleContractions = (type: ContractionType) =>

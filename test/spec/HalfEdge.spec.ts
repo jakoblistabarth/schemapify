@@ -456,6 +456,32 @@ describe("getMinimalCycleDistance()", function () {
     expect(edge0.getMinimalCycleDistance(dcel.getHalfEdges()[4])).toBe(2);
     expect(edge0.getMinimalCycleDistance(dcel.getHalfEdges()[6])).toBe(1);
   });
+
+  test("puts an edge which is on neither cycle out of reach.", function () {
+    const json = JSON.parse(
+      fs.readFileSync(
+        path.resolve("test/data/shapes/2plgn-islands.json"),
+        "utf8",
+      ),
+    );
+    const dcel = Dcel.fromGeoJSON(json);
+
+    const edge = dcel.getHalfEdges()[0];
+    const cycle = new Set([...edge.getCycle(), ...edge.getCycle(false)]);
+    const unreachable = dcel.getHalfEdges().find((other) => !cycle.has(other));
+
+    // Two islands share no ring, so one is not reached by walking round the other.
+    expect(unreachable).toBeDefined();
+    if (!unreachable) return;
+    expect(edge.getMinimalCycleDistance(unreachable)).toBe(Infinity);
+    // Out of reach has to sort behind every distance there is, where the -1 that
+    // looking up a missing index gives would have sorted ahead of all of them.
+    expect(
+      [edge.getMinimalCycleDistance(unreachable), 0, 1, 2].sort((a, b) =>
+        a === b ? 0 : a < b ? -1 : 1,
+      ),
+    ).toEqual([0, 1, 2, Infinity]);
+  });
 });
 
 describe("moveTo().", function () {
