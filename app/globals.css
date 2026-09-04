@@ -2,9 +2,10 @@
 
 /* Custom styles */
 @theme {
-  --font-sans: "Inter Variable", system-ui, sans-serif;
-  --font-display: "DM Sans Variable", serif;
-  --font-mono: "DM Mono", mono;
+  /* Fontsource declares a face rather than a variable, so the family is named. */
+  --font-sans: "Geist Variable", system-ui, sans-serif;
+  --font-display: var(--font-martian);
+  --font-mono: "Martian Mono Variable", monospace;
 }
 
 @layer base {

@@ -1,12 +1,12 @@
 "use client";
 
 import C from "@/src/c-oriented-schematization/C";
-import CIrregular from "@/src/c-oriented-schematization/CIrregular";
-import CRegular from "@/src/c-oriented-schematization/CRegular";
 import {
   formatAngles,
   parseAngles,
 } from "@/src/c-oriented-schematization/CConfig";
+import CIrregular from "@/src/c-oriented-schematization/CIrregular";
+import CRegular from "@/src/c-oriented-schematization/CRegular";
 import { degreesToRadians, radiansToDegrees } from "@/src/utilities";
 import * as Slider from "@radix-ui/react-slider";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
@@ -132,7 +132,7 @@ const CConfigurator: FC<Props> = ({ onCancel, onSubmit }) => {
             <label className="mb-1 block text-xs font-medium text-gray-600">
               No. of Orientations
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 font-mono">
               <input
                 type="number"
                 value={orientations}
@@ -166,7 +166,7 @@ const CConfigurator: FC<Props> = ({ onCancel, onSubmit }) => {
             <label className="mb-1 block text-xs font-medium text-gray-600">
               Beta-Shift (degrees)
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 font-mono">
               <input
                 type="number"
                 value={betaDegrees}
