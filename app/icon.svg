@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Isolation_Mode" data-name="Isolation Mode" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke-linejoin: round;
+        stroke-width: 7.3625px;
+      }
+
+      .cls-1, .cls-2 {
+        fill: none;
+        stroke: #000;
+      }
+
+      /* The mark is drawn in strokes, so the colour is the stroke rather than the
+         fill. In an icon this follows the browser's own theme, not the page's. */
+      @media (prefers-color-scheme: dark) {
+        .cls-1, .cls-2 {
+          stroke: #fff;
+        }
+      }
+
+      .cls-2 {
+        stroke-width: 7.2515px;
+      }
+    </style>
+  </defs>
+  <polygon class="cls-2" points="95.322 34.9123 95.322 65.0877 77.1932 65.0877 77.1932 83.2165 22.8068 83.2165 4.678 65.0877 4.678 16.7835 77.1932 16.7835 95.322 34.9123"/>
+  <g>
+    <line class="cls-1" x1="22.5892" y1="55.8357" x2="65.0447" y2="55.8357"/>
+    <g>
+      <circle class="cls-1" cx="34.3303" cy="36.9013" r="2.4368"/>
+      <circle class="cls-1" cx="53.3035" cy="36.9013" r="2.4368"/>
+    </g>
+  </g>
+</svg>
