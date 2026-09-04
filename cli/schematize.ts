@@ -57,7 +57,6 @@ type Options = {
   angles?: number[];
   k: number;
   lambda?: number;
-  maxIterations?: number;
   layer: string;
   quiet: boolean;
 };
@@ -96,11 +95,6 @@ const program = new Command()
   .option(
     "--lambda <n>",
     "subdivide edges longer than diameter × lambda",
-    toNumber,
-  )
-  .option(
-    "--max-iterations <n>",
-    "cap on the simplification's edge moves",
     toNumber,
   )
   .option("--layer <name>", "GeoPackage layer name", "schematization")
@@ -187,7 +181,7 @@ const main = async (inputPath: string, options: Options) => {
   const dcel = input.getDcel();
   if (options.lambda !== undefined)
     schematization.setEpsilon(dcel, options.lambda);
-  const schematized = schematization.run(dcel, options.maxIterations);
+  const schematized = schematization.run(dcel);
   flushStage();
   const subdivision = schematized.toSubdivision();
 
