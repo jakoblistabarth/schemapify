@@ -9,7 +9,7 @@ import { afterAll, describe, expect, test } from "vitest";
 
 const run = promisify(execFile);
 
-const outDir = mkdtempSync(path.join(tmpdir(), "schemapify-cli-"));
+const outDir = mkdtempSync(path.join(tmpdir(), "mapshaver-cli-"));
 afterAll(() => rmSync(outDir, { recursive: true, force: true }));
 
 /**

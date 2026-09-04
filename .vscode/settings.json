@@ -1,6 +1,6 @@
 {
   "cSpell.allowCompoundWords": true,
-  "cSpell.words": ["Buchin", "dcel", "Meulemans", "Renssen", "Schemapify"],
+  "cSpell.words": ["Buchin", "dcel", "Meulemans", "Renssen", "Mapshaver"],
   "cSpell.ignoreWords": ["bbox", "plgn"],
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"

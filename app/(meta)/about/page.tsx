@@ -3,7 +3,7 @@ export default function Page() {
     <div className="py-10">
       <h2 className="text-xl">About this tool</h2>
       <p>
-        Schemapify is a web based cartographic schematization tool, written in
+        Mapshaver is a web based cartographic schematization tool, written in
         Typescript. It aims to support the schematization of geo data
         (Shapefile, GeoJSON) in an interactive and accessible way. It implements
         the algorithm proposed in:

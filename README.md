@@ -1,8 +1,8 @@
-# <img height="25px" style="margin-bottom:-2.5px" src="./public/schemapify-mark.svg" alt="Schemapify" /> Schemapify
+# <img height="25px" style="margin-bottom:-2.5px" src="./public/mark.svg" alt="Mapshaver" /> Mapshaver
 
 ## Introduction
 
-_Schemapify_ aims to be a web based cartographic schematization tool, written in TypeScript.
+_Mapshaver_ is a cartographic schematization tool written in TypeScript.
 It aims to support the schematization of geodata (Shapefile, GeoJSON) in an interactive and accessible way.
 A schematization can be exported as geodata (GeoPackage, FlatGeobuf, or — for WGS84 data only, as RFC 7946 requires — GeoJSON), all of which keep the source's coordinate reference system, or as graphics (SVG) for finishing in vector software.
 
@@ -20,7 +20,7 @@ It uses the _Area-Preserving Simplification and Schematization of Polygonal Subd
 
 ### Setup
 
-Building and testing _schemapify_ requires [Node.js](http://nodejs.org).
+Building and testing _Mapshaver_ requires [Node.js](http://nodejs.org).
 
 Install build dependencies with:
 

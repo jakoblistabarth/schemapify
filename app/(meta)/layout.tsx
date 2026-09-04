@@ -21,7 +21,7 @@ export default function MetaLayout({ children }: { children: ReactNode }) {
         </Link>
         <Link
           className="flex items-center"
-          href={"https://github.com/jakoblistabarth/schemapify"}
+          href={"https://github.com/jakoblistabarth/mapshaver"}
         >
           <div className="mr-1">
             <RiGithubLine />

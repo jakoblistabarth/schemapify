@@ -6,7 +6,7 @@ eslint
 gl
 halfedge
 halfedges
-schemapify
+Mapshaver
 schematization
 X1
 X2

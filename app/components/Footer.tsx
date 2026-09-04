@@ -14,7 +14,7 @@ const Footer = () => {
           <div className="flex grow justify-end">
             <Link
               className="flex items-center"
-              href={"https://github.com/jakoblistabarth/schemapify"}
+              href={"https://github.com/jakoblistabarth/mapshaver"}
             >
               <div className="mr-1">
                 <RiGithubLine />

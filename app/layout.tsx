@@ -1,11 +1,11 @@
+import "@fontsource-variable/dm-sans";
 import "@fontsource-variable/inter";
 import "@fontsource/dm-mono/latin.css";
-import "@fontsource-variable/dm-sans";
-import "./globals.css";
 import { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Schemapify",
+  title: "Mapshaver",
   description: "Create schematic maps on demand.",
 };
 
